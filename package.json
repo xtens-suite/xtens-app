@@ -2,7 +2,7 @@
   "name": "xtens-app",
   "private": true,
   "version": "2.0.0",
-  "description": "a Repository for heterogeneous data for Biomedical Sciences",
+  "description": "A digital repository for biomedical data based on a flexible JSON data model",
   "keywords": [],
   "dependencies": {
     "JSONStream": "^1.2.1",
@@ -45,10 +45,10 @@
     "validator": "^3.40.0",
     "winston": "^2.2.0",
     "xregexp": "^3.0.0",
-    "xtens-fs": "git+https://github.com/biolab-unige/xtens-fs.git",
-    "xtens-pg": "git+https://git@github.com/biolab-unige/xtens-pg.git",
-    "xtens-utils": "git+https://github.com/biolab-unige/xtens-utils.git",
-    "xtens-waterline": "git+https://github.com/biolab-unige/xtens-waterline.git",
+    "xtens-fs": "git+https://github.com/xtens-suite/xtens-fs.git",
+    "xtens-pg": "git+https://git@github.com/xtens-suite/xtens-pg.git",
+    "xtens-utils": "git+https://github.com/xtens-suite/xtens-utils.git",
+    "xtens-waterline": "git+https://github.com/xtens-suite/xtens-waterline.git",
     "waterline": "0.11.9"
   },
   "scripts": {
@@ -64,7 +64,7 @@
   "main": "app.js",
   "repository": {
     "type": "git",
-    "url": "git://github.com/biolab-unige/xtens-app.git"
+    "url": "git://github.com/xtens-suite/xtens-app.git"
   },
   "author": "massi",
   "license": "",
