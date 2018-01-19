@@ -360,7 +360,7 @@
                             populate: ['type'],
                             limit: xtens.module("xtensconstants").DefaultLimit
 ,
-                            sort: 'created_at DESC'
+                            sort: 'updated_at DESC'
                         },
                         contentType: 'application/json',
                         success: function(results, options, res) {
@@ -609,7 +609,7 @@
                             project: activeProject ? activeProject.id : undefined,
                             populate: ['type'],
                             limit: xtens.module("xtensconstants").DefaultLimit,
-                            sort: 'created_at DESC'
+                            sort: 'updated_at DESC'
                         },
                         contentType: 'application/json',
                         success: function(results, options, res) {
@@ -793,7 +793,7 @@
                             project: activeProject ? activeProject.id : undefined,
                             populate: ['type', 'donor'],
                             limit: xtens.module("xtensconstants").DefaultLimit,
-                            sort: 'created_at DESC'
+                            sort: 'updated_at DESC'
                         },
                         contentType: 'application/json',
                         success: function(results, options, res) {

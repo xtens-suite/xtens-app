@@ -1180,8 +1180,7 @@
 
         events: {
             'click .pagin': 'changePage',
-            'click #newData': 'openNewDataView',
-            'click #moreData':'loadResults'
+            'click #newData': 'openNewDataView'
         },
 
         tagName: 'div',
@@ -1231,7 +1230,7 @@
                 "info": false
             });
 
-            this.filterData(this.params);
+            // this.filterData(this.params);
 
             $('#pagination').append(JST["views/templates/pagination-bar.ejs"]({
                 __: i18n,
@@ -1243,24 +1242,24 @@
             return this;
         },
 
-        filterData: function(opt){
-            var rex = opt && opt.projects ? new RegExp(opt.projects) : new RegExp($('#btn-project').val());
-
-            if(rex =="/all/"){
-                this.clearFilter();
-            }else{
-                $('.content').hide();
-                $('.content').filter(function() {
-                    return rex.test($(this).text());
-                }).show();
-            }
-            this.headers.notFiltered = $('tr').filter(function() { return $(this).css('display') !== 'none'; }).length - 1;
-        },
-
-        clearFilter: function(){
-            // $('#project-selector').val('');
-            $('.content').show();
-        },
+        // filterData: function(opt){
+        //     var rex = opt && opt.projects ? new RegExp(opt.projects) : new RegExp($('#btn-project').val());
+        //
+        //     if(rex =="/all/"){
+        //         this.clearFilter();
+        //     }else{
+        //         $('.content').hide();
+        //         $('.content').filter(function() {
+        //             return rex.test($(this).text());
+        //         }).show();
+        //     }
+        //     this.headers.notFiltered = $('tr').filter(function() { return $(this).css('display') !== 'none'; }).length - 1;
+        // },
+        //
+        // clearFilter: function(){
+        //     // $('#project-selector').val('');
+        //     $('.content').show();
+        // },
 
         changePage: function (ev) {
             ev.preventDefault();
@@ -1319,7 +1318,6 @@
             var parentSampleQuery = this.parentSample ? 'parentSample=' + this.parentSample : '';
             var parentDataQuery = this.parentData ? 'parentData=' + this.parentData : '';
             var parentDataTypeQuery = this.parentDataType ? 'parentDataType=' + this.parentDataType : '';
-            // var queryString = _.trim([parentSubjectQuery, parentSubjectCodeQuery, parentSampleQuery, parentDataQuery].join('&'), '&');
             var queryString = _.compact([parentSubjectQuery, parentSubjectCodeQuery,
                                         parentSampleQuery, parentDataQuery, parentDataTypeQuery]).join('&');
             var route = _.trim(['/data/new', queryString].join('/0?'));

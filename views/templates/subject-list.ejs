@@ -26,10 +26,10 @@
                     <tr class="content">
                         <td><%= subject.get("code") %></td>
                         <% if (xtens.session.get("canAccessPersonalData")) {%>
-                        <td><%= subject.get("given_name") && subject.get("given_name") %></td>
+                        <td><%= subject.get("givenName") && subject.get("givenName") %></td>
                         <td><%= subject.get("surname") && subject.get("surname") %></td>
                         <td>
-                            <% date = subject.get("birth_date") && subject.get("birth_date"); %>
+                            <% date = subject.get("birthDate") && subject.get("birthDate"); %>
                             <%= date ? moment(date).lang("it").format('L') : ' ' %>
                         </td>
                         <%} %>

@@ -2601,6 +2601,27 @@ CREATE INDEX data_type_idx ON data USING btree (type);
 
 
 --
+-- Name: updated_at_index; Type: INDEX; Schema: public; Owner: xtenspg; Tablespace:
+--
+
+CREATE INDEX updated_at_data_index ON data (updated_at DESC);
+
+
+--
+-- Name: updated_at_index; Type: INDEX; Schema: public; Owner: xtenspg; Tablespace:
+--
+
+CREATE INDEX updated_at_smpl_index ON sample (updated_at DESC);
+
+
+--
+-- Name: updated_at_index; Type: INDEX; Schema: public; Owner: xtenspg; Tablespace:
+--
+
+CREATE INDEX updated_at_sbj_index ON subject (updated_at DESC);
+
+
+--
 -- Name: biobank_fkey; Type: FK CONSTRAINT; Schema: public; Owner: xtenspg
 --
 
