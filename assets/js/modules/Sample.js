@@ -523,14 +523,14 @@
                     });
                     if (sampleTypeChildren.length > 0) {
                         var sids = _.map(sampleTypeChildren, 'id').join();
-                        sample.set("newDerivativeLink", "#/samples/new/0?idDataTypes=" + sids + "&parentSample=" + sample.id + "&donor=" + sample.get("parent_subject"));
+                        sample.set("newDerivativeLink", "#/samples/new/0?idDataTypes=" + sids + "&parentSample=" + sample.id + "&donor=" + sample.get("parentSubject"));
                     }
                     var dataTypeChildren = _.where(type.get("children"), {
                         "model": Classes.DATA
                     });
                     if (dataTypeChildren.length > 0) {
                         var dids = _.map(dataTypeChildren, 'id').join();
-                        var parentSubject = sample.get('parent_subject') ? "&parentSubject=" + sample.get('parent_subject') : "";
+                        var parentSubject = sample.get('parentSubject') ? "&parentSubject=" + sample.get('parentSubject') : "";
                         sample.set("newDataLink", "#/data/new/0?idDataTypes=" + dids + "&parentSample=" + sample.id + parentSubject);
                     }
                 }
