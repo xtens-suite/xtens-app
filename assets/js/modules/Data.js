@@ -1382,9 +1382,7 @@
             this.$("#save").prop('title', 'Select a specific project to perform a procedure and load at least a file');
             this.$('form').parsley(parsleyOpts);
             this.dropzone = new Dropzone(this.$(".dropzone")[0], this.dropzoneOpts);
-            // if ( xtens.session.get('activeProject') !== 'all' && this.dropzone.files.length > 0) {
-            //     this.$("#save").prop("disabled", true);
-            // }
+
             this.dropzone.on("sending", function(file, xhr, formData) {
                 xhr.setRequestHeader("Authorization", "Bearer " + xtens.session.get("accessToken"));
                 console.log(file.name);
@@ -1399,6 +1397,10 @@
 
             $("#collapse-button").click(function(){
                 $("#collapse-import").collapse('show');
+            });
+
+            xtens.router.on("route", function(route, params) {
+                clearInterval(that.interval);
             });
 
             return this;
@@ -1435,12 +1437,6 @@
                     });
                 }
             });
-            // this.modal = new ModalDialog({
-            //     title: i18n('please-wait-for-data-registration-to-complete'),
-            //     body: JST["views/templates/progressbar.ejs"]({valuemin: 0, valuemax: 100, valuenow: 100})
-            // });
-            // this.$modal.append(this.modal.render().el);
-            // this.modal.show();
             return false;
         },
 
@@ -1449,19 +1445,12 @@
             if (this.tableView) {
                 this.tableView.destroy();
             }
-            // this.hideProgressbar();
-            // if (!result) this.queryOnError(null, null, "Missing result object");
-
-            // if (_.isEmpty(results)) {
-            //     this.$daemonNoResultCnt.show();
-            //     return;
-            // }
             this.tableView = new Daemon.Views.DaemonsTable({daemons: results, operator: operator});
             this.$tableCnt.append(this.tableView.render().el);
             this.tableView.displayDaemonsTable();
-            var t = setInterval((function(self) {         //Self-executing func which takes 'this' as self
+            this.interval = setInterval((function(self) {         //Self-executing func which takes 'this' as self
                 return function() {   //Return a function in the context of 'self'
-                    self.tableView.refreshDaemonsTable(); //Thing you wanted to run as non-window 'this'
+                    self.tableView.refreshDaemonsTable();
                 };
             })(this),3000);
         },
@@ -1477,9 +1466,6 @@
                 body: JST["views/templates/dedicated-data-dialog-bootstrap.ejs"]({__: i18n})
             });
 
-            // this.modal.title= i18n('data-correctly-loaded-on-server');
-            // this.modal.body= JST["views/templates/dedicated-data-dialog-bootstrap.ejs"]({__: i18n});
-
             this.$modal.append(this.modal.render().el);
             $('.modal-header').addClass('alert-info');
             this.modal.show();
@@ -1489,7 +1475,6 @@
                 that.dropzone.removeAllFiles(true);
                 that.modal.remove();
                 that.tableView.refreshDaemonsTable();
-                // $('html,body').animate({scrollTop: that.$aDeamonTableTag.offset().top}, 'slow');
                 $("#collapse-import").collapse('hide');
             });
         }
