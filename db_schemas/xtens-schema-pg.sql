@@ -36,8 +36,17 @@ CREATE TYPE datatype_privilege_level AS ENUM (
     'edit'
 );
 
+CREATE TYPE daemon_status AS ENUM (
+    'initializing',
+    'error',
+    'running',
+    'success'
+);
+
 
 ALTER TYPE datatype_privilege_level OWNER TO xtenspg;
+
+ALTER TYPE daemon_status OWNER TO xtenspg;
 
 --
 -- Name: dom_basicdatatype; Type: DOMAIN; Schema: public; Owner: massipg
@@ -1590,6 +1599,44 @@ ALTER SEQUENCE group_projects__project_groups_id_seq OWNED BY group_projects__pr
 
 
 --
+-- Name: daemon; Type: TABLE; Schema: public; Owner: xtenspg; Tablespace:
+--
+
+CREATE TABLE daemon (
+    id integer NOT NULL,
+    pid integer NOT NULL,
+    source text NOT NULL,
+    operator integer NOT NULL,
+    status daemon_status DEFAULT 'initializing'::daemon_status NOT NULL,
+    info jsonb,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    updated_at timestamp with time zone DEFAULT now() NOT NULL
+);
+
+
+ALTER TABLE daemon OWNER TO xtenspg;
+
+--
+-- Name: daemon_id_seq; Type: SEQUENCE; Schema: public; Owner: xtenspg
+--
+
+CREATE SEQUENCE daemon_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE daemon_id_seq OWNER TO xtenspg;
+
+--
+-- Name: daemon_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: xtenspg
+--
+
+ALTER SEQUENCE daemon_id_seq OWNED BY daemon.id;
+
+--
 -- Name: sample; Type: TABLE; Schema: public; Owner: xtenspg; Tablespace:
 --
 
@@ -2066,6 +2113,12 @@ ALTER TABLE ONLY group_projects__project_groups ALTER COLUMN id SET DEFAULT next
 
 ALTER TABLE ONLY sample ALTER COLUMN id SET DEFAULT nextval('sample_id_seq'::regclass);
 
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: xtenspg
+--
+
+ALTER TABLE ONLY daemon ALTER COLUMN id SET DEFAULT nextval('daemon_id_seq'::regclass);
+
 
 --
 -- Name: id; Type: DEFAULT; Schema: public; Owner: xtenspg
@@ -2523,6 +2576,13 @@ ALTER TABLE ONLY group_projects__project_groups
 
 
 --
+-- Name: daemon_pkey; Type: CONSTRAINT; Schema: public; Owner: xtenspg; Tablespace:
+--
+
+ALTER TABLE ONLY daemon
+    ADD CONSTRAINT daemon_pkey PRIMARY KEY (id);
+
+--
 -- Name: sample_pkey; Type: CONSTRAINT; Schema: public; Owner: xtenspg; Tablespace:
 --
 
@@ -2772,6 +2832,13 @@ ALTER TABLE ONLY group_members__operator_groups
 
 ALTER TABLE ONLY data
     ADD CONSTRAINT parent_data_fkey FOREIGN KEY (parent_data) REFERENCES data(id) MATCH FULL ON DELETE CASCADE;
+
+--
+-- Name: operator_fkey; Type: FK CONSTRAINT; Schema: public; Owner: xtenspg
+--
+
+ALTER TABLE ONLY daemon
+    ADD CONSTRAINT operator_fkey FOREIGN KEY (operator) REFERENCES operator(id) MATCH FULL;
 
 
 --
@@ -3582,6 +3649,24 @@ GRANT ALL ON TABLE group_projects__project_groups TO xtenspg;
 REVOKE ALL ON SEQUENCE group_projects__project_groups_id_seq FROM PUBLIC;
 REVOKE ALL ON SEQUENCE group_projects__project_groups_id_seq FROM xtenspg;
 GRANT ALL ON SEQUENCE group_projects__project_groups_id_seq TO xtenspg;
+
+
+--
+-- Name: daemon; Type: ACL; Schema: public; Owner: xtenspg
+--
+
+REVOKE ALL ON TABLE daemon FROM PUBLIC;
+REVOKE ALL ON TABLE daemon FROM xtenspg;
+GRANT ALL ON TABLE daemon TO xtenspg;
+
+
+--
+-- Name: daemon_id_seq; Type: ACL; Schema: public; Owner: xtenspg
+--
+
+REVOKE ALL ON SEQUENCE daemon_id_seq FROM PUBLIC;
+REVOKE ALL ON SEQUENCE daemon_id_seq FROM xtenspg;
+GRANT ALL ON SEQUENCE daemon_id_seq TO xtenspg;
 
 
 --

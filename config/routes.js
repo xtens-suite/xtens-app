@@ -38,6 +38,8 @@ module.exports.routes = {
 
     // ContactInformation Controller
 
+    // Daemon Controller
+
     // Data Controller
     'GET /data/edit': {controller: 'data', action: 'edit'},
     /*

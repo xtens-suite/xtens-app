@@ -59,10 +59,11 @@ const MainController = {
             sails.log("MainController.executeCustomDataManagement - executing customised function");
             const ps = require("child_process").spawn(sails.config.xtens.customisedDataMap.get(key),[JSON.stringify(obj)], {stdio:['ipc']});
 
-            ps.stdout.on('data', (data) => {
-                console.log(data.toString());
-                sails.log(`stdout: ${data}`);
-            });
+
+            // ps.stdout.on('data', (data) => {
+            //     console.log(data.toString());
+            //     sails.log(`stdout: ${data}`);
+            // });
 
             ps.stderr.on('data', (data) => {
                 sails.log(`stderr: ${data}`);
@@ -79,15 +80,16 @@ const MainController = {
                 sails.log(`child process exited with code ${code}`);
                 let cmd = 'rm ' + DEFAULT_LOCAL_STORAGE + '/tmp/*';
                 require("child_process").exec(cmd, function(err, stdout, stderr) {
-                    sails.log('stdout: ' + stdout);
-                    sails.log('stderr: ' + stderr);
                     if ((code !== 0 && error)) {
-                        return co.error(error);
+                        sails.log('stderr: ' + stderr);
+                        // return co.error(error);
                     }
+                    sails.log('stdout: ' + stdout);
                     sails.log("MainController.executeCustomDataManagement - all went fine!");
-                    return res.json(summary);
+                    // return res.json(summary);
                 });
             });
+            return res.json(obj);
         });
 
     }

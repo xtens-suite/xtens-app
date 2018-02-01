@@ -55,6 +55,16 @@ module.exports.xtens = {
             DATA: 'Data'
         },
 
+        /**
+         * @description available Daemon statuses
+         */
+        DaemonStatus: {
+            INITIALIZING: 'initializing',
+            ERROR: 'error',
+            RUNNING: 'running',
+            SUCCESS: 'success'
+        },
+
         FieldTypes: {
             TEXT: 'Text',
             LINK: 'Link',
