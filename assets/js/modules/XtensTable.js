@@ -229,14 +229,14 @@
                           extend: 'copyHtml5',
                           exportOptions: {
                               orthogonal: 'export', // to export source data and not rendered data
-                              columns:  ':visible:not(.actions)' //to not export actions column
+                              columns:  ':visible:not(.actions)' //not export actions column
                           }
                       },
                       {
                           extend: 'excelHtml5',
                           exportOptions: {
                               orthogonal: 'export', // to export source data and not rendered data
-                              columns:  ':visible:not(.actions)' //to not export actions column
+                              columns:  ':visible:not(.actions)' //not export actions column
                           }
                       }
                   ];

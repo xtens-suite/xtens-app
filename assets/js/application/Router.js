@@ -14,6 +14,7 @@
     var SuperType = xtens.module("supertype");
     var Query = xtens.module("query");
     var Operator = xtens.module("operator");
+    var Daemon = xtens.module("daemon");
     var Group = xtens.module("group");
     var AdminAssociation = xtens.module("adminassociation");
     var DataTypePrivileges = xtens.module("datatypeprivileges");
@@ -958,6 +959,7 @@
             var privileges = new DataTypePrivileges.List();
             var operator = new Operator.List();
             var dataTypes = new DataType.List();
+            var daemons = new Daemon.List();
             var that = this;
             var idProject = xtens.session.get('activeProject') !== 'all' ? _.find(xtens.session.get('projects'), { 'name': xtens.session.get('activeProject')}).id : undefined;
             var idSuperTypeProcedures = _.map( procedures, 'superType');
@@ -979,12 +981,20 @@
                     data: $.param({dataType : dataTypesId, group: groupId, privilegeLevel: 'edit'})
                 });
                 $.when($privilegesDeferred).then( function(privilegesRes) {
-                    that.loadView(new Data.Views.DedicatedManagement({
-                        dataTypes: new DataType.List(dataTypesRes && dataTypesRes[0]),
-                        dataTypePrivileges: new DataTypePrivileges.List(privilegesRes)
-                    }));
-                }, function(jqxhr) {
-                    xtens.error(jqxhr);
+
+                    var $daemonsDeferred = daemons.fetch({
+                        data: $.param({operator : operatorRes[0][0].id, sort:'created_at DESC'})
+                    });
+                    $.when($daemonsDeferred).then( function(daemonsRes) {
+                        that.loadView(new Data.Views.DedicatedManagement({
+                            dataTypes: new DataType.List(dataTypesRes && dataTypesRes[0]),
+                            dataTypePrivileges: new DataTypePrivileges.List(privilegesRes),
+                            daemons: new Daemon.List(daemonsRes),
+                            operator: operatorRes[0][0].id
+                        }));
+                    }, function(jqxhr) {
+                        xtens.error(jqxhr);
+                    });
                 });
             });
 

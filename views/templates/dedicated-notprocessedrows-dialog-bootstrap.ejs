@@ -1,0 +1,29 @@
+<div class="modal-body">
+  <div class="title-body">
+    <%= __("file")%>: <%= file%>
+  </div>
+  <div class="row" style="margin-top: 2em;">
+      <div class="col-sm-12">
+          <div class="table-responsive">
+              <table class="table table-bordered table-striped table-hover">
+                  <thead>
+                      <tr>
+                          <th><%= __("index") %></th>
+                          <th><%= __("data") %></th>
+                          <th><%= __("error") %></th>
+                      </tr>
+                  </thead>
+                  <tbody>
+                  <% _.each(data, function(datum) { %>
+                    <tr class="content">
+                      <td><%= datum.index ? datum.index : '' %></td>
+                      <td><%= datum.data ? JSON.stringify(datum.data) : '' %></td>
+                      <td><%= datum.error ? datum.error : '' %></td>
+                    </tr>
+                  <% }) %>
+                  </tbody>
+              </table>
+          </div>
+      </div>
+  </div>
+</div>

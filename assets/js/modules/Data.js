@@ -18,6 +18,7 @@
     // var SuperTypeModel = xtens.module("supertype").Model;
     // var DataTypeCollection = xtens.module("datatype").List;
     var FileManager = xtens.module("filemanager");
+    var Daemon = xtens.module("daemon");
     var Group = xtens.module("group");
     var replaceUnderscoreAndCapitalize = xtens.module("utils").replaceUnderscoreAndCapitalize;
     // var dateUtil = xtens.module("utils").date;
@@ -1286,7 +1287,7 @@
                     headers['endRow'] = endRow;
                     that.headers = headers;
                     that.data.reset(results);
-                    that.filterData();
+                    // that.filterData();
                 },
                 error: function(err) {
                     xtens.error(err);
@@ -1348,8 +1349,14 @@
             this.template = JST["views/templates/dedicated-data-edit.ejs"];
             this.dataTypes = options.dataTypes && options.dataTypes.toJSON();
             this.privileges = options.dataTypePrivileges && options.dataTypePrivileges.toJSON();
+            this.tableView = null;
             this.render();
+            this.$tableCnt = this.$("#daemon-table-cnt");
             this.$modal = this.$(".customised-data-modal");
+            this.$daemonNoResultCnt = this.$("#daemonNoResultCnt");
+            // this.$aDeamonTableTag = $("#collapse-daemons");
+            this.daemons = options.daemons;
+            this.initializeDaemonsTable(this.daemons, options.operator);
         },
 
         dropzoneOpts: {
@@ -1371,13 +1378,13 @@
                 }
             });
             $("#data-type").html(textHtml).selectpicker();
-            if ( xtens.session.get('activeProject') === 'all') {
-                this.$("#save").prop("disabled", true);
-                this.$("#save").prop('title', 'Select a specific project to perform a procedure');
-            }
+            this.$("#save").prop("disabled", true);
+            this.$("#save").prop('title', 'Select a specific project to perform a procedure and load at least a file');
             this.$('form').parsley(parsleyOpts);
             this.dropzone = new Dropzone(this.$(".dropzone")[0], this.dropzoneOpts);
-
+            // if ( xtens.session.get('activeProject') !== 'all' && this.dropzone.files.length > 0) {
+            //     this.$("#save").prop("disabled", true);
+            // }
             this.dropzone.on("sending", function(file, xhr, formData) {
                 xhr.setRequestHeader("Authorization", "Bearer " + xtens.session.get("accessToken"));
                 console.log(file.name);
@@ -1385,15 +1392,17 @@
             });
 
             this.dropzone.on("success", function(file, xhr, formData) {
+                that.$("#save").prop("disabled", false);
+
                 console.log("Data.Views.DedicatedUpload -  file uploaded successfully");
             });
 
-
+            $("#collapse-button").click(function(){
+                $("#collapse-import").collapse('show');
+            });
 
             return this;
         },
-
-
 
         saveCustomisedData: function(ev) {
             ev.preventDefault();
@@ -1426,33 +1435,62 @@
                     });
                 }
             });
-            this.modal = new ModalDialog({
-                title: i18n('please-wait-for-data-registration-to-complete'),
-                body: JST["views/templates/progressbar.ejs"]({valuemin: 0, valuemax: 100, valuenow: 100})
-            });
-            this.$modal.append(this.modal.render().el);
-            this.modal.show();
+            // this.modal = new ModalDialog({
+            //     title: i18n('please-wait-for-data-registration-to-complete'),
+            //     body: JST["views/templates/progressbar.ejs"]({valuemin: 0, valuemax: 100, valuenow: 100})
+            // });
+            // this.$modal.append(this.modal.render().el);
+            // this.modal.show();
             return false;
         },
 
-        saveOnSuccess: function(summary) {
+        initializeDaemonsTable: function(results, operator) {
+
+            if (this.tableView) {
+                this.tableView.destroy();
+            }
+            // this.hideProgressbar();
+            // if (!result) this.queryOnError(null, null, "Missing result object");
+
+            // if (_.isEmpty(results)) {
+            //     this.$daemonNoResultCnt.show();
+            //     return;
+            // }
+            this.tableView = new Daemon.Views.DaemonsTable({daemons: results, operator: operator});
+            this.$tableCnt.append(this.tableView.render().el);
+            this.tableView.displayDaemonsTable();
+            var t = setInterval((function(self) {         //Self-executing func which takes 'this' as self
+                return function() {   //Return a function in the context of 'self'
+                    self.tableView.refreshDaemonsTable(); //Thing you wanted to run as non-window 'this'
+                };
+            })(this),3000);
+        },
+
+        saveOnSuccess: function(infoObj) {
             var that = this;
             if (this.modal) {
                 this.modal.hide();
             }
-            this.$modal.one('hidden.bs.modal', function (e) {
-                that.modal.title= i18n('data-correctly-stored-on-server');
-                that.modal.body= JST["views/templates/dedicated-data-dialog-bootstrap.ejs"]({__: i18n, summary: summary});
+            // this.$modal.one('hidden.bs.modal', function (e) {
+            this.modal = new ModalDialog({
+                title: i18n('data-correctly-loaded-on-server'),
+                body: JST["views/templates/dedicated-data-dialog-bootstrap.ejs"]({__: i18n})
+            });
 
-                that.$modal.append(that.modal.render().el);
-                $('.modal-header').addClass('alert-success');
-                that.modal.show();
+            // this.modal.title= i18n('data-correctly-loaded-on-server');
+            // this.modal.body= JST["views/templates/dedicated-data-dialog-bootstrap.ejs"]({__: i18n});
 
-                // setTimeout(function(){ that.modal.hide(); }, 1200);
-                that.$modal.on('hidden.bs.modal', function (e) {
-                    that.modal.remove();
-                    xtens.router.navigate('data', {trigger: true});
-                });
+            this.$modal.append(this.modal.render().el);
+            $('.modal-header').addClass('alert-info');
+            this.modal.show();
+
+            setTimeout(function(){ that.modal.hide(); }, 1500);
+            that.$modal.on('hidden.bs.modal', function (e) {
+                that.dropzone.removeAllFiles(true);
+                that.modal.remove();
+                that.tableView.refreshDaemonsTable();
+                // $('html,body').animate({scrollTop: that.$aDeamonTableTag.offset().top}, 'slow');
+                $("#collapse-import").collapse('hide');
             });
         }
 

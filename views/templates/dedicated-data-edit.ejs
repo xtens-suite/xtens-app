@@ -1,28 +1,50 @@
 <h1><%= __("customised-data-management") %></h1>
-<div id="content">
-    <form class="form-horizontal edit-data-form" role="form" data-parsley-focus="first" data-parsley-validate>
-        <div id="data-header-row" class="row data-header-row">
-            <div class="form-group dedicated-data-select">
-                <label for="dataType" class="data-label"><%= __("select-a-data-type") %></label>
-                <div class="data-input-div">
-                  <select required id="data-type" name="data-type" title="<%= __('please-select') %>" data-width="400px" class="form-control selectpicker">
-                    </select>
+<div id="content" style="margin-top:2em;">
+  <div class="row">
+    <button id="collapse-button" type="button" class="btn btn-success" name="button"><%= __("new-customised-data-import") %></button>
+  </div>
+  <div id="collapse-import" class="collapse">
+    <div class="row">
+      <h2></h2>
+      <div id="customised-form" class="col-xs-offset-2 col-xs-8">
+        <form class="form-horizontal edit-data-form" role="form" data-parsley-focus="first" data-parsley-validate>
+          <div class="row text-center">
+            <div class="col-xs-offset-3 col-xs-6" style="padding:1em;">
+              <div class="form-group">
+                <select required id="data-type" name="data-type" title="<%= __('please-select-a-data-type') %>" class="selectpicker form-control"></select>
+              </div>
+            </div>
+            <div class="row text-center">
+              <div class="col-xs-12">
+                <div class="dropzone" style="width: 18%;">
+                  <div class="dz-default dz-message text-center">
+                    <span><%= __('drop-files-here') %></span>
+                  </div>
+                  <div class="fallback">
+                    <input name="file" type="file">
+                  </div>
                 </div>
+              </div>
             </div>
-        </div>
-        <div class="dropzone">
-            <div class="dz-default dz-message text-center">
-                <span><%= __('drop-files-here') %></span>
+            <div id="buttonbardiv" class="row text-center">
+              <div class="btn-group btn-group-margin">
+                <input type="submit" id="save" class="btn btn-primary" value="<%=__('save') %>">
+              </div>
             </div>
-            <div class="fallback">
-                <input name="file" type="file">
-            </div>
-        </div>
-        <div id="buttonbardiv" class="row text-center">
-            <div class="btn-group btn-group-margin">
-                <input type="submit" id="save" class="btn btn-primary" value="<%=__('save') %>" >
-            </div>
-        </div>
-    </form>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row" style="margin-top: 2em;">
+  <h2><%= __("customised-data-daemon") %></h2>
+  <div class="row text-center">
+    <div class="col-xs-12">
+      <div id="daemon-table-cnt" class="row" style="margin-top:2em;"></div>
+    </div>
+  </div>
+</div>
 </div>
 <div class="customised-data-modal"></div>

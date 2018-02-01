@@ -5,7 +5,7 @@
         // menu
         "data-types": "Data Types",
         "data": "Data",
-        "customised-data": "Customised Data",
+        "customised-data": "Import Data",
         "subjects": "Subjects",
         "samples": "Samples",
         // views/templates/datatype-list.ejs
@@ -18,6 +18,7 @@
         "created":"Created",
         "updated":"Updated",
         "not-updated":"Not Updated",
+        "process-loaded": "Process correctly launched. You'll find progress in the process list below.",
         // views/templates/datatype-duplicate.ejs
         "edit-data-type":"Edit Data Type",
         "from": "From",
@@ -330,13 +331,30 @@
         /* views/templates/data-list.ejs */
         "details": "Details",
         /* views/templates/dedicated-data-management */
-        "customised-data-management": "Customised Data Management",
+        "customised-data-management": "Data Import Management",
+        "new-customised-data-import": "New Data Import",
+        "customised-data-daemon": "Processes List",
+        "daemons-list-empty": "Daemons List Empty",
+        "please-select-a-customised-type": "Please select a Data Import procedure",
+        "status" :"Status",
+        "file-name":"File Name",
+        "progress":"Progress",
+        "total-rows":"Total Rows",
+        "imported-rows":"Imported Rows",
+        "discarded-rows":"Discarded Rows",
+        "process-id": "Process ID",
+        /* views/templates/dedicated-notprocessedrows-dialog-bootstrap */
+        "file": "File",
+        "index": "Index",
+        "error": "Error",
+        "discarded-rows-list": "Discarded Rows list",
         /* assets/js/modules/Data.js */
         "ok": "OK",
         "confirm-deletion": "CONFIRM DELETION",
         "data-deleted": "Data Deleted",
         "data-will-be-permanently-deleted-are-you-sure": "Data will be permanently deleted. Are you sure?",
         "data-correctly-stored-on-server": "Data correctly stored on server",
+        "data-correctly-loaded-on-server": "Data correctly loaded on server",
         "please-wait-for-data-registration-to-complete": "Please wait for data registration to complete",
         /* views/templates/update-password.ejs */
         "update-password" : "Update Password",
