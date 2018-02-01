@@ -117,7 +117,7 @@ const coroutines = {
 
     hasDataSensitive: BluebirdPromise.coroutine(function* (idData, modelName ) {
 
-        let datum = yield global[modelName].findOne({id : idData}).populateAll();
+        let datum = yield global[modelName].findOne({id : idData}).populate('type');
 
         sails.log("DataService hasDataSensitive - called for model: " +  datum.type.model);
           //retrieve metadata fields sensitive

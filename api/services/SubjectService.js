@@ -133,7 +133,7 @@ let SubjectService = BluebirdPromise.promisifyAll({
             if (code) criteria.code = code;
 
             console.log(criteria);
-            Subject.findOne(criteria).populateAll().exec(next);
+            Subject.findOne(criteria).populate(['type', 'personalInfo', 'owner']).exec(next);
         }
     }
 

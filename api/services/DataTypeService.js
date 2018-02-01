@@ -286,7 +286,7 @@ let DataTypeService = {
             let ids = params.idDataTypes.split(",");
             criteriaObj.id = ids;
         }
-        DataType.find(criteriaObj).populateAll().exec(next); // do we need populateAll here?
+        DataType.find(criteriaObj).populate(['superType', 'parents', 'children', 'groups', 'project']).exec(next);
     },
 
     /**
