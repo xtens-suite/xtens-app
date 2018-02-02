@@ -2,9 +2,26 @@
 
     var i18n = xtens.module("i18n").en;
 
-    PersonalDetails.Model = Backbone.Model.extend({});
+    var parsleyOpts = {
+        priorityEnabled: false,
+        // excluded: "select[name='fieldUnit']",
+        successClass: "has-success",
+        errorClass: "has-error",
+        classHandler: function(el) {
+            return el.$element.parent();
+        },
+        errorsWrapper: "<span class='help-block'></span>",
+        errorTemplate: "<span></span>"
+    };
 
-    PersonalDetails.List = Backbone.Collection.extend({});
+    PersonalDetails.Model = Backbone.Model.extend({
+        urlRoot: '/personaldetails'
+    });
+
+    PersonalDetails.List = Backbone.Collection.extend({
+        model: PersonalDetails.Model,
+        url: '/personaldetails'
+    });
 
     PersonalDetails.Views.Edit = Backbone.View.extend({
 
@@ -24,20 +41,13 @@
 
                 // format date on model as ISO (YYYY-MM-DD)
                 onSet: function(val, options) {
-                    // var dateArray = val.split("/");
                     var momentDate = moment(val, 'L', 'it');
-                    // return new Date(dateArray[2] + '-'+ dateArray[1] + '-' + dateArray[0]);
                     return momentDate.format('YYYY-MM-DD');
                 },
 
                 // store data in view (from model) as DD/MM/YYYY (European format)
                 onGet: function(value, options) {
                     if (value) {
-                        /*
-                        var dateArray = value instanceof Date ? value.toISOString().split('-') : moment(value).format('L');
-                        var dateArray2 = dateArray[2].split('T');
-                        dateArray[2] = dateArray2[0];
-                        return dateArray[2] + '/' + dateArray[1] + '/' + dateArray[0]; */
                         return moment(value).lang("it").format('L');
                     }
                 },
@@ -57,8 +67,27 @@
 
         },
 
+        setParsleyRequired: function () {
+            var name=$('#givenName').val();
+            var surname=$('#surname').val();
+            var birthDate=$('#birthDate').val();
+
+            if ((name == null || name == "") && (surname == null || surname =="") && (birthDate == null || birthDate == "")) {
+                $('form').removeData('Parsley');
+                //set required attribute on input to false
+                $('.personaldetails-input').attr('data-parsley-required', 'false');
+                //reinitialize parsley
+                $('form').parsley(parsleyOpts).reset();
+            }
+            else {
+                $('form').removeData('Parsley');
+                $('.personaldetails-input').attr('data-parsley-required', 'true');
+                $('form').parsley(parsleyOpts);
+            }
+        },
+
         render: function() {
-            this.$el.html(this.template({__:i18n}));
+            this.$el.html(this.template({__:i18n, data: this.model}));
             this.stickit();
             return this;
         }
@@ -74,7 +103,7 @@
          */
         initialize: function(options) {
 
-          this.template = JST["views/templates/personaldetails-details.ejs"];
+            this.template = JST["views/templates/personaldetails-details.ejs"];
           // var filename= this.getFileName(this.model);
           //  this.model.set("filename", filename);
 
@@ -102,11 +131,11 @@
                         dateArray[2] = dateArray2[0];
                         return dateArray[2] + '/' + dateArray[1] + '/' + dateArray[0]; */
                         return moment(value).lang("it").format('L');
-                        }
-                      }
                     }
-                  }
-          });
+                }
+            }
+        }
+    });
 
 
 } (xtens, xtens.module("personaldetails")));

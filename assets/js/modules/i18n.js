@@ -202,6 +202,8 @@
         "next": "Next",
         "last": "Last",
         /* views/templates/personal-details-edit.ejs */
+        "personal-details": "Personal Details",
+        "personal-details-info-message": "To create a subject without Personal Details, leave these fields empty",
         "given-name": "Name",
         "surname": "Surname",
         /* views/templates/subject-details */

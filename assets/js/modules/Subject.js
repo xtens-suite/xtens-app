@@ -118,7 +118,12 @@
             !options.subject ? this.dataType ? this.model.set("type", this.dataType.id) : this.setDataTypeSelection() : null;
             if (xtens.session.get('canAccessPersonalData')) {
                 this.addPersonalDetailsView();
+                var that = this;
+                $('.personaldetails-input').focusout(function (e) {
+                    that.personalDetailsView.setParsleyRequired();
+                });
             }
+
         },
 
         setDataTypeSelection: function() {
@@ -198,6 +203,13 @@
             // this.model.set("type", this.model.get("type").id); // trying to send only the id to permorf POST or PUT
             if (this.personalDetailsView && this.personalDetailsView.model) {
                 this.model.set("personalInfo", _.clone(this.personalDetailsView.model.attributes));
+                var personalInfo = this.model.get("personalInfo");
+                if ((!personalInfo.givenName || personalInfo.givenName == "") && (!personalInfo.surname || personalInfo.surname == "") && (!personalInfo.birthDate || personalInfo.birthDate == "")) {
+                    this.model.set("personalInfo", null);
+                }
+            }
+            else {
+                this.model.set("personalInfo", null);
             }
             this.model.get("notes") === "" ? this.model.set("notes", null) : null;
             this.model.get("owner").id ? this.model.set("owner", this.model.get("owner").id) : null;
