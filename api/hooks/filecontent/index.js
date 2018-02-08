@@ -84,6 +84,7 @@ module.exports = function filecontent(sails){
                 sails.log.info("filecontent.uploadFileContent - dirname: " + dirName);
                 // sails.log.info("filecontent.uploadFileContent - filename: " + fileName);
                 req.file('uploadFile').upload({
+                    maxBytes: 900000000,
                     dirname: dirName,
                     saveAs: function (__newFileStream, cb) {
                         sails.log.debug(__newFileStream);
