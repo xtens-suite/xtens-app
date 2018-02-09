@@ -44,21 +44,25 @@ const MainController = {
         let key = req.param('dataType');
         let superType = req.param('superType');
         let idProject = req.param('idProject');
+        let folder = req.param('folder');
         let deafultOwner = req.param('owner');
         const operator = TokenService.getToken(req);
         let obj = { bearerToken: req.headers.authorization.split(' ')[1], idProject: idProject};
-        let summary = {};
+        // let summary = {};
 
         return DataType.findOne({superType: superType, project: idProject}).populate('parents').then( (dataType) => {
             if(dataType) {
                 let parentSubjectDt = _.find(dataType.parents, {model: 'Subject'});
                 obj.dataTypeId = dataType.id;
                 obj.parentSubjectDtId = parentSubjectDt ? parentSubjectDt.id : null;
+
             }
+            folder = obj.folder = folder && folder != null && folder != "undefined" ? folder : undefined;
             obj.owner = deafultOwner ? deafultOwner : operator.id;
+            obj.executor = operator.id;
+            
             sails.log("MainController.executeCustomDataManagement - executing customised function");
             const ps = require("child_process").spawn(sails.config.xtens.customisedDataMap.get(key),[JSON.stringify(obj)], {stdio:['ipc']});
-
 
             // ps.stdout.on('data', (data) => {
             //     console.log(data.toString());
@@ -73,12 +77,14 @@ const MainController = {
 
             ps.on('message', (results) => {
                 sails.log(`results: ${results}`);
-                results.error && !error ? error = results.error : summary = results;
+                results.error && !error ? error = results.error : results;
             });
 
             ps.on('close', (code) => {
                 sails.log(`child process exited with code ${code}`);
-                let cmd = 'rm ' + DEFAULT_LOCAL_STORAGE + '/tmp/*';
+                let lastFolder = folder ? folder + '/' : '*';
+                let command = folder ? 'rm -r ' : 'rm ';
+                let cmd = command + DEFAULT_LOCAL_STORAGE + '/tmp/' + lastFolder;
                 require("child_process").exec(cmd, function(err, stdout, stderr) {
                     if ((code !== 0 && error)) {
                         sails.log('stderr: ' + stderr);

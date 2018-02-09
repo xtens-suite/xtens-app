@@ -79,12 +79,13 @@ module.exports = function filecontent(sails){
 
                 // if path exists use local fs connection, otherwise use default local storage connection
                 dirName = fsPath ? path.resolve(fsPath, landingDir) : path.resolve(DEFAULT_LOCAL_STORAGE, 'tmp');
-
+                let folder = req.param('folder');
+                dirName = folder ? dirName + '/' + folder : dirName;
                 // fileName = req.param("fileName") || req.param('filename') || 'uploaded-file';
                 sails.log.info("filecontent.uploadFileContent - dirname: " + dirName);
                 // sails.log.info("filecontent.uploadFileContent - filename: " + fileName);
                 req.file('uploadFile').upload({
-                    maxBytes: 900000000,
+                    maxBytes: 2048000000,
                     dirname: dirName,
                     saveAs: function (__newFileStream, cb) {
                         sails.log.debug(__newFileStream);
@@ -104,7 +105,8 @@ module.exports = function filecontent(sails){
                     sails.log.info("filecontent.uploadFileContent - file uploaded: " + files[0]);
 
                     return res.json({
-                        name: files[0]
+                        name: files[0],
+                        folder: folder ? folder : undefined
                     });
                 });
 

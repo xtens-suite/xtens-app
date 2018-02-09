@@ -1346,10 +1346,20 @@
         initialize: function(options) {
             _.bindAll(this, 'saveOnSuccess');
             $("#main").html(this.el);
+            this.randomFolder = Math.floor(Math.random() * 20001) + 10000;
             this.template = JST["views/templates/dedicated-data-edit.ejs"];
             this.dataTypes = options.dataTypes && options.dataTypes.toJSON();
             this.privileges = options.dataTypePrivileges && options.dataTypePrivileges.toJSON();
             this.tableView = null;
+            let url = '/fileContent?folder=' + this.randomFolder;
+            this.dropzoneOpts = {
+                url: url,
+                paramName: "uploadFile",
+                maxFilesize: 2048, // max 2 GiB
+                uploadMultiple: false,
+                method: "POST"
+            };
+
             this.render();
             this.$tableCnt = this.$("#daemon-table-cnt");
             this.$modal = this.$(".customised-data-modal");
@@ -1359,13 +1369,7 @@
             this.initializeDaemonsTable(this.daemons, options.operator);
         },
 
-        dropzoneOpts: {
-            url: '/fileContent',
-            paramName: "uploadFile",
-            maxFilesize: 2048, // max 2 GiB
-            uploadMultiple: false,
-            method: "POST"
-        },
+
 
         render: function() {
             var that = this;
@@ -1420,8 +1424,8 @@
                     dataType: dataType,
                     superType: superType,
                     owner: owner,
-                    idProject: activeProject && activeProject.id
-
+                    idProject: activeProject && activeProject.id,
+                    folder: this.randomFolder
                 }),
                 contentType: 'application/json',
 
