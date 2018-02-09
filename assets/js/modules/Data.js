@@ -1351,7 +1351,7 @@
             this.dataTypes = options.dataTypes && options.dataTypes.toJSON();
             this.privileges = options.dataTypePrivileges && options.dataTypePrivileges.toJSON();
             this.tableView = null;
-            let url = '/fileContent?folder=' + this.randomFolder;
+            var url = '/fileContent?folder=' + this.randomFolder;
             this.dropzoneOpts = {
                 url: url,
                 paramName: "uploadFile",
