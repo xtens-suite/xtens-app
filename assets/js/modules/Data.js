@@ -1346,11 +1346,11 @@
         initialize: function(options) {
             _.bindAll(this, 'saveOnSuccess');
             $("#main").html(this.el);
-            this.randomFolder = Math.floor(Math.random() * 20001) + 10000;
             this.template = JST["views/templates/dedicated-data-edit.ejs"];
             this.dataTypes = options.dataTypes && options.dataTypes.toJSON();
             this.privileges = options.dataTypePrivileges && options.dataTypePrivileges.toJSON();
             this.tableView = null;
+            this.randomFolder = Math.floor(Math.random() * 20001) + 10000;
             var url = '/fileContent?folder=' + this.randomFolder;
             this.dropzoneOpts = {
                 url: url,
@@ -1412,6 +1412,7 @@
 
         saveCustomisedData: function(ev) {
             ev.preventDefault();
+
             var that = this, dataType = this.$("select option:selected").val(), superType = _.find(procedures, {'value': dataType}).superType, owner = _.find(procedures, {'value': dataType}).owner;
             var activeProject = xtens.session.get('activeProject') !== 'all' ? _.find(xtens.session.get('projects'), { 'name': xtens.session.get('activeProject')}) : undefined;
             $.ajax({
@@ -1464,6 +1465,9 @@
             if (this.modal) {
                 this.modal.hide();
             }
+            this.randomFolder = Math.floor(Math.random() * 20001) + 10000;
+            var url = '/fileContent?folder=' + this.randomFolder;
+            this.dropzone.options.url = url;
             // this.$modal.one('hidden.bs.modal', function (e) {
             this.modal = new ModalDialog({
                 title: i18n('data-correctly-loaded-on-server'),
