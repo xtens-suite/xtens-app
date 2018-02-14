@@ -675,7 +675,7 @@
 
                         d.y= d.depth*150;
                         if (d.depth === 0){d.x = width / 2;}
-                        if ( !isNaN(countDepth[d.depth]) && countDepth[d.depth] !== 1 ) {
+                        if ( !isNaN(countDepth[d.depth]) && (countDepth[d.depth] !== 1 || d.x >= width)  ) {
                             if( isNaN(c[d.depth]) ){ c[d.depth]=0; }
                             c[d.depth] = c[d.depth] + 1 ;
                             d.x= (( c[d.depth] / countDepth[d.depth] ) * width - ( 1 / countDepth[d.depth ]) * width / 2 );
