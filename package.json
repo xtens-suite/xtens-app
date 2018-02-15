@@ -12,7 +12,7 @@
     "connect-livereload": "^0.4.1",
     "d3": "^3.5.5",
     "d3-chart": "0.0.1",
-    "ejs": "~0.8.4",
+    "ejs": "~2.5.5",
     "eslint-plugin-react": "^6.10.3",
     "grunt": "^0.4.2",
     "grunt-assets-versioning": "^1.0.6",
