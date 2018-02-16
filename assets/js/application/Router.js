@@ -983,7 +983,7 @@
                 $.when($privilegesDeferred).then( function(privilegesRes) {
 
                     var $daemonsDeferred = daemons.fetch({
-                        data: $.param({operator : operatorRes[0][0].id, sort:'created_at DESC'})
+                        data: $.param({operator : operatorRes[0][0].id, sort:'created_at DESC', limit:1000 })
                     });
                     $.when($daemonsDeferred).then( function(daemonsRes) {
                         that.loadView(new Data.Views.DedicatedManagement({

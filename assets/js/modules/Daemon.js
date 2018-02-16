@@ -169,7 +169,7 @@
             var daemons = new Daemon.List();
             var that = this;
             var $daemonsDeferred = daemons.fetch({
-                data: $.param({operator : that.operator, sort:'created_at DESC'})
+                data: $.param({operator : that.operator, sort:'created_at DESC', limit:1000 })
             });
             $.when($daemonsDeferred).then( function(daemonsRes) {
                 // var info = that.table.page.info();
