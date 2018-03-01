@@ -904,7 +904,7 @@
             var groups = new Group.List();
 
             var groupIds =  _.compact(_.map(project.groups,function (g) {
-                if ((g.privilegeLevel ==="wheel" || g.privilegeLevel ==="admin") ) {
+                if ((g.privilegeLevel === "admin") ) { // excluding superusers g.privilegeLevel === "wheel"
                     return g.id;
                 }
             }));
