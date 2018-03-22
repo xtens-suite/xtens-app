@@ -232,7 +232,7 @@
             var that = this;
             var operators= new Operator.List();
             operators.fetch({
-
+                data: $.param({ limit:1000 }),
                 success: function(operators) {
                     that.$el.html(that.template({__: i18n, operators: operators.models}));
                     return that;
