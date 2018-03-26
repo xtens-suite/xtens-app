@@ -431,6 +431,7 @@
         initialize: function(options) {
             $("#main").html(this.el);
             this.dataTypes = options.dataTypes;
+            this.projectSource = xtens.session.get('activeProject') != 'all' ? _.find(xtens.session.get('projects'),function (p) { return p.name === xtens.session.get('activeProject'); }).id : null ;
             this.template = JST["views/templates/datatype-list.ejs"];
             this.render(options);
         },
@@ -467,7 +468,7 @@
             var modal = new ModalDialog({
                 title: i18n('duplicate-data-type'),
                 template: JST["views/templates/datatype-duplicate.ejs"],
-                data: { __: i18n, dataTypes: this.dataTypes.toJSON()}
+                data: { __: i18n, dataTypes: this.dataTypes.toJSON(), projectSource: this.projectSource }
             });
             this.$modal.append(modal.render().el);
 
@@ -477,16 +478,20 @@
             $('#project-dest').selectpicker('hide');
 
             modal.show();
+            if (xtens.session.get("activeProject") !=  "all") {
+                $('#project-source option[value='+ this.projectSource + ']').prop('disabled', true);
+                $('#project-source').selectpicker('refresh');
+            }
 
             $('#project-source').on('change.bs.select', function () {
-                var projectSource= $('#project-source').val();
+                this.projectSource= $('#project-source').val();
                 $("label[for='data-type']").prop('hidden',false);
                 $('#data-type-selector').selectpicker('show');
                 $('#data-type-selector optgroup').prop('disabled', true);
-                $('#data-type-selector optgroup#'+projectSource).prop('disabled', false);
+                $('#data-type-selector optgroup#'+this.projectSource).prop('disabled', false);
                 $('#data-type-selector').selectpicker('refresh');
                 $('#project-dest option').prop('disabled', false);
-                $('#project-dest option[value='+projectSource +']').prop('disabled', true);
+                $('#project-dest option[value='+this.projectSource +']').prop('disabled', true);
                 $('#project-dest').selectpicker('refresh');
 
                 $('#data-type-selector').on('change.bs.select', function () {
@@ -498,7 +503,9 @@
                     //     $('#project-dest').selectpicker('refresh');
                     // }
                     $('#project-dest').selectpicker('show');
-
+                    if (xtens.session.get("activeProject") !=  "all") {
+                        $('#project-dest').selectpicker('val', _.find(xtens.session.get('projects'),function (p) { return p.name === xtens.session.get('activeProject'); }).id );
+                    }
                     $('#project-dest').on('change.bs.select', function () {
                         var projectDest= $('#project-dest').val();
 
