@@ -46,6 +46,7 @@
     "validator": "^3.40.0",
     "waterline": "0.11.9",
     "winston": "^2.2.0",
+    "winston-postgres": "0.0.4",
     "xregexp": "^3.0.0",
     "xtens-fs": "git+https://github.com/xtens-suite/xtens-fs.git",
     "xtens-pg": "git+https://git@github.com/xtens-suite/xtens-pg.git",
