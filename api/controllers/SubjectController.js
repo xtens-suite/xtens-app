@@ -110,7 +110,7 @@ const coroutines = {
         ]);
 
         // NOTE: Log or not Log this is question
-        DbLog(logMessages.FIND, SUBJECT, subjects.length, _.uniq(_.map(subjects, 'owner')), dataTypesId, operator.id);
+        //DbLog(logMessages.FIND, SUBJECT, subjects.length, _.uniq(_.map(subjects, 'owner')), dataTypesId, operator.id);
         return DataService.prepareAndSendResponse(res, payload, headerInfo);
 
     }),

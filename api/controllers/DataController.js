@@ -100,7 +100,7 @@ const coroutines = {
             QueryService.composeHeaderInfo(req, params)
         ]);
         // NOTE: Log or not Log this is question
-        DbLog(logMessages.FIND, DATA, data.length, _.uniq(_.map(data, 'owner')), dataTypesId, operator.id);
+        //DbLog(logMessages.FIND, DATA, data.length, _.uniq(_.map(data, 'owner')), dataTypesId, operator.id);
         return DataService.prepareAndSendResponse(res, payload, headerInfo);
 
     }),
