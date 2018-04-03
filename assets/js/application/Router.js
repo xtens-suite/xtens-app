@@ -364,6 +364,7 @@
                             sort: 'updated_at DESC'
                         },
                         contentType: 'application/json',
+                        beforeSend: function() { $('.loader-gif').css("display","block"); },
                         success: function(results, options, res) {
                             var headers = {
                                 'Link': xtens.parseLinkHeader(res.getResponseHeader('Link')),
@@ -376,6 +377,7 @@
                             var endRow = headers['X-Page-Size']*headers['X-Current-Page'];
                             headers['startRow'] = startRow;
                             headers['endRow'] = endRow;
+                            $('.loader-gif').css("display","none");
                             that.loadView(new Data.Views.List({
                                 dataTypePrivileges: new DataTypePrivileges.List(privilegesRes && privilegesRes[0]),
                                 data: new Data.List(results),
@@ -613,6 +615,7 @@
                             sort: 'updated_at DESC'
                         },
                         contentType: 'application/json',
+                        beforeSend: function() { $('.loader-gif').css("display","block"); },
                         success: function(results, options, res) {
                             var headers = {
                                 'Link': xtens.parseLinkHeader(res.getResponseHeader('Link')),
@@ -625,6 +628,7 @@
                             var endRow = headers['X-Page-Size']*headers['X-Current-Page'];
                             headers['startRow'] = startRow;
                             headers['endRow'] = endRow;
+                            $('.loader-gif').css("display","none");
                             that.loadView(new Subject.Views.List({
                                 dataTypePrivileges: new DataTypePrivileges.List(privilegesRes && privilegesRes[0]),
                                 subjects: new Subject.List(results),
@@ -797,6 +801,7 @@
                             sort: 'updated_at DESC'
                         },
                         contentType: 'application/json',
+                        beforeSend: function() { $('.loader-gif').css("display","block"); },
                         success: function(results, options, res) {
                             var headers = {
                                 'Link': xtens.parseLinkHeader(res.getResponseHeader('Link')),
@@ -805,10 +810,11 @@
                                 'X-Total-Pages': parseInt(res.getResponseHeader('X-Total-Pages')),
                                 'X-Current-Page': parseInt(res.getResponseHeader('X-Current-Page')) + 1
                             };
-                            var startRow = (headers['X-Page-Size']*parseInt(res.getResponseHeader('X-Current-Page')))+1;
+                            var startRow = (headers['X-Page-Size']*parseInt(res.getResponseHeader('X-Current-Page'))) + 1;
                             var endRow = headers['X-Page-Size']*headers['X-Current-Page'];
                             headers['startRow'] = startRow;
                             headers['endRow'] = endRow;
+                            $('.loader-gif').css("display","none");
                             that.loadView(new Sample.Views.List({
                                 dataTypePrivileges: new DataTypePrivileges.List(privilegesRes && privilegesRes[0]),
                                 samples: new Sample.List(results),

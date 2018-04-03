@@ -441,6 +441,7 @@
                     'Authorization': 'Bearer ' + xtens.session.get("accessToken")
                 },
                 contentType: 'application/json',
+                beforeSend: function() { $('.loader-gif').css("display","block"); },
                 success: function(results, options, res) {
                     var headers = {
                         'Link': xtens.parseLinkHeader(res.getResponseHeader('Link')),
@@ -456,6 +457,7 @@
                     that.headers = headers;
                     // var subjects =  new Subject.List(results);
                     // that.addLinksToModels(subjects);
+                    $('.loader-gif').css("display","none");
                     that.subjects.reset(results);
                 },
                 error: function(err) {
@@ -531,6 +533,7 @@
                     'Authorization': 'Bearer ' + xtens.session.get("accessToken")
                 },
                 data: { idPatient: idPatient },
+                beforeSend: function() { $('.loader-gif').css("display","block"); },
                 success: function(err,res,body){
 
                     // clean the previous graph if present
@@ -741,7 +744,7 @@
                     .style("text-anchor", "end")
                     .text(function(d) { return d; });
 
-
+                    $('.loader-gif').css("display","none");
                     function nodeByName(name) {
                         return nodesByName[name] || (nodesByName[name] = {name: name});
                     }

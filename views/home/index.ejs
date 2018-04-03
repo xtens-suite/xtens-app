@@ -14,6 +14,7 @@
     <nav class="navbar navbar-default" id="menuBarNav" name="menuBarNav" role="navigation"></nav>
   </div><!-- #header -->
 <div id="main" class="container">
+  <div class="loader-gif"></div>
 </div>
   <div id="footer">
     <div id="footer-text">© University of Genoa 2014-2015</div>
@@ -96,4 +97,19 @@ li:hover{
    ul#box {
        width:400px;
    }
+
+   .loader-gif {
+       display:    none;
+       position:   fixed;
+       z-index:    1000;
+       top:        0;
+       left:       0;
+       height:     100%;
+       width:      100%;
+       background: rgba( 255, 255, 255, 0.9 )
+                   url('/images/Preloader_2.gif')
+                   50% 50%
+                   no-repeat;
+   }
+
 </style>

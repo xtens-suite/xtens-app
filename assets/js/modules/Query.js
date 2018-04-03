@@ -1344,6 +1344,8 @@
                 body: JST["views/templates/progressbar.ejs"]({valuemin: 0, valuemax: 100, valuenow: 100})
             });
             this.$queryModal.append(this.modal.render().el);
+            $('.query-modal .modal').modal({backdrop: 'static', keyboard: false});
+            $('.query-modal button').addClass('hidden');
             this.modal.show();
             return false;
         },

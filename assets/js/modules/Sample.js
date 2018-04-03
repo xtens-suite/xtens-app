@@ -593,6 +593,7 @@
                     populate:'donor'
                 },
                 contentType: 'application/json',
+                beforeSend: function() { $('.loader-gif').css("display","block"); },
                 success: function(results, options, res) {
                     var headers = {
                         'Link': xtens.parseLinkHeader(res.getResponseHeader('Link')),
@@ -606,6 +607,7 @@
                     headers['startRow'] = startRow;
                     headers['endRow'] = endRow;
                     that.headers = headers;
+                    $('.loader-gif').css("display","none");
                     that.samples.reset(results);
                 },
                 error: function(err) {

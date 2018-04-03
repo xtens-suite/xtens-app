@@ -580,7 +580,7 @@
                     'Authorization': 'Bearer ' + xtens.session.get("accessToken")
                 },
                 data: {idDataType: idDatatype},
-
+                beforeSend: function() { $('.loader-gif').css("display","block"); },
                 success: function (res, textStatus, jqXHR) {
                     //Get parentWidth
                     var parentWidth=d3.select('#main');
@@ -767,7 +767,7 @@
                                                 }
                                             });
 
-
+                    $('.loader-gif').css("display","none");
                     function nodeByName(name) {
                         return nodesByName[name] || (nodesByName[name] = {name: name});
                     }
