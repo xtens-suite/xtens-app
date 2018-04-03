@@ -5,9 +5,8 @@
  * @help        :: See http://links.sailsjs.org/docs/controllers
  */
 /* jshint node: true */
-/* globals _, sails, Data, DataType, DataService, DataTypeService, SubjectService, OperatorService, SampleService, QueryService, TokenService, DataTypePrivileges */
+/* globals _, sails, Data, DataType, DataService, DataTypeService, SubjectService, OperatorService, SampleService, QueryService, LogDbService, TokenService, DataTypePrivileges */
 "use strict";
-
 const BluebirdPromise = require('bluebird');
 const ControllerOut = require("xtens-utils").ControllerOut;
 const ValidationError = require('xtens-utils').Errors.ValidationError;
@@ -15,6 +14,8 @@ const PrivilegesError = require('xtens-utils').Errors.PrivilegesError;
 const NonexistentResourceError = require('xtens-utils').Errors.NonexistentResourceError;
 const xtensConf = global.sails.config.xtens;
 const crudManager = sails.hooks.persistence.crudManager;
+const DbLog = sails.hooks.dblog.log;
+const logMessages = sails.hooks.dblog.messages;
 const DATA = xtensConf.constants.DataTypeClasses.DATA;
 const VIEW_OVERVIEW = xtensConf.constants.DataTypePrivilegeLevels.VIEW_OVERVIEW;
 const EDIT = xtensConf.constants.DataTypePrivilegeLevels.EDIT;
@@ -46,6 +47,8 @@ const coroutines = {
         data = validationRes.value;
         const dataTypeName = dataType && dataType.name;
         const result = yield crudManager.createData(data, dataTypeName);
+
+        DbLog(logMessages.CREATE, DATA, result.id, result.owner, result.type, operator.id);
         sails.log.info(result);
         res.set('Location', `${req.baseUrl}${req.url}/${result.id}`);
         return res.json(201, result);
@@ -69,6 +72,8 @@ const coroutines = {
         if( !operator.canAccessSensitiveData && !_.isEmpty(data.metadata) ){
             data = yield DataService.filterOutSensitiveInfo(data, operator.canAccessSensitiveData);
         }
+
+        DbLog(logMessages.FINDONE, DATA, id, data.owner, idDataType, operator.id );
         return res.json(data);
 
     }),
@@ -94,6 +99,8 @@ const coroutines = {
             DataService.filterListByPrivileges(data, dataTypesId, pagePrivileges, operator.canAccessSensitiveData),
             QueryService.composeHeaderInfo(req, params)
         ]);
+        // NOTE: Log or not Log this is question
+        DbLog(logMessages.FIND, DATA, data.length, _.uniq(_.map(data, 'owner')), dataTypesId, operator.id);
         return DataService.prepareAndSendResponse(res, payload, headerInfo);
 
     }),
@@ -113,6 +120,11 @@ const coroutines = {
         if (!dataTypePrivilege || dataTypePrivilege.privilegeLevel != EDIT) {
             throw new PrivilegesError(`Authenticated user has not edit privileges on the data type ${data.type}`);
         }
+
+        let query = Data.findOne(data.id);
+        query = actionUtil.populateRequest(query, req);
+        let prevData = yield BluebirdPromise.resolve(query);
+
         DataService.simplify(data);
 
         const dataType = yield DataType.findOne(idDataType).populate('superType');
@@ -124,7 +136,12 @@ const coroutines = {
         data = validationRes.value;
         const updatedData = yield crudManager.updateData(data, dataTypeName);
 
-        return res.json(updatedData);
+        let qUpdate = Data.findOne(data.id);
+        qUpdate = actionUtil.populateRequest(qUpdate, req);
+        let upData = yield BluebirdPromise.resolve(qUpdate);
+
+        DbLog(logMessages.UPDATE, DATA, updatedData.id, updatedData.owner, updatedData.type, operator.id, {prevData: prevData, upData: upData});
+        return res.json(upData);
     }),
 
     destroy: BluebirdPromise.coroutine(function *(req, res, co) {
@@ -146,9 +163,11 @@ const coroutines = {
         if (!dataTypePrivilege || dataTypePrivilege.privilegeLevel != EDIT) {
             throw new PrivilegesError(`Authenticated user has not edit privileges on the data type ${data.type}`);
         }
-        sails.log.info(`Subject to be deleted:  ${data.id}`);
 
         const deleted = yield crudManager.deleteData(id);
+        if (deleted > 0) {
+            DbLog(logMessages.DELETE, DATA, data.id, data.owner, data.type, operator.id, {deletedData: JSON.stringify(data)});
+        }
         return res.json(200, { deleted: deleted });
 
     }),

@@ -12,6 +12,7 @@
     "connect-livereload": "^0.4.1",
     "d3": "^3.5.5",
     "d3-chart": "0.0.1",
+    "deep-diff": "^0.3.8",
     "ejs": "~2.5.5",
     "eslint-plugin-react": "^6.10.3",
     "grunt": "^0.4.2",
@@ -43,13 +44,13 @@
     "sails-postgresql": "^0.11.4",
     "skipper": "^0.5.3",
     "validator": "^3.40.0",
+    "waterline": "0.11.9",
     "winston": "^2.2.0",
     "xregexp": "^3.0.0",
     "xtens-fs": "git+https://github.com/xtens-suite/xtens-fs.git",
     "xtens-pg": "git+https://git@github.com/xtens-suite/xtens-pg.git",
     "xtens-utils": "git+https://github.com/xtens-suite/xtens-utils.git",
-    "xtens-waterline": "git+https://github.com/xtens-suite/xtens-waterline.git",
-    "waterline": "0.11.9"
+    "xtens-waterline": "git+https://github.com/xtens-suite/xtens-waterline.git"
   },
   "scripts": {
     "start": "node app.js",
@@ -132,7 +133,7 @@
     "webpack": "^2.3.3",
     "webpack-bundle-tracker": "^0.2.0"
   },
-  "optionalDependencies":{
+  "optionalDependencies": {
     "fsevents": "*"
   }
 }
