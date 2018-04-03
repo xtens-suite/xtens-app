@@ -45,6 +45,12 @@ module.exports = function(grunt) {
                 cwd: 'bower_components/font-awesome',
                 src: ['fonts/*.*'],
                 dest: '.tmp/public/version'
+            }, {
+                expand: true,
+                dot: true,
+                cwd: '.tmp/public/images',
+                src: ['*.{ico,png,txt,gif}'],
+                dest: '.tmp/public/version'
             }]
         }
 
