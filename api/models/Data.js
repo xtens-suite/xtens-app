@@ -41,19 +41,25 @@ var Data = {
         },
         // if the parent is a patient
         parentSubject: {
-            model: 'subject',
-            columnName: 'parent_subject'
+            collection:'subject',
+            via: 'childrenData'
         },
         // if the "parent" is a sample
         parentSample: {
-            model: 'sample',
-            columnName: 'parent_sample'
+            collection:'sample',
+            via: 'childrenData'
         },
         // if the "parent" is a generic data
         parentData: {
-            model: 'data',
-            columnName: 'parent_data'
+            collection:'data',
+            via: 'childrenData'
         },
+
+        childrenData: {
+            collection:'data',
+            via: 'parentData'
+        },
+
         owner: {
             model: 'operator',
             columnName: 'owner'
