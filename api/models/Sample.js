@@ -25,13 +25,23 @@ module.exports = {
         },
 
         donor: {
-            model: 'subject',
-            columnName: 'parent_subject'
+            collection:'subject',
+            via: 'samples'
         },
 
+        childrenSample: {
+            collection:'sample',
+            via: 'parentSample'
+        },
+        // if the "parent" is a sample
         parentSample: {
-            model: 'sample',
-            columnName: 'parent_sample'
+            collection:'sample',
+            via: 'childrenSample'
+        },
+
+        childrenData: {
+            collection:'data',
+            via: 'parentSample'
         },
 
         metadata: {
@@ -53,7 +63,7 @@ module.exports = {
             via: 'samples',
             dominant: true
         },
-        
+
         owner: {
             model: 'operator',
             columnName: 'owner'
