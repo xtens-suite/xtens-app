@@ -39,11 +39,14 @@
 
         events: {
             // 'click .remove-me': 'closeMe',
-            'click a.download-file-content': 'downloadFileContentOnClick'
+            'click span.download-file-content': 'downloadFileContentOnClick',
+            'click span.delete-file-content': 'deleteFileContentOnClick'
         },
 
-        initialize: function() {
+        initialize: function(options) {
             this.template = JST["views/templates/datafile-list.ejs"];
+            this.collection = options.collection;
+            this.datum = options.datum;
         },
 
         render: function() {
@@ -72,6 +75,14 @@
             var idFile = $(ev.target).data('id');
             console.log("FileManager.Views.Download.downloadFileContent: " + idFile);
             this.downloadFileContent(_.parseInt(idFile));
+            return false;
+        },
+
+        deleteFileContentOnClick: function(ev) {
+            ev.preventDefault();
+            var idFile = $(ev.target).data('id');
+            console.log("FileManager.Views.Download.downloadFileContent: " + idFile);
+            this.deleteFileContent(_.parseInt(idFile));
             return false;
         },
 
@@ -150,7 +161,40 @@
             xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
             xhr.setRequestHeader('Authorization', 'Bearer ' + xtens.session.get("accessToken"));
             xhr.send();
+        },
+
+        /**
+         * @method
+         * @name deleteFileContent
+         * @param{Integer} id - the ID of the dataFile on XTENS
+         * @description delete a file from the remote file storage given its XTENS ID
+         * @link http://stackoverflow.com/questions/16086162/handle-file-delete-from-ajax-post
+         */
+        deleteFileContent: function(idFile) {
+
+            var that = this;
+            var url = 'fileContent?id=' + idFile;
+            $.ajax({
+                url: 'fileContent?file=' + idFile +'&id='+ this.datum,
+                type: 'DELETE',
+                headers: {
+                    'Authorization': 'Bearer ' + xtens.session.get("accessToken")
+                },
+                contentType: 'application/json',
+                success: function() {
+                    that.trigger("fileDeleted", {dataId: this.datum});
+                    $('body').notify({
+                        message: 'File correclty deleted',
+                        type: 'danger'
+                    });
+                },
+                error: function(err) {
+                    xtens.error(err);
+                }
+            });
+
         }
+
 
 
     });

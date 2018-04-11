@@ -1,8 +1,11 @@
 <div name="stored-files-cnt" class="file-list">
-    <% _.each(fileNames, function(fileName) {%>
+    <% _.each(files, function(file) {
+          var uriFrags = file.uri && file.uri.split('/');
+          var fileName = uriFrags && uriFrags[uriFrags.length - 1]; %>
         <div class="input-group margin-bottom-sm">
             <span class="input-group-addon"><i class="fa fa-file"></i></span>
             <span class="form-control"><%= fileName %></span>
+            <span id="delete-file" class="input-group-addon btn btn-danger" value= "<%=file.id%>"><i class="fa fa-trash"></i></span>
         </div>
     <%}); %>
 </div>
@@ -14,4 +17,4 @@
         <input name="file" type="file">
     </div>
 </div>
-<div class="query-modal"></div>
+<div class="file-modal"></div>

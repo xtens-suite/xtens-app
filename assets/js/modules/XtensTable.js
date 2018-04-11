@@ -694,9 +694,15 @@
          */
           showFileList: function(ev) {
             // if there is any open popover destroy it
-              var that = this;
-              var currRow = this.table.row($(ev.currentTarget).parents('tr'));
-              var id = currRow.data().id;
+              var that = this, id;
+              if (ev.currentTarget) {
+                  var currRow = this.table.row($(ev.currentTarget).parents('tr'));
+                  id = currRow.data().id;
+              } else if (ev.dataId) {
+                  id = ev.dataId;
+              }else {
+                  return;
+              }
               var model = this.multiProject || this.isLeafSearch ? this.dataTypes.models[0].get("model") : this.dataTypes.get("model");
               if (!this[id]){
                   if (model === Classes.SUBJECT)
@@ -704,13 +710,14 @@
 
                   var data = model === Classes.SAMPLE ? new Sample.Model() : new Data.Model();
 
-                  data.set("id", currRow.data().id);
+                  data.set("id", id);
                   data.fetch({
                       data: $.param({populate: ['files']}),
                       success: function(result) {
                           var files = result.get("files");
                           var dataFiles = new DataFile.List(files);
-                          var view = new DataFile.Views.List({collection: dataFiles});
+                          var view = new DataFile.Views.List({collection: dataFiles, datum: id});
+                          //that.listenTo(view, 'fileDeleted', that.showFileList);
 
                           $(ev.currentTarget).popover({
                               trigger:'manual',
@@ -733,7 +740,7 @@
                                   $(ev.currentTarget).popover("hide");
                               }
                           });
-                          // that.listenTo(view, 'closeMe', that.removeChild);
+                          that.listenTo(view, 'closeMe', that.removeChild);
                           // that.childrenViews.push(view);
                       },
                       error: function(model, err) {

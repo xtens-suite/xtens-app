@@ -138,6 +138,7 @@
         "subject": "Subject",
         "owner": "Owner",
         "sample": "Sample",
+        "are-you-sure-delete-file": "The file will be permanently deleted. Are you sure?",
         /* views/templates/addressinformation-edit.ejs */
         "office": "Office",
         "address-information": "Address Information",

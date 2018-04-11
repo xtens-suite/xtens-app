@@ -939,7 +939,7 @@
                 template: JST["views/templates/confirm-dialog-bootstrap.ejs"],
                 title: i18n('confirm-deletion'),
                 body: i18n('data-will-be-permanently-deleted-are-you-sure'),
-                type: "delete"
+                type: i18n("delete")
             });
 
             this.$modal.append(modal.render().el);
@@ -1035,24 +1035,43 @@
          */
         enableFileUpload: function() {
             var _this = this;
-            var fileManager = new FileManager.Model();
+            //_this.$fileCnt.empty()
+            //var fileManager = new FileManager.Model();
             $.ajax({
                 url: '/fileManager',
                 type: 'GET',
                 contentType: 'application/json',
                 success: function(fileSystem) {
+                    _this.fileSystem = fileSystem;
                     _this.fileUploadView = new FileManager.Views.Dropzone({
                         files: _this.model.get("files"),
                         fileSystem: fileSystem,
-
+                        datum: _this.model,
                         // added the second condition for the scenarios where the dataType is not populated
                         dataTypeName: _this.model.get("type").name || _.findWhere(_this.dataTypes, {id: _.parseInt(_this.model.get("type"))}).name
                     });
                     _this.$fileCnt.append(_this.fileUploadView.render().el);
                     _this.fileUploadView.initializeDropzone();
+                    _this.listenTo(_this.fileUploadView, 'fileDeleted', _this.refreshFileCnt);
                 },
                 error: xtens.error
             });
+        },
+
+        refreshFileCnt: function (fileId) {
+            var files = this.model.get("files");
+            this.model.set("files", files.filter(function(f) { return f.id != fileId;}));
+            this.fileUploadView = new FileManager.Views.Dropzone({
+                files: this.model.get("files"),
+                fileSystem: this.fileSystem,
+                datum: this.model,
+              // added the second condition for the scenarios where the dataType is not populated
+                dataTypeName: this.model.get("type").name || _.findWhere(this.dataTypes, {id: _.parseInt(this.model.get("type"))}).name
+            });
+            $('.filemanager').remove();
+            this.$fileCnt.append(this.fileUploadView.render().el);
+            this.fileUploadView.initializeDropzone();
+            this.listenTo(this.fileUploadView, 'fileDeleted', this.refreshFileCnt);
         },
 
         retrieveAndSetFiles: function() {

@@ -252,7 +252,7 @@
                                     template: JST["views/templates/confirm-dialog-bootstrap.ejs"],
                                     title: i18n('confirm-edit'),
                                     body: i18n('edit-data-type-schema-warning'),
-                                    type: "edit"
+                                    type: i18n("edit")
                                 });
 
                                 that.$modal.append(modal.render().el);
@@ -367,7 +367,7 @@
                 template: JST["views/templates/confirm-dialog-bootstrap.ejs"],
                 title: i18n('confirm-deletion'),
                 body: i18n('datatype-will-be-permanently-deleted-are-you-sure'),
-                type: "delete"
+                type: i18n("delete")
             });
 
             this.$modal.append(modal.render().el);

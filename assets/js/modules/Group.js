@@ -152,7 +152,7 @@
                 template: JST["views/templates/confirm-dialog-bootstrap.ejs"],
                 title: i18n('confirm-deletion'),
                 body: i18n('group-will-be-permanently-deleted-are-you-sure'),
-                type: "delete"
+                type: i18n("delete")
             });
 
             this.$modal.append(modal.render().el);
