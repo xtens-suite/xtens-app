@@ -57,7 +57,7 @@ module.exports = function filecontent(sails){
                     // set response headers for file download
                     res.setHeader('Content-Disposition', `attachment;filename=${fileName}`);
 
-                    return fileSystem.downloadFileContent(dataFile.uri, res);
+                    return fileSystem.downloadFileContentAsync(dataFile.uri, res);
                 })
                 .then(() => {
                     return res.ok(); // res.json() ??
