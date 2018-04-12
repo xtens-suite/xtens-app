@@ -1,7 +1,7 @@
 "use strict";
 const winston = require('winston');
 const Postgres = require('winston-postgres').Postgres;
-const connection = require('./../../../config/local.js').connections.dblog;
+const connection = sails.config.connections.dblog;
 const DeepDiff = require('deep-diff');
 const BluebirdPromise = require('bluebird');
 const coroutines = {
