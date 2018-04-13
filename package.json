@@ -46,7 +46,7 @@
     "winston": "^2.2.0",
     "xregexp": "^3.0.0",
     "xtens-fs": "git+https://github.com/xtens-suite/xtens-fs.git",
-    "xtens-pg": "git+https://git@github.com/xtens-suite/xtens-pg.git@feat/pooling",
+    "xtens-pg": "git+https://git@github.com/xtens-suite/xtens-pg.git#feat/pooling",
     "xtens-utils": "git+https://github.com/xtens-suite/xtens-utils.git",
     "xtens-waterline": "git+https://github.com/xtens-suite/xtens-waterline.git",
     "waterline": "0.11.9"
