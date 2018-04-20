@@ -2682,6 +2682,27 @@ CREATE INDEX updated_at_sbj_index ON subject (updated_at DESC);
 
 
 --
+-- Name: gin_index_data; Type: INDEX; Schema: public; Owner: xtenspg; Tablespace:
+--
+
+CREATE INDEX gin_index_data ON data USING gin (metadata);
+
+
+--
+-- Name: gin_index_sample; Type: INDEX; Schema: public; Owner: xtenspg; Tablespace:
+--
+
+CREATE INDEX gin_index_sample ON sample USING gin (metadata);
+
+
+--
+-- Name: gin_index_subject; Type: INDEX; Schema: public; Owner: xtenspg; Tablespace:
+--
+
+CREATE INDEX gin_index_subject ON subject USING gin (metadata);
+
+
+--
 -- Name: biobank_fkey; Type: FK CONSTRAINT; Schema: public; Owner: xtenspg
 --
 
