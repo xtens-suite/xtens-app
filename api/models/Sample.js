@@ -26,7 +26,7 @@ module.exports = {
 
         donor: {
             collection:'subject',
-            via: 'samples'
+            via: 'childrenSample'
         },
 
         childrenSample: {

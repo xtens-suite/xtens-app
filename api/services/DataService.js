@@ -49,9 +49,9 @@ const coroutines = {
                 createdAt: Joi.date(),
                 updatedAt: Joi.date()
             })),
-            parentSubject: Joi.number().integer().allow(null),
-            parentSample: Joi.number().integer().allow(null),
-            parentData: Joi.number().integer().allow(null),
+            parentSubject: Joi.array().allow(null),
+            parentSample: Joi.array().allow(null),
+            parentData: Joi.array().allow(null),
             createdAt: Joi.date(),
             updatedAt: Joi.date()
         };
