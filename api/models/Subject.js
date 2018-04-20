@@ -33,7 +33,7 @@ var Subject= {
             model: 'dataType'
         },
 
-        samples: {
+        childrenSample: {
             collection: 'sample',
             via: 'donor'
         },
