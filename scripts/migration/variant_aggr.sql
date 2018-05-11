@@ -36,15 +36,13 @@ CREATE OR REPLACE FUNCTION variant_aggregation() RETURNS integer AS $$
 
     -- create data_types for every project
       FOR uniq_variant IN SELECT distinct
-            d.id,
             d.metadata->'chr'->>'value' as chr,
             d.metadata->'pos'->>'value' as pos,
             d.metadata->'ref'->>'value' as ref,
             d.metadata->'alt'->>'value' as alt FROM data d
             join data_type dt on dt.id = d.type
             join super_type s on dt.super_type =  s.id and s.id = 112
-            order by d.id asc
-              LOOP
+            LOOP
 
       -- da questa select recupero tutti i dati che cambiano tra le varianti
       v_sql_dynamic := 'SELECT distinct d.id  FROM data d join data_type dt on dt.id = d.type join super_type s on dt.super_type =  s.id and s.id = 112
