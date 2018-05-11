@@ -587,8 +587,6 @@ CREATE OR REPLACE FUNCTION main_migration() RETURNS integer AS $$
     DROP FUNCTION sample_parents_migration();
     DROP FUNCTION remove_columns_one_to_many_associations_and_set_indexes();
 
-    VACUUM ANALYZE;
-
     RETURN 1;
   END;
 $$ LANGUAGE plpgsql;
