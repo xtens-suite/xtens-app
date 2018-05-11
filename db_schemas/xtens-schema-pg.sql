@@ -2682,6 +2682,43 @@ CREATE INDEX updated_at_sbj_index ON subject (updated_at DESC);
 
 
 --
+-- Name: updated_at_index; Type: INDEX; Schema: public; Owner: xtenspg; Tablespace:
+--
+
+CREATE INDEX privileges_index ON datatype_privileges (data_type, xtens_group);
+
+--
+-- Name: join_data_data_index; Type: INDEX; Schema: public; Owner: xtenspg; Tablespace:
+--
+
+CREATE INDEX join_data_data_index ON data_childrendata__data_parentdata ("data_parentData", "data_childrenData");
+
+--
+-- Name: join_data_sample_index; Type: INDEX; Schema: public; Owner: xtenspg; Tablespace:
+--
+
+CREATE INDEX join_data_sample_index ON data_parentsample__sample_childrendata ("data_parentSample", "sample_childrenData");
+
+--
+-- Name: join_data_subject_index; Type: INDEX; Schema: public; Owner: xtenspg; Tablespace:
+--
+
+CREATE INDEX join_data_subject_index ON data_parentsubject__subject_childrendata ("data_parentSubject", "subject_childrenData");
+
+--
+-- Name: join_sample_sample_index; Type: INDEX; Schema: public; Owner: xtenspg; Tablespace:
+--
+
+CREATE INDEX join_sample_sample_index ON sample_parentsample__sample_childrensample ("sample_parentSample", "sample_childrenSample");
+
+--
+-- Name: join_sample_donor_index; Type: INDEX; Schema: public; Owner: xtenspg; Tablespace:
+--
+
+CREATE INDEX join_sample_donor_index ON sample_donor__subject_childrensample ("sample_donor", "subject_childrenSample");
+
+
+--
 -- Name: biobank_fkey; Type: FK CONSTRAINT; Schema: public; Owner: xtenspg
 --
 

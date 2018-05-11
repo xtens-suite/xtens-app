@@ -547,7 +547,7 @@ CREATE OR REPLACE FUNCTION sample_parents_migration() RETURNS integer AS $$
 $$ LANGUAGE plpgsql;
 
 
-CREATE OR REPLACE FUNCTION remove_columns_one_to_many_associations() RETURNS integer AS $$
+CREATE OR REPLACE FUNCTION remove_columns_one_to_many_associations_and_set_indexes() RETURNS integer AS $$
 
   BEGIN
 
@@ -557,6 +557,16 @@ CREATE OR REPLACE FUNCTION remove_columns_one_to_many_associations() RETURNS int
 
     ALTER TABLE sample DROP COLUMN parent_subject;
     ALTER TABLE sample DROP COLUMN parent_sample;
+
+    CREATE INDEX join_data_data_index ON data_childrendata__data_parentdata ("data_parentData", "data_childrenData");
+
+    CREATE INDEX join_data_sample_index ON data_parentsample__sample_childrendata ("data_parentSample", "sample_childrenData");
+
+    CREATE INDEX join_data_subject_index ON data_parentsubject__subject_childrendata ("data_parentSubject", "subject_childrenData");
+
+    CREATE INDEX join_sample_sample_index ON sample_parentsample__sample_childrensample ("sample_parentSample", "sample_childrenSample");
+
+    CREATE INDEX join_sample_donor_index ON sample_donor__subject_childrensample ("sample_donor", "subject_childrenSample");
 
     RETURN 1;
   END;
@@ -570,12 +580,14 @@ CREATE OR REPLACE FUNCTION main_migration() RETURNS integer AS $$
     PERFORM apply_schema_changes();
     PERFORM data_parents_migration();
     PERFORM sample_parents_migration();
-    PERFORM remove_columns_one_to_many_associations();
+    PERFORM remove_columns_one_to_many_associations_and_set_indexes();
 
     DROP FUNCTION apply_schema_changes();
     DROP FUNCTION data_parents_migration();
     DROP FUNCTION sample_parents_migration();
-    DROP FUNCTION remove_columns_one_to_many_associations();
+    DROP FUNCTION remove_columns_one_to_many_associations_and_set_indexes();
+
+    VACUUM ANALYZE;
 
     RETURN 1;
   END;
