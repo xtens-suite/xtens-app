@@ -2703,6 +2703,13 @@ CREATE INDEX gin_index_subject ON subject USING gin (metadata);
 
 
 --
+-- Name: updated_at_index; Type: INDEX; Schema: public; Owner: xtenspg; Tablespace:
+--
+
+CREATE INDEX privileges_index ON datatype_privileges (data_type, xtens_group);
+
+
+--
 -- Name: biobank_fkey; Type: FK CONSTRAINT; Schema: public; Owner: xtenspg
 --
 
