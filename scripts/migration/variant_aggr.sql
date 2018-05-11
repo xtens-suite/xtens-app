@@ -36,12 +36,14 @@ CREATE OR REPLACE FUNCTION variant_aggregation() RETURNS integer AS $$
 
     -- create data_types for every project
       FOR uniq_variant IN SELECT distinct
+            array_agg(d.id) as ids,
             d.metadata->'chr'->>'value' as chr,
             d.metadata->'pos'->>'value' as pos,
             d.metadata->'ref'->>'value' as ref,
             d.metadata->'alt'->>'value' as alt FROM data d
             join data_type dt on dt.id = d.type
             join super_type s on dt.super_type =  s.id and s.id = 112
+            group by d.metadata->'alt'->>'value', d.metadata->'ref'->>'value', d.metadata->'pos'->>'value', d.metadata->'chr'->>'value'
             LOOP
 
       -- da questa select recupero tutti i dati che cambiano tra le varianti
@@ -52,24 +54,22 @@ CREATE OR REPLACE FUNCTION variant_aggregation() RETURNS integer AS $$
             metadata @> ''{"ref":{"value":"' || uniq_variant.ref || '" }}'' AND
             metadata @> ''{"alt":{"value":"' || uniq_variant.alt || '" }}''';
 
-      --init first
-      first := FALSE;
-      first_ID := 0;
+
 
             FOR variant IN EXECUTE v_sql_dynamic
 				lOOP
 
         IF first = FALSE THEN
-          first_ID = variant.id;
+          first_ID = uniq_variant.ids[1];
           first = TRUE;
-          RAISE info 'MASTER Variant %', variant.id;
+          RAISE info 'MASTER Variant %', first_ID;
         ELSE
             -- RAISE info 'Perform update join table id %, master id %', variant.id, first_ID;
             --select id INTO join_id from data_childrendata__data_parentdata where "data_parentData" = variant.id;
 
             EXECUTE 'UPDATE data_childrendata__data_parentdata SET "data_parentData"=' || quote_literal(first_ID) || ' WHERE "data_parentData" = ' || quote_literal(variant.id);--' WHERE id = ' || quote_literal(join_id);
-            execute 'WITH row_deleted AS (delete from data where id =' || quote_literal(variant.id) || 'RETURNING *) SELECT count(*) FROM row_deleted' into c;
-            RAISE info 'Deleting Variant %, removed %', variant.id, c;
+            -- execute 'WITH row_deleted AS (delete from data where id =' || quote_literal(variant.id) || 'RETURNING *) SELECT count(*) FROM row_deleted' into c;
+            -- RAISE info 'Deleting Variant %, removed %', variant.id, c;
           END IF;
 
         --se la prima salvo il suo id e diventa la master
@@ -81,7 +81,9 @@ CREATE OR REPLACE FUNCTION variant_aggregation() RETURNS integer AS $$
 
             END LOOP;
 --finito il ciclo su una variante master rinizializzo a false first e master
-
+--init first
+first := FALSE;
+first_ID := 0;
       END LOOP;
       RAISE info 'Done creating data parents migration.';
       RETURN 1;
