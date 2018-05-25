@@ -361,7 +361,7 @@
                             populate: ['type'],
                             limit: xtens.module("xtensconstants").DefaultLimit
 ,
-                            sort: 'updated_at DESC'
+                            sort: 'created_at DESC'
                         },
                         contentType: 'application/json',
                         beforeSend: function() { $('.loader-gif').css("display","block"); },
@@ -612,7 +612,7 @@
                             project: activeProject ? activeProject.id : undefined,
                             populate: ['type'],
                             limit: xtens.module("xtensconstants").DefaultLimit,
-                            sort: 'updated_at DESC'
+                            sort: 'created_at DESC'
                         },
                         contentType: 'application/json',
                         beforeSend: function() { $('.loader-gif').css("display","block"); },
@@ -798,7 +798,7 @@
                             project: activeProject ? activeProject.id : undefined,
                             populate: ['type', 'donor'],
                             limit: xtens.module("xtensconstants").DefaultLimit,
-                            sort: 'updated_at DESC'
+                            sort: 'created_at DESC'
                         },
                         contentType: 'application/json',
                         beforeSend: function() { $('.loader-gif').css("display","block"); },

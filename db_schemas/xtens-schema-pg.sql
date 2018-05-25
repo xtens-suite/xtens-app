@@ -1,4 +1,4 @@
---
+created--
 -- PostgreSQL database dump
 --
 
@@ -2661,24 +2661,24 @@ CREATE INDEX data_type_idx ON data USING btree (type);
 
 
 --
--- Name: updated_at_index; Type: INDEX; Schema: public; Owner: xtenspg; Tablespace:
+-- Name: created_at_index; Type: INDEX; Schema: public; Owner: xtenspg; Tablespace:
 --
 
-CREATE INDEX updated_at_data_index ON data (updated_at DESC);
-
-
---
--- Name: updated_at_index; Type: INDEX; Schema: public; Owner: xtenspg; Tablespace:
---
-
-CREATE INDEX updated_at_smpl_index ON sample (updated_at DESC);
+CREATE INDEX created_at_data_index ON data (created_at DESC);
 
 
 --
--- Name: updated_at_index; Type: INDEX; Schema: public; Owner: xtenspg; Tablespace:
+-- Name: created_at_index; Type: INDEX; Schema: public; Owner: xtenspg; Tablespace:
 --
 
-CREATE INDEX updated_at_sbj_index ON subject (updated_at DESC);
+CREATE INDEX created_at_smpl_index ON sample (created_at DESC);
+
+
+--
+-- Name: created_at_index; Type: INDEX; Schema: public; Owner: xtenspg; Tablespace:
+--
+
+CREATE INDEX created_at_sbj_index ON subject (created_at DESC);
 
 
 --
@@ -2703,7 +2703,7 @@ CREATE INDEX gin_index_subject ON subject USING gin (metadata);
 
 
 --
--- Name: updated_at_index; Type: INDEX; Schema: public; Owner: xtenspg; Tablespace:
+-- Name: privileges_index; Type: INDEX; Schema: public; Owner: xtenspg; Tablespace:
 --
 
 CREATE INDEX privileges_index ON datatype_privileges (data_type, xtens_group);
