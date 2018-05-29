@@ -201,7 +201,7 @@ let DataTypeService = {
             id: Joi.number().integer().positive(),
             name: Joi.string().required(),
             model: Joi.string().required().valid(_.values(constants.DataTypeClasses)),
-            // schema: Joi.object().required(),
+            biobankPrefix: Joi.string().allow(null),
             project: Joi.number().integer().required(),
             superType: Joi.object().required().keys(superTypeValidationSchema),
             parents: Joi.array().allow(null),

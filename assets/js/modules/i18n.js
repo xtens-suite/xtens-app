@@ -178,6 +178,7 @@
         /* views/templates/project-edit.ejs */
         "project-data-types": "Project Data Types",
         "project-groups": "Project Groups",
+        "biobanks": "Biobanks",
         "save-project": "Save Project",
         "project-deleted": "Project Deleted",
         "project-will-be-permanently-deleted-are-you-sure": "Project will be permanently deleted. Are you sure?",
