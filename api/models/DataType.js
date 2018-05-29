@@ -11,6 +11,12 @@ var DataType = {
             required: true,
             columnName: 'name'
         },
+
+        biobankPrefix: {
+            type: 'string',
+            columnName: 'biobank_prefix'
+        },
+
         superType: {
             model:'superType',
             columnName: 'super_type'
