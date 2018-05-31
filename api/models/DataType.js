@@ -17,6 +17,11 @@ var DataType = {
             columnName: 'biobank_prefix'
         },
 
+        getParentCode: {
+            type: 'boolean',
+            columnName: 'parent_code'
+        },
+
         superType: {
             model:'superType',
             columnName: 'super_type'

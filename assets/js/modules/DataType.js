@@ -118,6 +118,10 @@
                 observe: 'biobankPrefix'
             },
 
+            '#getParentCode': {
+                observe: 'getParentCode'
+            },
+
             '#model': {
                 observe: 'model',
                 initialize: function($el) {

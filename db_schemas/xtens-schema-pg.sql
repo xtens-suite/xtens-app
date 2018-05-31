@@ -345,6 +345,8 @@ CREATE TABLE data_type (
     id integer NOT NULL,
     name text NOT NULL,
     model text NOT NULL,
+    biobank_code text,
+    parent_code boolean NOT NULL DEFAULT FALSE,
     super_type integer NOT NULL,
     project integer NOT NULL,
     created_at timestamp with time zone NOT NULL,

@@ -202,6 +202,7 @@ let DataTypeService = {
             name: Joi.string().required(),
             model: Joi.string().required().valid(_.values(constants.DataTypeClasses)),
             biobankPrefix: Joi.string().allow(null),
+            getParentCode: Joi.boolean().allow(null),
             project: Joi.number().integer().required(),
             superType: Joi.object().required().keys(superTypeValidationSchema),
             parents: Joi.array().allow(null),

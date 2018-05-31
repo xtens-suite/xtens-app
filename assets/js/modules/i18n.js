@@ -37,6 +37,7 @@
         "yes": "YES",
         "no": "NO",
         "biobank-prefix": "Biobank Prefix",
+        "get-parent-code": "Get Parent Code",
         "model": "Model",
         "class-template": "Class Template", //TODO
         "parent": "Parent",
