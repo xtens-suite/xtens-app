@@ -20,17 +20,23 @@
             <div class="form-group row">
                 <label for="model" class="col-md-2 control-label"><%= __("model") %></label>
                 <div class="col-md-4">
-                    <select class="form-control" id="model" name="model" placeholder="<%= __('please-select')%>" required></select>
+                    <select required class="form-control" id="model" name="model" placeholder="<%= __('please-select')%>"></select>
                 </div>
-                <label for="parent" class="col-md-2 control-label"><%= __("parent") %></label>
-                <div class="col-md-3">
-                    <select multiple class="form-control" id="parents" name="parents"></select>
-                </div>
+                <div class="biobankPrefix-container" hidden>
+                  <label for="biobankPrefix" class="col-md-2 control-label"><%= __("biobank-prefix") %></label>
+                  <div class="col-md-3">
+                      <input text class="form-control" id="biobankPrefix" name="biobankPrefix" placeholder="<%= __('please-insert')%>" ></input>
+                  </div>
+              </div>
             </div>
             <div class="form-group row">
                 <label for="project" class="col-md-2 control-label"><%= __("project") %></label>
                 <div class="col-md-4">
                     <select class="form-control" id="project" name="project" required></select>
+                </div>
+                <label for="parent" class="col-md-2 control-label"><%= __("parent") %></label>
+                <div class="col-md-3">
+                    <select multiple class="form-control" id="parents" name="parents"></select>
                 </div>
             </div>
             <div class="form-group row">

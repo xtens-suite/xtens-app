@@ -1,7 +1,7 @@
 <nav id="xtensNav" name="xtensNav" class="navbar navbar-default" role="navigation">
   <div class="row">
     <div class="navbar-header vcenter" style="width:100%">
-        <div class="col-md-10">
+        <div class="col-md-4">
           <svg height="50" width="200">
               <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="0%">
               <stop offset="0%" style="stop-color:rgb(0,255,255);stop-opacity:1" />
@@ -10,7 +10,7 @@
               <text x="30" y="40" fill = "url(#grad1)" font-family="ff-market-web, cursive" font-size="40">XTENS 2</text>
           </svg>
         </div>
-          <div class="col-md-2" style="margin-top:1.5vh;">
+          <div class="col-md-4 text-center" style="margin-top:1.5vh;">
             <label id="label-project-selector" for="project-selector" class="text-uppercase"><%= __("active-project") %>:</label>
             <% var project = session.get("activeProject");%>
             <button id="btn-project" value="<%=project%>" class="btn btn-default" data-placement="bottom" data-toggle="tooltip" title="<%= __('click-to-change-project')%>"><%= project !== 'all' ? project : __('all-projects') %></button>

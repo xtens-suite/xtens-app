@@ -36,6 +36,7 @@
         "file-upload": "File Upload",
         "yes": "YES",
         "no": "NO",
+        "biobank-prefix": "Biobank Prefix",
         "model": "Model",
         "class-template": "Class Template", //TODO
         "parent": "Parent",

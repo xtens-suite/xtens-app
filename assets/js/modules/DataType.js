@@ -101,6 +101,11 @@
             if (this.idDataType) {
                 $('#st-name').attr("disabled", true);
                 $('#uri').attr("disabled", true);
+                $('#model').attr("disabled", true);
+                if (this.model.get('model') === "Sample") {
+                    $('.biobankPrefix-container').removeAttr("hidden");
+                    $('#biobankPrefix').prop("disabled", true);
+                }
             }
         },
 
@@ -108,6 +113,11 @@
             '#name': {
                 observe: 'name'
             },
+
+            '#biobankPrefix': {
+                observe: 'biobankPrefix'
+            },
+
             '#model': {
                 observe: 'model',
                 initialize: function($el) {
@@ -192,6 +202,7 @@
         },
 
         render: function() {
+            var that = this;
 
             this.$el.html(this.template({__: i18n, dataType: this.model, isMultiProject: this.isMultiProject}));
             this.$form = this.$("form");
@@ -207,6 +218,19 @@
                 $('#project').prop('disabled', true);
                 this.getProjectParents();
             }
+
+            $('#model').on('change',function (event) {
+                var currentModel = event.currentTarget.value;
+                if (currentModel === "Sample") {
+                    $('.biobankPrefix-container').removeAttr("hidden");
+                    $('#biobankPrefix').prop("required", true);
+                }
+                else {
+                    $('.biobankPrefix-container').prop("hidden", true);
+                    $('#biobankPrefix').removeAttr("required");
+                }
+                that.$form.parsley(parsleyOpts);
+            });
 
             if (this.idDataType) {
                 this.getProjectParents();
@@ -239,7 +263,6 @@
                 }
                 else {
                   //edit
-                    var that = this;
                     if (this.isMultiProject) {
 
                         $(".panel-heading").on('click',function(){
@@ -319,7 +342,7 @@
             // if (this.superTypeView && this.superTypeView.model) {
             var body = this.serialize();
             this.stModel.attributes.schema = {
-                header: _.omit(header, ['parents']), // parent-child many-to-many associations are not currently saved in the JSON schema
+                header: _.omit(header, 'parents', 'biobankPrefix'), // parent-child many-to-many associations are not currently saved in the JSON schema
                 body: body
             };
             this.model.set("superType", _.clone(this.stModel.attributes));
