@@ -337,13 +337,37 @@
        */
 
         dataTypeOnChange: function() {
+            var that = this;
             Data.Views.Edit.prototype.dataTypeOnChange.call(this);
             var typeName = this.$('#data-type :selected').text(),
-                parentSample = this.model.get("parentSample");
+                parentSample = this.model.get("parentSample") ? this.model.get("parentSample").biobankCode : null,
+                biobank = this.model.get("biobank").id;
+            var type = _.find(this.dataTypes, function(dt){ return dt.name === typeName;});
+            var params = {
+                sample: {
+                    type: type.id,
+                    parentSample: parentSample,
+                    biobank: biobank
+                },
+                project: type.project
+            };
+            $.ajax({
+                url: '/sample/getNextBiobankCode',
+                type: 'GET',
+                headers: {
+                    'Authorization': 'Bearer ' + xtens.session.get("accessToken")
+                },
+                data: params,
+                contentType: 'application/json',
+                success: function(result) {
+                    that.model.set('biobankCode', result);
+                },
+                error: function(err) {
+                    xtens.error(err);
+                }
+            });
 
-            if (parentSample && parentSample.biobankCode) {
-                this.model.set('biobankCode', biobankCodeMap[typeName] + parentSample.biobankCode);
-            }
+
             if (this.subjects.length > 0) {
                 this.fetchDonorsOnSuccess(this.subjects, $('#donor'));
             }
