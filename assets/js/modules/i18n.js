@@ -38,6 +38,7 @@
         "no": "NO",
         "biobank-prefix": "Biobank Prefix",
         "get-parent-code": "Get Parent Code",
+        "no-parent-prefix": "If Parent Sample no Prefix",
         "model": "Model",
         "class-template": "Class Template", //TODO
         "parent": "Parent",

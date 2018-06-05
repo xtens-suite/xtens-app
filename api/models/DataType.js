@@ -19,7 +19,14 @@ var DataType = {
 
         getParentCode: {
             type: 'boolean',
+            defaultsTo: false,
             columnName: 'parent_code'
+        },
+
+        ifParentNoPrefix: {
+            type: 'boolean',
+            defaultsTo: false,
+            columnName: 'parent_no_prefix'
         },
 
         superType: {

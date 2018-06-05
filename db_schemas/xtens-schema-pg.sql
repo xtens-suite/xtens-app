@@ -1,4 +1,4 @@
-created--
+--
 -- PostgreSQL database dump
 --
 
@@ -347,6 +347,7 @@ CREATE TABLE data_type (
     model text NOT NULL,
     biobank_code text,
     parent_code boolean NOT NULL DEFAULT FALSE,
+    parent_no_prefix boolean NOT NULL DEFAULT FALSE,
     super_type integer NOT NULL,
     project integer NOT NULL,
     created_at timestamp with time zone NOT NULL,

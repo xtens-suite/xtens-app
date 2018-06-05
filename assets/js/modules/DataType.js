@@ -102,11 +102,29 @@
                 $('#st-name').attr("disabled", true);
                 $('#uri').attr("disabled", true);
                 $('#model').attr("disabled", true);
+                $('#biobankPrefix').prop("disabled", true);
+                $('#getParentCode').prop("disabled", true);
                 if (this.model.get('model') === "Sample") {
                     $('.biobankPrefix-container').removeAttr("hidden");
-                    $('#biobankPrefix').prop("disabled", true);
+                }
+                if (_.indexOf($('#parents').val().map(Number), this.idDataType) >= 0) {
+                    $('.noparent-container').css("display", "");
                 }
             }
+            $('#parents').on('change', function () {
+                if (that.model.get('model') === "Sample") {
+                // var selectedParents = _.filter(that.existingDataTypes, (d) => _.indexOf($('#parents').val().map(Number), d.id) >= 0);
+                    if (_.indexOf($('#parents').val().map(Number), that.idDataType) >= 0) {
+                        $('.noparent-container').css("display", "");
+                    }
+                    else {
+                        that.model.set('ifParentNoPrefix', false);
+                        $('.noparent-container').css("display", "none");
+                    }
+                }else {
+                    that.model.set('ifParentNoPrefix', false);
+                }
+            });
         },
 
         bindings: {
@@ -120,6 +138,10 @@
 
             '#getParentCode': {
                 observe: 'getParentCode'
+            },
+
+            '#ifParentNoPrefix': {
+                observe: 'ifParentNoPrefix'
             },
 
             '#model': {
