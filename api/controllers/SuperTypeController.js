@@ -16,6 +16,16 @@ const BluebirdPromise = require('bluebird');
 
 const coroutines = {
 
+    getMeta: BluebirdPromise.coroutine(function *(req, res) {
+        const operator = TokenService.getToken(req);
+        const params = req.allParams();
+        console.log(`SuperTypeController.getMeta - Params: ${JSON.stringify(params)}`);
+        const isMultiProject = yield SuperTypeService.isMultiProject(params.id);
+        console.log(`SuperTypeController.getMeta - isMultiProject: ${isMultiProject}`);
+        return res.json({
+            isMultiProject: isMultiProject
+        });
+    })
 
 };
 
@@ -23,7 +33,14 @@ const coroutines = {
 
 const SuperTypeController = {
 
-
+    getMeta: function(req, res) {
+        const co = new ControllerOut(res);
+        coroutines.getMeta(req, res)
+        .catch(err => {
+            sails.log.error(err);
+            return co.error(err);
+        });
+    }
 
 
 };
