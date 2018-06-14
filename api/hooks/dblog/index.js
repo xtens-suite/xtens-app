@@ -157,6 +157,17 @@ function dblog(sails) {
 
         configure: function() {
 
+            this.messages = {
+                DEFAULT: 'operation',
+                CREATE: 'create',
+                DELETE: 'delete',
+                FINDONE: 'find_one',
+                FIND: 'find',
+                DOWNLOAD: 'download',
+                UPDATE: 'update',
+                QUERY: 'query'
+            };
+            
             if (connection) {
                 this.myCustomLevels = {
                     levels: {
@@ -170,38 +181,27 @@ function dblog(sails) {
                     }
                 };
 
-                this.messages = {
-                    DEFAULT: 'operation',
-                    CREATE: 'create',
-                    DELETE: 'delete',
-                    FINDONE: 'find_one',
-                    FIND: 'find',
-                    DOWNLOAD: 'download',
-                    UPDATE: 'update',
-                    QUERY: 'query'
-                };
-                if (process.env.NODE_ENV != 'test') {
-                    this.connString = this.getLogdbConnectionString(connection);
-                    var that = this;
-                    this.logger = new(winston.Logger)({
-                        levels: this.myCustomLevels.levels,
-                        transports: [
-                            new(Postgres)({
-                                level: 'dbstore',
-                                ssl: false, // are you sure you want to do this?
-                                timestamp: true,
-                                connectionString: this.connString, //'postgres://admin:admin@localhost:5432/api',
-                                tableName: connection.tableName,
-                                ignoreMessage: function(level, message, metadata) {
-                                    if (level !== 'dbstore' || !metadata || message === that.messages.DEFAULT) {
-                                        return true;
-                                    }
-                                    return false;
+
+                this.connString = this.getLogdbConnectionString(connection);
+                var that = this;
+                this.logger = new(winston.Logger)({
+                    levels: this.myCustomLevels.levels,
+                    transports: [
+                        new(Postgres)({
+                            level: 'dbstore',
+                            ssl: false, // are you sure you want to do this?
+                            timestamp: true,
+                            connectionString: this.connString, //'postgres://admin:admin@localhost:5432/api',
+                            tableName: connection.tableName,
+                            ignoreMessage: function(level, message, metadata) {
+                                if (level !== 'dbstore' || !metadata || message === that.messages.DEFAULT) {
+                                    return true;
                                 }
-                            })
-                        ]
-                    });
-                }
+                                return false;
+                            }
+                        })
+                    ]
+                });
 
             }
         },
