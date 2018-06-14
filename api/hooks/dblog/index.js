@@ -227,8 +227,7 @@ function dblog(sails) {
      */
         log: function(message, model, data, owner, type, executor, obj) {
             if (process.env.NODE_ENV == 'test') {
-                console.log("NO DBLOGGING DURING TEST");
-                return BluebirdPromise.resolve(true);
+                return BluebirdPromise.resolve();
             }
             return coroutines.log(message, model, data, owner, type, executor, obj)
         .catch( /* istanbul ignore next */ function(err) {
