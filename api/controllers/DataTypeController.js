@@ -191,7 +191,7 @@ const coroutines = {
         sails.log.info("DataTypeController.destroy - Decoded ID is: " + operator.id);
         let adminGroups = yield Group.find(operator.adminGroups).populate('projects');
         const adminProjects = _.uniq(_.flatten(_.map(_.flatten(_.map(adminGroups, 'projects')), 'id')));
-        let adminDataTypes = yield DataType.find({project:adminProjects});
+        let adminDataTypes = yield DataType.find({project: adminProjects});
 
         if (!operator.isWheel && !_.find(adminDataTypes, function(dt){ return dt.id === _.parseInt(id);})) {
             throw new PrivilegesError('User has not privilege as Admin on this project');

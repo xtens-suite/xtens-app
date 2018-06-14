@@ -54,7 +54,7 @@ module.exports.routes = {
 
     // DataType Controller
     'GET /dataType/edit': {controller: 'dataType', action: 'edit'},
-    'POST /graph':{controller:'dataType',action:'buildGraph'},
+    'POST /graph': {controller:'dataType',action:'buildGraph'},
     // 'GET /graph/buildHierarchy':{controller:'dataType',action:'buildHierarchy'},
 
     // DataTypePrivileges Controller
@@ -79,7 +79,7 @@ module.exports.routes = {
     // 'GET /populateEAV': {controller: 'main', action: 'populateEAV'},
 
     // Operator Controller
-    'PATCH /operator':{controller:'operator',action:'patchPassword'},
+    'PATCH /operator': {controller:'operator',action:'patchPassword'},
 
     // PersonalDetails Controller
 
@@ -95,16 +95,15 @@ module.exports.routes = {
 
     // Subject Controller
     'GET /subject/edit': {controller: 'subject', action: 'edit'},
-    'POST /subjectGraph':{controller:'subject',action:'createGraph'},
-    'POST /subjectGraphSimple':{controller:'subject',action:'createGraphSimple'},
+    'POST /subjectGraph': {controller:'subject',action:'createGraph'},
+    'POST /subjectGraphSimple': {controller:'subject',action:'createGraphSimple'},
 
     'GET /app': {
         controller: 'main',
         action: 'getAppUI'
-    }
+    },
 
-
-
+    'GET /superType/meta/:id': {controller: 'superType', action: 'getMeta'}
 
     // REST API for subject (with personal info)
     // 'GET /subjectWithPersonalDetails': {controller: 'subject', action: 'findWithPersonalDetails'},
@@ -112,9 +111,6 @@ module.exports.routes = {
     // 'PUT /subjectWithPersonalDetails': {controller: 'subject', action: 'updateWithPersonalDetails'},
     // 'POST /subjectWithPersonalDetails': {controller: 'subject', action: 'createWithPersonalDetails'},
     // 'DELETE /subjectWithPersonalDetails': {controller: 'subject', action: 'deleteWithPersonalDetails'},
-
-
-
 
     /*,
     'GET /dataType': {controller: 'DataType', action: 'find'}
