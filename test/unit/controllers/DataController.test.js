@@ -158,8 +158,8 @@ describe('DataController', function() {
             })
             .expect(200)
             .end(function(err, res) {
-                console.log(res.body[0].notes);
-                expect(res.body[0].notes).to.equals(note);
+                console.log(res.body.notes);
+                expect(res.body.notes).to.equals(note);
                 if (err) {
                     done(err);
                     return;
