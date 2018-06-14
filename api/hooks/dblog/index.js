@@ -180,27 +180,28 @@ function dblog(sails) {
                     UPDATE: 'update',
                     QUERY: 'query'
                 };
-
-                this.connString = this.getLogdbConnectionString(connection);
-                var that = this;
-                this.logger = new(winston.Logger)({
-                    levels: this.myCustomLevels.levels,
-                    transports: [
-                        new(Postgres)({
-                            level: 'dbstore',
-                            ssl: false, // are you sure you want to do this?
-                            timestamp: true,
-                            connectionString: this.connString, //'postgres://admin:admin@localhost:5432/api',
-                            tableName: connection.tableName,
-                            ignoreMessage: function(level, message, metadata) {
-                                if (level !== 'dbstore' || !metadata || message === that.messages.DEFAULT) {
-                                    return true;
+                if (process.env.NODE_ENV != 'test') {
+                    this.connString = this.getLogdbConnectionString(connection);
+                    var that = this;
+                    this.logger = new(winston.Logger)({
+                        levels: this.myCustomLevels.levels,
+                        transports: [
+                            new(Postgres)({
+                                level: 'dbstore',
+                                ssl: false, // are you sure you want to do this?
+                                timestamp: true,
+                                connectionString: this.connString, //'postgres://admin:admin@localhost:5432/api',
+                                tableName: connection.tableName,
+                                ignoreMessage: function(level, message, metadata) {
+                                    if (level !== 'dbstore' || !metadata || message === that.messages.DEFAULT) {
+                                        return true;
+                                    }
+                                    return false;
                                 }
-                                return false;
-                            }
-                        })
-                    ]
-                });
+                            })
+                        ]
+                    });
+                }
 
             }
         },
@@ -226,12 +227,9 @@ function dblog(sails) {
      * @return {void}
      */
         log: function(message, model, data, owner, type, executor, obj) {
-            console.log("DBLOGGING DURING TEST", process.env.NODE_ENV);
             if (process.env.NODE_ENV == 'test') {
-                console.log("NO DBLOGGING DURING TEST");
-                return BluebirdPromise.resolve(true);
+                return BluebirdPromise.resolve();
             }
-            console.log("DBLOGGING"); 
             return coroutines.log(message, model, data, owner, type, executor, obj)
         .catch( /* istanbul ignore next */ function(err) {
             sails.log.error(err);
