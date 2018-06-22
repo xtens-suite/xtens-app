@@ -282,6 +282,25 @@
                     }
                 }
             }
+
+            $('input[name=name]').on('focusout', function (e) {
+                var name = e.currentTarget.value;
+                var namesArray = $('input[name=name]').map(function(){return this.value;});
+                // var namesArray = _.map(_.flatten(_.map(that.stModel.attributes.schema.body, 'content')),'name');
+                if (_.filter(namesArray, function (n) { return n === name; } ).length > 1) {
+                    e.currentTarget.value = null;
+                    $.notify('Invalid Name attibute, name already used', {
+                        type: 'danger',
+                        delay: 1500,
+                        allow_dismiss: false,
+                        placement: {
+                            from: 'bottom',
+                            align: 'right'
+                        }
+                    });
+                }
+            });
+
             return this;
         },
 
