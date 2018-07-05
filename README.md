@@ -82,7 +82,7 @@ Now configure PostgreSQL:
 
 Then create a file named ```local.js``` in the ```config/``` directory. This config file should include any settings specific of your local system/setup (db passwords, operators etc.).
 
-In the minimal setup it should contain the following information, including two default users with two user groups (admin and general user).
+In the minimal setup it should contain the following information, including two default users with two user groups (an admin and a standard user).
 
            module.exports = {
 
