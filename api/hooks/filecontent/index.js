@@ -79,16 +79,19 @@ module.exports = function filecontent(sails){
                 DataFile.findOne(fileId).populate('data').populate('samples').then(result => {
 
                     dataFile = result;
-
+                    let model = "Data";
                     if (dataFile.data[0] ) {
                         idDataType = dataFile.data[0].type;
                         dataFile.data = _.filter(dataFile.data, (d) => { return d.id == fileId;});
                     } else if (dataFile.samples[0]) {
                         idDataType = dataFile.samples[0].type;
                         dataFile.samples = _.filter(dataFile.data, (d) => { return d.id == fileId;});
+                        model = "Sample";
                     }
                     //check if the file has other associations, if not it can be deleted
-                    if(dataFile.data.length == 0 && dataFile.data.length == 0) {
+                    if( model === "Data" && dataFile.data.length == 0 && dataFile.data.length == 0 ) {
+                        toDelete = true;
+                    } else if ( model === "Sample" && dataFile.samples.length == 0 && dataFile.samples.length == 0 ) {
                         toDelete = true;
                     }
 
@@ -112,15 +115,14 @@ module.exports = function filecontent(sails){
                     return fileSystem.deleteFileContentAsync(dataFile.uri);
                 })
                 .then(() => {
-                    if (toDelete) {
-                        DataFile.destroy( dataFile.id).then(() => {
-                            return res.status(204).send(); // res.json() ??
-                        });
-                    }else {
-                        DataFile.update( dataFile.id, {data: dataFile.data, samples: dataFile.samples} ).then(() => {
-                            return res.status(204).send(); // res.json() ??
-                        });
-                    }
+                    DataFile.update( dataFile.id, {data: dataFile.data, samples: dataFile.samples} ).then(() => {
+                        if (toDelete) {
+                            DataFile.destroy( dataFile.id).then(() => {
+                                return res.status(204).send(); // res.json() ??
+                            });
+                        }
+                    });
+
                 })
                 .catch(/* istanbul ignore next */ function(err) {
                     return co.error(err);
