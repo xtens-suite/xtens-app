@@ -44,13 +44,13 @@ The following software packages are required to be installed on your system:
 
 * Install npm packages:
 
-        npm [sudo] install sails -g
+        [sudo] npm install sails -g
 
         npm install && npm install sails
 
-        npm [sudo] install grunt-cli -g
+        [sudo] npm install grunt-cli -g
 
-        npm [sudo] install bower -g
+        [sudo] npm install bower -g
 
 * Install ruby and sass       
 
