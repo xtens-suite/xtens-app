@@ -355,21 +355,24 @@
                 var fieldName = useFormattedNames ? serialized[i].formattedName : serialized[i].name;
 
                 // if it's not a field of a loop just store the value/unit pair as an object
-                if (!serialized[i].loop) {
-                    metadata[fieldName] = {value: serialized[i].value, unit: unit, group: serialized[i].groupName};
-                }
+                if (serialized[i].value && serialized[i].value != null && serialized[i].value !== "") {
+
+                    if (!serialized[i].loop ) {
+                        metadata[fieldName] = {value: serialized[i].value, unit: unit, group: serialized[i].groupName};
+                    }
 
                 // if it's a field within a loop store the value unit pair within two arrays
-                else {
-                    if (!metadata[fieldName]) {
-                        metadata[fieldName] = {values: [serialized[i].value], group: serialized[i].groupName, loop: serialized[i].loop};
-                        metadata[fieldName].units = unit ? [unit] : undefined;
-                    }
-                    // if the loop value/unit arrays already exists push them in the arrays
                     else {
-                        metadata[fieldName].values.push(serialized[i].value);
-                        if (unit && _.isArray(metadata[fieldName].units)) {
-                            metadata[fieldName].units.push(serialized[i].unit);
+                        if (!metadata[fieldName]) {
+                            metadata[fieldName] = {values: [serialized[i].value], group: serialized[i].groupName, loop: serialized[i].loop};
+                            metadata[fieldName].units = unit ? [unit] : undefined;
+                        }
+                    // if the loop value/unit arrays already exists push them in the arrays
+                        else {
+                            metadata[fieldName].values.push(serialized[i].value);
+                            if (unit && _.isArray(metadata[fieldName].units)) {
+                                metadata[fieldName].units.push(serialized[i].unit);
+                            }
                         }
                     }
                 }
