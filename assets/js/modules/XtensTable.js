@@ -237,10 +237,31 @@
                           exportOptions: {
                               orthogonal: 'export', // to export source data and not rendered data
                               columns:  ':visible:not(.actions)' //not export actions column
-                          }
+                          },
+                          filename:'XTENS_'+ moment().format("YYYY_MM_DD_hh_mm_ss")
                       }
                   ];
-                //TODO CREAZIONE BOTTONI SULLA BASE DI LEAF SEARCH
+
+                  if (this.checkVCF()) {
+
+                      buttons.push({
+                          extend: 'excelHtml5',
+                          text: 'Export as VCF',
+                          exportOptions: {
+                              orthogonal: 'export', // to export source data and not rendered data
+                              columns:  '.vcf', //export only vcf columns
+                              format: {
+                                  header: function (data, column) {
+                                      return data === "CHR" ? "#CHROM" : data;
+                                  }
+                              }
+                          },
+                          filename:'VCF_'+ moment().format("YYYY_MM_DD_hh_mm_ss"),
+                          extension: ".vcf",
+                          title:'##fileformat=VCFv4.1'
+                      });
+                  }
+
                   this.colvisButtons.push(buttons);
                   this.colvisButtons = _.flatten(this.colvisButtons);
                   new $.fn.dataTable.Buttons(this.table, {
@@ -253,6 +274,36 @@
             // the returned dataset is empty
               else {
                   this.remove();
+              }
+          },
+
+          checkVCF: function () {
+              var fieldsVCF = ["chr", "pos", "id", "qual", "ref", "alt", "filter"];
+              var fieldsVCF2 = ["chrom", "pos", "id", "qual", "ref", "alt", "filter"];
+              var found = 0, found2 = 0;
+              var fieldsNames = [], schemabody;
+              if (this.dataTypes.models) {
+                  schemaBody = _.flatten(_.map(this.dataTypes.models, 'attributes.superType.schema.body'));
+              }
+              else {
+                  schemaBody = this.dataTypes.get('superType').schema.body;
+
+              }
+              fieldsNames = _.map(_.flatten(_.map(schemaBody, 'content')),'formattedName');
+              fieldsNames.forEach(function (name) {
+                  if (fieldsVCF.find(n => n === name) ) {
+                      found = found + 1;
+                  }
+                  if (fieldsVCF2.find(n => n === name)) {
+                      found2 = found2 + 1;
+                  }
+              });
+
+              if (found == 7 || found2 == 7) {
+                  return true;
+              }
+              else {
+                  return false;
               }
           },
 
@@ -344,6 +395,13 @@
                           "defaultContent": "",
                           "className": className
                       };
+
+                      if( colTitle.toLowerCase() === "chr" || colTitle.toLowerCase() === "pos" || colTitle.toLowerCase() === "id" ||
+                          colTitle.toLowerCase() === "qual" || colTitle.toLowerCase() === "ref" || colTitle.toLowerCase() === "alt" || colTitle.toLowerCase() === "filter" ) {
+
+                          columnOpts.className = columnOpts.className + " vcf";
+
+                      }
                       // if field is loop retrieve multiple values
                       if (field._loop) {
                           columnOpts.data = idDataType ? "metadata." + fieldName + ".values" : queryArgs.label + "." + fieldName + ".values";
