@@ -370,7 +370,7 @@ let DataService = BluebirdPromise.promisifyAll({
             value = value.required();
         }
         else {      // allow "null" value if value is not required
-            value = value.allow(null);
+            value = value.allow(null,'');
         }
 
         if (metadataField.customValue) {
