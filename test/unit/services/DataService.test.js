@@ -203,7 +203,7 @@ describe('DataService', function() {
             var loopTextField = _.extend(_.cloneDeep(fixtures.supertype[3].schema.body[0].content[4].content[0]), {_loop: true, caseInsensitive: true});
             var schema = DataService.buildMetadataFieldValidationSchema(loopTextField);
             var expectedSchema = Joi.object().keys({
-                values: Joi.array().items(Joi.string().allow(null).valid(loopTextField.possibleValues)),
+                values: Joi.array().items(Joi.string().allow(null,'').valid(loopTextField.possibleValues)),
                 group: Joi.string(),
                 loop: Joi.string(),
                 units: Joi.array().items(Joi.string().required().valid(loopTextField.possibleUnits)).required()
