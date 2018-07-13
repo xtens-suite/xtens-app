@@ -163,7 +163,7 @@
          */
         dataTypePrivilegesList: function(queryString) {
             var queryParams = parseQueryString(queryString);
-            var privilegesParams = {sort:'id ASC', populate:['dataType','group'], limit:100};
+            var privilegesParams = {sort:'id ASC', populate:['dataType','group'], limit:1000};
             queryParams.groupId ? privilegesParams.group = queryParams.groupId : null;
             queryParams.dataTypeId ? privilegesParams.dataType = queryParams.dataTypeId : null;
             var that = this;
