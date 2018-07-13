@@ -101,13 +101,49 @@
             if (this.idDataType) {
                 $('#st-name').attr("disabled", true);
                 $('#uri').attr("disabled", true);
+                $('#model').attr("disabled", true);
+                $('#biobankPrefix').prop("disabled", true);
+                $('#getParentCode').prop("disabled", true);
+                if (this.model.get('model') === "Sample") {
+                    $('.biobankPrefix-container').removeAttr("hidden");
+                }
+                if (_.indexOf($('#parents').val().map(Number), this.idDataType) >= 0) {
+                    $('.noparent-container').css("display", "");
+                }
             }
+            $('#parents').on('change', function () {
+                if (that.model.get('model') === "Sample") {
+                // var selectedParents = _.filter(that.existingDataTypes, (d) => _.indexOf($('#parents').val().map(Number), d.id) >= 0);
+                    if (_.indexOf($('#parents').val().map(Number), that.idDataType) >= 0) {
+                        $('.noparent-container').css("display", "");
+                    }
+                    else {
+                        that.model.set('ifParentNoPrefix', false);
+                        $('.noparent-container').css("display", "none");
+                    }
+                }else {
+                    that.model.set('ifParentNoPrefix', false);
+                }
+            });
         },
 
         bindings: {
             '#name': {
                 observe: 'name'
             },
+
+            '#biobankPrefix': {
+                observe: 'biobankPrefix'
+            },
+
+            '#getParentCode': {
+                observe: 'getParentCode'
+            },
+
+            '#ifParentNoPrefix': {
+                observe: 'ifParentNoPrefix'
+            },
+
             '#model': {
                 observe: 'model',
                 initialize: function($el) {
@@ -192,6 +228,7 @@
         },
 
         render: function() {
+            var that = this;
 
             this.$el.html(this.template({__: i18n, dataType: this.model, isMultiProject: this.isMultiProject}));
             this.$form = this.$("form");
@@ -207,6 +244,19 @@
                 $('#project').prop('disabled', true);
                 this.getProjectParents();
             }
+
+            $('#model').on('change',function (event) {
+                var currentModel = event.currentTarget.value;
+                if (currentModel === "Sample") {
+                    $('.biobankPrefix-container').removeAttr("hidden");
+                    $('#biobankPrefix').prop("required", true);
+                }
+                else {
+                    $('.biobankPrefix-container').prop("hidden", true);
+                    $('#biobankPrefix').removeAttr("required");
+                }
+                that.$form.parsley(parsleyOpts);
+            });
 
             if (this.idDataType) {
                 this.getProjectParents();
@@ -239,7 +289,6 @@
                 }
                 else {
                   //edit
-                    var that = this;
                     if (this.isMultiProject) {
 
                         $(".panel-heading").on('click',function(){
@@ -338,7 +387,7 @@
             // if (this.superTypeView && this.superTypeView.model) {
             var body = this.serialize();
             this.stModel.attributes.schema = {
-                header: _.omit(header, ['parents']), // parent-child many-to-many associations are not currently saved in the JSON schema
+                header: _.omit(header, 'parents', 'biobankPrefix'), // parent-child many-to-many associations are not currently saved in the JSON schema
                 body: body
             };
             this.model.set("superType", _.clone(this.stModel.attributes));

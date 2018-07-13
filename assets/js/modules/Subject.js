@@ -103,6 +103,7 @@
             this.template = JST["views/templates/subject-edit.ejs"];
             this.personalDetailsView = null;
             this.schemaView = null;
+            this.savingSubject = false;
             this.operators = options.operators ? options.operators : [];
             if(xtens.session.get('activeProject') !== 'all'){
                 this.project = _.parseInt(_.find(xtens.session.get('projects'),{name: xtens.session.get('activeProject')} ).id);
@@ -196,6 +197,7 @@
          * @override
          */
         saveSubject: function(ev) {
+            this.savingSubject = true;
             this.$modal = this.$(".subject-modal");
             var that = this;
             var metadata = this.schemaView && this.schemaView.serialize(useFormattedNames);
@@ -229,10 +231,12 @@
                     setTimeout(function(){ modal.hide(); }, 1200);
                     that.$('.subject-modal').on('hidden.bs.modal', function (e) {
                         modal.remove();
+                        this.savingSubject = false;
                         xtens.router.navigate('subjects', {trigger: true});
                     });
                 },
                 error: function(model, res) {
+                    this.savingSubject = false;
                     xtens.error(res);
                 }
             });
@@ -240,6 +244,7 @@
         },
 
         deleteSubject: function(ev) {
+            this.savingSubject = true;
             ev.preventDefault();
             var that = this;
             this.$modal = this.$(".subject-modal");
@@ -273,11 +278,13 @@
                             setTimeout(function(){ modal.hide(); }, 1200);
                             that.$modal.on('hidden.bs.modal', function (e) {
                                 modal.remove();
+                                this.savingSubject = false;
                                 xtens.router.navigate(targetRoute, {trigger: true});
                             });
                         });
                     },
                     error: function(model, res) {
+                        this.savingSubject = false;
                         xtens.error(res);
                     }
                 });

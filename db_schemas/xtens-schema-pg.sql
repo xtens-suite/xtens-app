@@ -1,4 +1,4 @@
-created--
+--
 -- PostgreSQL database dump
 --
 
@@ -345,6 +345,9 @@ CREATE TABLE data_type (
     id integer NOT NULL,
     name text NOT NULL,
     model text NOT NULL,
+    biobank_code text,
+    parent_code boolean NOT NULL DEFAULT FALSE,
+    parent_no_prefix boolean NOT NULL DEFAULT FALSE,
     super_type integer NOT NULL,
     project integer NOT NULL,
     created_at timestamp with time zone NOT NULL,
@@ -1828,6 +1831,41 @@ ALTER TABLE xtens_group_id_seq OWNER TO xtenspg;
 ALTER SEQUENCE xtens_group_id_seq OWNED BY xtens_group.id;
 
 
+
+--
+-- Name: biobank_projects__project_biobanks; Type: TABLE; Schema: public; Owner: xtenspg; Tablespace:
+--
+
+CREATE TABLE biobank_projects__project_biobanks (
+    id integer NOT NULL,
+    project_biobanks integer NOT NULL,
+    biobank_projects integer NOT NULL
+);
+
+
+ALTER TABLE biobank_projects__project_biobanks OWNER TO xtenspg;
+
+--
+-- Name: biobank_projects__project_biobanks_id_seq; Type: SEQUENCE; Schema: public; Owner: xtenspg
+--
+
+CREATE SEQUENCE biobank_projects__project_biobanks_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE biobank_projects__project_biobanks_id_seq OWNER TO xtenspg;
+
+--
+-- Name: biobank_projects__project_biobanks_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: xtenspg
+--
+
+ALTER SEQUENCE biobank_projects__project_biobanks_id_seq OWNED BY biobank_projects__project_biobanks.id;
+
+
 --
 -- Name: id; Type: DEFAULT; Schema: public; Owner: xtenspg
 --
@@ -2144,6 +2182,12 @@ ALTER TABLE ONLY super_type ALTER COLUMN id SET DEFAULT nextval('super_type_id_s
 --
 
 ALTER TABLE ONLY xtens_group ALTER COLUMN id SET DEFAULT nextval('xtens_group_id_seq'::regclass);
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: xtenspg
+--
+
+ALTER TABLE ONLY biobank_projects__project_biobanks ALTER COLUMN id SET DEFAULT nextval('biobank_projects__project_biobanks_id_seq'::regclass);
 
 
 --
@@ -2966,6 +3010,37 @@ ALTER TABLE ONLY datatype_privileges
 
 
 --
+-- Name: biobank_projects__project_biobanks_key; Type: CONSTRAINT; Schema: public; Owner: xtenspg; Tablespace:
+--
+
+ALTER TABLE ONLY biobank_projects__project_biobanks
+    ADD CONSTRAINT biobank_projects__project_biobanks_key UNIQUE (project_biobanks, biobank_projects);
+
+
+--
+-- Name: biobank_projects__project_biobanks_pkey; Type: CONSTRAINT; Schema: public; Owner: xtenspg; Tablespace:
+--
+
+ALTER TABLE ONLY biobank_projects__project_biobanks
+    ADD CONSTRAINT biobank_projects__project_biobanks_pkey PRIMARY KEY (id);
+
+--
+-- Name: project_subjects_fkey; Type: FK CONSTRAINT; Schema: public; Owner: xtenspg
+--
+
+ALTER TABLE ONLY biobank_projects__project_biobanks
+    ADD CONSTRAINT project_biobanks_fkey FOREIGN KEY (project_biobanks) REFERENCES project(id) MATCH FULL ON DELETE CASCADE;
+
+
+
+--
+-- Name: subject_projects_fkey; Type: FK CONSTRAINT; Schema: public; Owner: xtenspg
+--
+
+ALTER TABLE ONLY biobank_projects__project_biobanks
+    ADD CONSTRAINT biobank_projects_fkey FOREIGN KEY (biobank_projects) REFERENCES biobank(id) MATCH FULL ON DELETE CASCADE;
+
+--
 -- Name: public; Type: ACL; Schema: -; Owner: postgres
 --
 
@@ -3677,6 +3752,23 @@ GRANT ALL ON TABLE group_projects__project_groups TO xtenspg;
 REVOKE ALL ON SEQUENCE group_projects__project_groups_id_seq FROM PUBLIC;
 REVOKE ALL ON SEQUENCE group_projects__project_groups_id_seq FROM xtenspg;
 GRANT ALL ON SEQUENCE group_projects__project_groups_id_seq TO xtenspg;
+
+--
+-- Name: biobank_projects__project_biobanks; Type: ACL; Schema: public; Owner: xtenspg
+--
+
+REVOKE ALL ON TABLE biobank_projects__project_biobanks FROM PUBLIC;
+REVOKE ALL ON TABLE biobank_projects__project_biobanks FROM xtenspg;
+GRANT ALL ON TABLE biobank_projects__project_biobanks TO xtenspg;
+
+
+--
+-- Name: biobank_projects__project_biobanks_id_seq; Type: ACL; Schema: public; Owner: xtenspg
+--
+
+REVOKE ALL ON SEQUENCE biobank_projects__project_biobanks_id_seq FROM PUBLIC;
+REVOKE ALL ON SEQUENCE biobank_projects__project_biobanks_id_seq FROM xtenspg;
+GRANT ALL ON SEQUENCE biobank_projects__project_biobanks_id_seq TO xtenspg;
 
 
 --

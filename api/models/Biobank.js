@@ -49,6 +49,12 @@ module.exports = {
             columnName: 'contact_information',
             model: 'contactInformation'
         },
+
+        projects:{
+            collection:'project',
+            via:'biobanks'
+        },
+        
         // MIABIS-08
         description: {
             type: 'text'

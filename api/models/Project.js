@@ -28,6 +28,11 @@ module.exports = {
             via:'projects'
         },
 
+        biobanks:{
+            collection:'biobank',
+            via:'projects'
+        },
+
         createdAt: {
             type: 'datetime',
             columnName: 'created_at'

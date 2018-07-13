@@ -36,6 +36,9 @@
         "file-upload": "File Upload",
         "yes": "YES",
         "no": "NO",
+        "biobank-prefix": "Biobank Prefix",
+        "get-parent-code": "Get Parent Code",
+        "no-parent-prefix": "If Parent Sample no Prefix",
         "model": "Model",
         "class-template": "Class Template", //TODO
         "parent": "Parent",
@@ -178,6 +181,7 @@
         /* views/templates/project-edit.ejs */
         "project-data-types": "Project Data Types",
         "project-groups": "Project Groups",
+        "biobanks": "Biobanks",
         "save-project": "Save Project",
         "project-deleted": "Project Deleted",
         "project-will-be-permanently-deleted-are-you-sure": "Project will be permanently deleted. Are you sure?",

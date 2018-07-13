@@ -163,7 +163,7 @@ const coroutines = {
         if (!dataTypePrivilege || dataTypePrivilege.privilegeLevel != EDIT) {
             throw new PrivilegesError(`Authenticated user has not edit privileges on the sample type ${sample.type}`);
         }
-        sails.log.info(`Subject to be deleted:  ${sample.id}`);
+        sails.log.info(`Sample to be deleted:  ${sample.id}`);
 
         const deleted = yield crudManager.deleteSample(id);
         if (deleted > 0) {
@@ -214,6 +214,18 @@ const coroutines = {
         return res.json(payload);
 
 
+    }),
+
+    getNextBiobankCode: BluebirdPromise.coroutine(function *(req, res) {
+        const operator = TokenService.getToken(req);
+        const params = req.allParams();
+        sails.log.info("SampleController.getNextBiobankCode - Decoded ID is: " + operator.id);
+
+        const nextCode = yield crudManager.getNextBiobankCode(params);
+
+        if (!nextCode){ throw new Error(`Error getting last biobank code for type ${params.type} and project ${params.project}`); }
+
+        return res.json(nextCode);
     })
 
 };
@@ -304,18 +316,32 @@ module.exports = {
         });
     },
 
-     /**
-     * @method
-     * @name edit
-     * @description retrieve all required models for editing/creating a Sample via client web-form
-     */
+    /**
+    * @method
+    * @name edit
+    * @description retrieve all required models for editing/creating a Sample via client web-form
+    */
     edit: function(req, res) {
         const co = new ControllerOut(res);
         coroutines.edit(req,res)
-        .catch(err => {
-            sails.log.error(err);
-            return co.error(err);
-        });
+       .catch(err => {
+           sails.log.error(err);
+           return co.error(err);
+       });
+    },
+
+   /**
+   * @method
+   * @name getNextBiobankCode
+   * @description retrieve last biobank code for creating a Sample via client web-form
+   */
+    getNextBiobankCode: function(req, res) {
+        const co = new ControllerOut(res);
+        coroutines.getNextBiobankCode(req,res)
+      .catch(err => {
+          sails.log.error(err);
+          return co.error(err);
+      });
     }
 
 };
