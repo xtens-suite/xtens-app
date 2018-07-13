@@ -123,7 +123,7 @@
                     return (val && val.id);
                 }
             },
-
+            '#donor': {observe: 'donor'},
       /*
       '#donor': {
           observe: 'donor',
@@ -207,6 +207,7 @@
             this.biobanks = options.biobanks || [];
             this.subjects = options.subjects || [];
             this.operators = options.operators ? options.operators : [];
+            this.savingSample = false;
             if (options.sample) {
                 this.model = new Sample.Model(options.sample);
             } else {
@@ -220,6 +221,7 @@
                 }
             }, this);
             this.render();
+
         },
 
         events: {
@@ -237,7 +239,9 @@
          * @return {false} - to suppress the HTML form submission
          */
         saveSample: function(ev) {
+            this.savingSample = true;
             var targetRoute = $(ev.currentTarget).data('targetRoute') || 'samples';
+
             if (this.schemaView && this.schemaView.serialize) {
                 var that = this;
                 this.$modal = this.$(".sample-modal");
@@ -266,6 +270,8 @@
                         }, 1200);
                         that.$('.sample-modal').on('hidden.bs.modal', function(e) {
                             modal.remove();
+                            that.savingSample = false;
+
                             xtens.router.navigate(targetRoute, {
                                 trigger: true
                             });
@@ -273,6 +279,7 @@
 
                     },
                     error: function(model, res) {
+                        that.savingSample = false;
                         xtens.error(res);
                     }
                 });
@@ -281,6 +288,8 @@
         },
 
         deleteSample: function(ev) {
+            this.savingSample = true;
+
             ev.preventDefault();
             var that = this;
             this.$modal = this.$(".sample-modal");
@@ -315,6 +324,7 @@
                                 modal.hide();
                             }, 1200);
                             that.$modal.on('hidden.bs.modal', function(e) {
+                                this.savingSample = false;
                                 modal.remove();
                                 xtens.router.navigate(targetRoute, {
                                     trigger: true
@@ -323,6 +333,7 @@
                         });
                     },
                     error: function(model, res) {
+                        this.savingSample = false;
                         xtens.error(res);
                     }
                 });
@@ -337,39 +348,41 @@
        */
 
         dataTypeOnChange: function() {
-            var that = this;
-            Data.Views.Edit.prototype.dataTypeOnChange.call(this);
-            var typeName = this.$('#data-type :selected').text(),
-                parentSample = this.model.get("parentSample") ? this.model.get("parentSample").biobankCode : null,
-                biobank = this.model.get("biobank").id;
-            var type = _.find(this.dataTypes, function(dt){ return dt.name === typeName;});
-            var params = {
-                sample: {
-                    type: type.id,
-                    parentSample: parentSample,
-                    biobank: biobank
-                },
-                project: type.project
-            };
-            $.ajax({
-                url: '/sample/getNextBiobankCode',
-                type: 'GET',
-                headers: {
-                    'Authorization': 'Bearer ' + xtens.session.get("accessToken")
-                },
-                data: params,
-                contentType: 'application/json',
-                success: function(result) {
-                    that.model.set('biobankCode', result);
-                },
-                error: function(err) {
-                    xtens.error(err);
+            if (!this.savingSample) {
+
+                var that = this;
+                Data.Views.Edit.prototype.dataTypeOnChange.call(this);
+                var typeName = this.$('#data-type :selected').text(),
+                    parentSample = this.model.get("parentSample") ? this.model.get("parentSample").biobankCode : null,
+                    biobank = this.model.get("biobank").id;
+                var type = _.find(this.dataTypes, function(dt){ return dt.name === typeName;});
+                var params = {
+                    sample: {
+                        type: type.id,
+                        parentSample: parentSample,
+                        biobank: biobank
+                    },
+                    project: type.project
+                };
+                $.ajax({
+                    url: '/sample/getNextBiobankCode',
+                    type: 'GET',
+                    headers: {
+                        'Authorization': 'Bearer ' + xtens.session.get("accessToken")
+                    },
+                    data: params,
+                    contentType: 'application/json',
+                    success: function(result) {
+                        that.model.set('biobankCode', result);
+                    },
+                    error: function(err) {
+                        xtens.error(err);
+                    }
+                });
+
+                if (this.subjects.length > 0) {
+                    this.fetchDonorsOnSuccess(this.subjects, $('#donor'));
                 }
-            });
-
-
-            if (this.subjects.length > 0) {
-                this.fetchDonorsOnSuccess(this.subjects, $('#donor'));
             }
 
         },
@@ -409,7 +422,7 @@
             var $select = $('<select>').addClass('form-control').attr({
                 'id': 'donor',
                 'name': 'donor'
-            });
+            }).prop('required',true);
 
             var parent = targetElem.parentNode ? targetElem.parentNode : targetElem.closest('.form-group')[0];
 

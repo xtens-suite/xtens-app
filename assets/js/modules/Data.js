@@ -703,6 +703,8 @@
             this.dataTypes = options.dataTypes || [];
             this.operators = options.operators ? options.operators : [];
             // _.extend(this, options);
+            this.savingData = false;
+
             if (options.data) {
                 this.model = new Data.Model(options.data);
             }
@@ -850,6 +852,7 @@
          * @return {false} - to suppress the HTML form submission
          */
         saveData: function(ev) {
+            this.savingData = true;
             var targetRoute = $(ev.currentTarget).data('targetRoute') || 'data';
             if (this.schemaView && this.schemaView.serialize) {
                 var that = this;
@@ -875,12 +878,14 @@
 
                         setTimeout(function(){ modal.hide(); }, 1200);
                         that.$('.data-modal').on('hidden.bs.modal', function (e) {
+                            this.savingData = false;
                             modal.remove();
                             xtens.router.navigate(targetRoute, {trigger: true});
                         });
 
                     },
                     error: function(model, res) {
+                        this.savingData = false;
                         xtens.error(res);
                     }
                 });
@@ -920,7 +925,7 @@
                 });
                 var options = {selectOptions:{collection:newColl}};
                 Backbone.Stickit.getConfiguration($('#owner')).update($('#owner'),{},{},options);
-                $('#owner').val({}).trigger("change");
+                $('#owner').select2('val','').trigger("change");
             });
         },
         /**
@@ -929,6 +934,7 @@
          * TODO - not implemented yet
          */
         deleteData: function(ev) {
+            this.savingData = true;
             ev.preventDefault();
             var that = this;
             if (this.modal) {
@@ -960,12 +966,14 @@
                             modal.show();
                             setTimeout(function(){ modal.hide(); }, 1200);
                             that.$modal.on('hidden.bs.modal', function (e) {
+                                this.savingData = false;
                                 modal.remove();
                                 xtens.router.navigate(targetRoute, {trigger: true});
                             });
                         });
                     },
                     error: function(model, res) {
+                        this.savingData = false;
                         xtens.error(res);
                     }
                 });
@@ -986,9 +994,11 @@
         },
 
         dataTypeOnChange: function() {
-            $('#owner').prop('disabled', false);
-            this.setOwnerList();
-            this.renderDataTypeSchema();
+            if (!this.savingData) {
+                $('#owner').prop('disabled', false);
+                this.setOwnerList();
+                this.renderDataTypeSchema();
+            }
         },
 
         /**
