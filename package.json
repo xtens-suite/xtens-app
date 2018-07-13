@@ -49,7 +49,7 @@
     "winston-postgres": "0.0.4",
     "xregexp": "^3.0.0",
     "xtens-fs": "git+https://github.com/xtens-suite/xtens-fs.git",
-    "xtens-pg": "git+https://git@github.com/xtens-suite/xtens-pg.git#feat/biobanks",
+    "xtens-pg": "git+https://git@github.com/xtens-suite/xtens-pg.git",
     "xtens-utils": "git+https://github.com/xtens-suite/xtens-utils.git",
     "xtens-waterline": "git+https://github.com/xtens-suite/xtens-waterline.git"
   },
