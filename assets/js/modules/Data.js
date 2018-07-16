@@ -355,7 +355,7 @@
                 var fieldName = useFormattedNames ? serialized[i].formattedName : serialized[i].name;
 
                 // if it's not a field of a loop just store the value/unit pair as an object
-                if (serialized[i].value && serialized[i].value != null && serialized[i].value !== "") {
+                if ((serialized[i].value || !isNaN(serialized[i].value)) && serialized[i].value != null && serialized[i].value !== "") {
 
                     if (!serialized[i].loop ) {
                         metadata[fieldName] = {value: serialized[i].value, unit: unit, group: serialized[i].groupName};
