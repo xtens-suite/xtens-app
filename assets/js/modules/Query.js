@@ -318,7 +318,7 @@
                 initialize: function($el) {
                     $el.select2({
                         data: data
-                    });
+                    }).select2("val", '=');
                     $el.removeClass('hidden');
                     $el.change(function() {
                         $el.trigger('input');
