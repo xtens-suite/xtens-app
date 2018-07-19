@@ -173,7 +173,10 @@
         render: function(options) {
             var that = this;
             var biobanks = new Biobank.List();
+            var activeProject = xtens.session.get('activeProject') !== 'all' ? _.find(xtens.session.get('projects'), { 'name': xtens.session.get('activeProject')}) : undefined;
+
             biobanks.fetch({
+                data: $.param({ project: activeProject ? activeProject.id : undefined }),
                 success: function(biobanks) {
                     that.$el.html(that.template({__: i18n, biobanks: biobanks.models}));
                 },

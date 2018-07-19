@@ -941,7 +941,7 @@
                     data: $.param({group: groupId, limit:100})
                 });
                 var $dataTypesDeferred = dataTypes.fetch({ data: $.param(criteria) });
-                var $biobanksDeferred = biobanks.fetch();
+                var $biobanksDeferred = biobanks.fetch({ data: $.param({project: idProject}) });
                 $.when($dataTypesDeferred, $biobanksDeferred, $privilegesDeferred).then( function(dataTypesRes, biobanksRes, privilegesRes) {
                     that.loadView(new Query.Views.Builder({
                         queryObj: params && params.queryArgs,

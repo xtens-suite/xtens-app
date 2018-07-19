@@ -21,13 +21,18 @@ const coroutines = {
     getBiobanksByProject: BluebirdPromise.coroutine(function *(idProject) {
         let biobanks = yield Biobank.find().populate('projects');
 
-        for (var i = biobanks.length - 1; i >= 0; i--) {
-            if(_.indexOf(_.map(biobanks[i].projects,'id'), _.parseInt(idProject))<0){
-                biobanks.splice(i, 1);
-            }
-        }
+        if (!idProject) {
+            return biobanks;
+        }else {
 
-        return biobanks;
+            for (var i = biobanks.length - 1; i >= 0; i--) {
+                if(_.indexOf(_.map(biobanks[i].projects,'id'), _.parseInt(idProject)) < 0){
+                    biobanks.splice(i, 1);
+                }
+            }
+
+            return biobanks;
+        }
     })
 };
 

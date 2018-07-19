@@ -188,7 +188,7 @@ const coroutines = {
                 project: params.project,
                 privilegeLevel: EDIT
             }),
-            biobanks: BiobankService.getAsync(params),
+            biobanks: BiobankService.getBiobanksByProject(params.project),
             donor: SubjectService.getOneAsync(params.donor, params.donorCode),
             parentSample: SampleService.getOneAsync(params.parentSample)
         });
