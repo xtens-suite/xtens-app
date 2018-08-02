@@ -245,7 +245,7 @@
                   if (this.checkVCF()) {
 
                       buttons.push({
-                          extend: 'excelHtml5',
+                          extend: 'csvHtml5',
                           text: 'Export as VCF',
                           exportOptions: {
                               orthogonal: 'export', // to export source data and not rendered data
@@ -256,9 +256,13 @@
                                   }
                               }
                           },
+                          customize: function (csv) {
+                              return "##fileformat=VCFv4.1\n"+  csv;
+                          },
+                          fieldSeparator: '\t',
                           filename:'VCF_'+ moment().format("YYYY_MM_DD_hh_mm_ss"),
-                          extension: ".vcf",
-                          title:'##fileformat=VCFv4.1'
+                          extension: ".vcf"
+                          // title:'##fileformat=VCFv4.1'
                       });
                   }
 
