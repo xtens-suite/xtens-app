@@ -1,6 +1,7 @@
 (function(xtens, i18n) {
 
     var en = {
+        "operation-in-progress": "Operation in Progress...",
         "welcome": "Welcome",
         // menu
         "data-types": "Data Types",

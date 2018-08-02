@@ -956,11 +956,13 @@
 
             this.$('#confirm').click( function (e) {
                 modal.hide();
-                var targetRoute = $(ev.currentTarget).data('targetRoute') || 'data';
+                $('.waiting-modal').modal('show');
+                that.$modal.one('hidden.bs.modal', function (e) {
+                    var targetRoute = $(ev.currentTarget).data('targetRoute') || 'data';
 
-                that.model.destroy({
-                    success: function(model, res) {
-                        that.$modal.one('hidden.bs.modal', function (e) {
+                    that.model.destroy({
+                        success: function(model, res) {
+                            $('.waiting-modal').modal('hide');
                             modal.template= JST["views/templates/dialog-bootstrap.ejs"];
                             modal.title= i18n('ok');
                             modal.body= i18n('data-deleted');
@@ -973,12 +975,12 @@
                                 modal.remove();
                                 xtens.router.navigate(targetRoute, {trigger: true});
                             });
-                        });
-                    },
-                    error: function(model, res) {
-                        this.savingData = false;
-                        xtens.error(res);
-                    }
+                        },
+                        error: function(model, res) {
+                            this.savingData = false;
+                            xtens.error(res);
+                        }
+                    });
                 });
                 return false;
             });

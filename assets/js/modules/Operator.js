@@ -189,9 +189,11 @@
 
             this.$('#confirm').click( function (e) {
                 modal.hide();
-                that.model.destroy({
-                    success: function(model, res) {
-                        that.$modal.one('hidden.bs.modal', function (e) {
+                that.$modal.one('hidden.bs.modal', function (e) {
+                    $('.waiting-modal').modal('show');
+                    that.model.destroy({
+                        success: function(model, res) {
+                            $('.waiting-modal').modal('hide');
                             modal.template= JST["views/templates/dialog-bootstrap.ejs"];
                             modal.title= i18n('ok');
                             modal.body= i18n('operator-deleted');
@@ -203,11 +205,11 @@
                                 modal.remove();
                                 xtens.router.navigate('operators', {trigger: true});
                             });
-                        });
-                    },
-                    error: function(model, res) {
-                        xtens.error(res);
-                    }
+                        },
+                        error: function(model, res) {
+                            xtens.error(res);
+                        }
+                    });
                 });
                 return false;
             });
