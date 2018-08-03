@@ -184,8 +184,9 @@
                 success: function() {
                     that.trigger("fileDeleted", {dataId: this.datum});
                     $('body').notify({
-                        message: 'File correclty deleted',
-                        type: 'danger'
+                        message: i18n('file-correctly-deleted')
+                    },{
+                        type: 'success'
                     });
                 },
                 error: function(err) {
