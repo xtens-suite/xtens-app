@@ -52,6 +52,7 @@ const coroutines = {
             parentSubject: Joi.array().allow(null),
             parentSample: Joi.array().allow(null),
             parentData: Joi.array().allow(null),
+            childrenData: Joi.array().allow(null),
             createdAt: Joi.date(),
             updatedAt: Joi.date()
         };
