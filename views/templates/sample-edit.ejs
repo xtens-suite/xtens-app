@@ -30,14 +30,14 @@
                         </div>
                     </div>
                     <div class="form-group metadataform-group">
-                        <label for="donor" class="data-label"><%= __('donor') %></label>
-                        <span class="data-span"><%= data.get("donor") ? data.get("donor").code : __("select-a-type") %></span>
+                        <label for="donor" class="data-label"><%= data.get("parentSample") && data.get("parentSample").length > 0 ? __('donor') : __('donors') %></label>
+                        <span class="data-span"><%= data.get("parentSample") && data.get("parentSample").length > 0 ? _.map(data.get("donor"), "code").join(",") : __("select-a-type") %></span>
                         <button disabled id="editDonor" class="btn btn-danger"><%= __("edit-donor") %></button>
                     </div>
-                    <% if (data.get("parentSample")) {%>
+                    <% if (data.get("parentSample") && data.get("parentSample").length > 0) {%>
                     <div class="form-group metadataform-group">
-                        <label for="parent-sample" class="data-label"><%= __('parent-sample') %></label>
-                        <span class="data-span"><%= data.get("parentSample").biobankCode %></span>
+                        <label for="parent-sample" class="data-label"><%= data.get("parentSample").length === 1 ?  __("parent-sample") :  __("parent-samples") %> </label>
+                        <span class="data-span"><%= _.map(data.get("parentSample"), "biobankCode").join(",") %></span>
                     </div>
                     <%} %>
                     <div class="form-group metadataform-group">
