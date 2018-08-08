@@ -25,6 +25,8 @@ const coroutines = {
             biobankCode: Joi.string().allow("").allow(null), // TODO change this one
             donor: Joi.array().allow(null),
             parentSample: Joi.array().allow(null),
+            childrenData: Joi.array().allow(null),
+            childrenSample: Joi.array().allow(null),
             tags: Joi.array().allow(null),
             notes: Joi.string().allow(null),
             metadata: Joi.object().required(),
