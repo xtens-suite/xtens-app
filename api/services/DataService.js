@@ -637,7 +637,11 @@ let DataService = BluebirdPromise.promisifyAll({
             stream.on('data', chunk => {
                 if(chunk.dataTypes || chunk.dataTypePrivileges) { return chunk; }
 
+<<<<<<< 65c7a959961e84a123df2cc701b85340ad6642d2
                 let priv = multiProject || !leafSearch ? _.find(dataTypePrivileges,{'dataType': chunk.type}) : leafSearch ? _.find(dataTypePrivileges,{'dataType': chunk.parents[0].type}) : dataTypePrivileges;
+=======
+                let priv = multiProject && !leafSearch ? _.find(dataTypePrivileges,{'dataType': chunk.type}) : leafSearch ? _.find(dataTypePrivileges,{'dataType': chunk.parents[0].type}) : dataTypePrivileges;
+>>>>>>> fixes on query builder and xtens datatable for pooling
 
                 //if operator has not privilege on dataTypePrivileges return empty data
                 if (!priv || _.isEmpty(priv) ) {
@@ -655,7 +659,11 @@ let DataService = BluebirdPromise.promisifyAll({
                     }
                 }
                 if (forbiddenMetadata.length > 0) {
+<<<<<<< 65c7a959961e84a123df2cc701b85340ad6642d2
                     let dt = multiProject || !leafSearch ? _.find(dataTypes,{'dataType': chunk.type}) : leafSearch ? _.find(dataTypes,{'dataType': chunk.parents[0].type}) : dataTypes;
+=======
+                    let dt = multiProject && !leafSearch ? _.find(dataTypes,{'id': chunk.type}) : leafSearch ? _.find(dataTypes,{'id': chunk.parents[0].type}) : dataTypes;
+>>>>>>> fixes on query builder and xtens datatable for pooling
                     for (const frbMtdt of forbiddenMetadata) {
                         if (dt.project === frbMtdt.project) {
                             chunk[frbMtdt.label] = {};

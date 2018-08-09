@@ -322,12 +322,12 @@
               this.colvisButtons = [];
 
               var model = this.multiProject || this.isLeafSearch ? dataTypes[0].get("model") : dataTypes.get("model");
-              this.columns = this.insertModelSpecificColumns(model, xtens.session.get('canAccessPersonalData'));
+              this.columns = this.insertModelSpecificColumns(model, xtens.session.get('canAccessPersonalData'), this.isLeafSearch);
               if (this.multiProject) {
                   this.columns.push({"title": i18n("project-owner"), "data": function (data) {
                       var projects = xtens.session.get("projects");
                       var project = _.filter(projects,function (pr) {
-                          var dt = that.multiProject || that.isLeafSearch ? _.find(that.dataTypes.models, {'id': data.type}) : that.dataTypes;
+                          var dt = that.multiProject && !that.isLeafSearch ? _.find(that.dataTypes.models, {'id': data.type}) : that.isLeafSearch ? _.find(that.dataTypes.models, {'id': data.parents[0].type}) : that.dataTypes;
                           return pr.id === dt.get('project');
                       });
                       return project.length > 0 ? project[0].name : "No project";
@@ -347,19 +347,20 @@
               }
               this.optLinks = {dataTypes: dataTypes, dataTypePrivileges: dataTypePrivileges, hasDataSensitive : false, fileUpload : fileUpload, hasDataChildren : hasDataChildren, hasSampleChildren : hasSampleChildren};
 
-              this.prepareDataForRenderingJSONLeaf(dataTypePrivileges, dataTypes, queryArgs, queryArgs.dataType);
+              this.prepareDataForRenderingJSONLeaf(dataTypePrivileges, dataTypes, queryArgs, queryArgs.dataType, this.isLeafSearch);
 
               if (!this.multiProject) {
                   this.addLinks(this.optLinks);
               }
           },
+          // _.has(that.data[0], content.label);
 
           /**
            * @method
            * @name prepareDataForRenderingJSONLeaf
            * @description Format the data according to the dataType schema and prepare data for visualization through DataTables
            */
-          prepareDataForRenderingJSONLeaf: function (dataTypePrivileges, dataTypes, queryArgs, idDataType) {
+          prepareDataForRenderingJSONLeaf: function (dataTypePrivileges, dataTypes, queryArgs, idDataType, nested) {
               var that = this;
               if(queryArgs.getMetadata || idDataType) {
                   var fieldsToShow = [];
@@ -395,7 +396,17 @@
                       var fieldName = useFormattedNames ? field.formattedName : field.name;
                       var columnOpts = {
                           "title": colTitle,
-                          "data": idDataType ? "metadata." + fieldName + ".value" : queryArgs.label + "." + fieldName + ".value",
+                          "data": function ( row, type, val, meta ) {
+                              if (idDataType && !nested) {
+                                  return row.metadata[fieldName] && row.metadata[fieldName].value ? row.metadata[fieldName].value : "";
+                              } else if(idDataType && nested) {
+                                  return _.map(row.parents, "metadata." + fieldName + ".value" ).join();
+                              } else if(!idDataType && nested) {
+                                  return _.map(row.parents, queryArgs.label + "." + fieldName + ".value" ).join();
+                              } else {
+                                  return row[queryArgs.label][fieldName] && row[queryArgs.label][fieldName].value ? row[queryArgs.label][fieldName].value : "";
+                              }
+                          },
                           "visible": field.visible,
                           "defaultContent": "",
                           "className": className
@@ -494,7 +505,7 @@
 
               }
               else {
-                  this.setLeafIdColumns(queryArgs);
+                  this.setLeafIdColumns(queryArgs, nested);
               }
               // handle leafs
               if (this.isLeafSearch){
@@ -503,17 +514,20 @@
                       if (content.dataType) {
                         // get right dataTypes and privileges of nested content
                           var results = that.getCurrentTypeAndPrivileges(content.dataType);
-                          that.prepareDataForRenderingJSONLeaf(results.dtps, results.dts, content);
+                          that.prepareDataForRenderingJSONLeaf(results.dtps, results.dts, content, undefined, !_.has(that.data[0], content.label));
                       }
                   });
               }
 
           },
 
-          setLeafIdColumns: function (content) {
+          setLeafIdColumns: function (content, nested) {
               var columnOpts = {
                   "title": content.title,
-                  "data": content.label + "_id",
+                  "data": nested ? function ( row, type, val, meta ) {
+                      return _.map(row.parents, content.label + "_id" ).join();
+                  }
+                    : content.label + "_id",
                   "visible": true,
                   "defaultContent": "",
                   "className": content.label
@@ -571,50 +585,60 @@
           //
           // },
 
-          insertModelSpecificColumns: function(model, canViewPersonalInfo) {
+          insertModelSpecificColumns: function(model, canViewPersonalInfo, nested) {
               var cols = [];
               if (canViewPersonalInfo) { // if you are allowed to see the Personal Details
-                  cols = cols.concat(this.insertPersonalDetailsColumns());
+                  cols = cols.concat(this.insertPersonalDetailsColumns(nested));
               }
               switch(model) {
                   case Classes.SUBJECT || Classes.DATA:
-                      cols = cols.concat(this.insertSubjectColumns());
+                      cols = cols.concat(this.insertSubjectColumns(nested));
                       break;
                   case Classes.DATA:
-                      cols = cols.concat(this.insertSubjectColumns());
+                      cols = cols.concat(this.insertSubjectColumns(nested));
                       break;
                   case Classes.SAMPLE:
-                      cols = cols.concat(this.insertSampleColumns());
+                      cols = cols.concat(this.insertSampleColumns(nested));
                       break;
               }
               return cols;
           },
 
-          insertPersonalDetailsColumns: function() {
+          insertPersonalDetailsColumns: function(nested) {
               return [
                 {"title": i18n("surname"),
                 "data": function ( data ) {
-                    return  data.surname ? data.surname : "";
+                    return  nested ? _.map(data.parents, "surname").join() : data.surname ? data.surname : "";
                 },"className": "header"},
                 {"title": i18n("given-name"), "data": function ( data ) {
-                    return  data.given_name ? data.given_name : "";
+                    return  nested ? _.map(data.parents, "given_name").join() : data.given_name ? data.given_name : "";
                 },"className": "header"},
-                {"title": i18n("birth-date"), "data": "birth_date", "render": renderDatatablesDate,"className": "header"}
+                {"title": i18n("birth-date"), "data": function ( data ) {
+                    return  nested ? _.map(data.parents, "birth_date").join() : data.birth_date ? data.birth_date : "";
+                }, "render": renderDatatablesDate,"className": "header"}
               ];
           },
 
-          insertSubjectColumns: function() {
+          insertSubjectColumns: function(nested) {
               return [
-                {"title": i18n("code"),"data": "code","className": "header"},
-                {"title": i18n("sex"),"data": "sex",
+                {"title": i18n("code"),"data": function ( data ) {
+                    return  nested ? _.map(data.parents, "code").join() : data.code ?  data.code : "";
+                }, "className": "header"},
+                {"title": i18n("sex"),"data": function ( data ) {
+                    return  nested ? _.map(data.parents, "sex").join() : data.sex ? data.sex : "";
+                },
               "className": "header"}
               ];
           },
 
-          insertSampleColumns: function() {
+          insertSampleColumns: function(nested) {
               return [
-                {"title": i18n("biobank"), "data": "biobank_acronym","className": "header"},
-                {"title": i18n("biobank-code"), "data": "biobank_code","className": "header"}
+                {"title": i18n("biobank"), "data": function ( data ) {
+                    return  nested ? _.map(data.parents, "biobank_acronym").join() : data.biobank_acronym ? data.biobank_acronym : "";
+                },"className": "header"},
+                {"title": i18n("biobank-code"), "data": function ( data ) {
+                    return  nested ? _.map(data.parents, "biobank_code").join() : data.biobank_code ? data.biobank_code : "";
+                },"className": "header"}
               ];
           },
 
