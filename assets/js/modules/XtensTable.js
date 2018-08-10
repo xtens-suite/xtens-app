@@ -191,6 +191,7 @@
          * @description show the datatable given the option object
          */
           displayDataTable: function() {
+              var that = this;
 
               this.tableOpts = {
                   data:           this.data,
@@ -210,6 +211,40 @@
 
               if (this.tableOpts && !_.isEmpty(this.tableOpts.data)) {
                   this.table = this.$el.DataTable(this.tableOpts);
+
+                  $(this.$el).on('click', 'td.details-control', function () {
+                      var tr = $(this).closest('tr');
+                      var row = that.table.row( tr );
+
+                      if ( row.child.isShown() ) {
+                          // This row is already open - close it
+                          row.child.hide();
+                          tr.removeClass('shown');
+                      }
+                      else {
+                          var cl = 'child-table-'+row.index();
+                          var data = row.data();
+                          var html = '<table class="'+ cl +'"></table>';
+                          var tableOptsChild = {
+                              data:           [data],
+                              columns:        that.childColumns,
+                              info:           true,
+                              scrollX:        true,
+                              scrollY:        "500px",
+                              scrollCollapse: true,
+                              paging:         false,
+                              autoWidth:      false,
+                              deferRender:    true,
+                              columnDefs: [
+                                {"className": "dt-center", "targets": "_all"}
+                              ]
+                          };
+                          row.child( html ).show();
+                          tr.addClass('shown');
+                          var tableSelector = '.' + cl;
+                          $(tableSelector).DataTable(tableOptsChild);
+                      }
+                  } );
 
                   if (this.tableOpts.columns.length>9){
                       new $.fn.dataTable.FixedColumns(this.table, {
@@ -256,6 +291,26 @@
               }
           },
 
+          formatChildRow: function( row ) {
+              var html = '<table class="child-table-'+row.index()+'" cellpadding="5" cellspacing="0" border="0" style="padding-left:50px;"></table>';
+              var tableOptsChild = {
+                  data:           row.data(),
+                  columns:        this.childColumns,
+                  info:           true,
+                  scrollX:        true,
+                  scrollY:        "500px",
+                  scrollCollapse: true,
+                  paging:         false,
+                  autoWidth:      false,
+                  deferRender:    true,
+                  columnDefs: [
+                    {"className": "dt-center", "targets": "_all"}
+                  ]
+              };
+              // `d` is the original data object for the row
+              return html;
+          },
+
           /**
            * @method
            * @name prepareDataForRenderingJSON
@@ -264,9 +319,26 @@
           prepareDataForRenderingJSON: function(dataTypePrivileges, dataTypes, queryArgs) {
               var that = this;
               this.colvisButtons = [];
+              this.columns = [];
+              this.childColumns = [];
 
               var model = this.multiProject || this.isLeafSearch ? dataTypes[0].get("model") : dataTypes.get("model");
-              this.columns = this.insertModelSpecificColumns(model, xtens.session.get('canAccessPersonalData'), this.isLeafSearch);
+
+              if (this.isLeafSearch) {
+                  this.columns = [
+                      {
+                          "className":      'details-control',
+                          "orderable":      false,
+                          "data":           null,
+                          "defaultContent": ''
+                      }
+                  ];
+                  this.childColumns.push(this.insertModelSpecificColumns(model, xtens.session.get('canAccessPersonalData'), this.isLeafSearch));
+                  this.childColumns = _.flatten(this.childColumns);
+              } else {
+                  this.columns.push(this.insertModelSpecificColumns(model, xtens.session.get('canAccessPersonalData'), this.isLeafSearch));
+                  this.columns = _.flatten(this.columns);
+              }
               if (this.multiProject) {
                   this.columns.push({"title": i18n("project-owner"), "data": function (data) {
                       var projects = xtens.session.get("projects");
@@ -277,7 +349,9 @@
                       return project.length > 0 ? project[0].name : "No project";
                   }, "className": "project-owner"});
               }
-              this.numLeft=this.columns.length;
+
+              this.childNumLeft= this.childColumns.length;
+              this.numLeft= this.columns.length;
 
               var fileUpload =  !this.multiProject ? this.isLeafSearch ? dataTypes[0].get("superType").schema.header.fileUpload : dataTypes.get("superType").schema.header.fileUpload : false;
               var hasDataChildren = false, hasSampleChildren = false;
@@ -418,7 +492,11 @@
                           }
                       }
 
-                      this.columns.push(columnOpts);
+                      if (nested) {
+                          this.childColumns.push(columnOpts);
+                      } else {
+                          this.columns.push(columnOpts);
+                      }
 
                       if (field.hasUnit) {
                           columnOpts = {
@@ -433,7 +511,12 @@
                           if (field._loop) {
                               columnOpts.data = idDataType ? "metadata." + fieldName + ".units" : queryArgs.label + "." + fieldName + ".units";
                           }
-                          this.columns.push(columnOpts);
+
+                          if (nested) {
+                              this.childColumns.push(columnOpts);
+                          } else {
+                              this.columns.push(columnOpts);
+                          }
                       }
 
                   }, this);
@@ -461,7 +544,7 @@
           setLeafIdColumns: function (content, nested) {
               var columnOpts = {
                   "title": content.title,
-                  "data": nested ? function ( row, type, val, meta ) {
+                  "data": nested ? function ( row ) {
                       return _.map(row.parents, content.label + "_id" ).join();
                   }
                     : content.label + "_id",
@@ -469,7 +552,11 @@
                   "defaultContent": "",
                   "className": content.label
               };
-              this.columns.push(columnOpts);
+              if (nested) {
+                  this.childColumns.push(columnOpts);
+              } else {
+                  this.columns.push(columnOpts);
+              }
           },
 
         /**
