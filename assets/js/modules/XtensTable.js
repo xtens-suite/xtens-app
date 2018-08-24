@@ -226,15 +226,12 @@
                   columnDefs: [
                   {"className": "dt-center", "targets": "_all"}
                   ],
-                  // createdRow: function ( row, data, index ) {
-                  //     if ( data.showRow ) {
-                  //         $(row).addClass('showRow');
-                  //     }
-                  // },
                   pagingType: "full_numbers" // DOES NOT WORK!!
               };
 
               if (this.tableOpts && !_.isEmpty(this.tableOpts.data)) {
+                  $.fn.dataTable.ext.search.pop();
+
                   this.table = this.$el.DataTable(this.tableOpts);
                   if (this.tableOpts.columns.length>9 ){
                       new $.fn.dataTable.FixedColumns(this.table, {
@@ -253,6 +250,7 @@
                             return rowData.showRow;
                         }
                       );
+                      
                       excelPlainData = [{
                           extend: 'excelHtml5',
                           text: 'Excel - child Rows',
@@ -264,6 +262,7 @@
                           }
                       }];
                   }
+
                   var buttons = [
                       {
                           extend: 'colvis',
@@ -412,7 +411,7 @@
                   this.columns.push({"title": i18n("project-owner"), "data": function (data) {
                       var projects = xtens.session.get("projects");
                       var project = _.filter(projects,function (pr) {
-                          var dt = that.multiProject && !that.isLeafSearch ? _.find(that.dataTypes.models, {'id': data.type}) : that.isLeafSearch ? _.find(that.dataTypes.models, {'id': data.parents[0].type}) : that.dataTypes;
+                          var dt = that.multiProject  || that.isLeafSearch ? _.find(that.dataTypes.models, {'id': data.type}) : that.dataTypes;
                           return pr.id === dt.get('project');
                       });
                       return project.length > 0 ? project[0].name : "No project";
@@ -779,7 +778,7 @@
               var currRow = this.table.row($(ev.currentTarget).parents('tr'));
               var data = currRow.data();
 
-              var dataType = this.multiProject && !this.isLeafSearch ? _.find(this.dataTypes.models, {'id': data.type }) : this.isLeafSearch ? _.find(this.dataTypes.models, {'id': data.parents[0].type }) : this.dataTypes;
+              var dataType = this.multiProject || this.isLeafSearch ? _.find(this.dataTypes.models, {'id': data.type }) : this.dataTypes;
               var model = dataType.get("model");
               var path = model === Classes.DATA ? model.toLowerCase() : model.toLowerCase() + 's';
               path += "/details/" + data.id;
@@ -798,7 +797,7 @@
               var data = currRow.data();
 
             // model here is the ENTITY model (a.k.a. the server-side resource)
-              var dataType = this.multiProject && !this.isLeafSearch ? _.find(this.dataTypes.models, {'id': data.type }) : this.isLeafSearch ? _.find(this.dataTypes.models, {'id': data.parents[0].type }) : this.dataTypes;
+              var dataType = this.multiProject || this.isLeafSearch ? _.find(this.dataTypes.models, {'id': data.type }) : this.dataTypes;
               var model = dataType.get("model");
               var path = model === Classes.DATA ? model.toLowerCase() : model.toLowerCase() + 's';
               path += "/edit/" + data.id;
@@ -816,7 +815,7 @@
           showDerivedDataList: function(ev) {
               var currRow = this.table.row($(ev.currentTarget).parents('tr'));
               var data = currRow.data();
-              var dataType = this.multiProject && !this.isLeafSearch ? _.find(this.dataTypes.models, {'id': data.type }) : this.isLeafSearch ? _.find(this.dataTypes.models, {'id': data.parents[0].type }) : this.dataTypes;
+              var dataType = this.multiProject || this.isLeafSearch ? _.find(this.dataTypes.models, {'id': data.type }) : this.dataTypes;
               var model = dataType.get("model");
               var parentProperty = model === Classes.SUBJECT ? 'parentSubject' : model === Classes.SAMPLE ? 'parentSample' : 'parentData';
               var dataId = this.isLeafSearch ? data.parents[0].id : data.id;
@@ -856,7 +855,7 @@
           showDerivedSampleList: function(ev) {
               var currRow = this.table.row($(ev.currentTarget).parents('tr'));
               var data = currRow.data();
-              var dataType = this.multiProject && !this.isLeafSearch ? _.find(this.dataTypes.models, {'id': data.type }) : this.isLeafSearch ? _.find(this.dataTypes.models, {'id': data.parents[0].type }) : this.dataTypes;
+              var dataType = this.multiProject || this.isLeafSearch ? _.find(this.dataTypes.models, {'id': data.type }) : this.dataTypes;
               var model = dataType && dataType.get("model");
             // DATA cannot have sample child
               if (model === Classes.DATA)
@@ -885,7 +884,7 @@
               var that = this;
               var currRow = this.table.row($(ev.currentTarget).parents('tr'));
               var id = currRow.data().id;
-              var dataType = this.multiProject && !this.isLeafSearch ? _.find(this.dataTypes.models, {'id': data.type }) : this.isLeafSearch ? _.find(this.dataTypes.models, {'id': data.parents[0].type }) : this.dataTypes;
+              var dataType = this.multiProject || this.isLeafSearch ? _.find(this.dataTypes.models, {'id': data.type }) : this.dataTypes;
               var model = dataType.get("model");
               if (!this[id]){
                   if (model === Classes.SUBJECT)
