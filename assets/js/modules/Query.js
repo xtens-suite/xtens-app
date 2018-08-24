@@ -1160,6 +1160,8 @@
                 for(var i=len-1; i>=0; i--) {
                     this.removeChild(this.nestedViews[i]);
                 }
+                xtens.router.navigate('/query/', {trigger: false});
+                this.model.set("content", []);
             } else {
                 this.nestedViews = _.filter(this.nestedViews, function(view){
                     if( _.find(view.el.classList, function(classes){ return classes !== "query-composite";}) ){
