@@ -82,9 +82,29 @@
               this.rootDataType = results.dt;
 
               this.data = options.result.data;
+              if (this.isLeafSearch) {
+                  this.buildPlainData();
+              }
               this.$modal = $(".query-modal");
               this.prepareDataForRenderingJSON(results.dtps, results.dts, this.queryArgs);
             // this.render();
+          },
+
+          buildPlainData: function () {
+              this.plainData = [];
+              var that = this;
+              for (var i = 0; i < this.data.length; i++) {
+                  for (var j = 0; j < this.data[i].parents.length; j++) {
+                      var obj = _.omit(this.data[i], 'parents');
+                      if (j == 0) {
+                          obj.showRow = true;
+                      }
+                      else {
+                          obj.showRow = false;
+                      }
+                      that.plainData.push(_.merge(this.data[i].parents[j],obj));
+                  }
+              }
           },
 
           getCurrentTypeAndPrivileges: function (dataType) {
@@ -194,7 +214,7 @@
               var that = this;
 
               this.tableOpts = {
-                  data:           this.data,
+                  data:           !this.isLeafSearch ? this.data : this.plainData,
                   columns:        this.columns,
                   info:           true,
                   scrollX:        true,
@@ -206,54 +226,43 @@
                   columnDefs: [
                   {"className": "dt-center", "targets": "_all"}
                   ],
+                  // createdRow: function ( row, data, index ) {
+                  //     if ( data.showRow ) {
+                  //         $(row).addClass('showRow');
+                  //     }
+                  // },
                   pagingType: "full_numbers" // DOES NOT WORK!!
               };
 
               if (this.tableOpts && !_.isEmpty(this.tableOpts.data)) {
                   this.table = this.$el.DataTable(this.tableOpts);
-
-                  $(this.$el).on('click', 'td.details-control', function () {
-                      var tr = $(this).closest('tr');
-                      var row = that.table.row( tr );
-
-                      if ( row.child.isShown() ) {
-                          // This row is already open - close it
-                          row.child.hide();
-                          tr.removeClass('shown');
-                      }
-                      else {
-                          var cl = 'child-table-'+row.index();
-                          var data = row.data();
-                          var html = '<table class="'+ cl +'"></table>';
-                          var tableOptsChild = {
-                              data:           [data],
-                              columns:        that.childColumns,
-                              info:           true,
-                              scrollX:        true,
-                              scrollY:        "500px",
-                              scrollCollapse: true,
-                              paging:         false,
-                              autoWidth:      false,
-                              deferRender:    true,
-                              columnDefs: [
-                                {"className": "dt-center", "targets": "_all"}
-                              ]
-                          };
-                          row.child( html ).show();
-                          tr.addClass('shown');
-                          var tableSelector = '.' + cl;
-                          $(tableSelector).DataTable(tableOptsChild);
-                      }
-                  } );
-
-                  if (this.tableOpts.columns.length>9){
+                  if (this.tableOpts.columns.length>9 ){
                       new $.fn.dataTable.FixedColumns(this.table, {
-                          leftColumns:this.numLeft,
-                          rightColumns: this.multiProject ? 0 : 1 //for multiProject search no available actions
+                          leftColumns: !this.isLeafSearch ? this.numLeft : 0,
+                          rightColumns: this.multiProject || this.isLeafSearch ? 0 : 1 //for multiProject search no available actions
                       });
                   }
                   else{
                       this.tableOpts.fixedColumns=false;
+                  }
+                  var excelPlainData = [];
+                  if (this.isLeafSearch) {
+                      this.childrenRowsHandler();
+                      $.fn.dataTable.ext.search.push(
+                        function(settings, searchData, index, rowData) {
+                            return rowData.showRow;
+                        }
+                      );
+                      excelPlainData = [{
+                          extend: 'excelHtml5',
+                          text: 'Excel - child Rows',
+                          title: null,
+                          filename: 'XTENS',
+                          exportOptions: {
+                              orthogonal: 'export', // to export source data and not rendered data
+                              columns:  ':not(.actions):not(.details-control)' //not export actions column
+                          }
+                      }];
                   }
                   var buttons = [
                       {
@@ -264,11 +273,13 @@
                           extend: 'copyHtml5',
                           exportOptions: {
                               orthogonal: 'export', // to export source data and not rendered data
-                              columns:  ':visible:not(.actions)' //not export actions column
+                              columns:  ':visible:not(.actions):not(.details-control)' //not export actions and details column
                           }
                       },
                       {
                           extend: 'excelHtml5',
+                          title: null,
+                          filename: 'XTENS',
                           exportOptions: {
                               orthogonal: 'export', // to export source data and not rendered data
                               columns:  ':visible:not(.actions)' //not export actions column
@@ -301,6 +312,7 @@
                       });
                   }
 
+                  buttons = buttons.concat(excelPlainData);
                   this.colvisButtons.push(buttons);
                   this.colvisButtons = _.flatten(this.colvisButtons);
                   new $.fn.dataTable.Buttons(this.table, {
@@ -316,55 +328,55 @@
               }
           },
 
-          checkVCF: function () {
-              var fieldsVCF = ["chr", "pos", "id", "qual", "ref", "alt", "filter"];
-              var fieldsVCF2 = ["chrom", "pos", "id", "qual", "ref", "alt", "filter"];
-              var found = 0, found2 = 0;
-              var fieldsNames = [];
-              var schemabody;
-              if (this.dataTypes.models) {
-                  schemaBody = _.flatten(_.map(this.dataTypes.models, 'attributes.superType.schema.body'));
-              }
-              else {
-                  schemaBody = this.dataTypes.get('superType').schema.body;
+          childrenRowsHandler: function( row ) {
+              var that = this;
+              $(this.$el).on('click', 'td.details-control', function () {
+                  var tr = $(this).closest('tr');
+                  var row = that.table.row( tr );
 
-              }
-              fieldsNames = _.map(_.flatten(_.map(schemaBody, 'content')),'formattedName');
-              fieldsNames.forEach(function (name) {
-                  if (fieldsVCF.find(function(n) {return n === name;}) ) {
-                      found = found + 1;
+                  if ( row.child.isShown() ) {
+                    // This row is already open - close it
+                      row.child.hide();
+                      tr.removeClass('shown');
                   }
-                  if (fieldsVCF2.find(function(n) {return n === name;})) {
-                      found2 = found2 + 1;
+                  else {
+                      var cl = 'child-table-'+row.index();
+                      var leafKey = _.find(_.keys(that.data[0]), function(k) { return k.indexOf("_id") > 0;});
+                      var data = _.find(that.data, function (d) {
+                          return d[leafKey] == row.data()[leafKey];
+                      });
+                      var maxWidth = $('.query').width() + 'px';
+                      var html = '<div class="row" style="max-width:' + maxWidth + ';"><div class="col-sm-12"><table class="'+ cl +' query-table"></table></div></div>';
+                      var tableOptsChild = {
+                          data:           data.parents,
+                          columns:        that.childColumns,
+                          info:           false,
+                          searching:      false,
+                          scrollX:        true,
+                          scrollY:        "500px",
+                          scrollCollapse: true,
+                          paging:         false,
+                          deferRender:    true,
+                          columnDefs: [
+                          {"className": "dt-center", "targets": "_all"}
+                          ]
+                      };
+                      row.child( html ).show();
+                      tr.addClass('shown');
+                      var tableSelector = '.' + cl;
+                      $(tableSelector).DataTable(tableOptsChild);
+
+                      if (tableOptsChild.columns.length>9){
+                          new $.fn.dataTable.FixedColumns($(tableSelector), {
+                              leftColumns:that.childNumLeft,
+                              rightColumns: 0
+                          });
+                      }
+                      else{
+                          tableOptsChild.fixedColumns=false;
+                      }
                   }
               });
-
-              if (found == 7 || found2 == 7) {
-                  return true;
-              }
-              else {
-                  return false;
-              }
-          },
-
-          formatChildRow: function( row ) {
-              var html = '<table class="child-table-'+row.index()+'" cellpadding="5" cellspacing="0" border="0" style="padding-left:50px;"></table>';
-              var tableOptsChild = {
-                  data:           row.data(),
-                  columns:        this.childColumns,
-                  info:           true,
-                  scrollX:        true,
-                  scrollY:        "500px",
-                  scrollCollapse: true,
-                  paging:         false,
-                  autoWidth:      false,
-                  deferRender:    true,
-                  columnDefs: [
-                    {"className": "dt-center", "targets": "_all"}
-                  ]
-              };
-              // `d` is the original data object for the row
-              return html;
           },
 
           /**
@@ -386,15 +398,16 @@
                           "className":      'details-control',
                           "orderable":      false,
                           "data":           null,
-                          "defaultContent": ''
+                          "defaultContent": '<i style="cursor:pointer; color:#337ab7;" class="fa fa-plus-circle"></i>'
                       }
                   ];
                   this.childColumns.push(this.insertModelSpecificColumns(model, xtens.session.get('canAccessPersonalData'), this.isLeafSearch));
                   this.childColumns = _.flatten(this.childColumns);
-              } else {
-                  this.columns.push(this.insertModelSpecificColumns(model, xtens.session.get('canAccessPersonalData'), this.isLeafSearch));
-                  this.columns = _.flatten(this.columns);
               }
+               // else {
+              this.columns.push(this.insertModelSpecificColumns(model, xtens.session.get('canAccessPersonalData'), this.isLeafSearch));
+              this.columns = _.flatten(this.columns);
+              // }
               if (this.multiProject) {
                   this.columns.push({"title": i18n("project-owner"), "data": function (data) {
                       var projects = xtens.session.get("projects");
@@ -471,12 +484,8 @@
                       var columnOpts = {
                           "title": colTitle,
                           "data": function ( row, type, val, meta ) {
-                              if (idDataType && !nested) {
+                              if (idDataType) {
                                   return row.metadata[fieldName] && row.metadata[fieldName].value ? row.metadata[fieldName].value : "";
-                              } else if(idDataType && nested) {
-                                  return _.map(row.parents, "metadata." + fieldName + ".value" ).join();
-                              } else if(!idDataType && nested) {
-                                  return _.map(row.parents, queryArgs.label + "." + fieldName + ".value" ).join();
                               } else {
                                   return row[queryArgs.label][fieldName] && row[queryArgs.label][fieldName].value ? row[queryArgs.label][fieldName].value : "";
                               }
@@ -555,11 +564,12 @@
                           }
                       }
 
+                      var tempOptCol = Object.assign({}, columnOpts);
                       if (nested) {
                           this.childColumns.push(columnOpts);
-                      } else {
-                          this.columns.push(columnOpts);
+                          tempOptCol.visible = false;
                       }
+                      this.columns.push(tempOptCol);
 
                       if (field.hasUnit) {
                           columnOpts = {
@@ -575,11 +585,12 @@
                               columnOpts.data = idDataType ? "metadata." + fieldName + ".units" : queryArgs.label + "." + fieldName + ".units";
                           }
 
+                          var tempOptColUn = Object.assign({}, columnOpts);
                           if (nested) {
                               this.childColumns.push(columnOpts);
-                          } else {
-                              this.columns.push(columnOpts);
+                              tempOptColUn.visible = false;
                           }
+                          this.columns.push(tempOptColUn);
                       }
 
                   }, this);
@@ -597,7 +608,8 @@
                       if (content.dataType) {
                         // get right dataTypes and privileges of nested content
                           var results = that.getCurrentTypeAndPrivileges(content.dataType);
-                          that.prepareDataForRenderingJSONLeaf(results.dtps, results.dts, content, undefined, !_.has(that.data[0], content.label));
+                          var isLast = _.find(content.content, function(c) { return c.dataType;}) ? false : true;
+                          that.prepareDataForRenderingJSONLeaf(results.dtps, results.dts, content, undefined, !_.has(that.data[0], content.label) && !isLast);
                       }
                   });
               }
@@ -607,19 +619,17 @@
           setLeafIdColumns: function (content, nested) {
               var columnOpts = {
                   "title": content.title,
-                  "data": nested ? function ( row ) {
-                      return _.map(row.parents, content.label + "_id" ).join();
-                  }
-                    : content.label + "_id",
+                  "data": content.label + "_id",
                   "visible": true,
                   "defaultContent": "",
                   "className": content.label
               };
+              var tempOptCol = Object.assign({}, columnOpts);
               if (nested) {
                   this.childColumns.push(columnOpts);
-              } else {
-                  this.columns.push(columnOpts);
+                  tempOptCol.visible = false;
               }
+              this.columns.push(tempOptCol);
           },
 
         /**
@@ -695,13 +705,13 @@
               return [
                 {"title": i18n("surname"),
                 "data": function ( data ) {
-                    return  nested ? _.map(data.parents, "surname").join() : data.surname ? data.surname : "";
+                    return data.surname ? data.surname : "";
                 },"className": "header"},
                 {"title": i18n("given-name"), "data": function ( data ) {
-                    return  nested ? _.map(data.parents, "given_name").join() : data.given_name ? data.given_name : "";
+                    return data.given_name ? data.given_name : "";
                 },"className": "header"},
                 {"title": i18n("birth-date"), "data": function ( data ) {
-                    return  nested ? _.map(data.parents, "birth_date").join() : data.birth_date ? data.birth_date : "";
+                    return data.birth_date ? data.birth_date : "";
                 }, "render": renderDatatablesDate,"className": "header"}
               ];
           },
@@ -709,10 +719,10 @@
           insertSubjectColumns: function(nested) {
               return [
                 {"title": i18n("code"),"data": function ( data ) {
-                    return  nested ? _.map(data.parents, "code").join() : data.code ?  data.code : "";
+                    return data.code ?  data.code : "";
                 }, "className": "header"},
                 {"title": i18n("sex"),"data": function ( data ) {
-                    return  nested ? _.map(data.parents, "sex").join() : data.sex ? data.sex : "";
+                    return data.sex ? data.sex : "";
                 },
               "className": "header"}
               ];
@@ -721,10 +731,10 @@
           insertSampleColumns: function(nested) {
               return [
                 {"title": i18n("biobank"), "data": function ( data ) {
-                    return  nested ? _.map(data.parents, "biobank_acronym").join() : data.biobank_acronym ? data.biobank_acronym : "";
+                    return data.biobank_acronym ? data.biobank_acronym : "";
                 },"className": "header"},
                 {"title": i18n("biobank-code"), "data": function ( data ) {
-                    return  nested ? _.map(data.parents, "biobank_code").join() : data.biobank_code ? data.biobank_code : "";
+                    return data.biobank_code ? data.biobank_code : "";
                 },"className": "header"}
               ];
           },
@@ -738,8 +748,8 @@
 
               var btnGroupTemplate = JST["views/templates/xtenstable-buttongroup.ejs"];
               var that = this;
-              _.each(this.data, function(datum) {
-                  var privilege = that.multiProject || that.isLeafSearch ? _.find(options.dataTypePrivileges, {dataType: datum.type}) : options.dataTypePrivileges;
+              var privilege = this.multiProject && !this.isLeafSearch ? _.find(options.dataTypePrivileges, {'dataType': this.data[0].type }) : this.isLeafSearch ? _.find(options.dataTypePrivileges, {'dataType': this.data[0].parents[0].type }) : options.dataTypePrivileges;
+              _.each(!this.isLeafSearch ? this.data : this.plainData, function(datum) {
                   datum._links = btnGroupTemplate({
                       __:i18n,
                       dataTypeModel: that.multiProject || that.isLeafSearch ? options.dataTypes[0].get("model") : options.dataTypes.get("model"),
@@ -769,8 +779,8 @@
               var currRow = this.table.row($(ev.currentTarget).parents('tr'));
               var data = currRow.data();
 
-            // model here is the ENTITY model (a.k.a. the server-side resource)
-              var model = this.multiProject || this.isLeafSearch ? _.find(this.dataTypes.models, {'id': data.type }).get("model") : this.dataTypes.get("model");
+              var dataType = this.multiProject && !this.isLeafSearch ? _.find(this.dataTypes.models, {'id': data.type }) : this.isLeafSearch ? _.find(this.dataTypes.models, {'id': data.parents[0].type }) : this.dataTypes;
+              var model = dataType.get("model");
               var path = model === Classes.DATA ? model.toLowerCase() : model.toLowerCase() + 's';
               path += "/details/" + data.id;
               xtens.router.navigate(path, {trigger: true});
@@ -788,7 +798,8 @@
               var data = currRow.data();
 
             // model here is the ENTITY model (a.k.a. the server-side resource)
-              var model = this.multiProject || this.isLeafSearch ? _.find(this.dataTypes.models, {'id': data.type }).get("model") : this.dataTypes.get("model");
+              var dataType = this.multiProject && !this.isLeafSearch ? _.find(this.dataTypes.models, {'id': data.type }) : this.isLeafSearch ? _.find(this.dataTypes.models, {'id': data.parents[0].type }) : this.dataTypes;
+              var model = dataType.get("model");
               var path = model === Classes.DATA ? model.toLowerCase() : model.toLowerCase() + 's';
               path += "/edit/" + data.id;
               xtens.router.navigate(path, {trigger: true});
@@ -805,13 +816,14 @@
           showDerivedDataList: function(ev) {
               var currRow = this.table.row($(ev.currentTarget).parents('tr'));
               var data = currRow.data();
-              var dataType = this.multiProject || this.isLeafSearch ? _.find(this.dataTypes.models, {'id': data.type }) : this.dataTypes;
+              var dataType = this.multiProject && !this.isLeafSearch ? _.find(this.dataTypes.models, {'id': data.type }) : this.isLeafSearch ? _.find(this.dataTypes.models, {'id': data.parents[0].type }) : this.dataTypes;
               var model = dataType.get("model");
               var parentProperty = model === Classes.SUBJECT ? 'parentSubject' : model === Classes.SAMPLE ? 'parentSample' : 'parentData';
-              var path = "data?" + parentProperty + "=" + data.id;
+              var dataId = this.isLeafSearch ? data.parents[0].id : data.id;
+              var path = "data?" + parentProperty + "=" + dataId;
 
             // TODO change "code" to "subjectCode" for sake of clarity
-              path += data.code ? "&parentSubjectCode=" + data.code : '';
+              path += this.isLeafSearch ? data.parents[0].code ? "&donorCode=" + data.parents[0].code : '' : data.code ? "&donorCode=" + data.code : '';
               path += "&parentDataType=" + dataType.id;
 
               xtens.router.navigate(path, {trigger: true});
@@ -827,7 +839,8 @@
           showSubjectGraph: function(ev) {
               var currRow = this.table.row($(ev.currentTarget).parents('tr'));
               var data = currRow.data();
-              var path = "subjects/graph?idPatient=" + data.id;
+              var dataId = this.isLeafSearch ? data.parents[0].id : data.id;
+              var path = "subjects/graph?idPatient=" + dataId;
 
               xtens.router.navigate(path, {trigger: true});
               return false;
@@ -843,17 +856,18 @@
           showDerivedSampleList: function(ev) {
               var currRow = this.table.row($(ev.currentTarget).parents('tr'));
               var data = currRow.data();
-              var dataType = this.multiProject || this.isLeafSearch ? _.find(this.dataTypes.models, {'id': data.type }) : this.dataTypes;
+              var dataType = this.multiProject && !this.isLeafSearch ? _.find(this.dataTypes.models, {'id': data.type }) : this.isLeafSearch ? _.find(this.dataTypes.models, {'id': data.parents[0].type }) : this.dataTypes;
               var model = dataType && dataType.get("model");
             // DATA cannot have sample child
               if (model === Classes.DATA)
                   return false;
 
               var parentProperty = model === Classes.SUBJECT ? 'donor' : 'parentSample';
-              var path = "samples?" + parentProperty + "=" + data.id;
+              var dataId = this.isLeafSearch ? data.parents[0].id : data.id;
+              var path = "samples?" + parentProperty + "=" + dataId;
 
             // TODO change "code" to "subjectCode" for sake of clarity
-              path += data.code ? "&donorCode=" + data.code : '';
+              path += this.isLeafSearch ? data.parents[0].code ? "&donorCode=" + data.parents[0].code : '' : data.code ? "&donorCode=" + data.code : '';
               path += "&parentDataType=" + dataType.id;
 
               xtens.router.navigate(path, {trigger: true});
@@ -868,23 +882,18 @@
          */
           showFileList: function(ev) {
             // if there is any open popover destroy it
-              var that = this, id;
-              if (ev.currentTarget) {
-                  var currRow = this.table.row($(ev.currentTarget).parents('tr'));
-                  id = currRow.data().id;
-              } else if (ev.dataId) {
-                  id = ev.dataId;
-              }else {
-                  return;
-              }
-              var model = this.multiProject || this.isLeafSearch ? this.dataTypes.models[0].get("model") : this.dataTypes.get("model");
+              var that = this;
+              var currRow = this.table.row($(ev.currentTarget).parents('tr'));
+              var id = currRow.data().id;
+              var dataType = this.multiProject && !this.isLeafSearch ? _.find(this.dataTypes.models, {'id': data.type }) : this.isLeafSearch ? _.find(this.dataTypes.models, {'id': data.parents[0].type }) : this.dataTypes;
+              var model = dataType.get("model");
               if (!this[id]){
                   if (model === Classes.SUBJECT)
                       return false;
 
                   var data = model === Classes.SAMPLE ? new Sample.Model() : new Data.Model();
-
-                  data.set("id", id);
+                  var dataId = this.isLeafSearch ? currRow.data().parents[0].id : currRow.data().id;
+                  data.set("id", dataId);
                   data.fetch({
                       data: $.param({populate: ['files']}),
                       success: function(result) {
@@ -894,7 +903,7 @@
                           //that.listenTo(view, 'fileDeleted', that.showFileList);
 
                           $(ev.currentTarget).popover({
-                              trigger:'manual',
+                              trigger: 'manual',
                               container: '.query',
                               html: true,
                               content: view.render().el,
