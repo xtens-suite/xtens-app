@@ -568,7 +568,7 @@ let DataService = BluebirdPromise.promisifyAll({
             _.forEach(data, (datum, i) => {
 
                 // console.log(dataTypePrivileges, datum.type);
-                let priv = multiProject || leafSearch ? _.find(dataTypePrivileges,{'dataType': datum.type}) : dataTypePrivileges;
+                let priv = multiProject && !leafSearch ? _.find(dataTypePrivileges,{'dataType': datum.type}) : leafSearch ? _.find(dataTypePrivileges,{'dataType': datum.parents[0].type}) : dataTypePrivileges;
 
               //if operator has not privilege on dataTypes return empty data
                 if (!priv || _.isEmpty(priv) ) { data.splice(i,1); return;}
@@ -583,7 +583,7 @@ let DataService = BluebirdPromise.promisifyAll({
                     }
                 }
                 if (forbiddenMetadata.length > 0) {
-                    let dt = multiProject || leafSearch ? _.find(dataTypes,{'id': datum.type}) : dataTypes;
+                    let dt = multiProject && !leafSearch ? _.find(dataTypes,{'id': datum.type}) : leafSearch ? _.find(dataTypes,{'id': datum.parents[0].type}) : dataTypes;
                     for (const frbMtdt of forbiddenMetadata) {
                         if (dt.project === frbMtdt.project) {
                             datum[frbMtdt.label] = {};
