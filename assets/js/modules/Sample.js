@@ -361,7 +361,7 @@
                 var that = this;
                 Data.Views.Edit.prototype.dataTypeOnChange.call(this);
                 var typeName = this.$('#data-type :selected').text(),
-                    parentSample = this.model.get("parentSample") ? this.model.get("parentSample").biobankCode : null,
+                    parentSample = this.model.get("parentSample") ? this.model.get("parentSample")[0].biobankCode : null,
                     biobank = this.model.get("biobank").id;
                 var type = _.find(this.dataTypes, function(dt){ return dt.name === typeName;});
                 var params = {

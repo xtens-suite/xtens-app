@@ -777,7 +777,7 @@
 
               var btnGroupTemplate = JST["views/templates/xtenstable-buttongroup.ejs"];
               var that = this;
-              var privilege = this.multiProject && !this.isLeafSearch ? _.find(options.dataTypePrivileges, {'dataType': this.data[0].type }) : this.isLeafSearch ? _.find(options.dataTypePrivileges, {'dataType': this.data[0].parents[0].type }) : options.dataTypePrivileges;
+              var privilege = this.multiProject || this.isLeafSearch ? _.find(options.dataTypePrivileges, {'dataType': this.data[0].type }) : options.dataTypePrivileges;
               _.each(!this.isLeafSearch ? this.data : this.plainData, function(datum) {
                   datum._links = btnGroupTemplate({
                       __:i18n,
@@ -848,11 +848,11 @@
               var dataType = this.multiProject || this.isLeafSearch ? _.find(this.dataTypes.models, {'id': data.type }) : this.dataTypes;
               var model = dataType.get("model");
               var parentProperty = model === Classes.SUBJECT ? 'parentSubject' : model === Classes.SAMPLE ? 'parentSample' : 'parentData';
-              var dataId = this.isLeafSearch ? data.parents[0].id : data.id;
+              var dataId = data.id;
               var path = "data?" + parentProperty + "=" + dataId;
 
             // TODO change "code" to "subjectCode" for sake of clarity
-              path += this.isLeafSearch ? data.parents[0].code ? "&donorCode=" + data.parents[0].code : '' : data.code ? "&donorCode=" + data.code : '';
+              path += data.code ? "&donorCode=" + data.code : '';
               path += "&parentDataType=" + dataType.id;
 
               xtens.router.navigate(path, {trigger: true});
@@ -868,7 +868,7 @@
           showSubjectGraph: function(ev) {
               var currRow = this.table.row($(ev.currentTarget).parents('tr'));
               var data = currRow.data();
-              var dataId = this.isLeafSearch ? data.parents[0].id : data.id;
+              var dataId = data.id;
               var path = "subjects/graph?idPatient=" + dataId;
 
               xtens.router.navigate(path, {trigger: true});
@@ -892,11 +892,11 @@
                   return false;
 
               var parentProperty = model === Classes.SUBJECT ? 'donor' : 'parentSample';
-              var dataId = this.isLeafSearch ? data.parents[0].id : data.id;
+              var dataId = data.id;
               var path = "samples?" + parentProperty + "=" + dataId;
 
             // TODO change "code" to "subjectCode" for sake of clarity
-              path += this.isLeafSearch ? data.parents[0].code ? "&donorCode=" + data.parents[0].code : '' : data.code ? "&donorCode=" + data.code : '';
+              path +=  data.code ? "&donorCode=" + data.code : '';
               path += "&parentDataType=" + dataType.id;
 
               xtens.router.navigate(path, {trigger: true});
@@ -913,7 +913,7 @@
             // if there is any open popover destroy it
               var that = this;
               var currRow = this.table.row($(ev.currentTarget).parents('tr'));
-              var id = this.isLeafSearch ? currRow.data().parents[0].id : currRow.data().id;
+              var id = currRow.data().id;
               var dataType = this.multiProject || this.isLeafSearch ? _.find(this.dataTypes.models, {'id': data.type }) : this.dataTypes;
               var model = dataType.get("model");
               if (!this[id]){
@@ -921,7 +921,7 @@
                       return false;
 
                   var data = model === Classes.SAMPLE ? new Sample.Model() : new Data.Model();
-                  var dataId = this.isLeafSearch ? currRow.data().parents[0].id : currRow.data().id;
+                  var dataId = currRow.data().id;
                   data.set("id", dataId);
                   data.fetch({
                       data: $.param({populate: ['files']}),
