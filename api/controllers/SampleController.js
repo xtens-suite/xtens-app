@@ -15,6 +15,8 @@ const ValidationError = require('xtens-utils').Errors.ValidationError;
 const PrivilegesError = require('xtens-utils').Errors.PrivilegesError;
 const NonexistentResourceError = require('xtens-utils').Errors.NonexistentResourceError;
 const xtensConf = global.sails.config.xtens;
+const DbLog = sails.hooks.dblog.log;
+const logMessages = sails.hooks.dblog.messages;
 const SAMPLE = xtensConf.constants.DataTypeClasses.SAMPLE;
 const VIEW_OVERVIEW = xtensConf.constants.DataTypePrivilegeLevels.VIEW_OVERVIEW;
 const EDIT = xtensConf.constants.DataTypePrivilegeLevels.EDIT;
@@ -47,6 +49,8 @@ const coroutines = {
         const dataTypeName = dataType && dataType.name;
         const project = dataType && dataType.project;
         const result = yield crudManager.createSample(sample, dataTypeName, project);
+
+        DbLog(logMessages.CREATE, SAMPLE, result.id, result.owner, result.type, operator.id);
         sails.log.info(result);
         res.set('Location', `${req.baseUrl}${req.url}/${result.id}`);
         return res.json(201, result);
@@ -70,6 +74,8 @@ const coroutines = {
         if( !operator.canAccessSensitiveData && !_.isEmpty(sample.metadata) ){
             sample = yield DataService.filterOutSensitiveInfo(sample, operator.canAccessSensitiveData);
         }
+
+        DbLog(logMessages.FINDONE, SAMPLE, id, sample.owner, idSampleType, operator.id );
         return res.json(sample);
 
     }),
@@ -94,6 +100,8 @@ const coroutines = {
             DataService.filterListByPrivileges(samples, dataTypesId, pagePrivileges, operator.canAccessSensitiveData),
             QueryService.composeHeaderInfo(req, params)
         ]);
+
+        //DbLog(logMessages.FIND, SAMPLE, samples.length, _.uniq(_.map(samples, 'owner')), dataTypesId, operator.id);
         return DataService.prepareAndSendResponse(res, payload, headerInfo);
 
     }),
@@ -112,6 +120,11 @@ const coroutines = {
         if (!dataTypePrivilege || dataTypePrivilege.privilegeLevel != EDIT) {
             throw new PrivilegesError(`Authenticated user has not edit privileges on the sample type ${sample.type}`);
         }
+
+        let query = Sample.findOne(sample.id);
+        query = actionUtil.populateRequest(query, req);
+        let prevSample = yield BluebirdPromise.resolve(query);
+
         SampleService.simplify(sample);
 
         const dataType = yield DataType.findOne(idSampleType);
@@ -123,6 +136,11 @@ const coroutines = {
         sample = validationRes.value;
         const updatedSample = yield crudManager.updateSample(sample, dataTypeName);
 
+        let qUpdate = Sample.findOne(sample.id);
+        qUpdate = actionUtil.populateRequest(qUpdate, req);
+        let upSample = yield BluebirdPromise.resolve(qUpdate);
+
+        DbLog(logMessages.UPDATE, SAMPLE, updatedSample.id, updatedSample.owner, updatedSample.type, operator.id, {prevData: prevSample, upData: upSample});
         return res.json(updatedSample);
     }),
 
@@ -145,9 +163,12 @@ const coroutines = {
         if (!dataTypePrivilege || dataTypePrivilege.privilegeLevel != EDIT) {
             throw new PrivilegesError(`Authenticated user has not edit privileges on the sample type ${sample.type}`);
         }
-        sails.log.info(`Subject to be deleted:  ${sample.id}`);
+        sails.log.info(`Sample to be deleted:  ${sample.id}`);
 
         const deleted = yield crudManager.deleteSample(id);
+        if (deleted > 0) {
+            DbLog(logMessages.DELETE, SAMPLE, sample.id, sample.owner, sample.type, operator.id, {deletedData: JSON.stringify(sample)});
+        }
         return res.json(200, { deleted: deleted });
 
     }),
@@ -167,7 +188,7 @@ const coroutines = {
                 project: params.project,
                 privilegeLevel: EDIT
             }),
-            biobanks: BiobankService.getAsync(params),
+            biobanks: BiobankService.getBiobanksByProject(params.project),
             donor: SubjectService.getOneAsync(params.donor, params.donorCode),
             parentSample: SampleService.getOneAsync(params.parentSample)
         });
@@ -193,6 +214,18 @@ const coroutines = {
         return res.json(payload);
 
 
+    }),
+
+    getNextBiobankCode: BluebirdPromise.coroutine(function *(req, res) {
+        const operator = TokenService.getToken(req);
+        const params = req.allParams();
+        sails.log.info("SampleController.getNextBiobankCode - Decoded ID is: " + operator.id);
+
+        const nextCode = yield crudManager.getNextBiobankCode(params);
+
+        if (!nextCode){ throw new Error(`Error getting last biobank code for type ${params.type} and project ${params.project}`); }
+
+        return res.json(nextCode);
     })
 
 };
@@ -283,18 +316,32 @@ module.exports = {
         });
     },
 
-     /**
-     * @method
-     * @name edit
-     * @description retrieve all required models for editing/creating a Sample via client web-form
-     */
+    /**
+    * @method
+    * @name edit
+    * @description retrieve all required models for editing/creating a Sample via client web-form
+    */
     edit: function(req, res) {
         const co = new ControllerOut(res);
         coroutines.edit(req,res)
-        .catch(err => {
-            sails.log.error(err);
-            return co.error(err);
-        });
+       .catch(err => {
+           sails.log.error(err);
+           return co.error(err);
+       });
+    },
+
+   /**
+   * @method
+   * @name getNextBiobankCode
+   * @description retrieve last biobank code for creating a Sample via client web-form
+   */
+    getNextBiobankCode: function(req, res) {
+        const co = new ControllerOut(res);
+        coroutines.getNextBiobankCode(req,res)
+      .catch(err => {
+          sails.log.error(err);
+          return co.error(err);
+      });
     }
 
 };

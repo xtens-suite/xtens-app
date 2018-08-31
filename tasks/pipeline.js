@@ -63,6 +63,7 @@ var jsFilesToInject = [
     'dependencies/d3-tip/index.js',
     'dependencies/**/Sortable.js',
     '/dependencies/**/bootstrap-select.js',
+    '/dependencies/**/bootstrap-notify.js',
     // Customised client-side js files
 
     'js/application/xtens.js',

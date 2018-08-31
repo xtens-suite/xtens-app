@@ -1,6 +1,6 @@
-# XTENS 2
+# XTENS 2 v.2.2
 
-[![Build Status](https://travis-ci.org/xtens-suite/xtens-app.svg?branch=master)](https://travis-ci.org/xtens-suite/xtens-app.svg?branch=master)
+[![Build Status](https://travis-ci.org/xtens-suite/xtens-app.svg?branch=master)](https://travis-ci.org/xtens-suite/xtens-app)
 [![Coverage Status](https://coveralls.io/repos/github/xtens-suite/xtens-app/badge.svg?branch=master)](https://coveralls.io/github/xtens-suite/xtens-app?branch=master)
 
 
@@ -44,13 +44,13 @@ The following software packages are required to be installed on your system:
 
 * Install npm packages:
 
-        npm [sudo] install sails -g
+        [sudo] npm install sails -g
 
         npm install && npm install sails
 
-        npm [sudo] install grunt-cli -g
+        [sudo] npm install grunt-cli -g
 
-        npm [sudo] install bower -g
+        [sudo] npm install bower -g
 
 * Install ruby and sass       
 
@@ -82,7 +82,7 @@ Now configure PostgreSQL:
 
 Then create a file named ```local.js``` in the ```config/``` directory. This config file should include any settings specific of your local system/setup (db passwords, operators etc.).
 
-In the minimal setup it should contain the following information, including two default users with two user groups (admin and general user).
+In the minimal setup it should contain the following information, including two default users with two user groups (an admin and a standard user).
 
            module.exports = {
 

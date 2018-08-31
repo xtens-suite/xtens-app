@@ -101,13 +101,49 @@
             if (this.idDataType) {
                 $('#st-name').attr("disabled", true);
                 $('#uri').attr("disabled", true);
+                $('#model').attr("disabled", true);
+                $('#biobankPrefix').prop("disabled", true);
+                $('#getParentCode').prop("disabled", true);
+                if (this.model.get('model') === "Sample") {
+                    $('.biobankPrefix-container').removeAttr("hidden");
+                }
+                if (_.indexOf($('#parents').val().map(Number), this.idDataType) >= 0) {
+                    $('.noparent-container').css("display", "");
+                }
             }
+            $('#parents').on('change', function () {
+                if (that.model.get('model') === "Sample") {
+                // var selectedParents = _.filter(that.existingDataTypes, (d) => _.indexOf($('#parents').val().map(Number), d.id) >= 0);
+                    if (_.indexOf($('#parents').val().map(Number), that.idDataType) >= 0) {
+                        $('.noparent-container').css("display", "");
+                    }
+                    else {
+                        that.model.set('ifParentNoPrefix', false);
+                        $('.noparent-container').css("display", "none");
+                    }
+                }else {
+                    that.model.set('ifParentNoPrefix', false);
+                }
+            });
         },
 
         bindings: {
             '#name': {
                 observe: 'name'
             },
+
+            '#biobankPrefix': {
+                observe: 'biobankPrefix'
+            },
+
+            '#getParentCode': {
+                observe: 'getParentCode'
+            },
+
+            '#ifParentNoPrefix': {
+                observe: 'ifParentNoPrefix'
+            },
+
             '#model': {
                 observe: 'model',
                 initialize: function($el) {
@@ -192,6 +228,7 @@
         },
 
         render: function() {
+            var that = this;
 
             this.$el.html(this.template({__: i18n, dataType: this.model, isMultiProject: this.isMultiProject}));
             this.$form = this.$("form");
@@ -207,6 +244,19 @@
                 $('#project').prop('disabled', true);
                 this.getProjectParents();
             }
+
+            $('#model').on('change',function (event) {
+                var currentModel = event.currentTarget.value;
+                if (currentModel === "Sample") {
+                    $('.biobankPrefix-container').removeAttr("hidden");
+                    $('#biobankPrefix').prop("required", true);
+                }
+                else {
+                    $('.biobankPrefix-container').prop("hidden", true);
+                    $('#biobankPrefix').removeAttr("required");
+                }
+                that.$form.parsley(parsleyOpts);
+            });
 
             if (this.idDataType) {
                 this.getProjectParents();
@@ -239,7 +289,6 @@
                 }
                 else {
                   //edit
-                    var that = this;
                     if (this.isMultiProject) {
 
                         $(".panel-heading").on('click',function(){
@@ -252,7 +301,7 @@
                                     template: JST["views/templates/confirm-dialog-bootstrap.ejs"],
                                     title: i18n('confirm-edit'),
                                     body: i18n('edit-data-type-schema-warning'),
-                                    type: "edit"
+                                    type: i18n("edit")
                                 });
 
                                 that.$modal.append(modal.render().el);
@@ -282,6 +331,25 @@
                     }
                 }
             }
+
+            $('input[name=name]').on('focusout', function (e) {
+                var name = e.currentTarget.value;
+                var namesArray = $('input[name=name]').map(function(){return this.value;});
+                // var namesArray = _.map(_.flatten(_.map(that.stModel.attributes.schema.body, 'content')),'name');
+                if (_.filter(namesArray, function (n) { return n === name; } ).length > 1) {
+                    e.currentTarget.value = null;
+                    $.notify('Invalid Name attibute, name already used', {
+                        type: 'danger',
+                        delay: 1500,
+                        allow_dismiss: false,
+                        placement: {
+                            from: 'bottom',
+                            align: 'right'
+                        }
+                    });
+                }
+            });
+
             return this;
         },
 
@@ -319,7 +387,7 @@
             // if (this.superTypeView && this.superTypeView.model) {
             var body = this.serialize();
             this.stModel.attributes.schema = {
-                header: _.omit(header, ['parents']), // parent-child many-to-many associations are not currently saved in the JSON schema
+                header: _.omit(header, 'parents', 'biobankPrefix'), // parent-child many-to-many associations are not currently saved in the JSON schema
                 body: body
             };
             this.model.set("superType", _.clone(this.stModel.attributes));
@@ -367,7 +435,7 @@
                 template: JST["views/templates/confirm-dialog-bootstrap.ejs"],
                 title: i18n('confirm-deletion'),
                 body: i18n('datatype-will-be-permanently-deleted-are-you-sure'),
-                type: "delete"
+                type: i18n("delete")
             });
 
             this.$modal.append(modal.render().el);
@@ -431,6 +499,7 @@
         initialize: function(options) {
             $("#main").html(this.el);
             this.dataTypes = options.dataTypes;
+            this.projectSource = xtens.session.get('activeProject') != 'all' ? _.find(xtens.session.get('projects'),function (p) { return p.name === xtens.session.get('activeProject'); }).id : null ;
             this.template = JST["views/templates/datatype-list.ejs"];
             this.render(options);
         },
@@ -467,7 +536,7 @@
             var modal = new ModalDialog({
                 title: i18n('duplicate-data-type'),
                 template: JST["views/templates/datatype-duplicate.ejs"],
-                data: { __: i18n, dataTypes: this.dataTypes.toJSON()}
+                data: { __: i18n, dataTypes: this.dataTypes.toJSON(), projectSource: this.projectSource }
             });
             this.$modal.append(modal.render().el);
 
@@ -477,16 +546,20 @@
             $('#project-dest').selectpicker('hide');
 
             modal.show();
+            if (xtens.session.get("activeProject") !=  "all") {
+                $('#project-source option[value='+ this.projectSource + ']').prop('disabled', true);
+                $('#project-source').selectpicker('refresh');
+            }
 
             $('#project-source').on('change.bs.select', function () {
-                var projectSource= $('#project-source').val();
+                this.projectSource= $('#project-source').val();
                 $("label[for='data-type']").prop('hidden',false);
                 $('#data-type-selector').selectpicker('show');
                 $('#data-type-selector optgroup').prop('disabled', true);
-                $('#data-type-selector optgroup#'+projectSource).prop('disabled', false);
+                $('#data-type-selector optgroup#'+this.projectSource).prop('disabled', false);
                 $('#data-type-selector').selectpicker('refresh');
                 $('#project-dest option').prop('disabled', false);
-                $('#project-dest option[value='+projectSource +']').prop('disabled', true);
+                $('#project-dest option[value='+this.projectSource +']').prop('disabled', true);
                 $('#project-dest').selectpicker('refresh');
 
                 $('#data-type-selector').on('change.bs.select', function () {
@@ -498,7 +571,9 @@
                     //     $('#project-dest').selectpicker('refresh');
                     // }
                     $('#project-dest').selectpicker('show');
-
+                    if (xtens.session.get("activeProject") !=  "all") {
+                        $('#project-dest').selectpicker('val', _.find(xtens.session.get('projects'),function (p) { return p.name === xtens.session.get('activeProject'); }).id );
+                    }
                     $('#project-dest').on('change.bs.select', function () {
                         var projectDest= $('#project-dest').val();
 
@@ -573,7 +648,7 @@
                     'Authorization': 'Bearer ' + xtens.session.get("accessToken")
                 },
                 data: {idDataType: idDatatype},
-
+                beforeSend: function() { $('.loader-gif').css("display","block"); },
                 success: function (res, textStatus, jqXHR) {
                     //Get parentWidth
                     var parentWidth=d3.select('#main');
@@ -760,7 +835,7 @@
                                                 }
                                             });
 
-
+                    $('.loader-gif').css("display","none");
                     function nodeByName(name) {
                         return nodesByName[name] || (nodesByName[name] = {name: name});
                     }

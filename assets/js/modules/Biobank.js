@@ -124,7 +124,7 @@
                 template: JST["views/templates/confirm-dialog-bootstrap.ejs"],
                 title: i18n('confirm-deletion'),
                 body: i18n('biobank-will-be-permanently-deleted-are-you-sure'),
-                type: "delete"
+                type: i18n("delete")
             });
 
             this.$modal.append(modal.render().el);
@@ -132,10 +132,12 @@
 
             this.$('#confirm').click( function (e) {
                 modal.hide();
+                that.$modal.one('hidden.bs.modal', function (e) {
+                    $('.waiting-modal').modal('show');
 
-                that.model.destroy({
-                    success: function(model, res) {
-                        that.$modal.one('hidden.bs.modal', function (e) {
+                    that.model.destroy({
+                        success: function(model, res) {
+                            $('.waiting-modal').modal('hide');
                             modal.template= JST["views/templates/dialog-bootstrap.ejs"];
                             modal.title= i18n('ok');
                             modal.body= i18n('biobank-deleted');
@@ -147,11 +149,11 @@
                                 modal.remove();
                                 xtens.router.navigate('biobanks', {trigger: true});
                             });
-                        });
-                    },
-                    error: function(model, res) {
-                        xtens.error(res);
-                    }
+                        },
+                        error: function(model, res) {
+                            xtens.error(res);
+                        }
+                    });
                 });
                 return false;
             });
@@ -173,7 +175,10 @@
         render: function(options) {
             var that = this;
             var biobanks = new Biobank.List();
+            var activeProject = xtens.session.get('activeProject') !== 'all' ? _.find(xtens.session.get('projects'), { 'name': xtens.session.get('activeProject')}) : undefined;
+
             biobanks.fetch({
+                data: $.param({ project: activeProject ? activeProject.id : undefined }),
                 success: function(biobanks) {
                     that.$el.html(that.template({__: i18n, biobanks: biobanks.models}));
                 },

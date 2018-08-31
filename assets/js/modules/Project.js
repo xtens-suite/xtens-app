@@ -77,6 +77,7 @@
             this.assDt = this.model.get('dataTypes');
             this.noAssGr = options.groups;
             this.assGr = this.model.get('groups');
+            this.biobanks = this.model.get('biobanks') ? options.biobanks.concat(this.model.get('biobanks')) : options.biobanks;
 
             $("#main").html(this.el);
             this.template = JST["views/templates/project-edit.ejs"];
@@ -87,7 +88,30 @@
             '#name': 'name',
 
             '#description': 'description'
-
+            ,
+            '#biobanks': {
+                observe: 'biobanks',
+                initialize: function($el) {
+                    $el.select2({placeholder: i18n("please-select") });
+                },
+                selectOptions: {
+                    collection: 'this.biobanks',
+                    labelPath: 'biobankID',
+                    valuePath: 'id',
+                    defaultOption: {
+                        label: "",
+                        value: null
+                    }
+                },
+                getVal: function($el, ev, options) {
+                    return $el.val() && $el.val().map(function(value) {
+                        return parseInt(value);
+                    });
+                },
+                onGet: function(vals) {
+                    return (vals && vals.map(function(val) {return val.id; }));
+                }
+            }
 
         },
 
@@ -102,32 +126,6 @@
             // this.dataTypesToBeSaved = _.map(this.assDt, 'id');
             this.groupsToBeSaved = _.map(this.assGr, 'id');
 
-            // var noDT = document.getElementById('noassociatedDataTypes');
-            // Sortable.create(noDT, {
-            //     group: 'dataType',
-            //     animation: 300
-            // });
-            // var assDT = document.getElementById('associatedDataTypes');
-            // Sortable.create(assDT, {
-            //     group: 'dataType',
-            //     animation: 300,
-            //     disabled:true
-            //
-            //     // Element is dropped into the list from another list
-            //     onAdd: function (/**Event*/evt) {
-            //         var itemEl = evt.item;  // dragged HTMLElement
-            //         evt.from;  // previous list
-            //         // + indexes from onEnd
-            //         that.dataTypesToBeSaved.push(itemEl.value);
-            //     },
-            //     // Element is removed from the list into another list
-            //     onRemove: function (/**Event*/evt) {
-            //       // same properties as onUpdate
-            //         var itemEl = evt.item;
-            //         var index = _.indexOf(that.dataTypesToBeSaved, itemEl.value);
-            //         that.dataTypesToBeSaved.splice(index,1);
-            //     }
-            // });
             var noGr = document.getElementById('noassociatedGroups');
             Sortable.create(noGr, {
                 group: 'groups',
@@ -198,7 +196,7 @@
                 template: JST["views/templates/confirm-dialog-bootstrap.ejs"],
                 title: i18n('confirm-deletion'),
                 body: i18n('project-will-be-permanently-deleted-are-you-sure'),
-                type: "delete"
+                type: i18n("delete")
             });
 
             this.$modal.append(modal.render().el);
@@ -207,11 +205,13 @@
             this.$('#confirm').click( function (e) {
                 modal.hide();
                 $('.modal-backdrop').remove();
-                var targetRoute = $(ev.currentTarget).data('targetRoute') || 'data';
+                that.$modal.one('hidden.bs.modal', function (e) {
+                    $('.waiting-modal').modal('show');
+                    var targetRoute = $(ev.currentTarget).data('targetRoute') || 'data';
 
-                that.model.destroy({
-                    success: function(model, res) {
-                        that.$modal.one('hidden.bs.modal', function (e) {
+                    that.model.destroy({
+                        success: function(model, res) {
+                            $('.waiting-modal').modal('hide');
                             modal.template= JST["views/templates/dialog-bootstrap.ejs"];
                             modal.title= i18n('ok');
                             modal.body= i18n('project-deleted');
@@ -223,11 +223,11 @@
                                 modal.remove();
                                 xtens.router.navigate('projects', {trigger: true});
                             });
-                        });
-                    },
-                    error: function(model, res) {
-                        xtens.error(res);
-                    }
+                        },
+                        error: function(model, res) {
+                            xtens.error(res);
+                        }
+                    });
                 });
                 return false;
             });

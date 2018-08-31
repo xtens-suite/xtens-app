@@ -10,6 +10,8 @@
 const ControllerOut = require("xtens-utils").ControllerOut, ValidationError = require('xtens-utils').Errors.ValidationError;
 const PrivilegesError = require('xtens-utils').Errors.PrivilegesError;
 const crudManager = sails.hooks.persistence.crudManager;
+const DbLog = sails.hooks.dblog.log;
+const logMessages = sails.hooks.dblog.messages;
 const actionUtil = require('sails/lib/hooks/blueprints/actionUtil');
 const BluebirdPromise = require('bluebird');
 
@@ -91,6 +93,8 @@ const coroutines = {
 
         dataType = yield crudManager.createDataType(dataType);
 
+        DbLog(logMessages.CREATE, "DataType", dataType.id, dataType.project, dataType.superType, operator.id);
+
         //add edit privileges for manager and wheel groups of operator
         // let projectGroups= yield GroupService.getGroupsByProject(dataType.project);
         // let wheelGroups = _.map(_.where(projectGroups,{privilegeLevel:"wheel"}),'id');
@@ -124,6 +128,10 @@ const coroutines = {
             throw new PrivilegesError('User has not privilege as Admin on this project');
         }
 
+        let query = DataType.findOne(dataType.id).populate('superType');
+        query = actionUtil.populateRequest(query, req);
+        let prevDataType = yield BluebirdPromise.resolve(query);
+
         // Validate data type (schema included)
         const validationRes = DataTypeService.validate(dataType, true);
         if(dataType.parents){
@@ -143,6 +151,13 @@ const coroutines = {
             throw new ValidationError(validationRes.error);
         }
         dataType = yield crudManager.updateDataType(dataType);
+
+        let qUpdate = DataType.findOne(dataType.id).populate('superType');
+        qUpdate = actionUtil.populateRequest(qUpdate, req);
+        let upDatatype = yield BluebirdPromise.resolve(qUpdate);
+
+        DbLog(logMessages.UPDATE, "DataType", dataType.id, dataType.project, dataType.superType, operator.id, {prevData: prevDataType, upData: upDatatype});
+
         sails.log(dataType);
         return res.json(dataType);
     }),
@@ -176,13 +191,20 @@ const coroutines = {
         sails.log.info("DataTypeController.destroy - Decoded ID is: " + operator.id);
         let adminGroups = yield Group.find(operator.adminGroups).populate('projects');
         const adminProjects = _.uniq(_.flatten(_.map(_.flatten(_.map(adminGroups, 'projects')), 'id')));
-        let adminDataTypes = yield DataType.find({project:adminProjects});
+        let adminDataTypes = yield DataType.find({project: adminProjects});
 
         if (!operator.isWheel && !_.find(adminDataTypes, function(dt){ return dt.id === _.parseInt(id);})) {
             throw new PrivilegesError('User has not privilege as Admin on this project');
         }
 
+        let query = DataType.findOne(id).populate('superType');
+        query = actionUtil.populateRequest(query, req);
+        let deletedDataType = yield BluebirdPromise.resolve(query);
+
         const deleted = yield crudManager.deleteDataType(id);
+        if (deleted > 0) {
+            DbLog(logMessages.DELETE, "DataType", deletedDataType.id, deletedDataType.project, deletedDataType.superType.id, operator.id, {deletedData: JSON.stringify(deletedDataType)});
+        }
         return res.json({deleted: deleted});
     })
 };

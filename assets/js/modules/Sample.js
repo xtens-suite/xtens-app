@@ -207,6 +207,7 @@
             this.biobanks = options.biobanks || [];
             this.subjects = options.subjects || [];
             this.operators = options.operators ? options.operators : [];
+            this.savingSample = false;
             if (options.sample) {
                 this.model = new Sample.Model(options.sample);
             } else {
@@ -220,6 +221,7 @@
                 }
             }, this);
             this.render();
+
         },
 
         events: {
@@ -237,7 +239,9 @@
          * @return {false} - to suppress the HTML form submission
          */
         saveSample: function(ev) {
+            this.savingSample = true;
             var targetRoute = $(ev.currentTarget).data('targetRoute') || 'samples';
+
             if (this.schemaView && this.schemaView.serialize) {
                 var that = this;
                 this.$modal = this.$(".sample-modal");
@@ -271,6 +275,8 @@
                         }, 1200);
                         that.$('.sample-modal').on('hidden.bs.modal', function(e) {
                             modal.remove();
+                            that.savingSample = false;
+
                             xtens.router.navigate(targetRoute, {
                                 trigger: true
                             });
@@ -278,6 +284,7 @@
 
                     },
                     error: function(model, res) {
+                        that.savingSample = false;
                         xtens.error(res);
                     }
                 });
@@ -286,6 +293,8 @@
         },
 
         deleteSample: function(ev) {
+            this.savingSample = true;
+
             ev.preventDefault();
             var that = this;
             this.$modal = this.$(".sample-modal");
@@ -297,7 +306,7 @@
                 template: JST["views/templates/confirm-dialog-bootstrap.ejs"],
                 title: i18n('confirm-deletion'),
                 body: i18n('sample-will-be-permanently-deleted-are-you-sure'),
-                type: "delete"
+                type: i18n("delete")
             });
 
             this.$modal.append(modal.render().el);
@@ -305,11 +314,14 @@
 
             this.$('#confirm').click(function(e) {
                 modal.hide();
-                var targetRoute = $(ev.currentTarget).data('targetRoute') || 'samples';
+                that.$modal.one('hidden.bs.modal', function (e) {
+                    $('.waiting-modal').modal('show');
+                    var targetRoute = $(ev.currentTarget).data('targetRoute') || 'samples';
 
-                that.model.destroy({
-                    success: function(model, res) {
-                        that.$modal.one('hidden.bs.modal', function (e) {
+                    that.model.destroy({
+                        success: function(model, res) {
+                            $('.waiting-modal').modal('hide');
+
                             modal.template = JST["views/templates/dialog-bootstrap.ejs"];
                             modal.title = i18n('ok');
                             modal.body = i18n('sample-deleted');
@@ -320,16 +332,18 @@
                                 modal.hide();
                             }, 1200);
                             that.$modal.on('hidden.bs.modal', function(e) {
+                                this.savingSample = false;
                                 modal.remove();
                                 xtens.router.navigate(targetRoute, {
                                     trigger: true
                                 });
                             });
-                        });
-                    },
-                    error: function(model, res) {
-                        xtens.error(res);
-                    }
+                        },
+                        error: function(model, res) {
+                            this.savingSample = false;
+                            xtens.error(res);
+                        }
+                    });
                 });
                 return false;
             });
@@ -342,15 +356,41 @@
        */
 
         dataTypeOnChange: function() {
-            Data.Views.Edit.prototype.dataTypeOnChange.call(this);
-            var typeName = this.$('#data-type :selected').text(),
-                parentSample = this.model.get("parentSample");
+            if (!this.savingSample) {
 
-            if (parentSample && parentSample.length > 0 && parentSample[0].biobankCode) {
-                this.model.set('biobankCode', biobankCodeMap[typeName] + parentSample[0].biobankCode);
-            }
-            if (this.subjects.length > 0) {
-                this.fetchDonorsOnSuccess(this.subjects, $('#donor'));
+                var that = this;
+                Data.Views.Edit.prototype.dataTypeOnChange.call(this);
+                var typeName = this.$('#data-type :selected').text(),
+                    parentSample = this.model.get("parentSample") ? this.model.get("parentSample").biobankCode : null,
+                    biobank = this.model.get("biobank").id;
+                var type = _.find(this.dataTypes, function(dt){ return dt.name === typeName;});
+                var params = {
+                    sample: {
+                        type: type.id,
+                        parentSample: parentSample,
+                        biobank: biobank
+                    },
+                    project: type.project
+                };
+                $.ajax({
+                    url: '/sample/getNextBiobankCode',
+                    type: 'GET',
+                    headers: {
+                        'Authorization': 'Bearer ' + xtens.session.get("accessToken")
+                    },
+                    data: params,
+                    contentType: 'application/json',
+                    success: function(result) {
+                        that.model.set('biobankCode', result);
+                    },
+                    error: function(err) {
+                        xtens.error(err);
+                    }
+                });
+
+                if (this.subjects.length > 0) {
+                    this.fetchDonorsOnSuccess(this.subjects, $('#donor'));
+                }
             }
 
         },
@@ -390,7 +430,7 @@
             var $select = $('<select>').addClass('form-control').attr({
                 'id': 'donor',
                 'name': 'donor'
-            });
+            }).prop('required',true);
 
             var parent = targetElem.parentNode ? targetElem.parentNode : targetElem.closest('.form-group')[0];
 
@@ -599,6 +639,7 @@
                     populate:'donor'
                 },
                 contentType: 'application/json',
+                beforeSend: function() { $('.loader-gif').css("display","block"); },
                 success: function(results, options, res) {
                     var headers = {
                         'Link': xtens.parseLinkHeader(res.getResponseHeader('Link')),
@@ -612,6 +653,7 @@
                     headers['startRow'] = startRow;
                     headers['endRow'] = endRow;
                     that.headers = headers;
+                    $('.loader-gif').css("display","none");
                     that.samples.reset(results);
                 },
                 error: function(err) {

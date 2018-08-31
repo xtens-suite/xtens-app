@@ -11,6 +11,24 @@ var DataType = {
             required: true,
             columnName: 'name'
         },
+
+        biobankPrefix: {
+            type: 'string',
+            columnName: 'biobank_prefix'
+        },
+
+        getParentCode: {
+            type: 'boolean',
+            defaultsTo: false,
+            columnName: 'parent_code'
+        },
+
+        ifParentNoPrefix: {
+            type: 'boolean',
+            defaultsTo: false,
+            columnName: 'parent_no_prefix'
+        },
+
         superType: {
             model:'superType',
             columnName: 'super_type'

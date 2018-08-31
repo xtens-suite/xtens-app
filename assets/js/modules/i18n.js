@@ -1,6 +1,7 @@
 (function(xtens, i18n) {
 
     var en = {
+        "operation-in-progress": "Operation in Progress...",
         "welcome": "Welcome",
         // menu
         "data-types": "Data Types",
@@ -36,6 +37,9 @@
         "file-upload": "File Upload",
         "yes": "YES",
         "no": "NO",
+        "biobank-prefix": "Biobank Prefix",
+        "get-parent-code": "Get Parent Code",
+        "no-parent-prefix": "If Parent Sample no Prefix",
         "model": "Model",
         "class-template": "Class Template", //TODO
         "parent": "Parent",
@@ -138,6 +142,7 @@
         "subject": "Subject",
         "owner": "Owner",
         "sample": "Sample",
+        "are-you-sure-delete-file": "The file will be permanently deleted. Are you sure?",
         /* views/templates/addressinformation-edit.ejs */
         "office": "Office",
         "address-information": "Address Information",
@@ -177,6 +182,7 @@
         /* views/templates/project-edit.ejs */
         "project-data-types": "Project Data Types",
         "project-groups": "Project Groups",
+        "biobanks": "Biobanks",
         "save-project": "Save Project",
         "project-deleted": "Project Deleted",
         "project-will-be-permanently-deleted-are-you-sure": "Project will be permanently deleted. Are you sure?",

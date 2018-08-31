@@ -5,7 +5,7 @@
  * @help        :: See http://links.sailsjs.org/docs/controllers
  */
  /* jshint node: true */
- /* globals _, sails, Project, ProjectService, GroupService, TokenService, Group */
+ /* globals _, sails, Project, ProjectService, GroupService, BiobankService, TokenService, Group */
 
 
 "use strict";
@@ -46,7 +46,8 @@ const coroutines = {
         const payload = yield BluebirdPromise.props({
             project: ProjectService.getOneAsync(params.id),
             // dataTypes: DataTypeService.getDataTypesToEditProject(),
-            groups: GroupService.getGroupsToEditProject(params.id)
+            groups: GroupService.getGroupsToEditProject(params.id),
+            biobanks: BiobankService.getBiobanksToEditProject(params.id)
         });
 
         return res.json(payload);

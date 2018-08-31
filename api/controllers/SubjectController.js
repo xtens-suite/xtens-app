@@ -15,6 +15,8 @@ const ValidationError = require('xtens-utils').Errors.ValidationError;
 const PrivilegesError = require('xtens-utils').Errors.PrivilegesError;
 const NonexistentResourceError = require('xtens-utils').Errors.NonexistentResourceError;
 const xtensConf = global.sails.config.xtens;
+const DbLog = sails.hooks.dblog.log;
+const logMessages = sails.hooks.dblog.messages;
 const SUBJECT = xtensConf.constants.DataTypeClasses.SUBJECT;
 const VIEW_OVERVIEW = xtensConf.constants.DataTypePrivilegeLevels.VIEW_OVERVIEW;
 const EDIT = xtensConf.constants.DataTypePrivilegeLevels.EDIT;
@@ -46,6 +48,8 @@ const coroutines = {
         subject = validationRes.value;
         const dataTypeName = dataType && dataType.name;
         const result = yield crudManager.createSubject(subject, dataTypeName);
+
+        DbLog(logMessages.CREATE, SUBJECT, result.id, result.owner, result.type, operator.id);
         sails.log.info(result);
         res.set('Location', `${req.baseUrl}${req.url}/${result.id}`);
         return res.json(201, result);
@@ -73,6 +77,8 @@ const coroutines = {
         if( !operator.canAccessSensitiveData && !_.isEmpty(subject.metadata) ){
             subject = yield DataService.filterOutSensitiveInfo(subject, operator.canAccessSensitiveData);
         }
+
+        DbLog(logMessages.FINDONE, SUBJECT, id, subject.owner, idSubjectType, operator.id );
         return res.json(subject);
 
     }),
@@ -102,6 +108,9 @@ const coroutines = {
             DataService.filterListByPrivileges(subjects, dataTypesId, pagePrivileges, operator.canAccessSensitiveData),
             QueryService.composeHeaderInfo(req, params)
         ]);
+
+        // NOTE: Log or not Log this is question
+        //DbLog(logMessages.FIND, SUBJECT, subjects.length, _.uniq(_.map(subjects, 'owner')), dataTypesId, operator.id);
         return DataService.prepareAndSendResponse(res, payload, headerInfo);
 
     }),
@@ -120,6 +129,11 @@ const coroutines = {
         if (!dataTypePrivilege || dataTypePrivilege.privilegeLevel != EDIT) {
             throw new PrivilegesError(`Authenticated user has not edit privileges on the subject type ${subject.type}`);
         }
+
+        let query = Subject.findOne(subject.id);
+        query = actionUtil.populateRequest(query, req);
+        let prevSubject = yield BluebirdPromise.resolve(query);
+
         SubjectService.simplify(subject);
 
         const dataType = yield DataType.findOne(idSubjectType);
@@ -131,6 +145,11 @@ const coroutines = {
         subject = validationRes.value;
         const updatedSubject = yield crudManager.updateSubject(subject, dataTypeName);
 
+        let qUpdate = Subject.findOne(subject.id);
+        qUpdate = actionUtil.populateRequest(qUpdate, req);
+        let upSubject = yield BluebirdPromise.resolve(qUpdate);
+
+        DbLog(logMessages.UPDATE, SUBJECT, updatedSubject.id, updatedSubject.owner, updatedSubject.type, operator.id, {prevData: prevSubject, upData: upSubject});
         return res.json(updatedSubject);
     }),
 
@@ -156,6 +175,9 @@ const coroutines = {
         sails.log.info(`Subject to be deleted:  ${subject.id}`);
 
         const deleted = yield crudManager.deleteSubject(id);
+        if (deleted > 0) {
+            DbLog(logMessages.DELETE, SUBJECT, subject.id, subject.owner, subject.type, operator.id, {deletedData: JSON.stringify(subject)});
+        }
         return res.json(200, { deleted: deleted });
 
     }),

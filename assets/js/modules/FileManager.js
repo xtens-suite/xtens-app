@@ -97,6 +97,10 @@
 
     FileManager.Views.Dropzone = Backbone.View.extend({
 
+        events: {
+            "click #delete-file": "openDialogDeleteFile"
+        },
+
         tagName: 'div',
         className: 'filemanager',
 
@@ -113,13 +117,14 @@
             this.template = JST['views/templates/filemanager-dropzone.ejs'];
             this.fileList = new FileManager.List();
             switch(options.fileSystem && options.fileSystem.type) {
-            case "irods-rest":
-                this.fsStrategy = new IrodsRestStrategy(options.fileSystem);
-                break;
-            default:
-                this.fsStrategy = new LocalFileSystemStrategy(options.fileSystem);
+                case "irods-rest":
+                    this.fsStrategy = new IrodsRestStrategy(options.fileSystem);
+                    break;
+                default:
+                    this.fsStrategy = new LocalFileSystemStrategy(options.fileSystem);
             }
             this.files = options.files;
+            this.datum = options.datum;
             /*
             this.fileSystem = options.fileSystem;
             */
@@ -132,12 +137,12 @@
 
             // set the upload URL based on the Distributed FileSystem adopted
             switch(fs.type) {
-            case "irods-rest":
-                url = fs.restURL.protocol + '//' + fs.restURL.hostname +
+                case "irods-rest":
+                    url = fs.restURL.protocol + '//' + fs.restURL.hostname +
                         ':' + fs.restURL.port + fs.restURL.path + '/fileContents' + fs.irodsHome;
-                break;
-            default:
-                url = null;
+                    break;
+                default:
+                    url = null;
             }
             return url;
         },
@@ -145,14 +150,66 @@
         render: function() {
             this.$el.html(this.template({
                 __:i18n,
-                fileNames: _.map(_.map(this.files, 'uri'), function(uri) {
-                    var uriFrags = uri && uri.split('/');
-                    return uriFrags && uriFrags[uriFrags.length - 1];
-                })
+                files: this.files
             }));
-            this.$queryModal = this.$(".query-modal");  // the modal dialog HTML element
+            this.$fileModal = this.$(".file-modal");  // the modal dialog HTML element
             this.dropzoneDiv = this.$(".dropzone")[0];       // the dropzone HTML element
             return this;
+        },
+
+        openDialogDeleteFile: function (ev) {
+            ev.preventDefault();
+            var that = this;
+            var idFile = ev.currentTarget.getAttribute('value');
+            this.modal = new ModalDialog({
+                template: JST["views/templates/confirm-dialog-bootstrap.ejs"],
+                title: i18n('confirm-deletion'),
+                body: i18n('are-you-sure-delete-file'),
+                type: i18n("delete")
+            });
+            this.$fileModal.append(this.modal.render().el);
+            this.modal.show();
+            $('.modal-header').addClass('alert-danger');
+            $('#confirm').addClass('btn-danger');
+
+            this.modal.$("#confirm").on('click',function(){
+                that.modal.hide();
+                that.$fileModal.on('hidden.bs.modal', function () {
+                    that.modal.remove();
+                    that.deleteFileContent(idFile);
+                });
+            });
+
+        },
+
+        deleteFileContent: function(idFile) {
+
+            var that = this;
+            var url = 'fileContent?file=' + idFile +'&id='+ this.datum.id;
+            $.ajax({
+                url: url,
+                type: 'DELETE',
+                headers: {
+                    'Authorization': 'Bearer ' + xtens.session.get("accessToken")
+                },
+                contentType: 'application/json',
+                success: function() {
+                    that.trigger("fileDeleted", idFile);
+                    $.notify('File correctly deleted', {
+                        type: 'success',
+                        delay: 1500,
+                        allow_dismiss: false,
+                        placement: {
+                            from: 'bottom',
+                            align: 'right'
+                        }
+                    });
+                },
+                error: function(err) {
+                    xtens.error(err);
+                }
+            });
+
         },
 
         /**
@@ -167,16 +224,6 @@
             console.log("DROPZONE opts: " + this.dropzoneOpts);
             this.dropzone = new Dropzone(this.dropzoneDiv, this.dropzoneOpts);
 
-            /*
-            if (files) {
-                var fileClones = _.cloneDeep(files);
-                _.each(fileClones, function(file) {
-                    file.name = _.last(file.uri.split("/"));
-                    this.dropzone.emit("addedfile", file);
-                }, this);
-                this.dropzone.disable();
-            } */
-
             this.dropzone.on("processing", function(file) {
                 // this.options.url = _this.dropzoneOpts.url + "/" + landingRepo + "/" + file.name;
                 this.options.url = that.fsStrategy.onProcessing(file.name);
@@ -189,18 +236,23 @@
 
             this.dropzone.on("success", function(file, xhr, formData) {
                 var name = file.name;
-                // var name = _.last(this.options.url.split("/"));
                 that.fileList.add(new FileManager.Model({name: name}));
+            });
+
+            this.dropzone.on("queuecomplete", function(file, xhr, formData) {
+                // var name = _.last(this.options.url.split("/"));
+                // that.fileList.add(new FileManager.Model({name: name}));
                 that.modal = new ModalDialog({
                     title: i18n('file-successfully-uploaded'),
-                    body: i18n('the-file') + ' ' + name + ' ' + i18n('has-been-successfully-uploaded')
+                    body: i18n('the-file') + ' ' + i18n('has-been-successfully-uploaded')
                 });
-                that.$queryModal.append(that.modal.render().el);
+                that.$fileModal.append(that.modal.render().el);
                 that.modal.show();
             });
 
-            //TODO: error handling on upload
-            this.dropzone.on("error", function() {});
+            this.dropzone.on("error", function(err) {
+                xtens.error(err);
+            });
         }
 
     });

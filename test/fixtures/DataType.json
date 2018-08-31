@@ -16,8 +16,10 @@
 
   {
     "id": 3,
+    "getParentCode": false,
     "name": "Star",
     "model": "Data",
+    "ifParentNoPrefix": false,
     "project":1,
     "superType": 3
   },

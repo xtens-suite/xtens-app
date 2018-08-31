@@ -103,6 +103,7 @@
             this.template = JST["views/templates/subject-edit.ejs"];
             this.personalDetailsView = null;
             this.schemaView = null;
+            this.savingSubject = false;
             this.operators = options.operators ? options.operators : [];
             if(xtens.session.get('activeProject') !== 'all'){
                 this.project = _.parseInt(_.find(xtens.session.get('projects'),{name: xtens.session.get('activeProject')} ).id);
@@ -196,6 +197,7 @@
          * @override
          */
         saveSubject: function(ev) {
+            this.savingSubject = true;
             this.$modal = this.$(".subject-modal");
             var that = this;
             var metadata = this.schemaView && this.schemaView.serialize(useFormattedNames);
@@ -229,10 +231,12 @@
                     setTimeout(function(){ modal.hide(); }, 1200);
                     that.$('.subject-modal').on('hidden.bs.modal', function (e) {
                         modal.remove();
+                        this.savingSubject = false;
                         xtens.router.navigate('subjects', {trigger: true});
                     });
                 },
                 error: function(model, res) {
+                    this.savingSubject = false;
                     xtens.error(res);
                 }
             });
@@ -240,6 +244,7 @@
         },
 
         deleteSubject: function(ev) {
+            this.savingSubject = true;
             ev.preventDefault();
             var that = this;
             this.$modal = this.$(".subject-modal");
@@ -251,7 +256,7 @@
                 template: JST["views/templates/confirm-dialog-bootstrap.ejs"],
                 title: i18n('confirm-deletion'),
                 body: i18n('subject-will-be-permanently-deleted-are-you-sure'),
-                type: "delete"
+                type: i18n("delete")
             });
 
             this.$modal.append(modal.render().el);
@@ -259,11 +264,13 @@
 
             this.$('#confirm').click( function (e) {
                 modal.hide();
-                var targetRoute = $(ev.currentTarget).data('targetRoute') || 'subjects';
+                that.$modal.one('hidden.bs.modal', function (e) {
+                    $('.waiting-modal').modal('show');
+                    var targetRoute = $(ev.currentTarget).data('targetRoute') || 'subjects';
 
-                that.model.destroy({
-                    success: function(model, res) {
-                        that.$modal.one('hidden.bs.modal', function (e) {
+                    that.model.destroy({
+                        success: function(model, res) {
+                            $('.waiting-modal').modal('hide');
                             modal.template= JST["views/templates/dialog-bootstrap.ejs"];
                             modal.title= i18n('ok');
                             modal.body= i18n('subject-deleted');
@@ -273,13 +280,15 @@
                             setTimeout(function(){ modal.hide(); }, 1200);
                             that.$modal.on('hidden.bs.modal', function (e) {
                                 modal.remove();
+                                this.savingSubject = false;
                                 xtens.router.navigate(targetRoute, {trigger: true});
                             });
-                        });
-                    },
-                    error: function(model, res) {
-                        xtens.error(res);
-                    }
+                        },
+                        error: function(model, res) {
+                            this.savingSubject = false;
+                            xtens.error(res);
+                        }
+                    });
                 });
                 return false;
             });
@@ -441,6 +450,7 @@
                     'Authorization': 'Bearer ' + xtens.session.get("accessToken")
                 },
                 contentType: 'application/json',
+                beforeSend: function() { $('.loader-gif').css("display","block"); },
                 success: function(results, options, res) {
                     var headers = {
                         'Link': xtens.parseLinkHeader(res.getResponseHeader('Link')),
@@ -456,6 +466,7 @@
                     that.headers = headers;
                     // var subjects =  new Subject.List(results);
                     // that.addLinksToModels(subjects);
+                    $('.loader-gif').css("display","none");
                     that.subjects.reset(results);
                 },
                 error: function(err) {
@@ -531,6 +542,7 @@
                     'Authorization': 'Bearer ' + xtens.session.get("accessToken")
                 },
                 data: { idPatient: idPatient },
+                beforeSend: function() { $('.loader-gif').css("display","block"); },
                 success: function(err,res,body){
 
                     // clean the previous graph if present
@@ -741,7 +753,7 @@
                     .style("text-anchor", "end")
                     .text(function(d) { return d; });
 
-
+                    $('.loader-gif').css("display","none");
                     function nodeByName(name) {
                         return nodesByName[name] || (nodesByName[name] = {name: name});
                     }

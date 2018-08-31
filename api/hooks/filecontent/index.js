@@ -59,8 +59,70 @@ module.exports = function filecontent(sails){
 
                     return fileSystem.downloadFileContentAsync(dataFile.uri, res);
                 })
-                .then(result => {
+                .then(() => {
                     return res.ok(); // res.json() ??
+                })
+                .catch(/* istanbul ignore next */ function(err) {
+                    return co.error(err);
+                });
+
+            };
+
+            this.deleteFile = function deleteFileContent(req, res) {
+                let dataFile, idDataType, toDelete = false;
+                let co = new ControllerOut(res);
+                let fileId = _.parseInt(req.param('file'));
+                let id = _.parseInt(req.param('id'));
+                let fileSystem = BluebirdPromise.promisifyAll(sails.hooks['persistence'].getFileSystem().manager);
+                const operator = TokenService.getToken(req);
+
+                DataFile.findOne(fileId).populate('data').populate('samples').then(result => {
+
+                    dataFile = result;
+                    let model = "Data";
+                    if (dataFile.data[0] ) {
+                        idDataType = dataFile.data[0].type;
+                        dataFile.data = _.filter(dataFile.data, (d) => { return d.id == fileId;});
+                    } else if (dataFile.samples[0]) {
+                        idDataType = dataFile.samples[0].type;
+                        dataFile.samples = _.filter(dataFile.data, (d) => { return d.id == fileId;});
+                        model = "Sample";
+                    }
+                    //check if the file has other associations, if not it can be deleted
+                    if( model === "Data" && dataFile.data.length == 0 && dataFile.data.length == 0 ) {
+                        toDelete = true;
+                    } else if ( model === "Sample" && dataFile.samples.length == 0 && dataFile.samples.length == 0 ) {
+                        toDelete = true;
+                    }
+
+                    return DataTypeService.getDataTypePrivilegeLevel(operator.groups, idDataType);
+                })
+                .then(dataTypePrivilege => {
+
+                    if(!dataTypePrivilege || dataTypePrivilege.privilegeLevel !== EDIT){
+                        throw new PrivilegesError(`Authenticated user has not edit privileges on the data type ${id}`);
+                    }
+
+                    sails.log.info("deleteFileContent - dataFile");
+                    sails.log.info(dataFile);
+
+                    let pathFrags = dataFile.uri.split("/");
+                    let fileName = pathFrags[pathFrags.length-1];
+
+                    // set response headers for file delete
+                    res.setHeader('Content-Disposition', `attachment;filename=${fileName}`);
+
+                    return fileSystem.deleteFileContentAsync(dataFile.uri);
+                })
+                .then(() => {
+                    DataFile.update( dataFile.id, {data: dataFile.data, samples: dataFile.samples} ).then(() => {
+                        if (toDelete) {
+                            DataFile.destroy( dataFile.id).then(() => {
+                                return res.status(204).send(); // res.json() ??
+                            });
+                        }
+                    });
+
                 })
                 .catch(/* istanbul ignore next */ function(err) {
                     return co.error(err);
@@ -70,7 +132,7 @@ module.exports = function filecontent(sails){
 
             this.upload = function uploadFileContent(req, res) {
 
-                let dirName, fileName, fsPath = sails.hooks['persistence'].getFileSystem().defaultConnection.path,
+                let dirName, fsPath = sails.hooks['persistence'].getFileSystem().defaultConnection.path,
                     landingDir = sails.hooks['persistence'].getFileSystem().defaultConnection.landingDirectory;
                 // if the local-fs strategy is not in use, don't allow local file upload
                 // if (this.fileSystemManager.type && this.fileSystemManager.type !== 'local-fs') {
@@ -138,6 +200,7 @@ module.exports = function filecontent(sails){
 
             let upload =this.upload;
             let download =this.download;
+            let deleteFile =this.deleteFile;
             let routePath = '/fileContent';
 
             sails.after('hook:persistence:loaded', function() {
@@ -152,6 +215,7 @@ module.exports = function filecontent(sails){
 
                     sails.router.bind(routePath, upload, 'POST',{});
                     sails.router.bind(routePath, download, 'GET',{});
+                    sails.router.bind(routePath, deleteFile, 'DELETE',{});
 
                     sails.emit('hook:filecontent:done');
                 });

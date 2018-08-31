@@ -6,8 +6,9 @@
  */
  /* globals _, sails,  DataService, TokenService */
  "use strict";
-
- let JSONStream = require('JSONStream');
+ const DbLog = sails.hooks.dblog.log;
+ const logMessages = sails.hooks.dblog.messages;
+ const JSONStream = require('JSONStream');
 
  module.exports = {
 
@@ -28,6 +29,12 @@
 
          .then(processedArgs => {
              sails.log(processedArgs);
+             let dataTypesId  =_.isArray(processedArgs.dataTypes) ? _.map(processedArgs.dataTypes, "id") :  processedArgs.dataTypes.id;
+             let projectsId  =_.isArray(processedArgs.dataTypes) ? _.map(processedArgs.dataTypes, "project") :  processedArgs.dataTypes.project;
+             let superTypesId  =_.isArray(processedArgs.dataTypes) ? _.uniq(_.map(_.map(processedArgs.dataTypes, "superType"),"id")) : processedArgs.dataTypes.superType.id;
+             DbLog(logMessages.QUERY, "Query", dataTypesId, projectsId, superTypesId, operator.id, {queryObj: JSON.stringify(processedArgs.queryObj)});
+
+
              if (isStream) {
                  return DataService.executeAdvancedStreamQuery(processedArgs, operator, (err, stream) => {
                      // initiate streaming into the sails:

@@ -163,7 +163,7 @@
          */
         dataTypePrivilegesList: function(queryString) {
             var queryParams = parseQueryString(queryString);
-            var privilegesParams = {sort:'id ASC', populate:['dataType','group'], limit:100};
+            var privilegesParams = {sort:'id ASC', populate:['dataType','group'], limit:1000};
             queryParams.groupId ? privilegesParams.group = queryParams.groupId : null;
             queryParams.dataTypeId ? privilegesParams.dataType = queryParams.dataTypeId : null;
             var that = this;
@@ -361,9 +361,10 @@
                             populate: ['type'],
                             limit: xtens.module("xtensconstants").DefaultLimit
 ,
-                            sort: 'updated_at DESC'
+                            sort: 'created_at DESC'
                         },
                         contentType: 'application/json',
+                        beforeSend: function() { $('.loader-gif').css("display","block"); },
                         success: function(results, options, res) {
                             var headers = {
                                 'Link': xtens.parseLinkHeader(res.getResponseHeader('Link')),
@@ -376,6 +377,7 @@
                             var endRow = headers['X-Page-Size']*headers['X-Current-Page'];
                             headers['startRow'] = startRow;
                             headers['endRow'] = endRow;
+                            $('.loader-gif').css("display","none");
                             that.loadView(new Data.Views.List({
                                 dataTypePrivileges: new DataTypePrivileges.List(privilegesRes && privilegesRes[0]),
                                 data: new Data.List(results),
@@ -610,9 +612,10 @@
                             project: activeProject ? activeProject.id : undefined,
                             populate: ['type'],
                             limit: xtens.module("xtensconstants").DefaultLimit,
-                            sort: 'updated_at DESC'
+                            sort: 'created_at DESC'
                         },
                         contentType: 'application/json',
+                        beforeSend: function() { $('.loader-gif').css("display","block"); },
                         success: function(results, options, res) {
                             var headers = {
                                 'Link': xtens.parseLinkHeader(res.getResponseHeader('Link')),
@@ -625,6 +628,7 @@
                             var endRow = headers['X-Page-Size']*headers['X-Current-Page'];
                             headers['startRow'] = startRow;
                             headers['endRow'] = endRow;
+                            $('.loader-gif').css("display","none");
                             that.loadView(new Subject.Views.List({
                                 dataTypePrivileges: new DataTypePrivileges.List(privilegesRes && privilegesRes[0]),
                                 subjects: new Subject.List(results),
@@ -794,9 +798,10 @@
                             project: activeProject ? activeProject.id : undefined,
                             populate: ['type', 'donor'],
                             limit: xtens.module("xtensconstants").DefaultLimit,
-                            sort: 'updated_at DESC'
+                            sort: 'created_at DESC'
                         },
                         contentType: 'application/json',
+                        beforeSend: function() { $('.loader-gif').css("display","block"); },
                         success: function(results, options, res) {
                             var headers = {
                                 'Link': xtens.parseLinkHeader(res.getResponseHeader('Link')),
@@ -805,10 +810,11 @@
                                 'X-Total-Pages': parseInt(res.getResponseHeader('X-Total-Pages')),
                                 'X-Current-Page': parseInt(res.getResponseHeader('X-Current-Page')) + 1
                             };
-                            var startRow = (headers['X-Page-Size']*parseInt(res.getResponseHeader('X-Current-Page')))+1;
+                            var startRow = (headers['X-Page-Size']*parseInt(res.getResponseHeader('X-Current-Page'))) + 1;
                             var endRow = headers['X-Page-Size']*headers['X-Current-Page'];
                             headers['startRow'] = startRow;
                             headers['endRow'] = endRow;
+                            $('.loader-gif').css("display","none");
                             that.loadView(new Sample.Views.List({
                                 dataTypePrivileges: new DataTypePrivileges.List(privilegesRes && privilegesRes[0]),
                                 samples: new Sample.List(results),
@@ -935,7 +941,7 @@
                     data: $.param({group: groupId, limit:100})
                 });
                 var $dataTypesDeferred = dataTypes.fetch({ data: $.param(criteria) });
-                var $biobanksDeferred = biobanks.fetch();
+                var $biobanksDeferred = biobanks.fetch({ data: $.param({project: idProject}) });
                 $.when($dataTypesDeferred, $biobanksDeferred, $privilegesDeferred).then( function(dataTypesRes, biobanksRes, privilegesRes) {
                     that.loadView(new Query.Views.Builder({
                         queryObj: params && params.queryArgs,

@@ -370,8 +370,13 @@ let DataService = BluebirdPromise.promisifyAll({
             fieldValidatorSchema = fieldValidatorSchema.required();
             value = value.required();
         }
-        else {      // allow "null" value if value is not required
-            value = value.allow(null);
+        else {      // allow "null" value if value is not required or null and empty string if fieldType is text
+            if (metadataField.fieldType === FieldTypes.TEXT) {
+                value = value.allow(null, '');
+            }
+            else {
+                value = value.allow(null);
+            }
         }
 
         if (metadataField.customValue) {

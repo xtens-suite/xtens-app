@@ -28,14 +28,21 @@
                 <div class="col-xs-9 col-offset-xs-1">
                   <div class="form-group">
                     <select required id='data-type-selector' title="<%= __('please-select-a-data-type') %>" class="form-control selectpicker">
-                        <% _.each(xtens.session.get("projects"), function(project) {%>
-                          <optgroup label="<%= project.name %>" id="<%= project.id %>">
-                            <% var dtProject = _.filter( dataTypes, function(dt){ return dt.project.id === project.id} )
-                            _.each(dtProject, function(dt) {%>
-                            <option data-subtext="<%= dt.description %>" value='<%= dt.id %>'><%= dt.name %></option>
-                            <% }) %>
-                          </optgroup>
-                        <% }) %>
+                        <% if (!projectSource) {
+                            _.each(xtens.session.get("projects"), function(project) {%>
+                              <optgroup label="<%= project.name %>" id="<%= project.id %>">
+                                <% var dtProject = _.filter( dataTypes, function(dt){ return dt.project.id === project.id} )
+                                _.each(dtProject, function(dt) {%>
+                                <option data-subtext="<%= dt.description %>" value='<%= dt.id %>'><%= dt.name %></option>
+                                <% }) %>
+                              </optgroup>
+                        <% })
+                      } else {
+                          var dtProject = _.filter( dataTypes, function(dt){ return dt.project.id === projectSource} )
+                          _.each(dtProject, function(dt) {%>
+                          <option data-subtext="<%= dt.description %>" value='<%= dt.id %>'><%= dt.name %></option>
+                          <% }) %>
+                      <%}%>
                     </select>
                   </div>
                 </div>

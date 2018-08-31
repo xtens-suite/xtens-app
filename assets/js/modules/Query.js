@@ -319,6 +319,7 @@
                     $el.select2({
                         data: data
                     });
+                    $el.val(data[0].id).trigger('change');
                     $el.removeClass('hidden');
                     $el.change(function() {
                         $el.trigger('input');
@@ -448,10 +449,12 @@
             '[name="surname-comparator"]': {
                 observe: 'surnameComparator',
                 initialize: function($el) {
+                    var data = [ { id: '=', text: '=' }, { id: '<>', text: '≠' },
+                          { id: 'LIKE', text: 'LIKE'}, { id: 'NOT LIKE', text: 'NOT LIKE'}];
                     $el.select2({
-                        data: [ { id: '=', text: '=' }, { id: '<>', text: '≠' },
-                                { id: 'LIKE', text: 'LIKE'}, { id: 'NOT LIKE', text: 'NOT LIKE'}]
+                        data: data
                     });
+                    $el.val(data[0].id).trigger('change');
                 }
             },
             '[name="surname"]': {
@@ -460,10 +463,12 @@
             '[name="given-name-comparator"]': {
                 observe: 'givenNameComparator',
                 initialize: function($el) {
+                    var data = [ { id: '=', text: '=' }, { id: '<>', text: '≠' },
+                          { id: 'LIKE', text: 'LIKE'}, { id: 'NOT LIKE', text: 'NOT LIKE'}];
                     $el.select2({
-                        data: [ { id: '=', text: '=' }, { id: '<>', text: '≠' },
-                                { id: 'LIKE', text: 'LIKE'}, { id: 'NOT LIKE', text: 'NOT LIKE'}]
+                        data: data
                     });
+                    $el.val(data[0].id).trigger('change');
                 }
             },
             '[name="given-name"]': {
@@ -472,11 +477,13 @@
             '[name="birth-date-comparator"]': {
                 observe: 'birthDateComparator',
                 initialize: function($el) {
+                    var data = [ { id: '=', text: '=' }, { id: '<>', text: '≠' },
+                          { id: '<=', text: '≤' }, { id: '>=', text: '≥' },
+                          { id: '<', text: '<'}, {id: '>', text: '>'}];
                     $el.select2({
-                        data: [ { id: '=', text: '=' }, { id: '<>', text: '≠' },
-                                { id: '<=', text: '≤' }, { id: '>=', text: '≥' },
-                                { id: '<', text: '<'}, {id: '>', text: '>'}]
+                        data: data
                     });
+                    $el.val(data[0].id).trigger('change');
                 }
             },
             '[name="birth-date"]': {
@@ -522,9 +529,11 @@
             '[name="code-comparator"]': {
                 observe: 'codeComparator',
                 initialize: function($el) {
+                    var data = [ { id: 'LIKE', text: '=' }, { id: 'NOT LIKE', text: '≠' }];
                     $el.select2({
-                        data: [ { id: 'LIKE', text: '=' }, { id: 'NOT LIKE', text: '≠' }]
+                        data: data
                     });
+                    $el.val(data[0].id).trigger('change');
                 }
             },
             '[name="code"]': {
@@ -533,9 +542,11 @@
             '[name="sex-comparator"]': {
                 observe: 'sexComparator',
                 initialize: function($el) {
+                    var data = [ { id: 'IN', text: '=' }, { id: 'NOT IN', text: '≠' }];
                     $el.select2({
-                        data: [ { id: 'IN', text: '=' }, { id: 'NOT IN', text: '≠' }]
+                        data: data
                     });
+                    $el.val(data[0].id).trigger('change');
                 }
             },
             '[name="sex"]': {
@@ -592,9 +603,11 @@
             '[name="biobank-comparator"]': {
                 observe: 'biobankComparator',
                 initialize: function($el) {
+                    var data = [ { id: '=', text: '=' }, { id: '<>', text: '≠' }];
                     $el.select2({
-                        data: [ { id: '=', text: '=' }, { id: '<>', text: '≠' }]
+                        data: data
                     });
+                    $el.val(data[0].id).trigger('change');
                 }
             },
 
@@ -628,9 +641,11 @@
             '[name="biobank-code-comparator"]': {
                 observe: 'biobankCodeComparator',
                 initialize: function($el) {
+                    var data = [ { id: 'LIKE', text: '=' }, { id: 'NOT LIKE', text: '≠' }];
                     $el.select2({
-                        data: [ { id: 'LIKE', text: '=' }, { id: 'NOT LIKE', text: '≠' }]
+                        data: data
                     });
+                    $el.val(data[0].id).trigger('change');
                 }
             },
             '[name="biobank-code"]': {
@@ -1346,6 +1361,8 @@
                 body: JST["views/templates/progressbar.ejs"]({valuemin: 0, valuemax: 100, valuenow: 100})
             });
             this.$queryModal.append(this.modal.render().el);
+            $('.query-modal .modal').modal({backdrop: 'static', keyboard: false});
+            $('.query-modal button').addClass('hidden');
             this.modal.show();
             return false;
         },

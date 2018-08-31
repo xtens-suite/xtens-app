@@ -355,21 +355,24 @@
                 var fieldName = useFormattedNames ? serialized[i].formattedName : serialized[i].name;
 
                 // if it's not a field of a loop just store the value/unit pair as an object
-                if (!serialized[i].loop) {
-                    metadata[fieldName] = {value: serialized[i].value, unit: unit, group: serialized[i].groupName};
-                }
+                if ((serialized[i].value || !isNaN(serialized[i].value)) && serialized[i].value != null && serialized[i].value !== "") {
+
+                    if (!serialized[i].loop ) {
+                        metadata[fieldName] = {value: serialized[i].value, unit: unit, group: serialized[i].groupName};
+                    }
 
                 // if it's a field within a loop store the value unit pair within two arrays
-                else {
-                    if (!metadata[fieldName]) {
-                        metadata[fieldName] = {values: [serialized[i].value], group: serialized[i].groupName, loop: serialized[i].loop};
-                        metadata[fieldName].units = unit ? [unit] : undefined;
-                    }
-                    // if the loop value/unit arrays already exists push them in the arrays
                     else {
-                        metadata[fieldName].values.push(serialized[i].value);
-                        if (unit && _.isArray(metadata[fieldName].units)) {
-                            metadata[fieldName].units.push(serialized[i].unit);
+                        if (!metadata[fieldName]) {
+                            metadata[fieldName] = {values: [serialized[i].value], group: serialized[i].groupName, loop: serialized[i].loop};
+                            metadata[fieldName].units = unit ? [unit] : undefined;
+                        }
+                    // if the loop value/unit arrays already exists push them in the arrays
+                        else {
+                            metadata[fieldName].values.push(serialized[i].value);
+                            if (unit && _.isArray(metadata[fieldName].units)) {
+                                metadata[fieldName].units.push(serialized[i].unit);
+                            }
                         }
                     }
                 }
@@ -703,6 +706,8 @@
             this.dataTypes = options.dataTypes || [];
             this.operators = options.operators ? options.operators : [];
             // _.extend(this, options);
+            this.savingData = false;
+
             if (options.data) {
                 this.model = new Data.Model(options.data);
             }
@@ -850,6 +855,7 @@
          * @return {false} - to suppress the HTML form submission
          */
         saveData: function(ev) {
+            this.savingData = true;
             var targetRoute = $(ev.currentTarget).data('targetRoute') || 'data';
             if (this.schemaView && this.schemaView.serialize) {
                 var that = this;
@@ -880,12 +886,14 @@
 
                         setTimeout(function(){ modal.hide(); }, 1200);
                         that.$('.data-modal').on('hidden.bs.modal', function (e) {
+                            this.savingData = false;
                             modal.remove();
                             xtens.router.navigate(targetRoute, {trigger: true});
                         });
 
                     },
                     error: function(model, res) {
+                        this.savingData = false;
                         xtens.error(res);
                     }
                 });
@@ -925,7 +933,7 @@
                 });
                 var options = {selectOptions:{collection:newColl}};
                 Backbone.Stickit.getConfiguration($('#owner')).update($('#owner'),{},{},options);
-                $('#owner').val({}).trigger("change");
+                $('#owner').select2('val','').trigger("change");
             });
         },
         /**
@@ -934,6 +942,7 @@
          * TODO - not implemented yet
          */
         deleteData: function(ev) {
+            this.savingData = true;
             ev.preventDefault();
             var that = this;
             if (this.modal) {
@@ -944,7 +953,7 @@
                 template: JST["views/templates/confirm-dialog-bootstrap.ejs"],
                 title: i18n('confirm-deletion'),
                 body: i18n('data-will-be-permanently-deleted-are-you-sure'),
-                type: "delete"
+                type: i18n("delete")
             });
 
             this.$modal.append(modal.render().el);
@@ -952,11 +961,13 @@
 
             this.$('#confirm').click( function (e) {
                 modal.hide();
-                var targetRoute = $(ev.currentTarget).data('targetRoute') || 'data';
+                $('.waiting-modal').modal('show');
+                that.$modal.one('hidden.bs.modal', function (e) {
+                    var targetRoute = $(ev.currentTarget).data('targetRoute') || 'data';
 
-                that.model.destroy({
-                    success: function(model, res) {
-                        that.$modal.one('hidden.bs.modal', function (e) {
+                    that.model.destroy({
+                        success: function(model, res) {
+                            $('.waiting-modal').modal('hide');
                             modal.template= JST["views/templates/dialog-bootstrap.ejs"];
                             modal.title= i18n('ok');
                             modal.body= i18n('data-deleted');
@@ -965,14 +976,16 @@
                             modal.show();
                             setTimeout(function(){ modal.hide(); }, 1200);
                             that.$modal.on('hidden.bs.modal', function (e) {
+                                this.savingData = false;
                                 modal.remove();
                                 xtens.router.navigate(targetRoute, {trigger: true});
                             });
-                        });
-                    },
-                    error: function(model, res) {
-                        xtens.error(res);
-                    }
+                        },
+                        error: function(model, res) {
+                            this.savingData = false;
+                            xtens.error(res);
+                        }
+                    });
                 });
                 return false;
             });
@@ -991,9 +1004,11 @@
         },
 
         dataTypeOnChange: function() {
-            $('#owner').prop('disabled', false);
-            this.setOwnerList();
-            this.renderDataTypeSchema();
+            if (!this.savingData) {
+                $('#owner').prop('disabled', false);
+                this.setOwnerList();
+                this.renderDataTypeSchema();
+            }
         },
 
         /**
@@ -1040,24 +1055,43 @@
          */
         enableFileUpload: function() {
             var _this = this;
-            var fileManager = new FileManager.Model();
+            //_this.$fileCnt.empty()
+            //var fileManager = new FileManager.Model();
             $.ajax({
                 url: '/fileManager',
                 type: 'GET',
                 contentType: 'application/json',
                 success: function(fileSystem) {
+                    _this.fileSystem = fileSystem;
                     _this.fileUploadView = new FileManager.Views.Dropzone({
                         files: _this.model.get("files"),
                         fileSystem: fileSystem,
-
+                        datum: _this.model,
                         // added the second condition for the scenarios where the dataType is not populated
                         dataTypeName: _this.model.get("type").name || _.findWhere(_this.dataTypes, {id: _.parseInt(_this.model.get("type"))}).name
                     });
                     _this.$fileCnt.append(_this.fileUploadView.render().el);
                     _this.fileUploadView.initializeDropzone();
+                    _this.listenTo(_this.fileUploadView, 'fileDeleted', _this.refreshFileCnt);
                 },
                 error: xtens.error
             });
+        },
+
+        refreshFileCnt: function (fileId) {
+            var files = this.model.get("files");
+            this.model.set("files", files.filter(function(f) { return f.id != fileId;}));
+            this.fileUploadView = new FileManager.Views.Dropzone({
+                files: this.model.get("files"),
+                fileSystem: this.fileSystem,
+                datum: this.model,
+              // added the second condition for the scenarios where the dataType is not populated
+                dataTypeName: this.model.get("type").name || _.findWhere(this.dataTypes, {id: _.parseInt(this.model.get("type"))}).name
+            });
+            $('.filemanager').remove();
+            this.$fileCnt.append(this.fileUploadView.render().el);
+            this.fileUploadView.initializeDropzone();
+            this.listenTo(this.fileUploadView, 'fileDeleted', this.refreshFileCnt);
         },
 
         retrieveAndSetFiles: function() {
@@ -1278,6 +1312,7 @@
                     'Authorization': 'Bearer ' + xtens.session.get("accessToken")
                 },
                 contentType: 'application/json',
+                beforeSend: function() { $('.loader-gif').css("display","block"); },
                 success: function(results, options, res) {
                     var headers = {
                         'Link': xtens.parseLinkHeader(res.getResponseHeader('Link')),
@@ -1291,6 +1326,7 @@
                     headers['startRow'] = startRow;
                     headers['endRow'] = endRow;
                     that.headers = headers;
+                    $('.loader-gif').css("display","none");
                     that.data.reset(results);
                     // that.filterData();
                 },
