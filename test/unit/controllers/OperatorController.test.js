@@ -45,7 +45,7 @@ describe('OperatorController', function() {
                 sex: 'M',
                 email: 'operator@domain.com',
                 login: 'newoperator',
-                password: 'pswdoperator'
+                password: 'Pswdoperator1234!'
             })
             .expect(201)
             .end(function(err, res) {
@@ -99,11 +99,12 @@ describe('OperatorController', function() {
 
             request(sails.hooks.http.app)
             .patch('/operator')
-            .set('Authorization', `Bearer ${tokenS}`)
+            // .set('Authorization', `Bearer ${tokenS}`)
             .send({
+                username: demouser.login,
                 oldPass: passport.password,
-                newPass: "NewPassword",
-                cnewPass: "NewPassword"
+                newPass: "NewPassword1234!",
+                cnewPass: "NewPassword1234!"
             })
             .expect(204)
             .end(function(err, res) {
@@ -123,11 +124,12 @@ describe('OperatorController', function() {
             const passport = _.find(fixtures.passport, {
                 'user': demouser.id,
                 'protocol': 'local'});
-
+            console.log(passport);
             request(sails.hooks.http.app)
           .patch('/operator')
-          .set('Authorization', `Bearer ${tokenS}`)
+          // .set('Authorization', `Bearer ${tokenS}`)
           .send({
+              username: demouser.login,
               oldPass: passport.password,
               newPass: passport.password,
               cnewPass: passport.password
@@ -154,11 +156,12 @@ describe('OperatorController', function() {
 
             request(sails.hooks.http.app)
           .patch('/operator')
-          .set('Authorization', `Bearer ${tokenS}`)
+          // .set('Authorization', `Bearer ${tokenS}`)
           .send({
+              username: demouser.login,
               oldPass: "WrongOldPass",
-              newPass: "NewPassword",
-              cnewPass: "NewPassword"
+              newPass: "NewPassword1!",
+              cnewPass: "NewPassword1!"
           })
           .expect(400)
           .end(function(err, res) {
@@ -186,11 +189,12 @@ describe('OperatorController', function() {
 
             request(sails.hooks.http.app)
         .patch('/operator')
-        .set('Authorization', `Bearer ${tokenS}`)
+        // .set('Authorization', `Bearer ${tokenS}`)
         .send({
+            username: demouser.login,
             oldPass: passport.password,
-            newPass: "NewPassword",
-            cnewPass: "OtherNewPassword"
+            newPass: "NewPassword1!",
+            cnewPass: "OtherNewPassword1!"
         })
         .expect(400).end(function(err, res) {
             // console.log(res.body);

@@ -29,12 +29,13 @@ describe("PassportService protocol Local", function() {
 
             const spycreateUser = sinon.spy(PassportService.protocols.local,"createUser");
             const operator = _.cloneDeep(fixtures.operator[0]);
-
+            operator.password = "TestPassword1!";
             PassportService.protocols.local.register(operator,function (err,res) {
 
                 if(err){
                     sails.log.error(err);
                     done(err);
+                    return;
                 }
                 sinon.assert.calledWith(spycreateUser,operator);
                 spycreateUser.restore();
@@ -56,7 +57,7 @@ describe("PassportService protocol Local", function() {
                 "firstName": "default createuser",
                 "lastName": "createuser",
                 "birthDate": "1970-01-01T00:00:00.000Z",
-                "password": "password"
+                "password": "Password1!"
             };
             PassportService.protocols.local.createUser(_user,function (err,operator) {
                 console.log(operator);
@@ -82,7 +83,7 @@ describe("PassportService protocol Local", function() {
                 "firstName": "default createuser",
                 "lastName": "createuser",
                 "birthDate": "1970-01-01T00:00:00.000Z",
-                "password": "password"
+                "password": "Password1!"
             };
             PassportService.protocols.local.createUser(_user,function (err,operator) {
 
@@ -102,7 +103,7 @@ describe("PassportService protocol Local", function() {
                 "firstName": "default createuser",
                 "lastName": "createuser",
                 "birthDate": "1970-01-01T00:00:00.000Z",
-                "password": "password"
+                "password": "Password1!"
             };
             PassportService.protocols.local.createUser(_user,function (err,operator) {
 
@@ -115,7 +116,7 @@ describe("PassportService protocol Local", function() {
         });
 
         it("should return ERROR - Error.Passport.Password.Invalid", function(done) {
-            var expectedErr = new Error('Error.Passport.Password.Invalid');
+            var expectedErr = new ValidationError('The password does not meet the minimum security requirements. It must contain at least one lower case character, an uppercase character, a number, a special character (!@#$%^&*) and be at least 8 characters long');
             const _user ={
                 "sex": "N.A.",
                 "email": "createuser@createuser.com",
@@ -123,7 +124,7 @@ describe("PassportService protocol Local", function() {
                 "firstName": "default createuser",
                 "lastName": "createuser",
                 "birthDate": "1970-01-01T00:00:00.000Z",
-                "password": {}
+                "password": "pswd"
             };
             PassportService.protocols.local.createUser(_user,function (err,operator) {
                 expect(err).to.be.an('error');
@@ -153,7 +154,7 @@ describe("PassportService protocol Local", function() {
                     path: '/path',
                     user: _user,
                     params: {
-                        password: "password"
+                        password: "Password1!"
                     },
                     headers:{},
                     param: function(par) {
@@ -181,7 +182,7 @@ describe("PassportService protocol Local", function() {
                     path: '/path',
                     user: {},
                     params: {
-                        password: "password"
+                        password: "Password1!"
                     },
                     headers:{},
                     param: function(par) {
@@ -302,9 +303,10 @@ describe("PassportService protocol Local", function() {
                 'user': demouser.id,
                 'protocol': 'local'});
             const param ={
+                username: demouser.login,
                 oldPass: passportlocal.password,
-                newPass: "NewPassword",
-                cnewPass: "NewPassword"
+                newPass: "NewPassword1!",
+                cnewPass: "NewPassword1!"
             };
             const expectedParam={
                 protocol: 'local',
@@ -312,10 +314,11 @@ describe("PassportService protocol Local", function() {
 
             // passport.password = param.newPass;
 
-            PassportService.protocols.local.updatePassword(param,demouser.id,function (err,res) {
+            PassportService.protocols.local.updatePassword(param,function (err,res) {
                 if(err){
                     console.log(err);
                     done(err);
+                    return;
                 }
                 console.log("Password updated: " + res);
                 sinon.assert.calledWith(spyFindPassp, expectedParam);
@@ -332,13 +335,14 @@ describe("PassportService protocol Local", function() {
 
             const demouser =fixtures.operator[0];
             const param ={
+                username: demouser.login,
                 oldPass: "samepassword",
                 newPass: "samepassword",
                 cnewPass: "samepassword"
             };
             const expectedError = new ValidationError('New Password and Old Password cannot be the same');
 
-            PassportService.protocols.local.updatePassword(param,demouser.id,function (err,res) {
+            PassportService.protocols.local.updatePassword(param, function (err,res) {
 
                 expect(err).to.eql(expectedError);
                 expect(spyFindPassp.called).to.be.false;
@@ -355,13 +359,14 @@ describe("PassportService protocol Local", function() {
                 'user': demouser.id,
                 'protocol': 'local'});
             const param ={
+                username: demouser.login,
                 oldPass: passportlocal.password,
-                newPass: "NewPassword",
+                newPass: "NewPassword1!",
                 cnewPass: "OtherNewPassword"
             };
             const expectedError = new ValidationError('New Passwords do not match');
 
-            PassportService.protocols.local.updatePassword(param,demouser.id,function (err,res) {
+            PassportService.protocols.local.updatePassword(param, function (err,res) {
 
                 expect(err).to.eql(expectedError);
                 expect(spyFindPassp.called).to.be.false;
@@ -378,13 +383,14 @@ describe("PassportService protocol Local", function() {
                 'user': demouser.id,
                 'protocol': 'local'});
             const param ={
+                username: demouser.login,
                 oldPass: "wrongPassword",
-                newPass: "NewPassword",
-                cnewPass: "NewPassword"
+                newPass: "NewPassword1!",
+                cnewPass: "NewPassword1!"
             };
             const expectedError = new ValidationError('Old Password does not match');
 
-            PassportService.protocols.local.updatePassword(param,demouser.id,function (err,res) {
+            PassportService.protocols.local.updatePassword(param, function (err,res) {
 
                 expect(err).to.eql(expectedError);
                 expect(spyFindPassp.called).to.be.true;
