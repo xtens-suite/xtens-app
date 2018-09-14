@@ -80,6 +80,7 @@ module.exports.routes = {
 
     // Operator Controller
     'PATCH /operator': {controller:'operator',action:'patchPassword'},
+    'PATCH /operator/resetPassword': {controller:'operator',action:'resetPassword'},
 
     // PersonalDetails Controller
 

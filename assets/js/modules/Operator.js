@@ -39,7 +39,8 @@
 
         events: {
             'click button.delete': 'deleteOperator',
-            'submit .edit-operator-form': 'saveOperator'
+            'submit .edit-operator-form': 'saveOperator',
+            'click button.password-reset': 'resetPasswordOperator'
         },
 
         initialize: function(options) {
@@ -208,6 +209,66 @@
                         },
                         error: function(model, res) {
                             xtens.error(res);
+                        }
+                    });
+                });
+                return false;
+            });
+        },
+
+        resetPasswordOperator: function (ev) {
+            ev.preventDefault();
+            var that = this;
+            if (this.modal) {
+                this.modal.hide();
+            }
+
+            var username = this.model.get('login');
+
+            var modal = new ModalDialog({
+                template: JST["views/templates/confirm-dialog-bootstrap.ejs"],
+                title: i18n('confirm-reset'),
+                body: i18n('are-you-sure-reset-password')
+            });
+
+            this.$modal.append(modal.render().el);
+            modal.show();
+
+            this.$('#confirm').click( function (e) {
+                modal.hide();
+                that.$modal.one('hidden.bs.modal', function (e) {
+                    $('.waiting-modal').modal('show');
+
+                    $.ajax({
+                        url: '/operator/resetPassword',
+                        type: 'PATCH',
+                        data: JSON.stringify({
+                            username: username
+                        }),
+                        headers: {
+                            'Authorization': 'Bearer ' + xtens.session.get("accessToken")
+                        },
+                        contentType: 'application/json',
+
+                        error: function(err) {
+                            $('.waiting-modal').modal('hide');
+                            if (that.modal)
+                                that.modal.hide();
+                            xtens.error(err);
+                        },
+                        success: function(model, res) {
+                            $('.waiting-modal').modal('hide');
+                            modal.template= JST["views/templates/dialog-bootstrap.ejs"];
+                            modal.title= i18n('ok');
+                            modal.body= i18n('password-reset') + model;
+                            that.$modal.append(modal.render().el);
+                            $('.modal-header').addClass('alert-success');
+                            modal.show();
+
+                            that.$modal.on('hidden.bs.modal', function (e) {
+                                modal.remove();
+                                xtens.router.navigate('operators', {trigger: true});
+                            });
                         }
                     });
                 });

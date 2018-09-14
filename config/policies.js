@@ -43,6 +43,7 @@ module.exports.policies = {
 
     OperatorController: {
         '*': ['bearerAuth', 'expiredPassword', 'isWheel'],
+        'resetPassword': ['bearerAuth', 'expiredPassword', 'isWheel'],
         find: ['bearerAuth', 'expiredPassword'],
         findOne: ['bearerAuth', 'expiredPassword'],
         'patchPassword': true

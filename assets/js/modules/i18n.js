@@ -157,6 +157,10 @@
         "update-operator" : "Update Operator",
         "operator-deleted": "Operator Deleted",
         "operator-will-be-permanently-deleted-are-you-sure": "Operator will be permanently deleted. Are you sure?",
+        "confirm-reset": "Confirm Password Reset",
+        "are-you-sure-reset-password": "Password will be reset for this operator. Are you sure to continue?",
+        "password-reset-btn": "Password Reset",
+        "password-reset": "Password Reset. The new password is: ",
         'operator-correctly-stored-on-server': "Operator correctly stored on server",
         /* views/templates/data-edit-partial.ejs */
         "date": "Date",

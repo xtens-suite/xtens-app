@@ -5,6 +5,7 @@ let validator = require('validator');
 let crypto = require('crypto');
 const ValidationError = require('xtens-utils').Errors.ValidationError;
 let BluebirdPromise = require('bluebird');
+const RandExp = require('randexp');
 /**
  * Local Authentication Protocol
  *
@@ -214,16 +215,15 @@ exports.login = function(req, identifier, password, next) {
  * matching then update passport with the new password.
  *
  * @param {Object}   param
- * @param {integer}  idOperator
  * @param {Function} next
  */
 /*eslint no-unreachable: 0*/
-exports.updatePassword = function(param, next) {
+exports.updatePassword = function(param, isReset, next) {
 
-    let identifier = param.username;
-    let password = param.oldPass;
-    let newPass = param.newPass;
-    let cnewPass = param.cnewPass;
+    let identifier = param.username,
+        password = param.oldPass,
+        newPass = param.newPass,
+        cnewPass = param.cnewPass;
 
     if (password === newPass) {
         let err = new ValidationError('New Password and Old Password cannot be the same');
@@ -238,6 +238,7 @@ exports.updatePassword = function(param, next) {
     if (!PassportService.isStrongPassword(newPass)) {
         return next(new ValidationError('The password does not meet the minimum security requirements. It must contain at least one lower case character, an uppercase character, a number, a special character (!@#$%^&*) and be at least 8 characters long'));
     }
+
 
     let isEmail = validator.isEmail(identifier),
         query = {};
@@ -271,6 +272,8 @@ exports.updatePassword = function(param, next) {
         .then(function(passport) {
 
       //Validate the old password inserted by user
+
+
             let passValidatePassword = BluebirdPromise.promisify(passport.validatePassword);
 
             return passValidatePassword.call(passport, password, function(err,res){
@@ -289,6 +292,69 @@ exports.updatePassword = function(param, next) {
                     });
                 });
             });
+
+        }).catch(/* istanbul ignore next */ function(err) {
+            sails.log.error(err);
+            return next(err, false);
+        });
+    });
+};
+
+/**
+ * reset user Password
+ *
+ * Attempts to find a local Passport associated with the user. If a Passport is
+ * found, its password isupdated with a random string based on reg expression.
+ *
+ * @param {Object}   param
+ * @param {Function} next
+ */
+/*eslint no-unreachable: 0*/
+exports.resetPassword = function(param, next) {
+
+    let identifier = param.username;
+
+    let isEmail = validator.isEmail(identifier),
+        query = {};
+
+    if (isEmail) {
+        query.email = identifier;
+    } else {
+        query.login = identifier;
+    }
+
+    Operator.findOne(query).populate('groups').exec(function(err, user) {
+        if (err) {
+            err.code = 500;
+            return next(err,false);
+        }
+
+        if (!user) {
+            if (isEmail) {
+                err = new ValidationError('Error.Passport.Email.NotFound');
+            } else {
+                err = new ValidationError('Error.Passport.Username.NotFound');
+            }
+            err.code = 401;
+            return next(err, false);
+        }
+
+        Passport.findOne({
+            protocol: 'local',
+            user: user.id
+        })
+        .then(function(passport) {
+            var newPass = new RandExp(/([a-z][A-Z][^\W0-9:_]{4})[!@#\$%\^&\*][0-9]/).gen();
+            passport.password = newPass;
+
+            return Passport.update({id: passport.id}, passport)
+            .then(function() {
+                return Operator.update({id: user.id}, {lastPswdUpdate: Date()})
+                .then(function() {
+                    return next(null, newPass);
+                });
+            });
+
         }).catch(/* istanbul ignore next */ function(err) {
             sails.log.error(err);
             return next(err, false);
