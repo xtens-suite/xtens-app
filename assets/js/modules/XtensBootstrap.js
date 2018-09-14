@@ -25,7 +25,7 @@
             this.body = options.body;
             this.type = options.type && options.type;
             this.data = options.data ? options.data : { __: i18n };
-            this.type ? this.data.type = this.type : this.data.type = "other";
+            this.type ? this.data.type = this.type : this.data.type = null;
         },
 
         render: function() {

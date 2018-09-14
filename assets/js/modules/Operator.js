@@ -232,6 +232,8 @@
             });
 
             this.$modal.append(modal.render().el);
+            $('.modal-header').addClass('alert-warning');
+            $('#confirm').removeClass('btn-default').addClass('btn-warning');
             modal.show();
 
             this.$('#confirm').click( function (e) {
