@@ -218,7 +218,7 @@ exports.login = function(req, identifier, password, next) {
  * @param {Function} next
  */
 /*eslint no-unreachable: 0*/
-exports.updatePassword = function(param, isReset, next) {
+exports.updatePassword = function(param, next) {
 
     let identifier = param.username,
         password = param.oldPass,
@@ -285,9 +285,9 @@ exports.updatePassword = function(param, isReset, next) {
                 passport.password = newPass;
 
                 return Passport.update({id: passport.id}, passport)
-                .then(function(res) {
-                    return Operator.update({id: user.id}, {lastPswdUpdate: Date()})
-                    .then(function(res) {
+                .then(function() {
+                    return Operator.update({id: user.id}, {lastPswdUpdate: Date(), resetPswd: false})
+                    .then(function() {
                         return next(null, true);
                     });
                 });
@@ -349,7 +349,7 @@ exports.resetPassword = function(param, next) {
 
             return Passport.update({id: passport.id}, passport)
             .then(function() {
-                return Operator.update({id: user.id}, {lastPswdUpdate: Date()})
+                return Operator.update({id: user.id}, {lastPswdUpdate: Date(), resetPswd: true})
                 .then(function() {
                     return next(null, newPass);
                 });

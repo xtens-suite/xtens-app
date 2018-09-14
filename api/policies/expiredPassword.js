@@ -21,7 +21,7 @@ module.exports = function(req, res, next) {
     // or if this is the last policy, the controller
     var startDate = new Date();
     startDate.setMonth(startDate.getMonth() - 3); //3 MONTHS
-    if (startDate.toISOString() <= payload.lastPswdUpdate) {
+    if (startDate.toISOString() <= payload.lastPswdUpdate && !payload.resetPswd) {
         return next();
     }
 
