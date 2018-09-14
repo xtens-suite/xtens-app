@@ -12,7 +12,7 @@
      * @name handleError
      *
      */
-    function handleError(res){
+    function handleError(res, type){
         var modal, body;
 
         var error = res.responseJSON.error._internal ? res.responseJSON.error._internal : res.responseJSON.error;
@@ -39,7 +39,7 @@
           //error is a string
             var spl = error && error.split(/\r?\n/);
             var splitted = spl && spl[0].split(":");
-            body = splitted && splitted[1];
+            body = splitted && splitted.length > 1 ? splitted[1] : splitted;
             if(res.responseJSON.error.raw){
                 var err = res.responseJSON.error.raw;
                 body = "Error on column <b>" + err.column + "</b> in  <b>" + err.table + "</b>";
@@ -51,7 +51,7 @@
         modal = new ModalDialog({
             title: title,
             body: body,
-            type: "delete"
+            type: type ? type : "delete"
         });
 
         $("#main").append(modal.render().el);
@@ -61,8 +61,11 @@
         $('#main .xtens-modal').on('hidden.bs.modal', function (e) {
 
             modal.remove();
-            if (res.status === (403 || 401)) {
-                window.location.replace('/#homepage');
+            if (res.status === (403 || 401) && Backbone.history.getFragment() !== "login" && body != "Expired Password") {
+                window.location.replace('/#/homepage');
+            } else if (res.status === 401 && body == "Expired Password") {
+                xtens.session.set("expiredPassword", true);
+                window.location.replace('/#/operators/updatePassword');
             }
         });
 

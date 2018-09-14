@@ -20,7 +20,7 @@ module.exports.policies = {
   // (`true` allows public access)
   // TODO change Passport policy for authentication
 
-    '*': 'bearerAuth',
+    '*': ['bearerAuth','expiredPassword'],
 
     'main':{
         '*': true
@@ -31,54 +31,54 @@ module.exports.policies = {
     },
 
     GroupController: {
-        '*': ['bearerAuth', 'isWheel'],
-        find: ['bearerAuth', 'isAdmin'],
-        findOne: ['bearerAuth', 'isAdmin']
+        '*': ['bearerAuth', 'expiredPassword', 'isWheel'],
+        find: ['bearerAuth', 'expiredPassword', 'isAdmin'],
+        findOne: ['bearerAuth', 'expiredPassword', 'isAdmin']
     },
 
     ProjectController: {
-        '*': ['bearerAuth', 'isWheel'],
-        find: 'bearerAuth'
+        '*': ['bearerAuth', 'expiredPassword', 'isWheel'],
+        find: ['bearerAuth', 'expiredPassword']
     },
 
     OperatorController: {
-        '*': ['bearerAuth', 'isWheel'],
-        find: 'bearerAuth',
-        findOne: 'bearerAuth',
-        'patchPassword': 'bearerAuth'
+        '*': ['bearerAuth', 'expiredPassword', 'isWheel'],
+        find: ['bearerAuth', 'expiredPassword'],
+        findOne: ['bearerAuth', 'expiredPassword'],
+        'patchPassword': true
     },
 
     DataTypePrivilegesController: {
-        '*': ['bearerAuth', 'isWheel'],
-        findOne: ['bearerAuth', 'isAdmin'],
-        'edit': ['bearerAuth', 'isAdmin'],
-        create: ['bearerAuth', 'isAdmin'],
-        find: 'bearerAuth'
+        '*': ['bearerAuth', 'expiredPassword', 'isWheel'],
+        findOne: ['bearerAuth', 'expiredPassword', 'isAdmin'],
+        'edit': ['bearerAuth', 'expiredPassword', 'isAdmin'],
+        create: ['bearerAuth', 'expiredPassword', 'isAdmin'],
+        find: ['bearerAuth', 'expiredPassword']
     },
 
     DataTypeController: {
-        '*':  ['bearerAuth', 'isAdmin'],
-        find: 'bearerAuth',
-        'edit':  ['bearerAuth', 'isAdmin']
+        '*':  ['bearerAuth', 'expiredPassword', 'isAdmin'],
+        find: ['bearerAuth', 'expiredPassword'],
+        'edit':  ['bearerAuth', 'expiredPassword', 'isAdmin']
     },
 
     SuperTypeController: {
-        '*':  ['bearerAuth', 'isAdmin'],
-        find: 'bearerAuth',
-        findOne: 'bearerAuth'
+        '*':  ['bearerAuth', 'expiredPassword', 'isAdmin'],
+        find: ['bearerAuth', 'expiredPassword'],
+        findOne: ['bearerAuth', 'expiredPassword']
     },
 
     BiobankController: {
-        '*':  ['bearerAuth', 'isAdmin'],
-        find: 'bearerAuth'
+        '*':  ['bearerAuth', 'expiredPassword', 'isAdmin'],
+        find: ['bearerAuth', 'expiredPassword']
     },
 
     ContactInformationController: {
-        '*': ['bearerAuth', 'isAdmin']
+        '*': ['bearerAuth', 'expiredPassword', 'isAdmin']
     },
 
     PersonalDetailsController: {
-        '*':  ['bearerAuth', 'canAccessPersonalData']
+        '*':  ['bearerAuth', 'expiredPassword', 'canAccessPersonalData']
     }
 
 

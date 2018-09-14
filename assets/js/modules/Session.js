@@ -71,7 +71,9 @@
                     that.set("projects", results.toJSON());
                     return callback();
                 },
-                error: xtens.error
+                error: function(collection, response) {
+                    return xtens.error(response, "Edit");
+                }
             });
 
         },
@@ -107,7 +109,6 @@
 
         render: function() {
             var that = this;
-
             if (xtens.session.get('activeProject') !== 'all') {
                 var adminProjects = xtens.session.get("adminProjects");
                 var idProject = _.find(xtens.session.get('projects'),function (p) { return p.name === xtens.session.get('activeProject'); }).id;

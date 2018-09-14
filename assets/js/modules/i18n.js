@@ -367,6 +367,8 @@
         /* views/templates/update-password.ejs */
         "update-password" : "Update Password",
         "old-password": "Old Password",
+        "password-complexity-error": "It must contain at least one lower case character, an uppercase character, a number, a special character (!@#$%^&*) and be at least 8 characters long",
+        "update-exp-password" : "Update Expired Password",
         "new-password-at-least": "New Password (At Least 8 Characters)",
         "cnew-password": "Confirm New Password",
         "change-password": "Change Password",

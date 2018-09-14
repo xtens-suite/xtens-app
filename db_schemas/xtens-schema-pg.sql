@@ -1424,6 +1424,7 @@ CREATE TABLE operator (
     sex text NOT NULL,
     email text NOT NULL,
     address_information integer NOT NULL,
+    last_pswd_update timestamp with time zone NOT NULL DEFAULT now(),
     created_at timestamp with time zone NOT NULL,
     updated_at timestamp with time zone NOT NULL
 );

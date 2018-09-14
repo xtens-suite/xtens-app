@@ -1,5 +1,5 @@
 /* jshint node: true */
-/* globals _, sails, Group, Operator, Passport, TokenService */
+/* globals _, sails, Group, Operator, Passport, PassportService, TokenService */
 'use strict';
 let validator = require('validator');
 let crypto = require('crypto');
@@ -50,6 +50,10 @@ exports.createUser = function(_user, next) {
      req.flash('error', 'Error.Passport.Password.Missing');
      return next(new Error('No password was entered.'));
      } */
+
+    if (!PassportService.isStrongPassword(password)) {
+        return next(new ValidationError('The password does not meet the minimum security requirements. It must contain at least one lower case character, an uppercase character, a number, a special character (!@#$%^&*) and be at least 8 characters long'));
+    }
 
     Operator.create(_user, function(err, operator) {
         if (err) {
@@ -214,8 +218,9 @@ exports.login = function(req, identifier, password, next) {
  * @param {Function} next
  */
 /*eslint no-unreachable: 0*/
-exports.updatePassword = function(param, idOperator, next) {
+exports.updatePassword = function(param, next) {
 
+    let identifier = param.username;
     let password = param.oldPass;
     let newPass = param.newPass;
     let cnewPass = param.cnewPass;
@@ -230,30 +235,63 @@ exports.updatePassword = function(param, idOperator, next) {
         return next(errn, false);
     }
 
-    Passport.findOne({
-        protocol: 'local',
-        user: idOperator
-    })
-    .then(function(passport) {
+    if (!PassportService.isStrongPassword(newPass)) {
+        return next(new ValidationError('The password does not meet the minimum security requirements. It must contain at least one lower case character, an uppercase character, a number, a special character (!@#$%^&*) and be at least 8 characters long'));
+    }
+
+    let isEmail = validator.isEmail(identifier),
+        query = {};
+
+    if (isEmail) {
+        query.email = identifier;
+    } else {
+        query.login = identifier;
+    }
+
+    Operator.findOne(query).populate('groups').exec(function(err, user) {
+        if (err) {
+            err.code = 500;
+            return next(err,false);
+        }
+
+        if (!user) {
+            if (isEmail) {
+                err = new ValidationError('Error.Passport.Email.NotFound');
+            } else {
+                err = new ValidationError('Error.Passport.Username.NotFound');
+            }
+            err.code = 401;
+            return next(err, false);
+        }
+
+        Passport.findOne({
+            protocol: 'local',
+            user: user.id
+        })
+        .then(function(passport) {
 
       //Validate the old password inserted by user
-        let passValidatePassword = BluebirdPromise.promisify(passport.validatePassword);
+            let passValidatePassword = BluebirdPromise.promisify(passport.validatePassword);
 
-        return passValidatePassword.call(passport, password, function(err,res){
-            if (!res) {
-                err = new ValidationError('Old Password does not match');
-                return next(err, false);
-            }
+            return passValidatePassword.call(passport, password, function(err,res){
+                if (!res) {
+                    err = new ValidationError('Old Password does not match');
+                    return next(err, false);
+                }
           //If New Passwords match, update passport with the new password
-            passport.password = newPass;
+                passport.password = newPass;
 
-            return Passport.update({id: passport.id}, passport)
-            .then(function(res) {
-                return next(null, true);
+                return Passport.update({id: passport.id}, passport)
+                .then(function(res) {
+                    return Operator.update({id: user.id}, {lastPswdUpdate: Date()})
+                    .then(function(res) {
+                        return next(null, true);
+                    });
+                });
             });
+        }).catch(/* istanbul ignore next */ function(err) {
+            sails.log.error(err);
+            return next(err, false);
         });
-    }).catch(/* istanbul ignore next */ function(err) {
-        sails.log.error(err);
-        return next(err, false);
     });
 };

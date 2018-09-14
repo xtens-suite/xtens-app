@@ -40,7 +40,7 @@
         <div class="form-group metadataform-group">
             <label for="password" class="operator-label"><%= __('password') %></label>
             <div class="operator-halfinput-div">
-                <input type="password" class="form-control" id="password" name="password" data-parsley-minlength="8" placeholder="<%= __('min-8-characters')  %>"></input>
+                <input type="password" class="form-control" id="password" name="password" data-parsley-minlength="8" data-parsley-pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})" placeholder="<%= __('min-8-characters')  %>"></input>
             </div>
         <label for="confirmedPassword" class="operator-label"><%= __('confirm-password')  %></label>
             <div class="operator-halfinput-div">

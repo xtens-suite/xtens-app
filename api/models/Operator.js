@@ -66,6 +66,12 @@ var Operator = {
             type:'datetime',
             columnName: 'updated_at'
         },
+
+        lastPswdUpdate: {
+            type:'datetime',
+            columnName: 'last_pswd_update'
+        },
+
         groups: {
             collection:'group',
             via:'members'
@@ -94,7 +100,7 @@ var Operator = {
          *                      7) canAccessSensitiveData [boolean]
          */
         formatForTokenPayload: function() {
-            var operator = _.pick(this.toObject(), ['id', 'groups']);
+            var operator = _.pick(this.toObject(), ['id', 'groups', 'lastPswdUpdate']);
             var privilegesArray = _.map(operator.groups, 'privilegeLevel');
             operator.isWheel = privilegesArray.indexOf(constants.GroupPrivilegeLevels.WHEEL) > -1;
             operator.isAdmin = operator.isWheel || privilegesArray.indexOf(constants.GroupPrivilegeLevels.ADMIN) > -1;

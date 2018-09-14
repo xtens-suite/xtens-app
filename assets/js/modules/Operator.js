@@ -282,6 +282,7 @@
         logIn: function() {
             var that = this;
             this.$('#loginFailed').hide();
+            xtens.session.set("expiredPassword", false);
             var username = this.$('#username').val();
             var password = this.$('#password').val();
 
@@ -394,13 +395,18 @@
             _.bindAll(this, 'saveOnSuccess');
             $('#main').html(this.el);
             this.template = JST['views/templates/update-password.ejs'];
+            this.pswdExpired = xtens.session.get("expiredPassword");
             this.render();
             this.$modal = this.$('.updated-password-modal');
-
         },
 
         render: function()  {
-            this.$el.html(this.template({__:i18n}));
+            this.$el.html(this.template({__:i18n, expired: this.pswdExpired}));
+            if (this.pswdExpired) {
+                $('#username').removeAttr('disabled');
+            }
+            $('#username').val(xtens.session.get('login') ? xtens.session.get('login') : null);
+
             this.$form = this.$("form");
             this.$form.parsley(parsleyOpts);
             return this;
@@ -409,16 +415,15 @@
         updatePassword: function(ev) {
             ev.preventDefault();
             var that = this;
+            var username =$('#username').val();
             var oldPass =$('#oldPassword').val();
             var newPass =$('#newPassword').val();
             var cnewPass =$('#confirmNewPass').val();
             $.ajax({
                 url: '/operator',
                 type: 'PATCH',
-                headers: {
-                    'Authorization': 'Bearer ' + xtens.session.get('accessToken')
-                },
                 data: JSON.stringify({
+                    username: username,
                     oldPass: oldPass,
                     newPass: newPass,
                     cnewPass: cnewPass
@@ -450,7 +455,10 @@
             setTimeout(function(){ modal.hide(); }, 1200);
             this.$('.xtens-modal').on('hidden.bs.modal', function (e) {
                 modal.remove();
-                xtens.router.navigate('homepage', {trigger: true});
+                xtens.session.set("bearerAuth", null);
+                xtens.session.set("expiredPassword", false);
+                xtens.session.set("accessToken", false);
+                xtens.router.navigate('login', {trigger: true});
             });
         }
 

@@ -130,8 +130,11 @@
                 if (!isAuth) {
                     this.navigate('login', {trigger: true});
                     return false;
+                }else if (xtens.session.get("expiredPassword") && path !== "operators/updatePassword") {
+                    this.navigate('operators/updatePassword', {trigger: true});
+                    return false;
                 }
-                else if (!this.menuBarView || this.menuBarView.$el.children().length < 1) {
+                else if (!xtens.session.get("expiredPassword") && (!this.menuBarView || this.menuBarView.$el.children().length < 1)) {
                     this.menuBarView = new Session.Views.MenuBar();
                 }
             }

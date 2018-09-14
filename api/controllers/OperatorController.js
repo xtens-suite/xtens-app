@@ -44,10 +44,10 @@ var OperatorController = {
      */
     patchPassword: function(req, res) {
         const co = new ControllerOut(res);
-        const idOperator = TokenService.getToken(req).id;
-        if (idOperator) {
+        // const idOperator = TokenService.getToken(req).id;
+        // if (idOperator) {
 
-            return updatePassword(req.allParams(), idOperator)
+        return updatePassword(req.allParams())
 
             .then(function() {
 
@@ -57,9 +57,10 @@ var OperatorController = {
                 sails.log(error.message);
                 return co.error(error);
             });
-        } else {
-            return res.json(400, 'Operator not Found');
-        }
+        // }
+        //  else {
+        //     return res.json(400, 'Operator not Found');
+        // }
 
     }
 
