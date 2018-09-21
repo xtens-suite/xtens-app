@@ -1588,7 +1588,9 @@
             var that = this;
 
             var serialized = this.queryView.serialize([]);
-
+            if (!serialized.res.content) {
+                return;
+            }
             var leafSearch = _.find(serialized.leafSearch, function (obj) {
                 return obj.getMetadata === true;
             });
