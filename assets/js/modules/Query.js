@@ -793,7 +793,11 @@
             this.dataTypes = options.dataTypes || [];
             this.isFirst = options.isFirst;
             if (this.isFirst) {
-                this.model.set('multiProject',false);
+                if (_.isEmpty(options.model.attributes)) {
+                    this.model.set('multiProject',false);
+                } else {
+                    this.model = options.model;
+                }
             }
             else {
                 if (_.isEmpty(options.model.attributes)) {
@@ -806,6 +810,7 @@
             }
             this.dataTypesComplete = options.dataTypesComplete || [];
             this.dataTypePrivileges = options.dataTypePrivileges || [];
+            this.bind("reset", this.destroyView);
             // this.listenTo(this.model, 'change:dataType', this.dataTypeOnChange);
         },
 
@@ -817,6 +822,16 @@
             'click [name="get-metadata"]': 'getMetadataBtnOnClick',
             'click .remove-me-field': 'closeMeField',
             'click .clear-me': 'clearMe'
+        },
+        destroyView:function (options) {
+          // COMPLETELY UNBIND THE VIEW
+            this.undelegateEvents();
+
+            this.$el.removeData().unbind();
+
+// Remove view from DOM
+            this.remove();
+            Backbone.View.prototype.remove.call(this);
         },
 
         addQueryRow: function(ev) {
@@ -839,16 +854,6 @@
 
             });
         },
-
-      /* *
-         * @deprecated
-        addLoopQuery: function(ev) {
-            ev.stopPropagation();
-            var childView = new Query.Views.Loop({loopList: this.dataTypes.get(this.model.get('dataType')).getLoops(),
-                                                 model: new Query.LoopModel()});
-                                                 this.$el.append(childView.render().el);
-                                                 this.add(childView);
-        }, */
 
         nestedQueryBtnOnClick: function(ev) {
             ev.stopPropagation();
@@ -1007,6 +1012,7 @@
          */
         dataTypeOnChange: function(model, idDataType) {
             this.clear(true);
+            var that = this;
             if (!idDataType) {
                 this.$multiSearchButton.addClass('hidden');
                 this.$addFieldButton.addClass('hidden');
@@ -1016,13 +1022,17 @@
             }
             else {
                 if(this.isFirst) {
+                    this.model = new Query.Model({});
                     xtens.session.set('multiProject', false);
-                    this.createDataTypeRow(idDataType);
-                    this.setMultiProjectButton(false, false, function () {
-                        $('input#search').prop('disabled',false);
+                    this.createDataTypeRow(idDataType, function () {
+                        that.setMultiProjectButton(false, false, function () {
+                            $('input#search').prop('disabled',false);
+                        });
                     });
                 }else {
-                    this.createDataTypeRow(idDataType);
+                    this.createDataTypeRow(idDataType, function () {
+
+                    });
                 }
             }
 
@@ -1073,7 +1083,7 @@
          * @name createDataTypeRow
          * @param{integer} idDataType
          */
-        createDataTypeRow: function(idDataType) {
+        createDataTypeRow: function(idDataType, next) {
             var personalInfoQueryView, modelQueryView, childView, queryContent = this.model.get("content"), that = this;
             this.selectedDataType = this.dataTypes.get(idDataType);
             this.selectedPrivilege = this.dataTypePrivileges.findWhere({'dataType' : idDataType});
@@ -1140,6 +1150,7 @@
                             }
                         }
                     }, that);
+                    next();
                 }
                 else {
                     if (xtens.session.get("isWheel") || that.selectedPrivilege.get('privilegeLevel') !== VIEW_OVERVIEW) {
@@ -1147,6 +1158,7 @@
                         that.$el.append(childView.render().el);
                         that.add(childView);
                     }
+                    next();
                 }
             });
 
@@ -1193,6 +1205,7 @@
          * @extends Backbone.View.render
          */
         render: function(options) {
+            var that = this;
             if (options.id) {} // load an existing query TODO
             else {
                 this.$el.html(this.template({__: i18n, isFirst: this.isFirst }));
@@ -1209,7 +1222,14 @@
             this.$addNestedButton = this.$("[name='add-nested']");
             this.$clearMe = this.$("[name='clear-me']");
             if (this.model.get("dataType")) {
-                this.createDataTypeRow(this.model.get("dataType"));
+                this.createDataTypeRow(this.model.get("dataType"), function() {
+                    if (that.isFirst) {
+                        that.setMultiProjectButton(that.model.get('multiProject'), true ,function(){
+                    // TODO: wait async nestedviews rendering and then trigger
+                        });
+                    }
+
+                });
             }
             this.listenTo(this.model, 'change:dataType', this.dataTypeOnChange);
             return this;
@@ -1248,6 +1268,7 @@
             options.dataTypes.comparator = 'id';
             options.dataTypes.sort();
             this.dataTypes = options.dataTypes || [];
+            this.operator = options.operator;
             this.dataTypePrivileges = options.dataTypePrivileges || [];
             this.render(options);
             xtens.session.set('multiProject', options.queryObj ? options.queryObj.multiProject : false);
@@ -1259,7 +1280,12 @@
                 dataTypePrivileges: this.dataTypePrivileges,
                 model: new Query.Model(options.queryObj)
             });
+            this.querySelectorView = new Query.Views.Selector({
+                operator: this.operator,
+                queryView: this.queryView
+            });
             this.$tableCnt = this.$("#result-table-cnt");
+            this.$querySelectorCnt = this.$(".query-selector-cnt");
             this.$queryModal = this.$(".query-modal");
             this.$queryNoResultCnt = this.$("#queryNoResultCnt");
             this.$queryErrorCnt = this.$("#queryErrorCnt");
@@ -1268,15 +1294,7 @@
             this.$('#buttonbardiv').before(this.queryView.render({}).el);
             this.listenToOnce(this, 'search', this.sendQuery);
             // if a query object exists trigger a server-side search
-            if (options.queryObj) {
-                // var that = this;
-                this.queryView.setMultiProjectButton(options.queryObj.multiProject, true ,function(){
-                  // TODO: wait async nestedviews rendering and then trigger search
-                    // that.trigger('search'); // disabled
-
-                });
-            }
-            else {
+            if (!options.queryObj) {
                 this.$('input#search').prop('disabled',true);
             }
         },
@@ -1284,9 +1302,9 @@
         render: function() {
             this.$el.html(this.template({__: i18n }));
 
+
             return this;
         },
-
 
         /**
          * @method
@@ -1479,6 +1497,259 @@
             this.$(".query-hidden").hide();
             this.modal && this.modal.hide();
         }
+
+    });
+
+    Query.Views.Selector = Backbone.View.extend({
+        events : {
+            'click .load-query': 'loadQuery',
+            'click .save-query': 'saveQuery',
+            'click .delete-query': 'deleteQuery'
+        },
+
+        /**
+         * @method
+         * @name initialize
+         * @extends Backbone.View.initialize
+         * @param{Object} - options, which contains the following properties:
+         *                  - dataTypes - a list/array of available DataTypes
+         *                  - queryObj - a (possibly nested) query object, as the one sent to server side requests
+         */
+        initialize: function(options) {
+
+            this.operator = options.operator;
+            this.queryView = options.queryView;
+            this.template = JST["views/templates/query-selector.ejs"];
+            this.$querySelectorCnt = $(".query-selector-cnt");
+            this.setElement(this.$querySelectorCnt);
+            this.$queryModal = $(".query-modal");
+
+            this.myQueries = JSON.parse(this.operator.get('queries'));
+            if (xtens.session.get('activeProject')!=='all') {
+                var idProject = _.find(xtens.session.get('projects'), { 'name': xtens.session.get('activeProject')}).id;
+                this.myQueries = _.filter(JSON.parse(this.operator.get('queries')), function(q) {return q.project == idProject;});
+            }
+            this.render();
+        },
+
+        render: function() {
+            this.$querySelectorCnt.append(this.template({__: i18n, queries: this.myQueries }));
+            $('select.query-selector').selectpicker();
+            if (this.myQueries.length == 0) {
+                $('select.query-selector').prop('disabled', true);
+            }
+
+            $('.delete-query').prop('disabled', true);
+            $('.load-query').prop('disabled', true);
+            $('[data-toggle="tooltip"]').tooltip();
+            $('select.query-selector').on('change', function (ev) {
+                if (ev.currentTarget.value != "") {
+                    $('.delete-query').prop('disabled', false);
+                    $('.load-query').prop('disabled', false);
+                }
+            });
+            return this;
+        },
+
+        /**
+         * @method
+         * @name loadQuery
+         * @description load a stored query into queryBuilder
+         * @return{boolean} false
+         */
+        loadQuery: function() {
+            var queryObj = JSON.parse($('select.query-selector').val());
+            var queryParameters = JSON.stringify({queryArgs: queryObj});
+            var path = '/query/' + encodeURIComponent(queryParameters);
+            xtens.router.navigate(path, {trigger: false});
+
+            this.queryView.trigger("reset");
+            this.queryView = new Query.Views.Composite({
+                isFirst: true,
+                biobanks: this.queryView.biobanks,
+                dataTypes: this.queryView.dataTypes,
+                dataTypesComplete: this.queryView.dataTypes,
+                dataTypePrivileges: this.queryView.dataTypePrivileges,
+                model: new Query.Model(queryObj)
+            });
+            $('#buttonbardiv').before(this.queryView.render({}).el);
+            $('input#search').prop('disabled',false);
+
+            return false;
+        },
+
+        /**
+         * @method
+         * @name sendQuery
+         * @description compose the object with query parameters and send it through AJAX request to the server for executing a (sanitised) query
+         * @return{boolean} false
+         */
+        saveQuery: function() {
+            var that = this;
+
+            var serialized = this.queryView.serialize([]);
+
+            var leafSearch = _.find(serialized.leafSearch, function (obj) {
+                return obj.getMetadata === true;
+            });
+            this.leafSearch = {
+                isLeafSearch: leafSearch && leafSearch.getMetadata ? true : false,
+                info: serialized.leafSearch
+            };
+            this.multiProject = xtens.session.get('multiProject');
+            var queryArgs  = _.extend(serialized.res, {
+                multiProject: this.queryView.multiProject,
+                wantsSubject: true,
+                leafSearch: this.leafSearch.isLeafSearch,
+                wantsPersonalInfo: xtens.session.get('canAccessPersonalData')
+            });
+            var idProject = xtens.session.get('activeProject') !== 'all' ? _.find(xtens.session.get('projects'), { 'name': xtens.session.get('activeProject')}).id : 0;
+
+            var myQueryTmpl = {
+                name: "",
+                project: idProject,
+                query: JSON.stringify(queryArgs)
+            };
+
+            this.modal = new ModalDialog({
+                title: i18n('save-query'),
+                template: JST["views/templates/query-save-modal.ejs"],
+                data: { __: i18n}
+            });
+            this.$queryModal.append(this.modal.render().el);
+            this.modal.show();
+
+            $('input.query-name').on('keyup', function (ev) {
+                ev.preventDefault();
+                if (ev.currentTarget.value != "") {
+                    if (_.find(that.myQueries, function(o) { return o.name.toLowerCase() === ev.currentTarget.value.toLowerCase();})) {
+                        $('.query-confirm-save').prop('disabled',true);
+                        $('#inputHelpBlock').prop('hidden',false);
+                    } else {
+                        myQueryTmpl.name = ev.currentTarget.value;
+                        $('.query-confirm-save').prop('disabled',false);
+                        $('#inputHelpBlock').prop('hidden',true);
+
+                    }
+                } else {
+                    $('.query-confirm-save').prop('disabled',true);
+                }
+            });
+
+            $('.query-confirm-save').on('click', function (ev) {
+
+
+                that.myQueries.push(myQueryTmpl);
+
+                that.operator.set("queries", JSON.stringify(that.myQueries));
+
+                that.modal.hide();
+
+                that.$queryModal.one('hidden.bs.modal', function (e) {
+                    that.operator.save(null, {
+                        success: function(operator) {
+                            if (that.modal) {
+                                that.modal.hide();
+                            }
+                            that.modal = new ModalDialog({
+                                title: i18n('ok'),
+                                body: i18n('query-correctly-stored-on-server')
+                            });
+                            that.$queryModal.append(that.modal.render().el);
+                            $('.modal-header').addClass('alert-success');
+                            that.modal.show();
+
+                            setTimeout(function(){ that.modal.hide(); }, 1200);
+                            that.$queryModal.on('hidden.bs.modal', function (e) {
+                                that.modal.remove();
+                                that.$querySelectorCnt.empty();
+                                that.myQueries = JSON.parse(that.operator.get('queries'));
+                                if (xtens.session.get('activeProject')!=='all') {
+                                    var idProject = _.find(xtens.session.get('projects'), { 'name': xtens.session.get('activeProject')}).id;
+                                    that.myQueries = _.filter(JSON.parse(that.operator.get('queries')), function(q) {return q.project == idProject;});
+                                }
+                                that.$querySelectorCnt.append(that.template({__: i18n, queries: that.myQueries }));
+                                $('.query-selector').selectpicker();
+                                $('select.query-selector').prop('disabled', false);
+                                $('.save-query').prop('disabled', false);
+                                $('.load-query').prop('disabled', false);
+                                $('.delete-query').prop('disabled', false);
+                            });
+                        },
+                        error: function(model, res) {
+                            xtens.error(res);
+                        }
+                    });
+                });
+
+            });
+
+
+        },
+
+        deleteQuery: function() {
+            var that = this;
+
+            this.modal = new ModalDialog({
+                template: JST["views/templates/confirm-dialog-bootstrap.ejs"],
+                title: i18n('confirm-deletion'),
+                body: i18n('query-will-be-permanently-deleted-are-you-sure'),
+                type: i18n("delete")
+            });
+            this.$queryModal.append(this.modal.render().el);
+            this.modal.show();
+
+            $('#confirm').on('click', function (ev) {
+                var queries = _.filter(JSON.parse(that.operator.get('queries')), function (o) {
+                    return o.name !== $('select.query-selector option:selected').text();
+                });
+
+                that.operator.set("queries", JSON.stringify(queries));
+                that.modal.hide();
+
+                that.$queryModal.one('hidden.bs.modal', function (e) {
+                    that.operator.save(null, {
+                        success: function(operator) {
+                            if (that.modal) {
+                                that.modal.hide();
+                            }
+                            that.modal = new ModalDialog({
+                                title: i18n('ok'),
+                                body: i18n('query-deleted')
+                            });
+                            that.$queryModal.append(that.modal.render().el);
+                            $('.modal-header').addClass('alert-success');
+                            that.modal.show();
+
+                            setTimeout(function(){ that.modal.hide(); }, 1200);
+                            that.$queryModal.on('hidden.bs.modal', function (e) {
+                                that.modal.remove();
+                                that.$querySelectorCnt.empty();
+                                that.myQueries = JSON.parse(that.operator.get('queries'));
+                                if (xtens.session.get('activeProject')!=='all') {
+                                    var idProject = _.find(xtens.session.get('projects'), { 'name': xtens.session.get('activeProject')}).id;
+                                    that.myQueries = _.filter(JSON.parse(that.operator.get('queries')), function(q) {return q.project == idProject;});
+                                }
+                                that.$querySelectorCnt.append(that.template({__: i18n, queries: that.myQueries }));
+                                $('.query-selector').selectpicker();
+                                if (that.myQueries.length == 0) {
+                                    $('select.query-selector').prop('disabled', true);
+                                }
+                                $('.delete-query').prop('disabled', true);
+                                $('.load-query').prop('disabled', true);
+                            });
+                        },
+                        error: function(model, res) {
+                            xtens.error(res);
+                        }
+                    });
+                });
+
+            });
+
+
+        }
+
 
     });
 

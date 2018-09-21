@@ -1426,6 +1426,7 @@ CREATE TABLE operator (
     address_information integer NOT NULL,
     last_pswd_update timestamp with time zone NOT NULL DEFAULT now(),
     reset_pswd boolean NOT NULL DEFAULT FALSE,
+    queries text NOT NULL DEFAULT '[]',
     created_at timestamp with time zone NOT NULL,
     updated_at timestamp with time zone NOT NULL
 );

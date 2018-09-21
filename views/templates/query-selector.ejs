@@ -1,0 +1,17 @@
+<div class="input-group">
+  <div class="input-group-addon">
+    <%= __("query-selector") %>
+  </div>
+  <select class="form-control query-selector selectpicker" title="<%=__('select-a-query')%>">
+    <%_.each(queries, function(obj) {
+      if(obj.name && obj.query){%>
+      <option value='<%= obj.query  %>'><%= obj.name %></option>
+      <%}%>
+    <%}) %>
+  </select>
+  <div class="input-group-btn">
+    <button class="btn btn-default load-query" data-toggle="tooltip" data-placement="top" title="<%= __('load-query')%>"><i class="fa fa-download" aria-hidden="true"></i></button>
+    <button class="btn btn-danger delete-query" data-toggle="tooltip" data-placement="top" title="<%= __('delete-query')%>"><i class="fa fa-trash" aria-hidden="true"></i></button>
+    <button class="btn btn-success save-query" data-toggle="tooltip" data-placement="top" title="<%= __('save-query')%>"><i class="fa fa-floppy-o" aria-hidden="true"></i></button>
+  </div>
+</div>

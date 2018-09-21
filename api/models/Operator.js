@@ -77,6 +77,11 @@ var Operator = {
             columnName: 'reset_pswd'
         },
 
+        queries: {
+            type: "string",
+            columnName: "queries"
+        },
+
         groups: {
             collection:'group',
             via:'members'

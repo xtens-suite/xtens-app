@@ -28,7 +28,8 @@ module.exports = function(grunt) {
                 'assets/js/application/**/*',
                 'assets/js/modules/**/*',
                 'tasks/pipeline.js',
-                'views/**/*',
+                'views/home/**/*',
+                'views/templates/**/*',
                 'assets/styles/**/*'
             ],
 

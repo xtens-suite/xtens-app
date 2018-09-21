@@ -947,6 +947,7 @@
                 var $biobanksDeferred = biobanks.fetch({ data: $.param({project: idProject}) });
                 $.when($dataTypesDeferred, $biobanksDeferred, $privilegesDeferred).then( function(dataTypesRes, biobanksRes, privilegesRes) {
                     that.loadView(new Query.Views.Builder({
+                        operator: new Operator.Model(operatorRes && operatorRes[0]),
                         queryObj: params && params.queryArgs,
                         biobanks: new Biobank.List(biobanksRes && biobanksRes[0]),
                         dataTypes: new DataType.List(dataTypesRes && dataTypesRes[0]),
