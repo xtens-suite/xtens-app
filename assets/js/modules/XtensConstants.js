@@ -2,6 +2,7 @@
 
 (function(xtens, XtensConstants) {
     XtensConstants.DefaultLimit = 10;
+    XtensConstants.DefaultLimitPrivileges = 10000;
 
     XtensConstants.Constants = {
         DATA: 'DATA',

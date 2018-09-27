@@ -829,7 +829,7 @@
 
             this.$el.removeData().unbind();
 
-// Remove view from DOM
+            // Remove view from DOM
             this.remove();
             Backbone.View.prototype.remove.call(this);
         },
@@ -870,14 +870,14 @@
                     return view;
                 }
             });
-            if (xtens.session.get('multiProject') === false) {
+            if (this.model.get('multiProject') === false) {
                 this.$multiSearchButton.removeClass('btn-danger').addClass('btn-success');
-                xtens.session.set('multiProject', true);
+                this.model.set('multiProject', true);
                 this.setDataTypeChildren(function () {});
             }
-            else if (xtens.session.get('multiProject') === true) {
+            else if (this.model.get('multiProject') === true) {
                 this.$multiSearchButton.removeClass('btn-success').addClass('btn-danger');
-                xtens.session.set('multiProject', false);
+                this.model.set('multiProject', false);
                 if (this.childrenDataTypes.length === 0) {
                     this.$addNestedButton.prop('disabled',true);
                 }else {
@@ -911,7 +911,7 @@
                 var childView = new Query.Views.Composite({
                     isFirst: false,
                     biobanks: this.biobanks,
-                    dataTypes: xtens.session.get('multiProject') && this.filteredChildren ? this.filteredChildren : this.childrenDataTypes,
+                    dataTypes: this.model.get('multiProject') && this.filteredChildren ? this.filteredChildren : this.childrenDataTypes,
                     dataTypesComplete: this.dataTypesComplete,
                     dataTypePrivileges:this.dataTypePrivileges,
                     model: new Query.Model(queryObj)
@@ -943,7 +943,7 @@
                 callback();
                 return;
             }
-            if (xtens.session.get('multiProject')) {
+            if (this.model.get('multiProject')) {
                 this.fetchDataTypesMultiProject(this.childrenDataTypes, this.selectedDataType.get("superType").id, function (filteredChildren) {
                     if (filteredChildren.length === 0) {
                         that.$addNestedButton.prop('disabled',true);
@@ -1022,8 +1022,13 @@
             }
             else {
                 if(this.isFirst) {
-                    this.model = new Query.Model({});
-                    xtens.session.set('multiProject', false);
+                    $("select.query-selector").val('default');
+                    $("select.query-selector").selectpicker("refresh");
+                    $('.delete-query').prop('disabled', true);
+                    this.model = new Query.Model({
+                        dataType: idDataType,
+                        multiProject: false
+                    });
                     this.createDataTypeRow(idDataType, function () {
                         that.setMultiProjectButton(false, false, function () {
                             $('input#search').prop('disabled',false);
@@ -1149,7 +1154,7 @@
                                 that.addSubqueryView(childView);
                             }
                         }
-                    }, that);
+                    });
                     next();
                 }
                 else {
@@ -1246,7 +1251,8 @@
      */
     Query.Views.Builder = Backbone.View.extend({
         events : {
-            'submit #query-form': 'sendQuery'
+            'submit #query-form': 'sendQuery',
+            'click .query-reset-all': 'resetQueryComposite'
         },
 
 
@@ -1271,7 +1277,7 @@
             this.operator = options.operator;
             this.dataTypePrivileges = options.dataTypePrivileges || [];
             this.render(options);
-            xtens.session.set('multiProject', options.queryObj ? options.queryObj.multiProject : false);
+            // xtens.session.set('multiProject', options.queryObj ? options.queryObj.multiProject : false);
             this.queryView = new Query.Views.Composite({
                 isFirst: true,
                 biobanks: this.biobanks,
@@ -1282,7 +1288,7 @@
             });
             this.querySelectorView = new Query.Views.Selector({
                 operator: this.operator,
-                queryView: this.queryView
+                queryBuilder: this
             });
             this.$tableCnt = this.$("#result-table-cnt");
             this.$querySelectorCnt = this.$(".query-selector-cnt");
@@ -1306,6 +1312,22 @@
             return this;
         },
 
+        resetQueryComposite: function (ev) {
+            ev.preventDefault();
+            this.queryView.trigger("reset");
+            this.queryView = new Query.Views.Composite({
+                isFirst: true,
+                biobanks: this.queryView.biobanks,
+                dataTypes: this.queryView.dataTypes,
+                dataTypesComplete: this.queryView.dataTypes,
+                dataTypePrivileges: this.queryView.dataTypePrivileges,
+                model: new Query.Model({})
+            });
+            $('#buttonbardiv').before(this.queryView.render({}).el);
+            this.$('input#search').prop('disabled',true);
+
+        },
+
         /**
          * @method
          * @name sendQuery
@@ -1326,7 +1348,7 @@
                 isLeafSearch: leafSearch && leafSearch.getMetadata ? true : false,
                 info: serialized.leafSearch
             };
-            this.multiProject = xtens.session.get('multiProject');
+            this.multiProject = this.queryView.model.get('multiProject');
             var queryArgs = _.extend(serialized.res, {
                 multiProject: this.multiProject,
                 wantsSubject: true,
@@ -1502,7 +1524,7 @@
 
     Query.Views.Selector = Backbone.View.extend({
         events : {
-            'click .load-query': 'loadQuery',
+            'change select.query-selector': 'loadQuery',
             'click .save-query': 'saveQuery',
             'click .delete-query': 'deleteQuery'
         },
@@ -1518,7 +1540,7 @@
         initialize: function(options) {
 
             this.operator = options.operator;
-            this.queryView = options.queryView;
+            this.queryBuilder = options.queryBuilder;
             this.template = JST["views/templates/query-selector.ejs"];
             this.$querySelectorCnt = $(".query-selector-cnt");
             this.setElement(this.$querySelectorCnt);
@@ -1540,12 +1562,10 @@
             }
 
             $('.delete-query').prop('disabled', true);
-            $('.load-query').prop('disabled', true);
             $('[data-toggle="tooltip"]').tooltip();
             $('select.query-selector').on('change', function (ev) {
                 if (ev.currentTarget.value != "") {
                     $('.delete-query').prop('disabled', false);
-                    $('.load-query').prop('disabled', false);
                 }
             });
             return this;
@@ -1557,22 +1577,23 @@
          * @description load a stored query into queryBuilder
          * @return{boolean} false
          */
-        loadQuery: function() {
+        loadQuery: function(ev) {
+            ev.preventDefault();
             var queryObj = JSON.parse($('select.query-selector').val());
             var queryParameters = JSON.stringify({queryArgs: queryObj});
             var path = '/query/' + encodeURIComponent(queryParameters);
             xtens.router.navigate(path, {trigger: false});
 
-            this.queryView.trigger("reset");
-            this.queryView = new Query.Views.Composite({
+            this.queryBuilder.queryView.trigger("reset");
+            this.queryBuilder.queryView = new Query.Views.Composite({
                 isFirst: true,
-                biobanks: this.queryView.biobanks,
-                dataTypes: this.queryView.dataTypes,
-                dataTypesComplete: this.queryView.dataTypes,
-                dataTypePrivileges: this.queryView.dataTypePrivileges,
+                biobanks: this.queryBuilder.queryView.biobanks,
+                dataTypes: this.queryBuilder.queryView.dataTypes,
+                dataTypesComplete: this.queryBuilder.queryView.dataTypes,
+                dataTypePrivileges: this.queryBuilder.queryView.dataTypePrivileges,
                 model: new Query.Model(queryObj)
             });
-            $('#buttonbardiv').before(this.queryView.render({}).el);
+            $('#buttonbardiv').before(this.queryBuilder.queryView.render({}).el);
             $('input#search').prop('disabled',false);
 
             return false;
@@ -1587,8 +1608,8 @@
         saveQuery: function() {
             var that = this;
 
-            var serialized = this.queryView.serialize([]);
-            if (!serialized.res.content) {
+            var serialized = this.queryBuilder.queryView.serialize([]);
+            if (!serialized.res.dataType) {
                 return;
             }
             var leafSearch = _.find(serialized.leafSearch, function (obj) {
@@ -1598,17 +1619,17 @@
                 isLeafSearch: leafSearch && leafSearch.getMetadata ? true : false,
                 info: serialized.leafSearch
             };
-            this.multiProject = xtens.session.get('multiProject');
+            this.multiProject = this.queryBuilder.queryView.model.get('multiProject');
             var queryArgs  = _.extend(serialized.res, {
-                multiProject: this.queryView.multiProject,
+                multiProject: this.queryBuilder.queryView.multiProject,
                 wantsSubject: true,
                 leafSearch: this.leafSearch.isLeafSearch,
                 wantsPersonalInfo: xtens.session.get('canAccessPersonalData')
             });
             var idProject = xtens.session.get('activeProject') !== 'all' ? _.find(xtens.session.get('projects'), { 'name': xtens.session.get('activeProject')}).id : 0;
-
+            var currentSelectedQueryName = $('select.query-selector option:selected').text();
             var myQueryTmpl = {
-                name: "",
+                name: currentSelectedQueryName != i18n('select-a-query') ? currentSelectedQueryName : "",
                 project: idProject,
                 query: JSON.stringify(queryArgs)
             };
@@ -1619,16 +1640,21 @@
                 data: { __: i18n}
             });
             this.$queryModal.append(this.modal.render().el);
+            if (currentSelectedQueryName != "" && currentSelectedQueryName != i18n('select-a-query')) {
+                $('input.query-name').val(currentSelectedQueryName);
+                $('.query-confirm-save').prop('disabled',false);
+                $('#inputHelpBlock').prop('hidden',false);
+            }
             this.modal.show();
 
             $('input.query-name').on('keyup', function (ev) {
                 ev.preventDefault();
                 if (ev.currentTarget.value != "") {
+                    myQueryTmpl.name = ev.currentTarget.value;
                     if (_.find(that.myQueries, function(o) { return o.name.toLowerCase() === ev.currentTarget.value.toLowerCase();})) {
-                        $('.query-confirm-save').prop('disabled',true);
+                        // $('.query-confirm-save').prop('disabled',true);
                         $('#inputHelpBlock').prop('hidden',false);
                     } else {
-                        myQueryTmpl.name = ev.currentTarget.value;
                         $('.query-confirm-save').prop('disabled',false);
                         $('#inputHelpBlock').prop('hidden',true);
 
@@ -1640,7 +1666,9 @@
 
             $('.query-confirm-save').on('click', function (ev) {
 
-
+                that.myQueries = _.filter(JSON.parse(that.operator.get('queries')), function (o) {
+                    return o.name.toLowerCase() !== $('input.query-name').val().toLowerCase();
+                });
                 that.myQueries.push(myQueryTmpl);
 
                 that.operator.set("queries", JSON.stringify(that.myQueries));
@@ -1670,12 +1698,7 @@
                                     var idProject = _.find(xtens.session.get('projects'), { 'name': xtens.session.get('activeProject')}).id;
                                     that.myQueries = _.filter(JSON.parse(that.operator.get('queries')), function(q) {return q.project == idProject;});
                                 }
-                                that.$querySelectorCnt.append(that.template({__: i18n, queries: that.myQueries }));
-                                $('.query-selector').selectpicker();
-                                $('select.query-selector').prop('disabled', false);
-                                $('.save-query').prop('disabled', false);
-                                $('.load-query').prop('disabled', false);
-                                $('.delete-query').prop('disabled', false);
+                                that.render(JSON.stringify(queryArgs));
                             });
                         },
                         error: function(model, res) {
@@ -1703,7 +1726,7 @@
 
             $('#confirm').on('click', function (ev) {
                 var queries = _.filter(JSON.parse(that.operator.get('queries')), function (o) {
-                    return o.name !== $('select.query-selector option:selected').text();
+                    return o.name.toLowerCase() !== $('select.query-selector option:selected').text().toLowerCase();
                 });
 
                 that.operator.set("queries", JSON.stringify(queries));
@@ -1732,13 +1755,7 @@
                                     var idProject = _.find(xtens.session.get('projects'), { 'name': xtens.session.get('activeProject')}).id;
                                     that.myQueries = _.filter(JSON.parse(that.operator.get('queries')), function(q) {return q.project == idProject;});
                                 }
-                                that.$querySelectorCnt.append(that.template({__: i18n, queries: that.myQueries }));
-                                $('.query-selector').selectpicker();
-                                if (that.myQueries.length == 0) {
-                                    $('select.query-selector').prop('disabled', true);
-                                }
-                                $('.delete-query').prop('disabled', true);
-                                $('.load-query').prop('disabled', true);
+                                that.render();
                             });
                         },
                         error: function(model, res) {

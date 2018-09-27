@@ -166,7 +166,7 @@
          */
         dataTypePrivilegesList: function(queryString) {
             var queryParams = parseQueryString(queryString);
-            var privilegesParams = {sort:'id ASC', populate:['dataType','group'], limit:1000};
+            var privilegesParams = {sort:'id ASC', populate:['dataType','group'], limit: xtens.module("xtensconstants").DefaultLimitPrivileges};
             queryParams.groupId ? privilegesParams.group = queryParams.groupId : null;
             queryParams.dataTypeId ? privilegesParams.dataType = queryParams.dataTypeId : null;
             var that = this;
@@ -345,7 +345,7 @@
                     data: $.param({ populate: ['children','superType'] })
                 });
                 var $privilegesDeferred = privileges.fetch({
-                    data: $.param({group: groupId, limit:100})
+                    data: $.param({group: groupId, limit:xtens.module("xtensconstants").DefaultLimitPrivileges})
                 });
 
                 $.when($dataTypesDeferred, $privilegesDeferred).then(function(dataTypesRes, privilegesRes) {
@@ -599,7 +599,7 @@
                 var groupsOperator = operatorRes && _.uniq(_.map(operatorRes[0].groups, 'id'));
                 var groupId = groupsActiveProject ? _.intersection(groupsActiveProject, groupsOperator) : groupsOperator;
                 var $privilegesDeferred = privileges.fetch({
-                    data: $.param({group: groupId, limit:100})
+                    data: $.param({group: groupId, limit: xtens.module("xtensconstants").DefaultLimitPrivileges})
                 });
                 var $dataTypesDeferred = dataTypes.fetch({
                     data: $.param({ populate: ['children','superType'] })
@@ -780,7 +780,7 @@
                 var groupsOperator = operatorRes && _.uniq(_.map(operatorRes[0].groups, 'id'));
                 var groupId = groupsActiveProject ? _.intersection(groupsActiveProject, groupsOperator) : groupsOperator;
                 var $privilegesDeferred = privileges.fetch({
-                    data: $.param({group: groupId, limit:100})
+                    data: $.param({group: groupId, limit: xtens.module("xtensconstants").DefaultLimitPrivileges})
                 });
                 var $dataTypesDeferred = dataTypes.fetch({
                     data: $.param({populate:['children','superType']})
@@ -941,7 +941,7 @@
             $.when($operatorDeferred).then( function(operatorRes) {
                 var groupId = operatorRes && _.uniq(_.map(operatorRes[0].groups, 'id'));
                 var $privilegesDeferred = privileges.fetch({
-                    data: $.param({group: groupId, limit:100})
+                    data: $.param({group: groupId, limit: xtens.module("xtensconstants").DefaultLimitPrivileges})
                 });
                 var $dataTypesDeferred = dataTypes.fetch({ data: $.param(criteria) });
                 var $biobanksDeferred = biobanks.fetch({ data: $.param({project: idProject}) });
