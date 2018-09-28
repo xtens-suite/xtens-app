@@ -45,7 +45,6 @@ const coroutines = {
         qUpdate = actionUtil.populateRequest(qUpdate, req);
         let upData = yield BluebirdPromise.resolve(qUpdate);
 
-        DbLog(logMessages.UPDATE, 'OPERATOR', updatedData.id, updatedData.owner, updatedData.type, operator.id, {prevData: prevData, upData: upData});
         return res.json(upData);
     })
 
