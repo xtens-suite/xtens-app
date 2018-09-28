@@ -1324,6 +1324,8 @@
                 model: new Query.Model({})
             });
             $('#buttonbardiv').before(this.queryView.render({}).el);
+            $("select.query-selector").val('default');
+            $("select.query-selector").selectpicker("refresh");
             this.$('input#search').prop('disabled',true);
 
         },
