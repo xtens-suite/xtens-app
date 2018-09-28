@@ -250,7 +250,7 @@
                             return rowData.showRow;
                         }
                       );
-                      
+
                       excelPlainData = [{
                           extend: 'excelHtml5',
                           text: 'Excel - child Rows',
@@ -376,6 +376,37 @@
                       }
                   }
               });
+          },
+
+          checkVCF: function () {
+              var fieldsVCF = ["chr", "pos", "id", "qual", "ref", "alt", "filter"];
+              var fieldsVCF2 = ["chrom", "pos", "id", "qual", "ref", "alt", "filter"];
+              var found = 0, found2 = 0;
+              var fieldsNames = [];
+              var schemabody;
+              if (this.dataTypes.models) {
+                  schemaBody = _.flatten(_.map(this.dataTypes.models, 'attributes.superType.schema.body'));
+              }
+              else {
+                  schemaBody = this.dataTypes.get('superType').schema.body;
+
+              }
+              fieldsNames = _.map(_.flatten(_.map(schemaBody, 'content')),'formattedName');
+              fieldsNames.forEach(function (name) {
+                  if (fieldsVCF.find(function(n) {return n === name;}) ) {
+                      found = found + 1;
+                  }
+                  if (fieldsVCF2.find(function(n) {return n === name;})) {
+                      found2 = found2 + 1;
+                  }
+              });
+
+              if (found == 7 || found2 == 7) {
+                  return true;
+              }
+              else {
+                  return false;
+              }
           },
 
           /**
