@@ -1326,6 +1326,7 @@
             $('#buttonbardiv').before(this.queryView.render({}).el);
             $("select.query-selector").val('default');
             $("select.query-selector").selectpicker("refresh");
+            xtens.router.navigate('/query', {trigger: false});
             this.$('input#search').prop('disabled',true);
 
         },
