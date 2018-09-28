@@ -389,11 +389,7 @@
                 var that = this;
                 Data.Views.Edit.prototype.dataTypeOnChange.call(this);
                 var typeName = this.$('#data-type :selected').text(),
-<<<<<<< 6c22e66fd439d10a1aac888c9e4479bd858cee89
                     parentSample = this.model.get("parentSample") && this.model.get("parentSample").length > 0 ? this.model.get("parentSample")[0].biobankCode : null,
-=======
-                    parentSample = this.model.get("parentSample") ? this.model.get("parentSample")[0].biobankCode : null,
->>>>>>> fix after merge
                     biobank = this.model.get("biobank").id;
                 var type = _.find(this.dataTypes, function(dt){ return dt.name === typeName;});
                 var params = {
