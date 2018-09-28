@@ -167,7 +167,7 @@ function dblog(sails) {
                 UPDATE: 'update',
                 QUERY: 'query'
             };
-            
+
             if (connection) {
                 this.myCustomLevels = {
                     levels: {
@@ -227,7 +227,7 @@ function dblog(sails) {
      * @return {void}
      */
         log: function(message, model, data, owner, type, executor, obj) {
-            if (process.env.NODE_ENV == 'test') {
+            if (process.env.NODE_ENV == 'test' || !connection ) {
                 return BluebirdPromise.resolve();
             }
             return coroutines.log(message, model, data, owner, type, executor, obj)
