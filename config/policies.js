@@ -46,7 +46,8 @@ module.exports.policies = {
         'resetPassword': ['bearerAuth', 'expiredPassword', 'isWheel'],
         find: ['bearerAuth', 'expiredPassword'],
         findOne: ['bearerAuth', 'expiredPassword'],
-        'patchPassword': true
+        'patchPassword': true,
+        'patchQueries': ['bearerAuth', 'expiredPassword']
     },
 
     DataTypePrivilegesController: {

@@ -1676,7 +1676,15 @@
                 that.modal.hide();
 
                 that.$queryModal.one('hidden.bs.modal', function (e) {
-                    that.operator.save(null, {
+                    $.ajax({
+                        url: '/operator/patchQueries',
+                        type: 'PATCH',
+                        data: JSON.stringify(that.operator),
+                        headers: {
+                            'Authorization': 'Bearer ' + xtens.session.get("accessToken")
+                        },
+                        contentType: 'application/json',
+
                         success: function(operator) {
                             if (that.modal) {
                                 that.modal.hide();
@@ -1733,7 +1741,15 @@
                 that.modal.hide();
 
                 that.$queryModal.one('hidden.bs.modal', function (e) {
-                    that.operator.save(null, {
+                    $.ajax({
+                        url: '/operator/patchQueries',
+                        type: 'PATCH',
+                        data: JSON.stringify(that.operator),
+                        headers: {
+                            'Authorization': 'Bearer ' + xtens.session.get("accessToken")
+                        },
+                        contentType: 'application/json',
+
                         success: function(operator) {
                             if (that.modal) {
                                 that.modal.hide();
