@@ -123,65 +123,6 @@
                     return (val && val.id);
                 }
             },
-<<<<<<< HEAD
-            // '#donor': {observe: 'donor'},
-
-            // '#donor': {
-            //     observe: 'donor',
-            //     selectOptions: {
-            //         collection: function() {
-            //             return this.subjects.map(function(subj) {
-            //                 return {
-            //                     label: subj.personalInfo.surname + " " +  subj.personalInfo.givenName,
-            //                     value: subj.id
-            //                 };
-            //             });
-            //         },
-            //         defaultOption: {
-            //             label: "",
-            //             value: null
-            //         }
-            //     },
-            //     initialize: function($el) {
-            //         $el.select2({placeholder: i18n('please-select')});
-            //     },
-            //     getVal: function($el, ev, options) {
-            //         var value = parseInt($el.val());
-            //         return _.findWhere(options.view.subjects, {id: value });
-            //     },
-            //     onGet: function(val, options) {
-            //         return (val && val.id);
-            //     }
-            // },
-            //
-            // '#parent-sample': {
-            //     observe: 'parentSample',
-            //     selectOptions: {
-            //         collection: function() {
-            //             return this.subjects.map(function(subj) {
-            //                 return {
-            //                     label: subj.personalInfo.surname + " " +  subj.personalInfo.givenName,
-            //                     value: subj.id
-            //                 };
-            //             });
-            //         },
-            //         defaultOption: {
-            //             label: "",
-            //             value: null
-            //         }
-            //     },
-            //     initialize: function($el) {
-            //         $el.select2({placeholder: i18n('please-select')});
-            //     },
-            //     getVal: function($el, ev, options) {
-            //         var value = parseInt($el.val());
-            //         return _.findWhere(options.view.subjects, {id: value });
-            //     },
-            //     onGet: function(val, options) {
-            //         return (val && val.id);
-            //     }
-            // },
-=======
 
             /*
             '#donor': {
@@ -211,7 +152,6 @@
                     return (val && val.id);
                 }
             }, */
->>>>>>> 66f9685fcb88213ff01ff94c3303d399ea41fa06
 
             // '#parent-sample': {
             //     observe: 'parentSample',
@@ -421,11 +361,7 @@
                 var that = this;
                 Data.Views.Edit.prototype.dataTypeOnChange.call(this);
                 var typeName = this.$('#data-type :selected').text(),
-<<<<<<< HEAD
                     parentSample = this.model.get("parentSample") && this.model.get("parentSample").length > 0 ? this.model.get("parentSample")[0].biobankCode : null,
-=======
-                    parentSample = this.model.get("parentSample") ? this.model.get("parentSample")[0].biobankCode : null,
->>>>>>> 66f9685fcb88213ff01ff94c3303d399ea41fa06
                     biobank = this.model.get("biobank").id;
                 var type = _.find(this.dataTypes, function(dt){ return dt.name === typeName;});
                 var params = {

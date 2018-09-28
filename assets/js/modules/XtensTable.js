@@ -278,11 +278,7 @@
                       {
                           extend: 'excelHtml5',
                           title: null,
-<<<<<<< HEAD
-                          filename: 'XTENS',
-=======
                           filename:'XTENS_'+ moment().format("YYYY_MM_DD_hh_mm_ss"),
->>>>>>> 66f9685fcb88213ff01ff94c3303d399ea41fa06
                           exportOptions: {
                               orthogonal: 'export', // to export source data and not rendered data
                               columns:  ':visible:not(.actions):not(.details-control)' //not export actions and details column
