@@ -29,7 +29,7 @@
                             <% date = data.get("date") %>
                             <%= date ? moment(date).lang("it").format('L') : '' %>
                         </td>
-                        <td><%= JSON.stringify(data.get("tags")) %></td>
+                        <td><%= data.get("tags") && data.get("tags").length > 0 ? JSON.stringify(data.get("tags")) : "" %></td>
                         <!--
                         <td>
                             <ul>

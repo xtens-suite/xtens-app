@@ -804,6 +804,9 @@
                 // format date on model as ISO (YYYY-MM-DD)
                 onSet: function(val, options) {
                     // var dateArray = val.split("/");
+                    if (!val || val == "") {
+                        return null;
+                    }
                     var momentDate = moment(val, 'L', 'it');
                     // return new Date(dateArray[2] + '-'+ dateArray[1] + '-' + dateArray[0]);
                     return momentDate.format('YYYY-MM-DD');
