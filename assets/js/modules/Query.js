@@ -798,6 +798,9 @@
                 } else {
                     this.model = options.model;
                 }
+                if (options.queryBuiderView) {
+                    this.queryBuiderView = options.queryBuiderView;
+                }
             }
             else {
                 if (_.isEmpty(options.model.attributes)) {
@@ -1231,6 +1234,7 @@
                     if (that.isFirst) {
                         that.setMultiProjectButton(that.model.get('multiProject'), true ,function(){
                     // TODO: wait async nestedviews rendering and then trigger
+                            that.queryBuiderView.trigger('search');
                         });
                     }
 
@@ -1284,7 +1288,8 @@
                 dataTypes: this.dataTypes,
                 dataTypesComplete: this.dataTypes,
                 dataTypePrivileges: this.dataTypePrivileges,
-                model: new Query.Model(options.queryObj)
+                model: new Query.Model(options.queryObj),
+                queryBuiderView: this
             });
             this.querySelectorView = new Query.Views.Selector({
                 operator: this.operator,
