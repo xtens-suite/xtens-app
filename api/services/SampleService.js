@@ -3,7 +3,7 @@
  */
 /* jshint esnext: true */
 /* jshint node: true */
-/* globals _, sails, Sample, DataTypeService, DataService */
+/* globals _, sails, Sample, DataTypeService, DataService, BiobankService */
 "use strict";
 let BluebirdPromise = require('bluebird');
 let Joi = require("joi");
@@ -51,6 +51,19 @@ const coroutines = {
 
         validationSchema = Joi.object().keys(validationSchema);
         return Joi.validate(sample, validationSchema);
+    }),
+
+    validateBiobank: BluebirdPromise.coroutine(function* (sample, dataType) {
+        if (!sample || ! dataType) {
+            throw new Error('SampleService: validateBiobank - Missing function arguments');
+        }
+
+        let biobanksProjects = yield BiobankService.getBiobanksByProject(dataType.project);
+
+        if (_.find(biobanksProjects, function (b) { return b.id == sample.biobank; })) {
+            return true;
+        }
+        return false;
     })
 };
 
@@ -83,6 +96,24 @@ let SampleService = BluebirdPromise.promisifyAll({
      */
     validate: function(sample, performMetadataValidation, dataType) {
         return coroutines.validate(sample, performMetadataValidation, dataType)
+        .catch(/* istanbul ignore next */ function(err) {
+            sails.log(err);
+            return err;
+        });
+    },
+
+    /**
+     * @method
+     * @name validateBiobank
+     * @description validata a sample instance against the given schema
+     * @param{Object} sample - the sample to be validated
+     * @param{Object} dataType - the dataType containing the project
+     * @return {Object} - the result object contains two properties:
+     *                      - error: null if the Data is validated, an Error object otherwise
+     *                      - value: the validated data object if no error is returned
+     */
+    validateBiobank: function(sample, performMetadataValidation, dataType) {
+        return coroutines.validateBiobank(sample, performMetadataValidation, dataType)
         .catch(/* istanbul ignore next */ function(err) {
             sails.log(err);
             return err;

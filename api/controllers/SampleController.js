@@ -45,6 +45,11 @@ const coroutines = {
         if (validationRes.error !== null) {
             throw new ValidationError(validationRes.error);
         }
+        const biobankValidation = yield SampleService.validateBiobank(sample, dataType);
+        if (!biobankValidation) {
+            throw new ValidationError(`Biobank ${sample.biobank} not associated with Project ${dataType.project}`);
+        }
+
         sample = validationRes.value;
         const dataTypeName = dataType && dataType.name;
         const project = dataType && dataType.project;
@@ -132,6 +137,10 @@ const coroutines = {
         if (validationRes.error !== null) {
             throw new ValidationError(validationRes.error);
         }
+        const biobankValidation = yield SampleService.validateBiobank(sample, dataType);
+        if (!biobankValidation) {
+            throw new ValidationError(`Biobank ${sample.biobank} not associated with Project ${dataType.project}`);
+        }        
         const dataTypeName = dataType && dataType.name;
         sample = validationRes.value;
         const updatedSample = yield crudManager.updateSample(sample, dataTypeName);
