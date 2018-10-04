@@ -13,7 +13,7 @@ const fs = require('fs');
 
 describe('fileContent Hook', function() {
 
-    let tokenDataSens, tokenNoDataSens, downloadFileContentAsyncStub;
+    let tokenDataSens, tokenNoDataSens, downloadFileContentAsyncStub, deleteFileContentAsyncStub;
 
     before(function(done) {
         loginHelper.loginAnotherStandardUser(request, function (bearerToken) {
@@ -37,7 +37,7 @@ describe('fileContent Hook', function() {
                 });
 
                 getRequest.on('end', function() {
-                    sails.log("irods.downloadFileContent - file download ended");
+                    sails.log("STUB irods.downloadFileContent - file download ended");
                     next();
                 });
             });
@@ -62,6 +62,7 @@ describe('fileContent Hook', function() {
                 if (err) {
                     sails.log.error(err);
                     done(err);
+                    return;
                 }
                 let fileNameReceived = res.headers['content-disposition'].split('=')[1];
 
@@ -93,6 +94,7 @@ describe('fileContent Hook', function() {
                 if (err) {
                     sails.log.error(err);
                     done(err);
+                    return;
                 }
                 let finaldest = res.body.name.fd;
 
@@ -103,5 +105,94 @@ describe('fileContent Hook', function() {
 
     });
 
+    describe('DELETE /fileContent', function() {
+        beforeEach(function() {
+            let fileSystem = BluebirdPromise.promisifyAll(sails.hooks['persistence'].getFileSystem().manager);
+
+            deleteFileContentAsyncStub = sinon.stub(fileSystem, "deleteFileContent", function(uri, next) {
+                fs.unlink(uri , (err) => {
+                    if (err) {
+                        next(err);
+                        return;
+                    }
+                    console.log('irods.deleteFileContent -  successfully deleted: ' + uri);
+                    next();
+                });
+            });
+        });
+
+        afterEach(function() {
+            sails.hooks['persistence'].getFileSystem().manager.deleteFileContent.restore();
+        });
+
+        it('Should return OK 204, file deleted from data', function (done) {
+
+            request(sails.hooks.http.app)
+                .delete('/fileContent?id=1&file=3')
+                .set('Authorization', `Bearer ${tokenDataSens}`)
+                .send()
+                .expect(204)
+                .end(function(err, res) {
+                    if (err) {
+                        sails.log.error(err);
+                        done(err);
+                        return;
+                    }
+                    fs.writeFile('test/resources/file.test.delete.txt', 'TEST FILE DELETE',  { override: false }, function (err) {
+                        if (err) {
+                            sails.log.error(err);
+                            done(err);
+                            return;
+                        }
+                        console.log('File is created successfully.');
+                        done();
+                    });
+                });
+        });
+
+        it('Should return OK 204, file deleted from sample', function (done) {
+
+            request(sails.hooks.http.app)
+                .delete('/fileContent?id=1&file=5')
+                .set('Authorization', `Bearer ${tokenDataSens}`)
+                .send()
+                .expect(204)
+                .end(function(err, res) {
+                    if (err) {
+                        sails.log.error(err);
+                        done(err);
+                        return;
+                    }
+
+                    fs.writeFile('test/resources/file.test.delete.3.txt', 'TEST FILE DELETE', { override: false }, function (err) {
+                        if (err) {
+                            sails.log.error(err);
+                            done(err);
+                            return;
+                        }
+                        console.log('File is created successfully.');
+                        done();
+                    });
+                });
+        });
+
+        it('Should return Error 403, Authenticated user has not edit privileges on the data type 4', function (done) {
+
+            request(sails.hooks.http.app)
+                .delete('/fileContent?id=2&file=4')
+                .set('Authorization', `Bearer ${tokenDataSens}`)
+                .send()
+                .expect(403)
+                .end(function(err, res) {
+                    if (err) {
+                        sails.log.error(err);
+                        done(err);
+                        return;
+                    }
+                    done();
+                });
+        });
+
+    });
 
 });

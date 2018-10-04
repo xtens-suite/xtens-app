@@ -72,7 +72,7 @@ module.exports = function filecontent(sails){
                 let dataFile, idDataType, toDelete = false;
                 let co = new ControllerOut(res);
                 let fileId = _.parseInt(req.param('file'));
-                let id = _.parseInt(req.param('id'));
+                let idData = _.parseInt(req.param('id'));
                 let fileSystem = BluebirdPromise.promisifyAll(sails.hooks['persistence'].getFileSystem().manager);
                 const operator = TokenService.getToken(req);
 
@@ -82,10 +82,10 @@ module.exports = function filecontent(sails){
                     let model = "Data";
                     if (dataFile.data[0] ) {
                         idDataType = dataFile.data[0].type;
-                        dataFile.data = _.filter(dataFile.data, (d) => { return d.id == fileId;});
+                        dataFile.data = _.filter(dataFile.data, (d) => { return d.id != idData;});
                     } else if (dataFile.samples[0]) {
                         idDataType = dataFile.samples[0].type;
-                        dataFile.samples = _.filter(dataFile.data, (d) => { return d.id == fileId;});
+                        dataFile.samples = _.filter(dataFile.samples, (d) => { return d.id != idData;});
                         model = "Sample";
                     }
                     //check if the file has other associations, if not it can be deleted
@@ -100,7 +100,7 @@ module.exports = function filecontent(sails){
                 .then(dataTypePrivilege => {
 
                     if(!dataTypePrivilege || dataTypePrivilege.privilegeLevel !== EDIT){
-                        throw new PrivilegesError(`Authenticated user has not edit privileges on the data type ${id}`);
+                        throw new PrivilegesError(`Authenticated user has not edit privileges on the data type ${idData}`);
                     }
 
                     sails.log.info("deleteFileContent - dataFile");
@@ -120,6 +120,8 @@ module.exports = function filecontent(sails){
                             DataFile.destroy( dataFile.id).then(() => {
                                 return res.status(204).send(); // res.json() ??
                             });
+                        }else {
+                            return res.status(204).send(); // res.json() ??
                         }
                     });
 
