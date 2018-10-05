@@ -21,8 +21,8 @@ const coroutines = {
         let project = req.param('project');
         const operator = TokenService.getToken(req);
         const result = yield BiobankService.getBiobanksByProject(project);
-        sails.log.info(result);
-        res.json(201, result);
+        // sails.log.info(result);
+        res.json(result);
     })
 };
 
