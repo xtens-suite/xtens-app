@@ -9,7 +9,7 @@
     "id": 2,
     "name": "Tissue",
     "model": "Sample",
-    "parents": 1,
+    "parents": [1],
     "project":1,
     "superType": 2
   },
@@ -23,7 +23,6 @@
     "project":1,
     "superType": 3
   },
-
   {
     "id": 4,
     "name": "Variant",
@@ -35,6 +34,7 @@
     "name": "Variant Annotation",
     "model": "Data",
     "project":1,
+    "parents": [3],
     "superType": 5
   }, {
     "id": 6,
@@ -49,5 +49,12 @@
     "model": "Data",
     "project":5,
     "superType": 3
+  }, {
+    "id": 8,
+    "name": "Variant Annotation2",
+    "model": "Data",
+    "project":1,
+    "parents": [7],
+    "superType": 5
   }
 ]

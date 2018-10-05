@@ -154,5 +154,17 @@
         "dataType": 7,
         "group": 4,
         "privilegeLevel": "edit"
+    },
+    {
+        "id": 27,
+        "dataType": 8,
+        "group": 1,
+        "privilegeLevel": "edit"
+    },
+    {
+        "id": 28,
+        "dataType": 8,
+        "group": 2,
+        "privilegeLevel": "edit"
     }
 ]

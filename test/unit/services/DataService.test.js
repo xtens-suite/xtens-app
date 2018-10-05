@@ -475,6 +475,180 @@ describe('DataService', function() {
                 done(err);
             });
         });
+
+        it("should return an object with the right queryObject, dataPrivilege, dataType and forbiddenFields array, multiProject false, leafSearch true", function(done) {
+            var dataType = _.cloneDeep(fixtures.datatype[0]);
+            var expectedDataTypes = [_.cloneDeep(fixtures.datatype[0]), _.cloneDeep(fixtures.datatype[1])];
+            var expectedDataTypePrivileges = [_.cloneDeep(fixtures.datatypeprivileges[0]), _.cloneDeep(fixtures.datatypeprivileges[1])];
+            var param = [dataType.id];
+            var queryObj = { statement: queryStatement, parameters: param};
+            var queryArgs = {
+                "dataType":1,
+                "multiProject":false,
+                "model":"Subject",
+                "content":[
+                    {
+                        "personalDetails":true,
+                        "surnameComparator":"=",
+                        "givenNameComparator":"=",
+                        "birthDateComparator":"="
+                    },
+                    {
+                        "getMetadata":true,
+                        "label":"tissue",
+                        "dataType":2,
+                        "model":"Sample",
+                        "title":"Tissue",
+                        "superType":2,
+                        "content":[]
+                    }],
+                "wantsSubject":true,
+                "leafSearch":true,
+                "wantsPersonalInfo":true
+            };
+            var expectedResults = {
+                queryObj:queryObj,
+                dataTypes: expectedDataTypes,
+                dataTypePrivileges: expectedDataTypePrivileges,
+                forbiddenFields: [{
+                    "fields": [
+                        {
+                            "customValue": null,
+                            "description": "Description",
+                            "fieldType": "Text",
+                            "formattedName": "disease",
+                            "hasRange": false,
+                            "hasUnit": false,
+                            "isList": true,
+                            "label": "METADATA FIELD",
+                            "name": "Disease",
+                            "ontologyUri": null,
+                            "possibleUnits": null,
+                            "possibleValues": [
+                                "neuroblastoma",
+                                "medulloblastoma",
+                                "DIV",
+                                "DIA",
+                                "fallot",
+                                "glucogen storage disease"
+                            ],
+                            "required": false,
+                            "sensitive": true
+                        }
+                    ],
+                    "label": "metadata"
+                },
+                    {
+                        "fields": [
+                            {
+                                "customValue": null,
+                                "description": "Description",
+                                "fieldType": "Text",
+                                "formattedName": "arrival_code",
+                                "hasRange": false,
+                                "hasUnit": false,
+                                "isList": false,
+                                "label": "METADATA FIELD",
+                                "name": "Arrival Code",
+                                "ontologyUri": null,
+                                "possibleUnits": null,
+                                "possibleValues": null,
+                                "required": false,
+                                "sensitive": true
+                            }
+                        ],
+                        "label": "tissue"
+                    }]
+            };
+
+            DataService.preprocessQueryParamsAsync(queryArgs, operatorPayload.groups, dataType.id).then(function (results) {
+                expect(results.queryObj).to.eql(expectedResults.queryObj);
+                expect(results.dataTypePrivileges.id).to.equal(expectedResults.dataTypePrivileges.id);
+                expect(results.dataTypes.id).to.eql(expectedResults.dataTypes.id);
+                expect(results.forbiddenFields).to.eql(expectedResults.forbiddenFields);
+                done();
+                return;
+            }).catch(function (err) {
+                sails.log.error(err);
+                done(err);
+            });
+        });
+
+        it("should return an object with the right queryObject, dataPrivileges, dataTypes and forbiddenFields array, multiProject true, leafSearch true", function(done) {
+            var dataTypes = [_.cloneDeep(fixtures.datatype[2]), _.cloneDeep(fixtures.datatype[6])];
+            var expectedDataTypes = [_.cloneDeep(fixtures.datatype[2]), _.cloneDeep(fixtures.datatype[6]), _.cloneDeep(fixtures.datatype[4]), _.cloneDeep(fixtures.datatype[7])];
+            var expectedDataTypePrivileges = [_.cloneDeep(fixtures.datatypeprivileges[2]), _.cloneDeep(fixtures.datatypeprivileges[22]), _.cloneDeep(fixtures.datatypeprivileges[21]), _.cloneDeep(fixtures.datatypeprivileges[26])];
+            // var dataPrivileges = [_.cloneDeep(fixtures.datatypeprivileges[2]), _.cloneDeep(fixtures.datatypeprivileges[22])];
+            // console.log(dataTypes,dataPrivileges);
+            var param = [[dataTypes[0].id, dataTypes[1].id]];
+            var queryObj = { statement: queryStatement, parameters: param};
+            var queryArgs = {
+                "dataType":[3, 7],
+                "multiProject":true,
+                "model":"Sample",
+                "content":[
+                    {
+                        "getMetadata":true,
+                        "label":"variant_annotation",
+                        "dataType": [5,8],
+                        "model":"Data",
+                        "title":"Variant Annotation",
+                        "superType":5,
+                        "content":[]
+                    }],
+                "wantsSubject":true,
+                "leafSearch":true,
+                "wantsPersonalInfo":true
+            };
+            var expectedResults = {
+                queryObj:queryObj,
+                dataTypes: expectedDataTypes,
+                dataTypePrivileges: expectedDataTypePrivileges,
+                forbiddenFields: [{
+                    "fields": [
+                        {
+                            "caseInsensitive": true,
+                            "customValue": null,
+                            "description": "Description",
+                            "fieldType": "Text",
+                            "formattedName": "name",
+                            "hasRange": false,
+                            "hasUnit": false,
+                            "isList": false,
+                            "label": "METADATA FIELD",
+                            "name": "Name",
+                            "ontologyUri": null,
+                            "possibleUnits": null,
+                            "possibleValues": null,
+                            "required": true,
+                            "sensitive": true,
+                            "visible": true
+                        }
+                    ],
+                    "label": "metadata"
+                }]
+            };
+            return DataService.preprocessQueryParamsAsync(queryArgs, operatorPayload.groups, dataTypes[0].id).then(function (results) {
+                console.log(_.map(results.dataTypes, 'id'));
+                expect(results.queryObj).to.eql(expectedResults.queryObj);
+                expect(results.dataTypePrivileges.length).to.equal(expectedResults.dataTypePrivileges.length);
+                expect(results.dataTypePrivileges[0].id).to.equal(expectedResults.dataTypePrivileges[0].id);
+                expect(results.dataTypePrivileges[1].id).to.equal(expectedResults.dataTypePrivileges[1].id);
+                expect(results.dataTypePrivileges[2].id).to.equal(expectedResults.dataTypePrivileges[2].id);
+                expect(results.dataTypePrivileges[3].id).to.equal(expectedResults.dataTypePrivileges[3].id);
+                expect(results.dataTypes.length).to.equal(expectedResults.dataTypes.length);
+                expect(results.dataTypes[0].id).to.equal(expectedResults.dataTypes[0].id);
+                expect(results.dataTypes[1].id).to.equal(expectedResults.dataTypes[1].id);
+                expect(results.dataTypes[2].id).to.equal(expectedResults.dataTypes[2].id);
+                expect(results.dataTypes[3].id).to.equal(expectedResults.dataTypes[3].id);
+                expect(results.forbiddenFields).to.eql(expectedResults.forbiddenFields);
+                done();
+                return;
+            }).catch(function (err) {
+                sails.log.error(err);
+                done(err);
+            });
+        });
     });
 
     describe('#executeAdvancedQuery', function() {

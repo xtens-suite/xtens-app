@@ -195,7 +195,7 @@ describe('DataTypeController', function() {
             .send({
                 "parents": [1],
                 "name": "update DataType",
-                "id":8,
+                "id": 9,
                 "superType": {
                     "name": "New DataType",
                     "uri": "http://domain.com",
@@ -227,7 +227,7 @@ describe('DataTypeController', function() {
                 .send({
                     "parents": [1,7],
                     "name": "update DataType",
-                    "id":8,
+                    "id":9,
                     "superType": {
                         "name": "New DataType",
                         "uri": "http://domain.com",
@@ -337,7 +337,7 @@ describe('DataTypeController', function() {
 
         it('Should return 200 OK with 1 deleted item if resource exists', function (done) {
             request(sails.hooks.http.app)
-            .delete('/dataType/8')
+            .delete('/dataType/9')
             .set('Authorization', `Bearer ${tokenA}`)
             .send()
             .expect(200)

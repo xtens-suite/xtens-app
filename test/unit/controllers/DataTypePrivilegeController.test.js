@@ -83,7 +83,7 @@ describe('DataTypePrivilege', function() {
         it('Should return OK 200, notes Updated', function (done) {
 
             request(sails.hooks.http.app)
-            .put('/dataTypePrivileges/22')
+            .put('/dataTypePrivileges/12')
             .set('Authorization', `Bearer ${tokenSA}`)
             .send({
                 "id": 16,
@@ -108,7 +108,7 @@ describe('DataTypePrivilege', function() {
             let expectedErrorMessage = 'child "privilegeLevel" fails because ["privilegeLevel" must be one of [view_overview, view_details, download, edit]]';
 
             request(sails.hooks.http.app)
-            .put('/dataTypePrivileges/22')
+            .put('/dataTypePrivileges/12')
             .set('Authorization', `Bearer ${tokenSA}`)
             .send({
                 "id": 16,
@@ -174,7 +174,7 @@ describe('DataTypePrivilege', function() {
 
         it('Should return 200 OK with 1 deleted item if resource exists', function (done) {
             request(sails.hooks.http.app)
-            .delete('/dataTypePrivileges/27')
+            .delete('/dataTypePrivileges/29')
             .set('Authorization', `Bearer ${tokenSA}`)
             .send()
             .expect(200)
@@ -192,7 +192,7 @@ describe('DataTypePrivilege', function() {
 
         it('Should return 200 OK with 0 deleted items if resource does not exist', function (done) {
             request(sails.hooks.http.app)
-            .delete('/dataTypePrivileges/27')
+            .delete('/dataTypePrivileges/29')
             .set('Authorization', `Bearer ${tokenSA}`)
             .send()
             .expect(200)
