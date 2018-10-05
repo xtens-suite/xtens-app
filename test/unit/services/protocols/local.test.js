@@ -399,5 +399,118 @@ describe("PassportService protocol Local", function() {
                 return;
             });
         });
+
+        it("Should return Validation ERROR - Error.Passport.Email.NotFound", function(done) {
+
+            const demouser =fixtures.operator[0];
+            const passportlocal = _.find(fixtures.passport, {
+                'user': demouser.id,
+                'protocol': 'local'});
+            const param ={
+                username: "wrong@mail.com",
+                oldPass: "wrongPassword",
+                newPass: "NewPassword1!",
+                cnewPass: "NewPassword1!"
+            };
+            let expectedError = new ValidationError('Error.Passport.Email.NotFound');
+            expectedError.code = 401;
+            PassportService.protocols.local.updatePassword(param, function (err,res) {
+
+                expect(err).to.eql(expectedError);
+                expect(spyFindPassp.called).to.be.false;
+                expect(spyUpPassp.called).to.be.false;
+                done();
+                return;
+            });
+        });
+    });
+
+    describe("#resetPassword", function() {
+
+
+        var spyFindPassp, spyValPassw, spyUpPassp, expectedError;
+
+        beforeEach(function() {
+            spyFindPassp = sinon.spy(Passport,'findOne');
+            spyUpPassp = sinon.spy(Passport,'update');
+        });
+
+        afterEach(function() {
+            Passport.findOne.restore();
+            Passport.update.restore();
+        });
+        it("Should fire Passport.findOne with the correct input parameters", function(done) {
+
+            const demouser =fixtures.operator[8];
+            const passportlocal = _.find(fixtures.passport, {
+                'user': demouser.id,
+                'protocol': 'local'});
+            const param ={
+                username: demouser.login
+            };
+            const expectedParam={
+                protocol: 'local',
+                user: demouser.id};
+
+            // passport.password = param.newPass;
+
+            PassportService.protocols.local.resetPassword(param,function (err,res) {
+                if(err){
+                    console.log(err);
+                    done(err);
+                    return;
+                }
+                console.log("Password updated: " + res);
+                sinon.assert.calledWith(spyFindPassp, expectedParam);
+                expect(spyFindPassp.called).to.be.true;
+                expect(spyUpPassp.called).to.be.true;
+                done();
+                return;
+            });
+
+
+        });
+
+        it("Should return Validation ERROR - Error.Passport.Email.NotFound", function(done) {
+
+            const demouser =fixtures.operator[0];
+            const passportlocal = _.find(fixtures.passport, {
+                'user': demouser.id,
+                'protocol': 'local'});
+            const param ={
+                username: "wrong@mail.com"
+            };
+            let expectedError = new ValidationError('Error.Passport.Email.NotFound');
+            expectedError.code = 401;
+            PassportService.protocols.local.resetPassword(param, function (err,res) {
+
+                expect(err).to.eql(expectedError);
+                expect(spyFindPassp.called).to.be.false;
+                expect(spyUpPassp.called).to.be.false;
+                done();
+                return;
+            });
+        });
+
+        it("Should return Validation ERROR - Error.Passport.Username.NotFound", function(done) {
+
+            const demouser =fixtures.operator[0];
+            const passportlocal = _.find(fixtures.passport, {
+                'user': demouser.id,
+                'protocol': 'local'});
+            const param ={
+                username: "wrongusername"
+            };
+            let expectedError = new ValidationError('Error.Passport.Username.NotFound');
+            expectedError.code = 401;
+            PassportService.protocols.local.resetPassword(param, function (err,res) {
+
+                expect(err).to.eql(expectedError);
+                expect(spyFindPassp.called).to.be.false;
+                expect(spyUpPassp.called).to.be.false;
+                done();
+                return;
+            });
+        });
     });
 });
