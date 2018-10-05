@@ -7,6 +7,7 @@ const expect = require("chai").expect;
 const request = require('supertest');
 const sinon = require('sinon');
 const loginHelper = require('./loginHelper');
+const BluebirdPromise = require("bluebird");
 
 
 describe('SampleController', function() {
@@ -554,6 +555,86 @@ describe('SampleController', function() {
                         return;
                     }
                     sails.hooks.persistence.crudManager.getDataTypesByRolePrivileges.restore();
+                    done();
+                    return;
+                });
+        });
+    });
+
+    describe('GET /sample/getNextBiobankCode', function() {
+        let getNextBiobankCodeAsyncStub;
+        beforeEach(function() {
+            let crudManager = BluebirdPromise.promisifyAll(sails.hooks['persistence'].getDatabaseManager().crudManager);
+            // getNextBiobankCodeAsyncStub = sinon.stub(crudManager, "getNextBiobankCode", function(uri, next) {
+            //     return BluebirdPromise.resolve("NEXT-1000000");
+            // });
+        });
+
+        afterEach(function() {
+            // sails.hooks['persistence'].getDatabaseManager().crudManager.getNextBiobankCode.restore();
+        });
+        it('Should return 200 OK the correct biobankcode provided into sample object', function (done) {
+            request(sails.hooks.http.app)
+            .get('/sample/getNextBiobankCode')
+            .set('Authorization', `Bearer ${tokenDataSens}`)
+            .query({sample: {biobankCode: 12}, project: 1})
+            .expect(200)
+            .end(function(err, res) {
+                if (err) {
+                    sails.log.error(err);
+                    done(err);
+                    return;
+                }
+
+                expect(_.parseInt(res.body)).to.eql(12);
+
+                done();
+                return;
+            });
+        });
+
+        it('Should return 200 OK with the next biobankCode', function (done) {
+            let sample = _.cloneDeep(fixtures.sample[1]);
+            let expectedBiobankCode = _.parseInt(sample.biobankCode) + 1;
+            sample.id = null; //new sample
+            sample.biobankCode = null;
+            request(sails.hooks.http.app)
+                .get('/sample/getNextBiobankCode')
+                .set('Authorization', `Bearer ${tokenDataSens}`)
+                .query({sample: sample, project: 1})
+                .expect(200)
+                .end(function(err, res) {
+                    if (err) {
+                        sails.log.error(err);
+                        done(err);
+                        return;
+                    }
+
+                    expect(_.parseInt(res.body)).to.eql(expectedBiobankCode);
+
+                    done();
+                    return;
+                });
+        });
+
+        it('Should return Error - Error getting last biobank code', function (done) {
+            let sample = _.cloneDeep(fixtures.sample[1]);
+            let expectedError = new Error(`Error getting last biobank code for type ${sample.type} and project `);
+            sample.id = null; //new sample
+            sample.biobankCode = null;
+            request(sails.hooks.http.app)
+                .get('/sample/getNextBiobankCode')
+                .set('Authorization', `Bearer ${tokenDataSens}`)
+                .query({sample: sample, project: null})
+                .expect(500)
+                .end(function(err, res) {
+                    if (err) {
+                        sails.log.error(err);
+                        expect(err).to.eql(expectedError);
+                        done(err);
+                        return;
+                    }
+
                     done();
                     return;
                 });
