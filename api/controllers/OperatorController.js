@@ -26,13 +26,12 @@ const coroutines = {
         let params = req.allParams();
         const operator = TokenService.getToken(req);
 
-        console.log(params,operator);
         if (operator.id != params.id && !operator.isWheel) {
             throw new PrivilegesError("Authenticated user is not allowed to modify operator");
         }
 
         if (!params.queries) {
-            throw new ValidationError("Authenticated user is not allowed to modify operator");
+            throw new ValidationError("Queries array object not found");
         }
 
         let query = Operator.findOne(params.id);
@@ -100,7 +99,6 @@ var OperatorController = {
      */
     resetPassword: function(req, res) {
         const co = new ControllerOut(res);
-
         return resetPassword(req.allParams())
             .then(function(result) {
                 return res.json(201, result);

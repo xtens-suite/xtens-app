@@ -3,15 +3,11 @@
 /* globals _, sails, fixtures, TokenService */
 "use strict";
 const sinon = require('sinon');
-const _chai = require('chai');
 const expect = require("chai").expect;
-const request = require('supertest');
-const loginHelper = require('../controllers/loginHelper');
 
 describe('Policy expiredPassword', function() {
 
     let expiredPassword;
-    let chai = _chai;
     let res ={unauthorized:function (){return 0;}};
     let spyUnauth = sinon.spy(res,'unauthorized');
     let spy = sinon.spy();

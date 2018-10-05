@@ -164,3 +164,30 @@ module.exports.loginUserNoPrivileges = function(request, done) {
         return;
     });
 };
+
+module.exports.loginResetPswdUser = function(request, done) {
+    const user = fixtures.operator[8];
+    const passport = _.find(fixtures.passport, {
+        'user': user.id,
+        'protocol': 'local'
+    });
+
+    sails.log("Xtens.test - user and local passport is: ");
+    sails.log(user);
+    sails.log(passport);
+
+    request(sails.hooks.http.app)
+    .post('/login')
+    .send({identifier: user.login, password: passport.password})
+    .end(function(err, res) {
+        if (err) {
+            sails.log.error("Xtens.test - login failed");
+            sails.log.error(err.message);
+            done(err);
+        }
+        var token =  res.body && res.body.token;
+        sails.log("Bearer token is: " + token);
+        done(token);
+        return;
+    });
+};

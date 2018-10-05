@@ -101,5 +101,18 @@
     "createdAt": "2015-06-18T10:13:11.000Z",
     "updatedAt": "2015-06-18T10:13:11.000Z",
     "groups": [5]
+  },
+  {
+    "sex": "N.A.",
+    "email": "none@none.com",
+    "login": "userchangepswd",
+    "id": 9,
+    "firstName": "user",
+    "lastName": "ChangePswd",
+    "birthDate": "1970-01-01T00:00:00.000Z",
+    "addressInformation": 1,
+    "createdAt": "2015-06-18T10:13:11.000Z",
+    "updatedAt": "2015-06-18T10:13:11.000Z",
+    "groups": [5]
   }
 ]
