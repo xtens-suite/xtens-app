@@ -13,7 +13,7 @@ XTENS 2 is an open source web-based digital repository for heterogeneous data in
 * Password managment improved: added more restrictive contraints for passwords security, password expiration and password reset (only by administrator)
 * Minor bugs fixed and improvements
 
-To migrate from XTENS 2.2 to **2.3** follow the link: [guide](https://github.com/biolab-unige/xtens-app/blob/master/docs/migration_guide_to_2_3.md)
+To migrate from XTENS 2.2 to **2.3** follow the link: [guide](https://github.com/xtens-suite/xtens-app/blob/master/docs/migration_guide_to_2_3.md)
 
 
 It is designed with the following features:
@@ -46,7 +46,7 @@ The following software packages are required to be installed on your system:
 
 * Download the file .zip or Clone the repository:
 
-        git clone https://github.com/biolab-unige/xtens-app.git
+        git clone https://github.com/xtens-suite/xtens-app.git
 
 * Move into xtens-app directory:
 
@@ -319,6 +319,6 @@ Now you can go to the application page http://host:port/#/. (the host is the ip 
 
 To discover XTENS 2 RESTful API follow the link: [RESTful API](http://docs.xtens2.apiary.io)
 
-To migrate from XTENS 2.0 to **2.1** follow the link: [guide](https://github.com/biolab-unige/xtens-app/blob/master/docs/migration_guide_to_2_1.md)
+To migrate from XTENS 2.0 to **2.1** follow the link: [guide](https://github.com/xtens-suite/xtens-app/blob/master/docs/migration_guide_to_2_1.md)
 
 XTENS 2 is published under the BSD 3-clause License.
