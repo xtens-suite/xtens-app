@@ -1,15 +1,25 @@
-# XTENS 2 v.2.2
+# XTENS 2 v.2.3
 
 [![Build Status](https://travis-ci.org/xtens-suite/xtens-app.svg?branch=master)](https://travis-ci.org/xtens-suite/xtens-app)
 [![Coverage Status](https://coveralls.io/repos/github/xtens-suite/xtens-app/badge.svg?branch=master)](https://coveralls.io/github/xtens-suite/xtens-app?branch=master)
 
-
 XTENS 2 is an open source web-based digital repository for heterogeneous data in life science.
+
+##### Release notes (v2.3)
+
+* Vcf file export: based on data type structure (Variant Data Type) export variant calls resulting from queries directly in vcf format  
+* Biobank management: new biobank code generation system, project - biobank association
+* Favorite Queries System: added component to store and reload automatically favorite queries  
+* Password managment improved: added more restrictive contraints for passwords security, password expiration and password reset (only by administrator)
+* Minor bugs fixed and improvements
+
+To migrate from XTENS 2.2 to **2.3** follow the link: [guide](https://github.com/biolab-unige/xtens-app/blob/master/docs/migration_guide_to_2_3.md)
+
 
 It is designed with the following features:
 
 * Define simply and quickly complex hierarchical structures without any code updating
-* _new v2.1_ Handle multiple projects. For each project, you can define a different Data type structure
+* Handle multiple projects. For each project, you can define a different Data type structure
 * Manage heterogenous data (subjects, samples, any type of data)
 * Roles and privileges system to handle data access and allowed operations for any authenticated user
 * Allows to handle binary data, organizing them in a distributed storage between all different centers of research
@@ -23,7 +33,7 @@ The following software packages are required to be installed on your system:
 
 * <a href="https://nodejs.org"><img src="https://cloud.githubusercontent.com/assets/14332186/22329480/bf0228ec-e3c1-11e6-9d8b-7840838e177e.png" width="100"></a>   [Node.js v6+](http://nodejs.org/);
 
-* <a href="https://sailsjs.com"><img src="https://cloud.githubusercontent.com/assets/14332186/22330446/8e8e29a4-e3c6-11e6-9e97-bb246d4c8049.png" width="100"></a>   [Sails.js 0.11+](http://sailjs.com);
+* <a href="https://sailsjs.com"><img src="https://cloud.githubusercontent.com/assets/14332186/22330446/8e8e29a4-e3c6-11e6-9e97-bb246d4c8049.png" width="100"></a>   [Sails.js 0.12+](https://0.12.sailsjs.com/);
 
 * <a href="https://www.postgresql.org/"><img src="https://cloud.githubusercontent.com/assets/14332186/22330780/2e1b4b4a-e3c8-11e6-84f0-6cf256719e01.png" width="60"></a>   [PostgreSQL 9.5+](http://www.postgresql.org/);
 
