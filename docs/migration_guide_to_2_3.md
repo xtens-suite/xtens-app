@@ -58,7 +58,7 @@ The following software packages are required to be installed on your system:
 
 - Run the script to execute migration:
 
-        psql xtensdb-2-3 < /path/xtens/2.1/scripts/migration/db_migration_from 2_2_to_2_3.sql
+        psql xtensdb-2-3 < /path-xtens-app-folder/scripts/migration/db_migration_from 2_2_to_2_3.sql
 
 - Copy from old XTENS folder, ```config/local.js``` file and modify the database configuration with the new database name (e. from xtensdb to xtensdb-2-3):
 
