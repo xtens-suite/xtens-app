@@ -27,7 +27,6 @@ CREATE OR REPLACE FUNCTION apply_schema_changes() RETURNS integer AS $$
 
   BEGIN
   -- MANY SUBJECT - MANY DATA
-
   -- Name: data_parentsubject__subject_childrendata; Type: TABLE; Schema: public; Owner: xtenspg; Tablespace:
   --
 

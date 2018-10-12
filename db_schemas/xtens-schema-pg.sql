@@ -49,44 +49,44 @@ ALTER TYPE datatype_privilege_level OWNER TO xtenspg;
 ALTER TYPE daemon_status OWNER TO xtenspg;
 
 --
--- Name: dom_basicdatatype; Type: DOMAIN; Schema: public; Owner: massipg
+-- Name: dom_basicdatatype; Type: DOMAIN; Schema: public; Owner: xtenspg
 --
 
 CREATE DOMAIN dom_basicdatatype AS text COLLATE pg_catalog."C.UTF-8"
 	CONSTRAINT dom_basicdatatype_check CHECK (((length(VALUE) > 3) AND (length(VALUE) < 32)));
 
 
-ALTER DOMAIN dom_basicdatatype OWNER TO massipg;
+ALTER DOMAIN dom_basicdatatype OWNER TO xtenspg;
 
 --
--- Name: dom_componentdatatypename; Type: DOMAIN; Schema: public; Owner: massipg
+-- Name: dom_componentdatatypename; Type: DOMAIN; Schema: public; Owner: xtenspg
 --
 
 CREATE DOMAIN dom_componentdatatypename AS text
 	CONSTRAINT dom_componentdatatypename_check CHECK ((((length(VALUE) > 2) AND (length(VALUE) < 100)) AND (VALUE ~ '^[A-Za-z][A-Za-z0-9]+$'::text)));
 
 
-ALTER DOMAIN dom_componentdatatypename OWNER TO massipg;
+ALTER DOMAIN dom_componentdatatypename OWNER TO xtenspg;
 
 --
--- Name: dom_leaftype; Type: DOMAIN; Schema: public; Owner: massipg
+-- Name: dom_leaftype; Type: DOMAIN; Schema: public; Owner: xtenspg
 --
 
 CREATE DOMAIN dom_leaftype AS text NOT NULL
 	CONSTRAINT dom_leaftype_check CHECK (((length(VALUE) > 3) AND (length(VALUE) <= 50)));
 
 
-ALTER DOMAIN dom_leaftype OWNER TO massipg;
+ALTER DOMAIN dom_leaftype OWNER TO xtenspg;
 
 --
--- Name: dom_nodename; Type: DOMAIN; Schema: public; Owner: massipg
+-- Name: dom_nodename; Type: DOMAIN; Schema: public; Owner: xtenspg
 --
 
 CREATE DOMAIN dom_nodename AS text COLLATE pg_catalog."C.UTF-8"
 	CONSTRAINT dom_nodename_check CHECK (((length(VALUE) > 2) AND (length(VALUE) < 100)));
 
 
-ALTER DOMAIN dom_nodename OWNER TO massipg;
+ALTER DOMAIN dom_nodename OWNER TO xtenspg;
 
 --
 -- Name: xtens_group_privileges; Type: TYPE; Schema: public; Owner: xtenspg
@@ -515,6 +515,176 @@ ALTER TABLE datatype_privileges_id_seq OWNER TO xtenspg;
 --
 
 ALTER SEQUENCE datatype_privileges_id_seq OWNED BY datatype_privileges.id;
+
+--
+-- MANY DATA - MANY DATA
+-- Name: data_childrendata__data_parentdata; Type: TABLE; Schema: public; Owner: xtenspg; Tablespace:
+--
+
+CREATE TABLE data_childrendata__data_parentdata (
+    id integer NOT NULL,
+    "data_parentData" integer NOT NULL,
+    "data_childrenData" integer NOT NULL
+);
+
+
+ALTER TABLE data_childrendata__data_parentdata OWNER TO xtenspg;
+
+--
+-- Name: data_childrendata__data_parentdata_id_seq; Type: SEQUENCE; Schema: public; Owner: xtenspg
+--
+
+CREATE SEQUENCE data_childrendata__data_parentdata_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE data_childrendata__data_parentdata_id_seq OWNER TO xtenspg;
+
+--
+-- Name: data_childrendata__data_parentdata_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: xtenspg
+--
+
+ALTER SEQUENCE data_childrendata__data_parentdata_id_seq OWNED BY data_childrendata__data_parentdata.id;
+
+--
+-- MANY SAMPLE - MANY SAMPLE
+-- Name: sample_parentsample__sample_childrensample; Type: TABLE; Schema: public; Owner: xtenspg; Tablespace:
+--
+
+CREATE TABLE sample_parentsample__sample_childrensample (
+    id integer NOT NULL,
+    "sample_parentSample" integer NOT NULL,
+    "sample_childrenSample" integer NOT NULL
+);
+
+
+ALTER TABLE sample_parentsample__sample_childrensample OWNER TO xtenspg;
+
+--
+-- Name: sample_parentsample__sample_childrensample; Type: SEQUENCE; Schema: public; Owner: xtenspg
+--
+
+CREATE SEQUENCE sample_parentsample__sample_childrensample_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE sample_parentsample__sample_childrensample_id_seq OWNER TO xtenspg;
+
+--
+-- Name: sample_parentsample__sample_childrensample; Type: SEQUENCE OWNED BY; Schema: public; Owner: xtenspg
+--
+
+ALTER SEQUENCE sample_parentsample__sample_childrensample_id_seq OWNED BY sample_parentsample__sample_childrensample.id;
+
+--
+-- MANY SUBJECT - MANY SAMPLE
+-- Name: sample_donor__subject_childrensample; Type: TABLE; Schema: public; Owner: xtenspg; Tablespace:
+--
+
+CREATE TABLE sample_donor__subject_childrensample (
+    id integer NOT NULL,
+    sample_donor integer NOT NULL,
+    "subject_childrenSample" integer NOT NULL
+);
+
+
+ALTER TABLE sample_donor__subject_childrensample OWNER TO xtenspg;
+
+--
+-- Name: sample_donor__subject_childrensample_id_seq; Type: SEQUENCE; Schema: public; Owner: xtenspg
+--
+
+CREATE SEQUENCE sample_donor__subject_childrensample_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE sample_donor__subject_childrensample_id_seq OWNER TO xtenspg;
+
+--
+-- Name: sample_donor__subject_childrensample_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: xtenspg
+--
+
+ALTER SEQUENCE sample_donor__subject_childrensample_id_seq OWNED BY sample_donor__subject_childrensample.id;
+
+--
+-- MANY SAMPLE - MANY DATA
+-- Name: data_parentsample__sample_childrendata; Type: TABLE; Schema: public; Owner: xtenspg; Tablespace:
+--
+
+CREATE TABLE data_parentsample__sample_childrendata (
+    id integer NOT NULL,
+    "data_parentSample" integer NOT NULL,
+    "sample_childrenData" integer NOT NULL
+);
+
+
+ALTER TABLE data_parentsample__sample_childrendata OWNER TO xtenspg;
+
+--
+-- Name: data_parentsample__sample_childrendata_id_seq; Type: SEQUENCE; Schema: public; Owner: xtenspg
+--
+
+CREATE SEQUENCE data_parentsample__sample_childrendata_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE data_parentsample__sample_childrendata_id_seq OWNER TO xtenspg;
+
+--
+-- Name: data_parentsample__sample_childrendata_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: xtenspg
+--
+
+ALTER SEQUENCE data_parentsample__sample_childrendata_id_seq OWNED BY data_parentsample__sample_childrendata.id;
+
+--
+-- MANY SUBJECT - MANY DATA
+-- Name: data_parentsubject__subject_childrendata; Type: TABLE; Schema: public; Owner: xtenspg; Tablespace:
+--
+
+CREATE TABLE data_parentsubject__subject_childrendata (
+    id integer NOT NULL,
+    "data_parentSubject" integer NOT NULL,
+    "subject_childrenData" integer NOT NULL
+);
+
+
+ALTER TABLE data_parentsubject__subject_childrendata OWNER TO xtenspg;
+
+--
+-- Name: data_parentsubject__subject_childrendata_id_seq; Type: SEQUENCE; Schema: public; Owner: xtenspg
+--
+
+CREATE SEQUENCE data_parentsubject__subject_childrendata_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE data_parentsubject__subject_childrendata_id_seq OWNER TO xtenspg;
+
+--
+-- Name: data_parentsubject__subject_childrendata_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: xtenspg
+--
+
+ALTER SEQUENCE data_parentsubject__subject_childrendata_id_seq OWNED BY data_parentsubject__subject_childrendata.id;
 
 
 --
@@ -2194,6 +2364,36 @@ ALTER TABLE ONLY biobank_projects__project_biobanks ALTER COLUMN id SET DEFAULT 
 
 
 --
+-- Name: id; Type: DEFAULT; Schema: public; Owner: xtenspg
+--
+
+ALTER TABLE ONLY data_parentsubject__subject_childrendata ALTER COLUMN id SET DEFAULT nextval('data_parentsubject__subject_childrendata_id_seq'::regclass);
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: xtenspg
+--
+
+ALTER TABLE ONLY sample_donor__subject_childrensample ALTER COLUMN id SET DEFAULT nextval('sample_donor__subject_childrensample_id_seq'::regclass);
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: xtenspg
+--
+
+ALTER TABLE ONLY sample_parentsample__sample_childrensample ALTER COLUMN id SET DEFAULT nextval('sample_parentsample__sample_childrensample_id_seq'::regclass);
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: xtenspg
+--
+
+ALTER TABLE ONLY data_childrendata__data_parentdata ALTER COLUMN id SET DEFAULT nextval('data_childrendata__data_parentdata_id_seq'::regclass);
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: xtenspg
+--
+
+ALTER TABLE ONLY data_parentsample__sample_childrendata ALTER COLUMN id SET DEFAULT nextval('data_parentsample__sample_childrendata_id_seq'::regclass);
+
+--
 -- Name: address_information_pkey; Type: CONSTRAINT; Schema: public; Owner: xtenspg; Tablespace:
 --
 
@@ -2335,6 +2535,147 @@ ALTER TABLE ONLY datatype_privileges
 ALTER TABLE ONLY datatype_privileges
     ADD CONSTRAINT datatype_xtensgroup_key UNIQUE (data_type, xtens_group);
 
+--
+-- Name: data_parentsubject__subject_childrendata_key; Type: CONSTRAINT; Schema: public; Owner: xtenspg; Tablespace:
+--
+
+ALTER TABLE ONLY data_parentsubject__subject_childrendata
+    ADD CONSTRAINT data_parentsubject__subject_childrendata_key UNIQUE ("data_parentSubject", "subject_childrenData");
+
+
+--
+-- Name: data_parentsubject__subject_childrendata_pkey; Type: CONSTRAINT; Schema: public; Owner: xtenspg; Tablespace:
+--
+
+ALTER TABLE ONLY data_parentsubject__subject_childrendata
+    ADD CONSTRAINT data_parentsubject__subject_childrendata_pkey PRIMARY KEY (id);
+
+--
+-- Name: data_parents_fkey; Type: FK CONSTRAINT; Schema: public; Owner: xtenspg
+--
+
+ALTER TABLE ONLY data_parentsubject__subject_childrendata
+    ADD CONSTRAINT data_parents_fkey FOREIGN KEY ("data_parentSubject") REFERENCES data(id) MATCH FULL ON DELETE CASCADE;
+
+--
+-- Name: subject_children_fkey; Type: FK CONSTRAINT; Schema: public; Owner: xtenspg
+--
+
+ALTER TABLE ONLY data_parentsubject__subject_childrendata
+    ADD CONSTRAINT subject_children_fkey FOREIGN KEY ("subject_childrenData") REFERENCES subject(id) MATCH FULL ON DELETE CASCADE;
+
+--
+-- Name: sample_donor__subject_childrensample_key; Type: CONSTRAINT; Schema: public; Owner: xtenspg; Tablespace:
+--
+
+ALTER TABLE ONLY sample_donor__subject_childrensample
+    ADD CONSTRAINT sample_donor__subject_childrensample_key UNIQUE (sample_donor, "subject_childrenSample");
+
+
+--
+-- Name: sample_donor__subject_childrensample_pkey; Type: CONSTRAINT; Schema: public; Owner: xtenspg; Tablespace:
+--
+
+ALTER TABLE ONLY sample_donor__subject_childrensample
+    ADD CONSTRAINT sample_donor__subject_childrensample_pkey PRIMARY KEY (id);
+
+--
+-- Name: sample_parents_fkey; Type: FK CONSTRAINT; Schema: public; Owner: xtenspg
+--
+
+ALTER TABLE ONLY sample_donor__subject_childrensample
+    ADD CONSTRAINT sample_parents_fkey FOREIGN KEY (sample_donor) REFERENCES sample(id) MATCH FULL ON DELETE CASCADE;
+
+--
+-- Name: subject_children_fkey; Type: FK CONSTRAINT; Schema: public; Owner: xtenspg
+--
+
+ALTER TABLE ONLY sample_donor__subject_childrensample
+    ADD CONSTRAINT subject_children_fkey FOREIGN KEY ("subject_childrenSample") REFERENCES subject(id) MATCH FULL ON DELETE CASCADE;
+
+--
+-- Name: sample_parentsample__sample_childrensample_key; Type: CONSTRAINT; Schema: public; Owner: xtenspg; Tablespace:
+--
+
+ALTER TABLE ONLY sample_parentsample__sample_childrensample
+    ADD CONSTRAINT sample_parentsample__sample_childrensample_key UNIQUE ("sample_parentSample", "sample_childrenSample");
+
+--
+-- Name: sample_parentsample__sample_childrensample_pkey; Type: CONSTRAINT; Schema: public; Owner: xtenspg; Tablespace:
+--
+
+ALTER TABLE ONLY sample_parentsample__sample_childrensample
+    ADD CONSTRAINT sample_parentsample__sample_childrensample_pkey PRIMARY KEY (id);
+
+--
+-- Name: sample_parents_fkey; Type: FK CONSTRAINT; Schema: public; Owner: xtenspg
+--
+
+ALTER TABLE ONLY sample_parentsample__sample_childrensample
+    ADD CONSTRAINT sample_parents_fkey FOREIGN KEY ("sample_parentSample") REFERENCES sample(id) MATCH FULL ON DELETE CASCADE;
+
+--
+-- Name: sample_children_fkey; Type: FK CONSTRAINT; Schema: public; Owner: xtenspg
+--
+
+ALTER TABLE ONLY sample_parentsample__sample_childrensample
+    ADD CONSTRAINT sample_children_fkey FOREIGN KEY ("sample_childrenSample") REFERENCES sample(id) MATCH FULL ON DELETE CASCADE;
+
+--
+-- Name: data_childrendata__data_parentdata_key; Type: CONSTRAINT; Schema: public; Owner: xtenspg; Tablespace:
+--
+
+ALTER TABLE ONLY data_childrendata__data_parentdata
+    ADD CONSTRAINT data_childrendata__data_parentdata_key UNIQUE ("data_parentData", "data_childrenData");
+
+--
+-- Name: data_childrendata__data_parentdata_pkey; Type: CONSTRAINT; Schema: public; Owner: xtenspg; Tablespace:
+--
+
+ALTER TABLE ONLY data_childrendata__data_parentdata
+    ADD CONSTRAINT data_childrendata__data_parentdata_pkey PRIMARY KEY (id);
+
+--
+-- Name: data_parentsData_fkey; Type: FK CONSTRAINT; Schema: public; Owner: xtenspg
+--
+
+ALTER TABLE ONLY data_childrendata__data_parentdata
+    ADD CONSTRAINT data_parentsData_fkey FOREIGN KEY ("data_parentData") REFERENCES data(id) MATCH FULL ON DELETE CASCADE;
+
+--
+-- Name: data_children_fkey; Type: FK CONSTRAINT; Schema: public; Owner: xtenspg
+--
+
+ALTER TABLE ONLY data_childrendata__data_parentdata
+    ADD CONSTRAINT data_children_fkey FOREIGN KEY ("data_childrenData") REFERENCES data(id) MATCH FULL ON DELETE CASCADE;
+
+--
+-- Name: data_parentsample__sample_childrendata_key; Type: CONSTRAINT; Schema: public; Owner: xtenspg; Tablespace:
+--
+
+ALTER TABLE ONLY data_parentsample__sample_childrendata
+    ADD CONSTRAINT data_parentsample__sample_childrendata_key UNIQUE ("data_parentSample", "sample_childrenData");
+
+--
+-- Name: data_parentsample__sample_childrendata_pkey; Type: CONSTRAINT; Schema: public; Owner: xtenspg; Tablespace:
+--
+
+ALTER TABLE ONLY data_parentsample__sample_childrendata
+    ADD CONSTRAINT data_parentsample__sample_childrendata_pkey PRIMARY KEY (id);
+
+--
+-- Name: data_parents_fkey; Type: FK CONSTRAINT; Schema: public; Owner: xtenspg
+--
+
+ALTER TABLE ONLY data_parentsample__sample_childrendata
+    ADD CONSTRAINT data_parents_fkey FOREIGN KEY ("data_parentSample") REFERENCES data(id) MATCH FULL ON DELETE CASCADE;
+
+--
+-- Name: sample_children_fkey; Type: FK CONSTRAINT; Schema: public; Owner: xtenspg
+--
+
+ALTER TABLE ONLY data_parentsample__sample_childrendata
+    ADD CONSTRAINT sample_children_fkey FOREIGN KEY ("sample_childrenData") REFERENCES sample(id) MATCH FULL ON DELETE CASCADE;
 
 --
 -- Name: eav_attribute_pkey; Type: CONSTRAINT; Schema: public; Owner: xtenspg; Tablespace:
@@ -3091,22 +3432,22 @@ GRANT ALL ON SCHEMA public TO PUBLIC;
 
 
 --
--- Name: dom_componentdatatypename; Type: ACL; Schema: public; Owner: massipg
+-- Name: dom_componentdatatypename; Type: ACL; Schema: public; Owner: xtenspg
 --
 
 REVOKE ALL ON TYPE dom_componentdatatypename FROM PUBLIC;
-REVOKE ALL ON TYPE dom_componentdatatypename FROM massipg;
-GRANT ALL ON TYPE dom_componentdatatypename TO massipg;
+REVOKE ALL ON TYPE dom_componentdatatypename FROM xtenspg;
+GRANT ALL ON TYPE dom_componentdatatypename TO xtenspg;
 GRANT ALL ON TYPE dom_componentdatatypename TO PUBLIC;
 
 
 --
--- Name: dom_leaftype; Type: ACL; Schema: public; Owner: massipg
+-- Name: dom_leaftype; Type: ACL; Schema: public; Owner: xtenspg
 --
 
 REVOKE ALL ON TYPE dom_leaftype FROM PUBLIC;
-REVOKE ALL ON TYPE dom_leaftype FROM massipg;
-GRANT ALL ON TYPE dom_leaftype TO massipg;
+REVOKE ALL ON TYPE dom_leaftype FROM xtenspg;
+GRANT ALL ON TYPE dom_leaftype TO xtenspg;
 GRANT ALL ON TYPE dom_leaftype TO PUBLIC;
 
 
@@ -3899,6 +4240,88 @@ GRANT ALL ON TABLE xtens_group TO xtenspg;
 REVOKE ALL ON SEQUENCE xtens_group_id_seq FROM PUBLIC;
 REVOKE ALL ON SEQUENCE xtens_group_id_seq FROM xtenspg;
 GRANT ALL ON SEQUENCE xtens_group_id_seq TO xtenspg;
+
+
+--
+-- Name: data_parentsample__sample_childrendata; Type: ACL; Schema: public; Owner: xtenspg
+--
+
+REVOKE ALL ON TABLE data_parentsample__sample_childrendata FROM PUBLIC;
+REVOKE ALL ON TABLE data_parentsample__sample_childrendata FROM xtenspg;
+GRANT ALL ON TABLE data_parentsample__sample_childrendata TO xtenspg;
+
+--
+-- Name: data_parentsample__sample_childrendata_id_seq; Type: ACL; Schema: public; Owner: xtenspg
+--
+
+REVOKE ALL ON SEQUENCE data_parentsample__sample_childrendata_id_seq FROM PUBLIC;
+REVOKE ALL ON SEQUENCE data_parentsample__sample_childrendata_id_seq FROM xtenspg;
+GRANT ALL ON SEQUENCE data_parentsample__sample_childrendata_id_seq TO xtenspg;
+
+--
+-- Name: data_parentsubject__subject_childrendata; Type: ACL; Schema: public; Owner: xtenspg
+--
+
+REVOKE ALL ON TABLE data_parentsubject__subject_childrendata FROM PUBLIC;
+REVOKE ALL ON TABLE data_parentsubject__subject_childrendata FROM xtenspg;
+GRANT ALL ON TABLE data_parentsubject__subject_childrendata TO xtenspg;
+
+--
+-- Name: data_parentsubject__subject_childrendata_id_seq; Type: ACL; Schema: public; Owner: xtenspg
+--
+
+REVOKE ALL ON SEQUENCE data_parentsubject__subject_childrendata_id_seq FROM PUBLIC;
+REVOKE ALL ON SEQUENCE data_parentsubject__subject_childrendata_id_seq FROM xtenspg;
+GRANT ALL ON SEQUENCE data_parentsubject__subject_childrendata_id_seq TO xtenspg;
+
+--
+-- Name: sample_donor__subject_childrensample; Type: ACL; Schema: public; Owner: xtenspg
+--
+
+REVOKE ALL ON TABLE sample_donor__subject_childrensample FROM PUBLIC;
+REVOKE ALL ON TABLE sample_donor__subject_childrensample FROM xtenspg;
+GRANT ALL ON TABLE sample_donor__subject_childrensample TO xtenspg;
+
+--
+-- Name: sample_donor__subject_childrensample_id_seq; Type: ACL; Schema: public; Owner: xtenspg
+--
+
+REVOKE ALL ON SEQUENCE sample_donor__subject_childrensample_id_seq FROM PUBLIC;
+REVOKE ALL ON SEQUENCE sample_donor__subject_childrensample_id_seq FROM xtenspg;
+GRANT ALL ON SEQUENCE sample_donor__subject_childrensample_id_seq TO xtenspg;
+
+--
+-- Name: sample_parentsample__sample_childrensample; Type: ACL; Schema: public; Owner: xtenspg
+--
+
+REVOKE ALL ON TABLE sample_parentsample__sample_childrensample FROM PUBLIC;
+REVOKE ALL ON TABLE sample_parentsample__sample_childrensample FROM xtenspg;
+GRANT ALL ON TABLE sample_parentsample__sample_childrensample TO xtenspg;
+
+--
+-- Name: sample_parentsample__sample_childrensample_id_seq; Type: ACL; Schema: public; Owner: xtenspg
+--
+
+REVOKE ALL ON SEQUENCE sample_parentsample__sample_childrensample_id_seq FROM PUBLIC;
+REVOKE ALL ON SEQUENCE sample_parentsample__sample_childrensample_id_seq FROM xtenspg;
+GRANT ALL ON SEQUENCE sample_parentsample__sample_childrensample_id_seq TO xtenspg;
+
+--
+-- Name: data_childrendata__data_parentdata; Type: ACL; Schema: public; Owner: xtenspg
+--
+
+REVOKE ALL ON TABLE data_childrendata__data_parentdata FROM PUBLIC;
+REVOKE ALL ON TABLE data_childrendata__data_parentdata FROM xtenspg;
+GRANT ALL ON TABLE data_childrendata__data_parentdata TO xtenspg;
+
+--
+-- Name: data_childrendata__data_parentdata_id_seq; Type: ACL; Schema: public; Owner: xtenspg
+--
+
+REVOKE ALL ON SEQUENCE data_childrendata__data_parentdata_id_seq FROM PUBLIC;
+REVOKE ALL ON SEQUENCE data_childrendata__data_parentdata_id_seq FROM xtenspg;
+GRANT ALL ON SEQUENCE data_childrendata__data_parentdata_id_seq TO xtenspg;
+
 
 --
 -- PostgreSQL database dump complete
