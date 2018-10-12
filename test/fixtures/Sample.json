@@ -5,7 +5,7 @@
         "type": 2,
         "owner":1,
         "biobankCode": "081852",
-        "donor": 2,
+        "donor": [2],
         "tags": null,
         "files": [],
         "metadata": {
@@ -21,9 +21,9 @@
         "type": 6,
         "owner":1,
         "biobankCode": "321646",
-        "donor": 3,
+        "donor": [2],
         "tags": null,
-        "parentSample": 1,
+        "parentSample": [1],
         "metadata": {
             "arrival_code": {"value": "13-H-0099"},
             "location": {"value": "eye socket"},

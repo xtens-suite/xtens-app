@@ -7,18 +7,18 @@
         <div id="data-header-row" class="row data-header-row">
             <div id="data-header" class="col-md-offset-2 col-md-6">
                 <div class="row margin-row">
-                    <% if (data.get("parentSubject")) {%>
+                      <% if (data.get("parentSubject") && data.get("parentSubject").length > 0) {%>
                     <label for="parentSubject" class="data-label">
-                        <%= __("subject") %>: </label>
+                        <%= data.get("parentSubject").length === 1 ? __("subject") : __("subjects")  %>: </label>
                     <span class="data-span">
-                        <%= data.get("parentSubject").code %>
+                        <%= _.map(data.get("parentSubject"), "code").join(",") %>
                     </span>
                     <%} %>
-                    <% if (data.get("parentSample")) {%>
+                    <% if (data.get("parentSample") && data.get("parentSample").length > 0) {%>
                     <label for="parentSample" class="data-label">
-                        <%= __("sample") %>: </label>
+                        <%= data.get("parentSample").length === 1 ?  __("sample") :  __("samples") %>: </label>
                     <span class="data-span">
-                        <%= data.get("parentSample").biobankCode %>
+                       <%= _.map(data.get("parentSample"), "biobankCode").join(",") %>
                     </span>
                     <%} %>
                 </div>

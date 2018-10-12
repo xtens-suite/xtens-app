@@ -123,44 +123,16 @@
                     return (val && val.id);
                 }
             },
-            '#donor': {observe: 'donor'},
-      /*
-      '#donor': {
-          observe: 'donor',
-          selectOptions: {
-              collection: function() {
-                  return this.subjects.map(function(subj) {
-                      return {
-                          label: subj.personalInfo.surname + " " +  subj.personalInfo.givenName,
-                          value: subj.id
-                      };
-                  });
-              },
-              defaultOption: {
-                  label: "",
-                  value: null
-              }
-          },
-          initialize: function($el) {
-              $el.select2({placeholder: i18n('please-select')});
-          },
-          getVal: function($el, ev, options) {
-              var value = parseInt($el.val());
-              return _.findWhere(options.view.subjects, {id: value });
-          },
-          onGet: function(val, options) {
-              return (val && val.id);
-          }
-      }, */
 
-            '#parent-sample': {
-                observe: 'parentSample',
+            /*
+            '#donor': {
+                observe: 'donor',
                 selectOptions: {
                     collection: function() {
-                        return this.parentSamples.map(function(sample) {
+                        return this.subjects.map(function(subj) {
                             return {
-                                label: sample.biobankCode,
-                                value: sample.id
+                                label: subj.personalInfo.surname + " " +  subj.personalInfo.givenName,
+                                value: subj.id
                             };
                         });
                     },
@@ -170,20 +142,48 @@
                     }
                 },
                 initialize: function($el) {
-                    $el.select2({
-                        placeholder: i18n('please-select')
-                    });
+                    $el.select2({placeholder: i18n('please-select')});
                 },
                 getVal: function($el, ev, options) {
                     var value = parseInt($el.val());
-                    return _.findWhere(options.view.parentSamples, {
-                        id: value
-                    });
+                    return _.findWhere(options.view.subjects, {id: value });
                 },
                 onGet: function(val, options) {
                     return (val && val.id);
                 }
-            },
+            }, */
+
+            // '#parent-sample': {
+            //     observe: 'parentSample',
+            //     selectOptions: {
+            //         collection: function() {
+            //             return this.parentSamples.map(function(sample) {
+            //                 return {
+            //                     label: sample.biobankCode,
+            //                     value: sample.id
+            //                 };
+            //             });
+            //         },
+            //         defaultOption: {
+            //             label: "",
+            //             value: null
+            //         }
+            //     },
+            //     initialize: function($el) {
+            //         $el.select2({
+            //             placeholder: i18n('please-select')
+            //         });
+            //     },
+            //     getVal: function($el, ev, options) {
+            //         var value = parseInt($el.val());
+            //         return _.findWhere(options.view.parentSamples, {
+            //             id: value
+            //         });
+            //     },
+            //     onGet: function(val, options) {
+            //         return (val && val.id);
+            //     }
+            // },
 
             '#tags': {
                 observe: 'tags',
@@ -217,7 +217,7 @@
             }
             _.each(["donor", "parentSample"], function(parent) {
                 if (options[parent]) {
-                    this.model.set(parent, options[parent]);
+                    this.model.set(parent, _.isArray() ? options[parent] : [options[parent]]);
                 }
             }, this);
             this.render();
@@ -250,6 +250,11 @@
                 this.model.get("notes") === "" ? this.model.set("notes", null) : null;
                 this.retrieveAndSetFiles();
                 this.model.get("owner").id ? this.model.set("owner", this.model.get("owner").id) : null;
+
+                this.model.get("donor") && this.model.get("donor").length > 0 ? this.model.set("donor", _.map(this.model.get("donor"), "id")) : null;
+                this.model.get("parentSample") && this.model.get("parentSample").length > 0 ? this.model.set("parentSample", _.map(this.model.get("parentSample"), "id")) : null;
+                this.model.get("childrenSample") && this.model.get("childrenSample").length > 0 ? this.model.set("childrenSample", _.map(this.model.get("childrenSample"), "id")) : null;
+                this.model.get("childrenData") && this.model.get("childrenData").length > 0 ? this.model.set("childrenData", _.map(this.model.get("childrenData"), "id")) : null;
 
                 this.model.save(null, {
                     success: function(data) {
@@ -356,7 +361,7 @@
                 var that = this;
                 Data.Views.Edit.prototype.dataTypeOnChange.call(this);
                 var typeName = this.$('#data-type :selected').text(),
-                    parentSample = this.model.get("parentSample") ? this.model.get("parentSample").biobankCode : null,
+                    parentSample = this.model.get("parentSample") && this.model.get("parentSample").length > 0 ? this.model.get("parentSample")[0].biobankCode : null,
                     biobank = this.model.get("biobank").id;
                 var type = _.find(this.dataTypes, function(dt){ return dt.name === typeName;});
                 var params = {
@@ -463,7 +468,7 @@
                 },
                 getVal: function($el, ev, options) {
                     var value = parseInt($el.val());
-                    return _.findWhere(options.view.subjects, {
+                    return _.filter(options.view.subjects, {
                         id: value
                     });
                 },
@@ -563,14 +568,15 @@
                     });
                     if (sampleTypeChildren.length > 0) {
                         var sids = _.map(sampleTypeChildren, 'id').join();
-                        sample.set("newDerivativeLink", "#/samples/new/0?idDataTypes=" + sids + "&parentSample=" + sample.id + "&donor=" + sample.get("parentSubject"));
+                        var donor = sample.get('code') && sample.get('code').length > 0 ? "&donorCode=" + sample.get('code') : "";
+                        sample.set("newDerivativeLink", "#/samples/new/0?idDataTypes=" + sids + "&parentSample=" + sample.id + donor);
                     }
                     var dataTypeChildren = _.where(type.get("children"), {
                         "model": Classes.DATA
                     });
                     if (dataTypeChildren.length > 0) {
                         var dids = _.map(dataTypeChildren, 'id').join();
-                        var parentSubject = sample.get('parentSubject') ? "&parentSubject=" + sample.get('parentSubject') : "";
+                        var parentSubject = sample.get('code') && sample.get('code').length > 0 ? "&parentSubjectCode=" + sample.get('code') : "";
                         sample.set("newDataLink", "#/data/new/0?idDataTypes=" + dids + "&parentSample=" + sample.id + parentSubject);
                     }
                 }

@@ -716,7 +716,7 @@
             }
             _.each(["parentSubject","parentSample", "parentData"], function(parent) {
                 if(options[parent]) {
-                    this.model.set(parent, options[parent]);
+                    this.model.set(parent, _.isArray() ? options[parent] : [options[parent]]);
                 }
             }, this);
             this.render();
@@ -866,6 +866,11 @@
                 this.model.set("metadata", metadata);
                 this.model.get("owner").id ? this.model.set("owner", this.model.get("owner").id) : null;
                 this.model.get("notes") === "" ? this.model.set("notes", null) : null;
+                this.model.get("parentSubject") && this.model.get("parentSubject").length > 0 ? this.model.set("parentSubject", _.map(this.model.get("parentSubject"), "id")) : null;
+                this.model.get("parentSample") && this.model.get("parentSample").length > 0 ? this.model.set("parentSample", _.map(this.model.get("parentSample"), "id")) : null;
+                this.model.get("parentData") && this.model.get("parentData").length > 0 ? this.model.set("parentData", _.map(this.model.get("parentData"), "id")) : null;
+                this.model.get("childrenData") && this.model.get("childrenData").length > 0 ? this.model.set("childrenData", _.map(this.model.get("childrenData"), "id")) : null;
+
                 this.retrieveAndSetFiles();
 
                 this.model.save(null, {

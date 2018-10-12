@@ -60,7 +60,7 @@ describe('DataService', function() {
         it("should correctly validate a valid data using its schema", function() {
             var data = _.cloneDeep(fixtures.data[0]);
             var dataType = _.cloneDeep(_.findWhere(fixtures.datatype, {id: data.type}));
-            var parentSubject = _.cloneDeep(_.findWhere(fixtures.subject, {id: data.parentSubject}));
+            var parentSubject = _.cloneDeep(_.findWhere(fixtures.subject, {id: data.parentSubject[0]}));
             data.type = dataType; //populate dataType
             data.parentSubject = parentSubject; //populate parentSubject
             DataService.simplify(data);
@@ -672,9 +672,7 @@ describe('DataService', function() {
             },
             "tags": ["test","a test"],
             "notes": "just a test",
-            "parentSubject": 2,
-            "parentSample": null,
-            "parentData": null
+            "parentSubject": [2]
         }];
 
           /**
@@ -743,9 +741,7 @@ describe('DataService', function() {
                 },
                 "tags": ["test","a test"],
                 "notes": "just a test",
-                "parentSubject": 2,
-                "parentSample": null,
-                "parentData": null
+                "parentSubject": [2]
             }];
             var bearer = "Bearer "+ tokenNS;
             var req = {headers:{authorization : bearer}};
@@ -789,9 +785,7 @@ describe('DataService', function() {
                 },
                 "tags": ["test","a test"],
                 "notes": "just a test",
-                "parentSubject": 2,
-                "parentSample": null,
-                "parentData": null
+                "parentSubject": [2]
             }];
             var bearer = "Bearer "+ tokenNS;
             var req = {headers:{authorization : bearer}};
@@ -826,9 +820,7 @@ describe('DataService', function() {
                 "metadata": {},
                 "tags": ["test","a test"],
                 "notes": "just a test",
-                "parentSubject": 2,
-                "parentSample": null,
-                "parentData": null
+                "parentSubject": [2]
             }];
             var bearer = "Bearer "+ tokenSOV;
             var req = {headers:{authorization : bearer}};

@@ -23,8 +23,10 @@ const coroutines = {
             owner: Joi.number().integer().positive().required(),
             biobank: Joi.number().integer().positive().required(),
             biobankCode: Joi.string().allow("").allow(null), // TODO change this one
-            donor: Joi.number().integer().positive(),
-            parentSample: Joi.number().integer().positive(),
+            donor: Joi.array().allow(null),
+            parentSample: Joi.array().allow(null),
+            childrenData: Joi.array().allow(null),
+            childrenSample: Joi.array().allow(null),
             tags: Joi.array().allow(null),
             notes: Joi.string().allow(null),
             metadata: Joi.object().required(),
