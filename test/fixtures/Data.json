@@ -16,9 +16,7 @@
         },
         "tags": ["test","a test"],
         "notes": "just a test",
-        "parentSubject": 2,
-        "parentSample": null,
-        "parentData": null
+        "parentSubject": [2]
     },
     {
         "id":2,

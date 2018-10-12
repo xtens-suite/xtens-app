@@ -53,7 +53,7 @@ describe('SampleController', function() {
                 owner:1,
                 biobank:2,
                 biobankCode: "081852",
-                donor: 11,
+                donor: [1],
                 metadata: metadata
             })
             .expect(201)
@@ -83,7 +83,7 @@ describe('SampleController', function() {
                 biobank:2,
                 owner:1,
                 biobankCode: "081852",
-                donor: 11,
+                donor: [1],
                 metadata: metadata
             })
             .expect(400);
@@ -150,7 +150,7 @@ describe('SampleController', function() {
                 owner:1,
                 biobank: biobank,
                 biobankCode: "081852",
-                donor: 11,
+                donor: [1],
                 metadata: metadata
             }).expect(200)
             .end(function(err, res) {
@@ -176,7 +176,7 @@ describe('SampleController', function() {
                 owner:1,
                 biobank:14,
                 biobankCode: "081852",
-                donor: 11,
+                donor: [1],
                 metadata: metadata
             })
             .expect(400);

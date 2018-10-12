@@ -14,7 +14,7 @@ XTENS 2 is an open source web-based digital repository for heterogeneous data in
 * Minor bugs fixed and improvements
 
 To migrate from XTENS 2.2 to **2.3** follow the link: [guide](https://github.com/xtens-suite/xtens-app/blob/master/docs/migration_guide_to_2_3.md)
-
+[Download](https://github.com/xtens-suite/xtens-app/releases/tag/2.3.0) The last Release (v. 2.3) and follow
 
 It is designed with the following features:
 
@@ -43,10 +43,15 @@ The following software packages are required to be installed on your system:
 
 
 ## Installation (ubuntu server):
+* [Download](https://github.com/xtens-suite/xtens-app/releases) the Release file (zip or tar gz) and extract it:
 
-* Download the file .zip or Clone the repository:
+OR:
+
+* Clone the repository:
 
         git clone https://github.com/xtens-suite/xtens-app.git
+
+THEN:
 
 * Move into xtens-app directory:
 
