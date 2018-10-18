@@ -300,7 +300,7 @@
                     data = [{ id: 'IN', text: '=' }, { id: 'NOT IN', text: '≠' }];
                 }
             }
-            else if (fieldType === FieldTypes.INTEGER || fieldType === FieldTypes.FLOAT) {
+            else if (fieldType === FieldTypes.INTEGER || fieldType === FieldTypes.FLOAT || FieldTypes.DATE) {
                 data = [{ id: '=', text: '=' }, { id: '<=', text: '≤' },
                     { id: '>=', text: '≥' }, { id: '<', text: '<' },
                     { id: '>', text: '>' }, { id: '<>', text: '≠' }];
@@ -457,7 +457,9 @@
                     $el.select2({
                         data: data
                     });
-                    $el.val(data[0].id).trigger('change');
+                    if (!this.model.get('surnameComparator')) {
+                        $el.val(data[0].id).trigger('change');
+                    }
                 }
             },
             '[name="surname"]': {
@@ -471,7 +473,9 @@
                     $el.select2({
                         data: data
                     });
-                    $el.val(data[0].id).trigger('change');
+                    if (!this.model.get('givenNameComparator')) {
+                        $el.val(data[0].id).trigger('change');
+                    }
                 }
             },
             '[name="given-name"]': {
@@ -486,7 +490,9 @@
                     $el.select2({
                         data: data
                     });
-                    $el.val(data[0].id).trigger('change');
+                    if (!this.model.get('birthDateComparator')) {
+                        $el.val(data[0].id).trigger('change');
+                    }
                 }
             },
             '[name="birth-date"]': {
@@ -536,7 +542,9 @@
                     $el.select2({
                         data: data
                     });
-                    $el.val(data[0].id).trigger('change');
+                    if (!this.model.get('codeComparator')) {
+                        $el.val(data[0].id).trigger('change');
+                    }
                 }
             },
             '[name="code"]': {
@@ -549,7 +557,9 @@
                     $el.select2({
                         data: data
                     });
-                    $el.val(data[0].id).trigger('change');
+                    if (!this.model.get('sexComparator')) {
+                        $el.val(data[0].id).trigger('change');
+                    }
                 }
             },
             '[name="sex"]': {
@@ -610,7 +620,9 @@
                     $el.select2({
                         data: data
                     });
-                    $el.val(data[0].id).trigger('change');
+                    if (!this.model.get('biobankComparator')) {
+                        $el.val(data[0].id).trigger('change');
+                    }
                 }
             },
 
@@ -648,7 +660,9 @@
                     $el.select2({
                         data: data
                     });
-                    $el.val(data[0].id).trigger('change');
+                    if (!this.model.get('biobankCodeComparator')) {
+                        $el.val(data[0].id).trigger('change');
+                    }
                 }
             },
             '[name="biobank-code"]': {
