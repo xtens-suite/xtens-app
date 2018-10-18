@@ -411,7 +411,8 @@
                 initialize: function($el) {
                     $el.select2({
                         data: data,
-                        placeholder: i18n("please-select")
+                        placeholder: i18n("please-select"),
+                        multiple: "multiple"
                     });
                     $el.removeClass('hidden');
                     $el.change(function() {
