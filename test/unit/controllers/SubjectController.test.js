@@ -7,6 +7,7 @@ const expect = require("chai").expect;
 const request = require('supertest');
 const sinon = require('sinon');
 const loginHelper = require('./loginHelper');
+const BluebirdPromise = require("bluebird");
 
 
 describe('SubjectController', function() {
@@ -790,6 +791,78 @@ describe('SubjectController', function() {
             }
             done();
             return;
+        });
+    });
+
+    describe('GET /sample/getNextSubjectCode', function() {
+        let getNextSubjectCodeAsyncStub;
+        beforeEach(function() {
+            let crudManager = BluebirdPromise.promisifyAll(sails.hooks['persistence'].getDatabaseManager().crudManager);
+            // getNextSubjectCodeAsyncStub = sinon.stub(crudManager, "getNextSubjectCode", function(uri, next) {
+            //     return BluebirdPromise.resolve("NEXT-1000000");
+            // });
+        });
+
+        afterEach(function() {
+            // sails.hooks['persistence'].getDatabaseManager().crudManager.getNextSubjectCode.restore();
+        });
+        it('Should return 200 OK the correct Subject Code provided into subject object', function (done) {
+            request(sails.hooks.http.app)
+            .get('/subject/getNextSubjectCode')
+            .set('Authorization', `Bearer ${tokenDataSens}`)
+            .query({type:1, code: "PAT-002"})
+            .expect(200)
+            .end(function(err, res) {
+                if (err) {
+                    sails.log.error(err);
+                    done(err);
+                    return;
+                }
+                expect(res.body).to.eql("PAT-002");
+
+                done();
+                return;
+            });
+        });
+
+        it('Should return 200 OK the next Subject Code', function (done) {
+            request(sails.hooks.http.app)
+            .get('/subject/getNextSubjectCode')
+            .set('Authorization', `Bearer ${tokenDataSens}`)
+            .query({type:1, code: null})
+            .expect(200)
+            .end(function(err, res) {
+                if (err) {
+                    sails.log.error(err);
+                    done(err);
+                    return;
+                }
+                expect(res.body).to.eql("PAT-68");
+
+                done();
+                return;
+            });
+        });
+
+        it('Should return Error - Error getting next Subject code', function (done) {
+            let expectedError = new Error(`Error getting last subject code - Please provide a data type`);
+
+            request(sails.hooks.http.app)
+                .get('/subject/getNextSubjectCode')
+                .set('Authorization', `Bearer ${tokenDataSens}`)
+                .query({type: null, code: null})
+                .expect(500)
+                .end(function(err, res) {
+                    if (err) {
+                        sails.log.error(err);
+                        expect(err).to.eql(expectedError);
+                        done(err);
+                        return;
+                    }
+
+                    done();
+                    return;
+                });
         });
     });
 });

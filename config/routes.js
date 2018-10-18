@@ -100,6 +100,7 @@ module.exports.routes = {
     'GET /subject/edit': {controller: 'subject', action: 'edit'},
     'POST /subjectGraph': {controller:'subject',action:'createGraph'},
     'POST /subjectGraphSimple': {controller:'subject',action:'createGraphSimple'},
+    'GET /subject/getNextSubjectCode': {controller: 'subject', action: 'getNextSubjectCode'},
 
     'GET /app': {
         controller: 'main',

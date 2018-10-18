@@ -215,6 +215,17 @@ const coroutines = {
         return res.json(payload);
 
 
+    }),
+
+    getNextSubjectCode: BluebirdPromise.coroutine(function *(req, res) {
+        const operator = TokenService.getToken(req);
+        const subject = req.allParams();
+        sails.log.info("SubjectController.getNextSubjectCode - Decoded ID is: " + operator.id);
+        if (!subject.type){ throw new Error(`Error getting last subject code - Please provide a data type`);}
+
+        const nextCode = yield crudManager.getNextSubjectCode(subject);
+
+        return res.json(nextCode);
     })
 
 
@@ -320,6 +331,20 @@ module.exports = {
             return co.error(err);
         });
 
+    },
+
+   /**
+   * @method
+   * @name getNextSubjectCode
+   * @description retrieve last biobank code for creating a Sample via client web-form
+   */
+    getNextSubjectCode: function(req, res) {
+        const co = new ControllerOut(res);
+        coroutines.getNextSubjectCode(req,res)
+      .catch(err => {
+          sails.log.error(err);
+          return co.error(err);
+      });
     },
 
 

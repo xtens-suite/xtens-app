@@ -138,7 +138,7 @@
             $divInput.append($select);
             var $label = $('<label>').addClass('data-label').attr({'for': 'data-type'}).text( i18n("data-type") );
             $divForm.append($label).append($divInput);
-            $('#personal-details').after($divForm);
+            $('#metadataform-group-cnt').prepend($divForm);
             this.addBinding(null, '#data-type', {
                 observe: 'type',
 
@@ -184,7 +184,6 @@
         events: {
             "submit .edit-subject-form": "saveSubject",
             "click button.delete": "deleteSubject"
-            // "click #add-personal-details": "addPersonalDetailsView"
         },
 
         /**
@@ -293,6 +292,39 @@
                 return false;
             });
 
+        },
+
+        dataTypeOnChange: function() {
+
+            Data.Views.Edit.prototype.dataTypeOnChange.call(this);
+            this.getNextCode();
+
+        },
+
+        getNextCode: function() {
+
+            var that = this;
+
+            var subject = {
+                type: this.model.get('type') ? this.model.get('type').id ? this.model.get('type').id : this.model.get('type') : this.dataType.id,
+                code: this.model.get('code') ? this.model.get('code') : null
+            };
+
+            $.ajax({
+                url: '/subject/getNextSubjectCode',
+                type: 'GET',
+                headers: {
+                    'Authorization': 'Bearer ' + xtens.session.get("accessToken")
+                },
+                data: subject,
+                contentType: 'application/json',
+                success: function(result) {
+                    that.model.set('code', result);
+                },
+                error: function(err) {
+                    xtens.error(err);
+                }
+            });
         },
 
         addPersonalDetailsView: function() {
