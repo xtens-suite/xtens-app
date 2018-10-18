@@ -319,7 +319,9 @@
                     $el.select2({
                         data: data
                     });
-                    $el.val(data[0].id).trigger('change');
+                    if (!this.model.get('comparator')) {
+                        $el.val(data[0].id).trigger('change');
+                    }
                     $el.removeClass('hidden');
                     $el.change(function() {
                         $el.trigger('input');
