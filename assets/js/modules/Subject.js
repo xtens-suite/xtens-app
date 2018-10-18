@@ -306,8 +306,8 @@
             var that = this;
 
             var subject = {
-                type: this.model.get('type') ? this.model.get('type').id ? this.model.get('type').id : this.model.get('type') : this.dataType.id,
-                code: this.model.get('code') ? this.model.get('code') : null
+                type: this.model.get('type') ? this.model.get('type').id ? this.model.get('type').id : this.model.get('type') : this.dataType.id
+                // code: this.model.get('code') ? this.model.get('code') : null
             };
 
             $.ajax({
