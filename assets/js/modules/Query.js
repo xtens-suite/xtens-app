@@ -1239,7 +1239,9 @@
                     if (that.isFirst) {
                         that.setMultiProjectButton(that.model.get('multiProject'), true ,function(){
                     // TODO: wait async nestedviews rendering and then trigger
-                            that.queryBuiderView.trigger('search');
+                            if (that.queryBuiderView) {
+                                that.queryBuiderView.trigger('search');
+                            }
                         });
                     }
 
