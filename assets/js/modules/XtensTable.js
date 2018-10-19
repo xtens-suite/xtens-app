@@ -255,7 +255,7 @@
                           extend: 'excelHtml5',
                           text: 'Excel - child Rows',
                           title: null,
-                          filename: 'XTENS',
+                          filename: 'XTENS_'+ moment().format("YYYY_MM_DD_hh_mm_ss"),
                           exportOptions: {
                               orthogonal: 'export', // to export source data and not rendered data
                               columns:  ':not(.actions):not(.details-control)' //not export actions column
@@ -285,7 +285,6 @@
                           }
                       }
                   ];
-                  buttons = buttons.concat(excelPlainData);
 
                   if (this.checkVCF()) {
 
