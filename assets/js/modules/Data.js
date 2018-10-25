@@ -153,7 +153,8 @@
                     var index = options.loopParams.index || 0;
                     this.set("value", fieldRecord.values[index]);
                     if (field.hasUnit) {
-                        this.set("unit", fieldRecord.units[index]);
+                        var unitloop = fieldRecord.units[index] ? fieldRecord.units[index] : field.possibleUnits[0];
+                        this.set("unit", unitloop);
                     }
                 }
 
@@ -161,7 +162,8 @@
                 else {
                     this.set("value", fieldRecord.value);
                     if (field.hasUnit) {
-                        this.set("unit", fieldRecord.unit);
+                        var unit = fieldRecord.unit ? fieldRecord.unit : field.possibleUnits[0];
+                        this.set("unit", unit);
                     }
                 }
             }
