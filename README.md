@@ -10,7 +10,7 @@ XTENS 2 is an open source web-based digital repository for heterogeneous data in
 * Replaced the one-to-many with a many-to-many relationship between Data, Sample, and Subject tables. Now a data instance can have multiple children and multiple fathers.
 * Minor fixes and improvements
 
-To migrate from XTENS 2 v2.3.0 to **v3.0.0** follow the link: [guide](https://github.com/xtens-suite/xtens-app/blob/master/docs/migration_guide_to_2_3.md)
+To migrate from XTENS 2 v2.3.0 to **v3.0.0** follow the link: [guide](https://github.com/xtens-suite/xtens-app/blob/master/docs/migration_guide_to_3_0.md)
 
 [Download](https://github.com/xtens-suite/xtens-app/releases/tag/3.0.0) The last Release (v3.0.0) and follow the guide
 
