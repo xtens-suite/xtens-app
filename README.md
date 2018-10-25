@@ -1,20 +1,17 @@
-# XTENS 2 v.2.3
+# XTENS 2 v.3.0
 
 [![Build Status](https://travis-ci.org/xtens-suite/xtens-app.svg?branch=master)](https://travis-ci.org/xtens-suite/xtens-app)
 [![Coverage Status](https://coveralls.io/repos/github/xtens-suite/xtens-app/badge.svg?branch=master)](https://coveralls.io/github/xtens-suite/xtens-app?branch=master)
 
 XTENS 2 is an open source web-based digital repository for heterogeneous data in life science.
 
-##### Release notes (v2.3)
+##### Release notes (v3.0)
 
-* Vcf file export: based on data type structure (Variant Data Type) export variant calls resulting from queries directly in vcf format  
-* Biobank management: new biobank code generation system, project - biobank association
-* Favorite Queries System: added component to store and reload automatically favorite queries  
-* Password managment improved: added more restrictive contraints for passwords security, password expiration and password reset (only by administrator)
-* Minor bugs fixed and improvements
+* Replaced the one-to-many with a many-to-many relationship between Data, Sample, and Subject tables. Now a data instance can have multiple children and multiple fathers.
+* Minor fixes and improvements
 
-To migrate from XTENS 2.2 to **2.3** follow the link: [guide](https://github.com/xtens-suite/xtens-app/blob/master/docs/migration_guide_to_2_3.md)
-[Download](https://github.com/xtens-suite/xtens-app/releases/tag/2.3.0) The last Release (v. 2.3) and follow
+To migrate from XTENS 2 v2.3.0 to **v3.0.0** follow the link: [guide](https://github.com/xtens-suite/xtens-app/blob/master/docs/migration_guide_to_2_3.md)
+[Download](https://github.com/xtens-suite/xtens-app/releases/tag/3.0.0) The last Release (v3.0.0) and follow the istructions
 
 It is designed with the following features:
 
@@ -324,6 +321,10 @@ Now you can go to the application page http://host:port/#/. (the host is the ip 
 
 To discover XTENS 2 RESTful API follow the link: [RESTful API](http://docs.xtens2.apiary.io)
 
-To migrate from XTENS 2.0 to **2.1** follow the link: [guide](https://github.com/xtens-suite/xtens-app/blob/master/docs/migration_guide_to_2_1.md)
+To migrate from XTENS 2 v2.0.0 to **v2.1.0** follow the link: [guide](https://github.com/xtens-suite/xtens-app/blob/master/docs/migration_guide_to_2_1.md)
+[Download](https://github.com/xtens-suite/xtens-app/releases/tag/2.1.0) Release (v2.1.0)
+
+To migrate from XTENS 2 v2.2.0 to **v2.3.0** follow the link: [guide](https://github.com/xtens-suite/xtens-app/blob/master/docs/migration_guide_to_2_3.md)
+[Download](https://github.com/xtens-suite/xtens-app/releases/tag/2.3.0) Release (v2.3.0)
 
 XTENS 2 is published under the BSD 3-clause License.
