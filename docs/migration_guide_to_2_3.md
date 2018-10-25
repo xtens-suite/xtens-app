@@ -1,4 +1,4 @@
-# Guide to migrate from XTENS 2.2 TO 2.3
+# Guide to migrate XTENS 2 from 2.2 TO 2.3
 
 ## System Prerequisites:
 The following software packages are required to be installed on your system:
