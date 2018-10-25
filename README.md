@@ -6,7 +6,7 @@
 XTENS 2 is an open source web-based digital repository for heterogeneous data in life science.
 
 ##### Release notes (v3.0)
-
+ 
 * Replaced the one-to-many with a many-to-many relationship between Data, Sample, and Subject tables. Now a data instance can have multiple children and multiple fathers.
 * Minor fixes and improvements
 
