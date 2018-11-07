@@ -577,6 +577,8 @@
                 beforeSend: function() { $('.loader-gif').css("display","block"); },
                 success: function(err,res,body){
 
+                    var path = "subjects/graph?idPatient=" + idPatient;
+                    xtens.router.navigate(path, {trigger: false});
                     // clean the previous graph if present
                     d3.select("#subject-graph").remove();
 
