@@ -306,6 +306,7 @@
         "select-a-query": "Select a query",
         "query-deleted": "Query Deleted",
         "query-will-be-permanently-deleted-are-you-sure": "Query will be permanently deleted. Are you sure?",
+        "select-unit": "Select unit",
         /* views/templates/data-table.ejs */
         "overall-status": "Overall Status",
         "diagnosis-age": "Diagnosis Age",

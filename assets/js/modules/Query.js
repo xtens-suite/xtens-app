@@ -197,6 +197,7 @@
 
         initialize: function(options) {
             this.template = JST['views/templates/query-generic-row.ejs'];
+            this.templateUnit = JST['views/templates/query-generic-row-unit.ejs'];
             this.fieldList = options.fieldList;
             this.listenTo(this.model, 'change:fieldName', this.fieldNameOnChange);
         },
@@ -206,7 +207,7 @@
             this.$el.addClass("query-row");
             this.stickit();
             this.$comparator = this.$("input[name=comparator]");
-            this.$unit = this.$("input[name=unit]");
+            this.$unitCnt = this.$(".query-unit-div");
             this.$junction = this.$("input[name=junction]");
             if (this.model.get("fieldName")) {
                 var selectedField = this.generateStatementOptions(this.model, this.model.get("fieldName"));
@@ -269,7 +270,7 @@
             this.$("input[type=text]").select2('destroy');
             this.$("input[type=text]").addClass('hidden');
             this.$("input[type=text]").attr('required', false);
-
+            this.$unitCnt.empty();
             // set match criteria on formatted or unformatted names depending of the application usage
             var matchCriteria = useFormattedNames ? {"formattedName": fieldName} : {"name": fieldName};
 
@@ -281,7 +282,12 @@
             this.generateComparisonItem(selectedField);
             this.generateComparedValueItem(selectedField);
             if (selectedField.hasUnit && selectedField.possibleUnits) {
-                this.generateComparedUnitItem(selectedField.possibleUnits);
+                var dataUnit = selectedField.possibleUnits.map(function(unit) {
+                    return { id: unit, text: unit };
+                });
+                this.$unitCnt.append(this.templateUnit({ __: i18n, data: dataUnit }));
+                this.$unit = this.$("select[name=unit]");
+                this.generateComparedUnitItem(dataUnit);
             }
             this.generateJunctionItem();
             return selectedField;
@@ -404,22 +410,28 @@
             });
         },
 
-        generateComparedUnitItem:function(possibleUnits) {
-            var data = possibleUnits.map(function(unit) {
-                return { id: unit, text: unit };
-            });
-            this.addBinding(null, "input[name='unit']", {
+        generateComparedUnitItem:function(data) {
+            this.$unit.selectpicker('hide');
+
+            this.addBinding(null, "select[name='unit']", {
                 observe: 'fieldUnit',
                 initialize: function($el) {
-                    $el.select2({
-                        data: data,
+                    $el.selectpicker({
                         placeholder: i18n("please-select"),
-                        multiple: "multiple"
+                        width: "100%"
                     });
+                    $el.selectpicker('show');
+                    if (this.model.get('fieldUnit') && this.model.get('fieldUnit').length > 0) {
+                        $el.selectpicker('val',this.model.get('fieldUnit'));
+                        $el.selectpicker('refresh');
+                    }
                     $el.removeClass('hidden');
                     $el.change(function() {
                         $el.trigger('input');
                     });
+                },
+                getVal: function($el) {
+                    return $el.val();
                 }
 
             });

@@ -22,6 +22,12 @@ module.exports = function(grunt) {
                 cwd: './assets',
                 src: ['**/*.!(coffee|less|sass|scss)'],
                 dest: '.tmp/public'
+            }, {
+                expand: true,
+                dot: true,
+                cwd: './assets/dependencies/bootstrap',
+                src: ['fonts/*.*'],
+                dest: '.tmp/public'
             }]
         },
         build: {
@@ -43,6 +49,12 @@ module.exports = function(grunt) {
                 expand: true,
                 dot: true,
                 cwd: 'bower_components/font-awesome',
+                src: ['fonts/*.*'],
+                dest: '.tmp/public/version'
+            }, {
+                expand: true,
+                dot: true,
+                cwd: 'bower_components/bootstrap',
                 src: ['fonts/*.*'],
                 dest: '.tmp/public/version'
             }, {

@@ -41,7 +41,7 @@
     "parsleyjs": "~2.0.5",
     "pikaday": "https://github.com/dbushell/Pikaday.git#~1.2.0",
     "select2": "https://github.com/ivaynberg/select2.git#~3.5.3",
-    "select2-bootstrap-css": "https://github.com/t0m/select2-bootstrap-css.git#~1.4.1",
+    "select2-bootstrap-css": "https://github.com/t0m/select2-bootstrap-css.git",
     "Sortable": "sortablejs#^1.5.1",
     "remarkable-bootstrap-notify": "^3.1.3"
   },
@@ -50,6 +50,7 @@
       "js": "dist/jquery.js"
     },
     "bootstrap": {
+      "fonts": "fonts/*",
       "less": "less",
       "js": "dist/js/bootstrap.js"
     },
@@ -58,7 +59,7 @@
       "js": "dist/js/bootstrap-select.js"
     },
     "remarkable-bootstrap-notify": {
-      "js":"dist/bootstrap-notify.js"
+      "js": "dist/bootstrap-notify.js"
     },
     "underscore": {
       "js": "**/underscore.js"
@@ -123,5 +124,8 @@
     "chai-jquery": "~1.2.2",
     "lodash": "~2.4.1",
     "sinon": "http://sinonjs.org/releases/sinon-1.12.1.js"
+  },
+  "resolutions": {
+    "datatables": ">=1.10.15"
   }
 }
