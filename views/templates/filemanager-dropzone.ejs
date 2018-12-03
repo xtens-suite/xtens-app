@@ -4,7 +4,7 @@
           var fileName = uriFrags && uriFrags[uriFrags.length - 1]; %>
         <div class="input-group margin-bottom-sm">
             <span class="input-group-addon"><i class="fa fa-file"></i></span>
-            <span class="form-control"><%= fileName %></span>
+            <span style="height:auto;" class="form-control"><%= fileName %></span>
             <span id="delete-file" class="input-group-addon btn btn-danger" value= "<%=file.id%>"><i class="fa fa-trash"></i></span>
         </div>
     <%}); %>

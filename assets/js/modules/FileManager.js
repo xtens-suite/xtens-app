@@ -109,7 +109,14 @@
             paramName: "uploadFile",
             maxFilesize: 2048, // max 2 GiB
             uploadMultiple: false,
-            method: "POST"
+            method: "POST",
+            accept: function(file, done) {
+                var format =new RegExp(/[!@#$%^&*+\-=\[\]{};':"\\|,.<>\/?]/);
+                if (format.test(file.name.split(".")[0])) {
+                    done("Please rename file removing special characters. !@#$%^&*+-=[]{};':\"\\|,.<>\/?");
+                }
+                else { done(); }
+            }
             // withCredentials: true
         },
 
