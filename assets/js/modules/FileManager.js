@@ -111,9 +111,9 @@
             uploadMultiple: false,
             method: "POST",
             accept: function(file, done) {
-                var format =new RegExp(/[!@#$%^&*+\-=\[\]{};':"\\|,<>\/?]/);
-                if (format.test(file.name.split(".")[0])) {
-                    done("Please rename file removing special characters. !@#$%^&*+-=[]{};':\"\\|,<>\/?");
+                var format =new RegExp(/[!@#$%^&*+=\[\]{};':"\\|,<>\/?]/);
+                if (format.test(file.name)) { //.split(".").slice(0,-1).join(".")
+                    done("Please rename file removing special characters. !@#$%^&*+=[]{};':\"\\|,<>\/?");
                 }
                 else { done(); }
             }
