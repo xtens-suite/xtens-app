@@ -109,10 +109,9 @@
                 for (var i=0, len=this.nestedViews.length; i<len; i++) {
                     var result = this.nestedViews[i].serialize(leafSearch);
                     var serialized = result.leafSearch ? result.res : result;
-                    if (!_.isEmpty(serialized) && (!serialized.content || (serialized.content && !_.isEmpty(serialized.content)))) {
-                        if (!serialized.fieldName || serialized.fieldValue && serialized.comparator) {
-                            res.content.push(serialized);
-                        }
+                    // personalDetails, subjectComparator, sampleComparator, fieldComparator, root, nestedDatatype
+                    if (this.IsValidContent(serialized)) {
+                        res.content.push(serialized);
                     }
                 }
                 if(res.content && res.content.length > 0 && !_.isEmpty(res.content[0])){
@@ -122,6 +121,72 @@
                 }
             }
             return {res:res, leafSearch: leafSearch };
+        },
+
+        IsValidContent: function (serialized) {
+          //se undefined oppure oggetto/array vuoto non valido
+            if (!serialized || _.isEmpty(serialized)) {
+                return false;
+            }
+            else if (this.isValidPersonalDetailsContent(serialized)) {
+                return true;
+            }
+            else if (this.isValidSubjectComparatorContent(serialized)) {
+                return true;
+            }
+            else if (this.isValidSampleComparatorContent(serialized)) {
+                return true;
+            }
+            else if (this.isValidFieldComparatorContent(serialized)) {
+                return true;
+            }
+            else if(this.isValidDatatypeContent(serialized)) {
+                return true;
+            }
+            return false;
+        },
+
+        isValidDatatypeContent: function (serialized) {
+            return serialized.hasOwnProperty("dataType") &&
+                  serialized.hasOwnProperty("getMetadata") &&
+                  serialized.hasOwnProperty("label") &&
+                  serialized.hasOwnProperty("model") &&
+                  serialized.hasOwnProperty("superType") &&
+                  serialized.hasOwnProperty("title");
+        },
+
+        isValidFieldComparatorContent: function (serialized) {
+            return serialized.hasOwnProperty("caseInsensitive") &&
+                   serialized.hasOwnProperty("comparator") &&
+                   serialized.hasOwnProperty("fieldName") &&
+                   serialized.hasOwnProperty("fieldType") &&
+                   serialized.hasOwnProperty("fieldValue") &&
+                   serialized.hasOwnProperty("isInLoop") &&
+                   serialized.hasOwnProperty("isList");
+
+        },
+
+        isValidSampleComparatorContent: function (serialized) {
+            return _.isArray(serialized) && serialized.length == 2 &&
+                   serialized[0].hasOwnProperty("specializedQuery") &&
+                   serialized[0].hasOwnProperty("biobankComparator") &&
+                   serialized[1].hasOwnProperty("biobankCodeComparator") &&
+                   serialized[1].hasOwnProperty("specializedQuery");
+        },
+
+        isValidSubjectComparatorContent: function (serialized) {
+            return _.isArray(serialized) && serialized.length == 2 &&
+                   serialized[0].hasOwnProperty("codeComparator") &&
+                   serialized[0].hasOwnProperty("specializedQuery")&&
+                   serialized[1].hasOwnProperty("specializedQuery") &&
+                   serialized[1].hasOwnProperty("sexComparator");
+        },
+
+        isValidPersonalDetailsContent: function (serialized) {
+            return serialized.hasOwnProperty("birthDateComparator") &&
+                   serialized.hasOwnProperty("givenNameComparator") &&
+                   serialized.hasOwnProperty("personalDetails") &&
+                   serialized.hasOwnProperty("surnameComparator");
         }
 
     });
@@ -232,7 +297,8 @@
                     break;
                 case FieldTypes.DATE:
                     this.initDatepicker();
-                    this.$fieldValue.attr("placeholder", "YYYY-MM-DD");
+                    this.$fieldValue.attr("placeholder", "DD/MM/YYYY");
+
                     break;
             }
             if (selectedField.hasRange) {
@@ -247,7 +313,7 @@
         initDatepicker: function() {
             var picker = new Pikaday({
                 field: this.$fieldValue[0],
-                format: 'YYYY-MM-DD',
+                format: 'DD/MM/YYYY',
                 yearRange: [1900, new Date().getYear()],
                 maxDate: new Date()
             });
@@ -508,7 +574,30 @@
                 }
             },
             '[name="birth-date"]': {
-                observe: 'birthDate'
+                observe: 'birthDate',
+                onSet: function(val, options) {
+                    if (!val || val == "") {
+                        return null;
+                    }
+                    var momentDate = moment(val, 'L', 'it');
+                    return momentDate.format('YYYY-MM-DD');
+                },
+
+                // store data in view (from model) as DD/MM/YYYY (European format)
+                onGet: function(value, options) {
+                    if (value) {
+                        return moment(value).lang("it").format('L');
+                    }
+                },
+                initialize: function($el, model) {
+                    new Pikaday({
+                        field: $el[0],
+                        // lang: 'it',
+                        format: moment.localeData('it')._longDateFormat.L,
+                        minDate: moment('1900-01-01').toDate(),
+                        maxDate: new Date()
+                    });
+                }
             }
 
         },
@@ -524,7 +613,6 @@
 
         render: function() {
             this.$el.html(this.template({ __: i18n})); // TODO implement canViewPersonalInfo policy (server side)
-            // this.$el.addClass("query-row");
             this.stickit();
             return this;
         },
