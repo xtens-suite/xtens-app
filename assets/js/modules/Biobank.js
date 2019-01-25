@@ -166,26 +166,24 @@
         tagName: 'div',
         className: 'biobanks',
 
-        initialize: function() {
+        initialize: function(options) {
             $("#main").html(this.el);
             this.template = JST["views/templates/biobank-list.ejs"];
+            this.biobanks = options.biobanks;
+
             this.render();
         },
 
         render: function(options) {
-            var that = this;
-            var biobanks = new Biobank.List();
-            var activeProject = xtens.session.get('activeProject') !== 'all' ? _.find(xtens.session.get('projects'), { 'name': xtens.session.get('activeProject')}) : undefined;
 
-            biobanks.fetch({
-                data: $.param({ project: activeProject ? activeProject.id : undefined }),
-                success: function(biobanks) {
-                    that.$el.html(that.template({__: i18n, biobanks: biobanks.models}));
-                },
-                error: function() {
-                    that.$el.html(that.template({__: i18n}));
-                }
+            this.$el.html(this.template({__: i18n, biobanks: this.biobanks.models}));
+
+            $('.table').DataTable({
+                scrollY:        '40vh',
+                scrollCollapse: true,
+                "searching": true
             });
+
             return this;
         }
     });
