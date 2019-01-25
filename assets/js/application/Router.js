@@ -536,7 +536,20 @@
         },
 
         operatorList:function() {
-            this.loadView(new Operator.Views.List());
+            var that = this;
+
+            var operators= new Operator.List();
+            operators.fetch({
+                data: $.param({ limit:1000 }),
+                success: function(operators) {
+                    that.loadView(new Operator.Views.List({operators: operators}));
+                },
+
+                error:function(operators, res) {
+                    xtens.error(res);
+                }
+            });
+
         },
 
         operatorEdit:function(id) {
@@ -908,7 +921,19 @@
         },
 
         biobankList: function() {
-            this.loadView(new Biobank.Views.List());
+            var that = this;
+            var biobanks = new Biobank.List();
+            var activeProject = xtens.session.get('activeProject') !== 'all' ? _.find(xtens.session.get('projects'), { 'name': xtens.session.get('activeProject')}) : undefined;
+
+            biobanks.fetch({
+                data: $.param({ project: activeProject ? activeProject.id : undefined }),
+                success: function(biobanks) {
+                    that.loadView(new Biobank.Views.List({biobanks: biobanks}));
+                },
+                error: function(model, res) {
+                    xtens.error(res);
+                }
+            });
         },
 
         biobankEdit: function(id) {

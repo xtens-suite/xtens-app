@@ -1,18 +1,20 @@
 <h2 class="legend" align="center"><%= __("group-list") %></h2>
 <div id="list">
-    <div class="table-responsive no-datatable-list">
+    <div class="table-container">
         <table class="table striped">
             <thead>
                 <tr>
                     <th><%= __("name") %></th>
                     <th><%= __("projects") %></th>
                     <th></th>
+                    <th></th>
+                    <th></th>
                 </tr>
             </thead>
             <tbody>  <% _.each(groups, function(group) { %>
             <tr class="group_val">
               <td><%= group.get("name") %></td>
-              <td><%= _.map(group.get("projects"), 'name').join(" ") %></td>
+              <td><%= group.get("projects").length < 11 ? _.map(group.get("projects"), 'name').join(" ") : "all" %></td>
               <td><a id="edit" class="btn" href="#/groups/edit/<%= group.id %>"><%=__("edit") %></a></td>
               <td><a id="edit" class="btn" href="#/groups/operator/<%= group.id %>"><%=__("member-operators") %></a></td>
               <td><a id="edit" class="btn" href="#/datatypeprivileges?groupId=<%= group.id %>"><%=__("data-type-privileges") %></a></td>

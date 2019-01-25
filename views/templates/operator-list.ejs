@@ -1,9 +1,8 @@
 <h2 class="legend" align="center"><%= __("operator-list") %></h2>
 <div id="list">
-    <div class="table-responsive no-datatable-list">
+    <div class="table-container">
         <table class="table striped">
             <thead>
-
                 <tr>
                     <th><%= __("first-name") %></th>
                     <th><%= __("last-name") %></th>
@@ -16,8 +15,6 @@
             </thead>
             <tbody>  <% _.each(operators, function(operator) { %>
             <tr>
-
-
                 <td class="oper_val"><%= operator.get("firstName") %></td>
                 <td class="oper_val"><%= operator.get("lastName") %></td>
                 <td class="oper_val"><%= moment(operator.get("birthDate")).format("DD/MM/YYYY") %></td>
@@ -25,8 +22,6 @@
                 <td class="oper_val"><%= operator.get("email") %></td>
                 <td class="oper_val"><%= operator.get("login") %></td>
                 <td><a id="edit" class="btn" href="#/operators/edit/<%= operator.id %>"><%=__("edit") %></a></td>
-
-
             </tr>
             <% }) %>
             </tbody>

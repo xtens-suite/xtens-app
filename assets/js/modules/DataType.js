@@ -509,7 +509,20 @@
             this.$el.html(this.template({ __: i18n, dataTypes: this.dataTypes.models}));
             this.$modal = this.$(".data-type-modal");
             xtens.session.get("projects").length < 2 ? $('#duplicate').prop('disabled',true) :null;
-            this.filterDataTypes(options.queryParams);
+            var table = $('.table').DataTable({
+                scrollY:        '40vh',
+                scrollCollapse: true,
+                "searching": true
+                // "columnDefs": [
+                //   { "visible": false, "targets": 1 }
+                // ]
+            });
+            // this.filterDataTypes(options.queryParams);
+            var filter = options.queryParams && options.queryParams.projects ? options.queryParams.projects : $('#btn-project').val();
+            if(filter != 'all'){
+                filter += " ";
+                table.search( filter ).draw();
+            }
             return this;
         },
 

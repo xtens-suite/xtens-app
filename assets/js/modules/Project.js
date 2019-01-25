@@ -32,23 +32,20 @@
         tagName: 'div',
         className: 'project',
 
-        initialize: function() {
+        initialize: function(options) {
             $("#main").html(this.el);
             this.template = JST["views/templates/project-list.ejs"];
+            this.projects = options.projects;
             this.render();
         },
 
         render: function() {
 
-            var _this = this;
-            var projects= new Project.List();
-            projects.fetch({
-                data: $.param({sort:'id ASC'}),
-                success: function(projects) {
-                    _this.$el.html(_this.template({__: i18n, projects: projects.models}));
-                    return _this;
-                },
-                error: xtens.error
+            this.$el.html(this.template({__: i18n, projects: this.projects.models}));
+            $('.table').DataTable({
+                scrollY:        '40vh',
+                scrollCollapse: true,
+                "searching": true
             });
             return this;
         }

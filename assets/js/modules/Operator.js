@@ -286,27 +286,20 @@
         className: 'operator',
 
 
-        initialize: function() {
+        initialize: function(options) {
             $('#main').html(this.el);
             this.template = JST['views/templates/operator-list.ejs'];
+            this.operators = options.operators;
             this.render();
         },
 
         render: function(options) {
+            this.$el.html(this.template({__: i18n, operators: this.operators.models}));
 
-            var that = this;
-            var operators= new Operator.List();
-            operators.fetch({
-                data: $.param({ limit:1000 }),
-                success: function(operators) {
-                    that.$el.html(that.template({__: i18n, operators: operators.models}));
-                    return that;
-                },
-
-                error:function(operators, res) {
-                    xtens.error(res);
-                }
-
+            $('.table').DataTable({
+                scrollY:        '40vh',
+                scrollCollapse: true,
+                "searching": true
             });
             return this;
         }

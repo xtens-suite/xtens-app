@@ -204,7 +204,20 @@
             var that = this;
             this.$el.html(that.template({__: i18n, groups: options.groups}));
 
-            this.filterGroups(options.queryParams);
+            // this.filterGroups(options.queryParams);
+            var table = $('.table').DataTable({
+                scrollY:        '40vh',
+                scrollCollapse: true,
+                "searching": true
+                // "columnDefs": [
+                //   { "visible": false, "targets": 1 }
+                // ]
+            });
+            var filter = options.queryParams && options.queryParams.projects ? options.queryParams.projects : $('#btn-project').val();
+            if(filter != 'all'){
+                filter += " ";
+                table.search( filter ).draw();
+            }
             return this;
         },
 

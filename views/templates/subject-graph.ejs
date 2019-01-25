@@ -26,7 +26,6 @@ ellipse {
   margin-left:20px;
  }
 
-
 .d3-tip.n:after {
   margin: 0 0 0 0;
   top: 100%;
@@ -37,7 +36,7 @@ ellipse {
   <label for="subject-selector" class="text-uppercase"><%= __("select-a-patient") %>:</label>
     <div class="row">
         <div class="col-md-4">
-          <select id='subject-selector' class="form-group selectpicker" data-live-search="true" data-width="fit">
+          <select id='subject-selector' class="form-group selectpicker" data-live-search="true" data-width="14vh">
             <% _.each(subjects, function(subject) {
               var label = subject.given_name && subject.surname ? subject.code + ": " + subject.surname + " " + subject.given_name : subject.code; %>
               <option value='<%= subject.id %>'><%= label %></option>
