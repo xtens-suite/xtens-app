@@ -15,8 +15,12 @@
                     </div>
                     <div class="form-group metadataform-group">
                         <label for="biobank-code" class="data-label"><%= __('biobank-code') %></label>
-                        <div class="data-input-div">
+                        <div class="data-input-div" style="width:auto;">
                             <input text class="form-control" id="biobank-code" name="biobank-code"></input>
+                        </div>
+                        <div class="input-group-append">
+                          <button class="btn btn-default print"><%= __("print") %></button>
+                          <span class="input-group-text" id="basic-addon2"><canvas style="height: 6vh;" id="barcode"></canvas></span>
                         </div>
                     </div>
                     <div class="form-group metadataform-group">

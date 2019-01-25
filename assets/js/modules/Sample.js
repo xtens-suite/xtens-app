@@ -221,13 +221,20 @@
                 }
             }, this);
             this.render();
+            if ($('#biobank-code')[0].value && $('#biobank-code')[0].value != "") {
+                $("#barcode").JsBarcode($('#biobank-code')[0].value);
+            }
+            $('#biobank-code').on('input',function (e) {
+                $("#barcode").JsBarcode(e.currentTarget.value);
+            });
 
         },
 
         events: {
             'click #editDonor': 'editDonor',
             "submit .edit-sample-form": "saveSample",
-            "click button.delete": "deleteSample"
+            "click button.delete": "deleteSample",
+            "click button.print": "printBarCode"
         },
 
         /**
@@ -382,6 +389,7 @@
                     contentType: 'application/json',
                     success: function(result) {
                         that.model.set('biobankCode', result);
+                        $("#barcode").JsBarcode(result);
                     },
                     error: function(err) {
                         xtens.error(err);
@@ -393,6 +401,15 @@
                 }
             }
 
+        },
+
+        printBarCode: function () {
+            // var newWndw = window.open().document.write('<img src="' + $("#barcode")[0].toDataURL("image/png") + '" />');
+            var newWndw = window.open();
+            newWndw.document.write('<img src="' + $("#barcode")[0].toDataURL("image/png") + '" />');
+
+            newWndw.print();
+            newWndw.close();
         },
 
       /**
@@ -691,6 +708,97 @@
                 trigger: true
             });
             return false;
+        }
+    });
+
+    /**
+     * @class
+     * @name Sample.Views.GetFromBarCode
+     * @extends Data.Views.GetFromBarCode
+     * @description view containing the details (metadata and files) of a Sample (Sample.Model) instance
+     */
+    Sample.Views.GetFromBarCode = Backbone.View.extend({
+
+        /**
+         * @method
+         * @name initialize
+         */
+        initialize: function(options) {
+            $("#main").html(this.el);
+            this.template = JST["views/templates/sample-get-from-barcode.ejs"];
+            this.idProject = xtens.session.get('activeProject') !== 'all' ? _.find(xtens.session.get('projects'),function (p) { return p.name === xtens.session.get('activeProject'); }).id : undefined;
+            this.render();
+        },
+
+        render: function() {
+
+            var disabled = this.idProject ? false : true;
+
+            this.$el.html(this.template({ __: i18n, disabled: disabled}));
+            this.initializeBarCodeReader(disabled);
+
+            return this;
+
+        },
+
+        initializeBarCodeReader: function (disable) {
+            var that = this ,timer, delay = 500;
+
+            $('#biobank-code').prop('disabled', disable);
+            if (disable) {
+                $('.error-cnt').removeClass('hidden');
+            }
+
+            $('#biobank-code').focus();
+            $('#biobank-code').focusin(function (e) {
+                e.currentTarget.value = null;
+            });
+            $('#biobank-code').bind('keydown blur change', function(e) {
+
+                clearTimeout(timer);
+                timer = setTimeout(function() {
+                    if (e.currentTarget.value && e.currentTarget.value != "") {
+                        e.preventDefault();
+                        that.getSampleByBiobankCode(e.currentTarget.value);
+                    }
+                }, delay );
+            });
+        },
+
+        getSampleByBiobankCode: function (biobankCode) {
+
+            $.ajax({
+                url: '/sample/findByBiobankCode',
+                type: 'GET',
+                headers: {
+                    'Authorization': 'Bearer ' + xtens.session.get("accessToken")
+                },
+                data: {
+                    biobankCode: biobankCode,
+                    project: this.idProject
+                },
+                contentType: 'application/json',
+                beforeSend: function() { $('.loader-gif').css("display","block"); },
+                success: function(sample, options, res) {
+                    if (sample && sample.id && sample.id > 0) {
+                        $("#bc-mess-succ").fadeIn( 0, function() {
+                            $("#bc-mess-succ").fadeOut( 2000,function () {
+                                xtens.router.navigate('samples/edit/' + sample.id, {
+                                    trigger: true
+                                });
+                            });
+                        });
+                    } else {
+                        $("#bc-mess-err").fadeIn( 10, function() {
+                            $("#bc-mess-err").fadeOut( 4000 );
+                        });
+                        $('#biobank-code').focus();
+                    }
+                },
+                error: function(err) {
+                    xtens.error(err);
+                }
+            });
         }
     });
 

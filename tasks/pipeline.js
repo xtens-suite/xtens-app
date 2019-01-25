@@ -62,6 +62,7 @@ var jsFilesToInject = [
     'dependencies/**/d3.js',
     'dependencies/d3-tip/index.js',
     'dependencies/**/Sortable.js',
+    'dependencies/**/JsBarcode.all.js',
     '/dependencies/**/bootstrap-select.js',
     '/dependencies/**/bootstrap-notify.js',
     // Customised client-side js files

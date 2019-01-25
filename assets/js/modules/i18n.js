@@ -237,6 +237,7 @@
         "project": "Project",
         /* views/templates/sample-edit.ejs */
         "sample-manager": "Sample Manager",
+        "print": "Print",
         "create-sample": "Create Sample",
         "edit-sample": "Edit Sample",
         "update-sample": "Update Sample",

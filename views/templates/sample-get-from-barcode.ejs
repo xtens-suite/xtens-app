@@ -1,0 +1,10 @@
+<h2 id="bar-code" class="legend">Scan your bar code!</h2>
+<div class="form-group metadataform-group">
+  <label for="biobank-code" class="data-label col-md-2"><%= __('biobank-code') %></label>
+  <div class="data-input-div col-md-2" disabled='<%=disabled%>'>
+    <input text class="form-control" id="biobank-code" name="biobank-code"></input>
+  </div>
+</div>
+<span text class="error-cnt hidden text-warning" id="biobank-code" name="biobank-code-project">Please select a project first.</span>
+<span text class="text-danger" id="bc-mess-err" name="bc-mess-err" style="display:none;">Sample not found. Please Retry!</span>
+<span text class="text-success" id="bc-mess-succ" name="bc-mess-succ" style="display:none;">Sample found! Redirecting...</span>
