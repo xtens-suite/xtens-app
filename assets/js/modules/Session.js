@@ -38,6 +38,7 @@
             }
 
             this.set("login", options.user && options.user.login);
+            this.set("userId", options.user && options.user.id);
             this.set("accessToken", options.token);
 
             if (_.isEmpty(options.user.groups)) {
@@ -80,6 +81,8 @@
 
         reset: function() {
             this.clear().set(this.defaults);
+            $('.navbar-cnt').empty();
+            $('.sidebar-cnt').empty();
         },
 
         isAuthenticated: function() {
@@ -99,89 +102,122 @@
         //     'change #project-selector': 'setSessionProject'
         // },
 
-        el: '#menuBarNav',
+        // el: '#menuBarNav',
 
         initialize : function(){
             _.bindAll(this);
-            this.template = JST['views/templates/menu-bar.ejs'];
+            this.sideTemplate = JST['views/templates/menu-sidebar.ejs'];
+            this.navTemplate = JST['views/templates/menu-navbar.ejs'];
+
+            this.adminProjects = null;
+            this.idProject = null;
+            this.isAdminProject = null;
+            if (xtens.session.get('activeProject') !== 'all') {
+                this.adminProjects = xtens.session.get("adminProjects");
+                this.idProject = _.find(xtens.session.get('projects'),function (p) { return p.name === xtens.session.get('activeProject'); }).id;
+                this.isAdminProject = _.find(this.adminProjects, function(pr){ return pr === this.idProject;});
+                xtens.session.set("isAdmin", this.isAdminProject ? true : false);
+            }
+            this.projects = xtens.session.get("projects");
+
             this.render();
         },
 
         render: function() {
-            var that = this;
-            if (xtens.session.get('activeProject') !== 'all') {
-                var adminProjects = xtens.session.get("adminProjects");
-                var idProject = _.find(xtens.session.get('projects'),function (p) { return p.name === xtens.session.get('activeProject'); }).id;
-                var isAdminProject = _.find(adminProjects, function(pr){ return pr === idProject;});
-                xtens.session.set("isAdmin", isAdminProject ? true : false);
+            this.renderMenuBar();
+            if (this.projects.length == 1) {
+                $('#p-project-selector').hide();
+            }
+            else if (this.projects.length > 1) {
+                this.initializeProjectSelectorModal();
             }
 
-            var projects = xtens.session.get("projects");
-
-            this.$el.html(this.template({
-                __:i18n,
-                session: xtens.session,
-                projectLength: projects.length
-            }));
-
-            if (projects.length > 1) {
-                $('#btn-project').tooltip();
-
-                that.$modal = that.$(".project-modal");
-
-            //change project
-                that.$('#btn-project').click( function (ev) {
-                    ev.stopPropagation();
-
-                    var projects = xtens.session.get("projects");
-                // if (projects.length > 1) {
-                    if (that.modal) {
-                        that.modal.hide();
-                    }
-                    var modal = new ModalDialog({
-                        title: i18n('project-selection'),
-                        template: JST["views/templates/project-modal.ejs"],
-                        data: { __: i18n, projects: projects}
-                    });
-                    $('#project-selector').selectpicker('hide');
-
-                    that.$modal.append(modal.render().el);
-                    modal.show();
-
-                    $("#checkbox").change(function() {
-                        if(this.checked) {
-                            $('#project-selector').selectpicker('show');
-                            $('#project-selector').on('change.bs.select', function (e) {
-                                e.stopPropagation();
-                                $('#confirm-project').prop('disabled', false);
-                                $('#confirm-project').addClass('btn-success');
-                                $('#confirm-project').one('click.bs.button', function (e) {
-                                    e.preventDefault();
-                                    var projectSelected = $('#project-selector').val();
-                                    modal.hide();
-
-                                    xtens.session.set('activeProject', projectSelected);
-                                    if (location.href.includes("/#query/%7B%22queryArgs")) {
-                                        location.href = location.href.split("/%7B%22queryArgs")[0];
-                                    }
-                                    location.reload();
-                                });
-                            });
-
-                            that.$('.project-modal').on('hidden.bs.modal', function (e) {
-                                modal.remove();
-                                $('.modal-backdrop').remove();
-                            });
-                        }
-                        else {
-                            $('#project-selector').selectpicker('hide');
-                        }
-                    });
-                    // }
-                });
-            }
+            $('#p-edit-operator').tooltip();
+            $('#logout').tooltip();
+            $('#show-hide-bar').tooltip();
 
             return this;
+        },
+
+        renderMenuBar: function () {
+            $('.sidebar-cnt').html(this.sideTemplate({
+                __:i18n,
+                session: xtens.session,
+                currentProject: xtens.session.get('activeProject'),
+                login: xtens.session.get('login'),
+                operatorId: xtens.session.get('userId')
+            }));
+
+            $('.navbar-cnt').html(this.navTemplate({
+                __:i18n,
+                session: xtens.session,
+                currentProject: xtens.session.get('activeProject'),
+                login: xtens.session.get('login')
+            }));
+
+            $('#sidebarCollapse').on('click', function () {
+                $('#sidebar').toggleClass('active');
+                $(this).toggleClass('active');
+            });
+        },
+
+        initializeProjectSelectorModal: function () {
+            this.$modalProjectSelector = $(".project-modal");
+
+            var that = this;
+
+            $('#p-project-selector').tooltip();
+
+
+            //change project initializiation
+            $('#p-project-selector').click( function (ev) {
+                ev.stopPropagation();
+
+                var projects = xtens.session.get("projects");
+
+                if (that.modal) {
+                    that.modal.hide();
+                }
+                var modal = new ModalDialog({
+                    title: i18n('project-selection'),
+                    template: JST["views/templates/project-modal.ejs"],
+                    data: { __: i18n, projects: projects}
+                });
+                $('#project-selector').selectpicker('hide');
+
+                that.$modalProjectSelector.append(modal.render().el);
+                modal.show();
+
+                $("#checkbox").change(function() {
+                    if(this.checked) {
+                        $('#project-selector').selectpicker('show');
+                        $('#project-selector').on('change.bs.select', function (e) {
+                            e.stopPropagation();
+                            $('#confirm-project').prop('disabled', false);
+                            $('#confirm-project').addClass('btn-success');
+                            $('#confirm-project').one('click.bs.button', function (e) {
+                                e.preventDefault();
+                                var projectSelected = $('#project-selector').val();
+                                modal.hide();
+
+                                xtens.session.set('activeProject', projectSelected);
+                                if (location.href.includes("/#query/%7B%22queryArgs")) {
+                                    location.href = location.href.split("/%7B%22queryArgs")[0];
+                                }
+                                location.reload();
+                            });
+                        });
+
+                        that.$('.project-modal').on('hidden.bs.modal', function (e) {
+                            modal.remove();
+                            $('.modal-backdrop').remove();
+                        });
+                    }
+                    else {
+                        $('#project-selector').selectpicker('hide');
+                    }
+                });
+            });
         }
 
         // setSessionProject: function (ev) {

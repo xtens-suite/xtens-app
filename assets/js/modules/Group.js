@@ -213,7 +213,7 @@
                 //   { "visible": false, "targets": 1 }
                 // ]
             });
-            var filter = options.queryParams && options.queryParams.projects ? options.queryParams.projects : $('#btn-project').val();
+            var filter = options.queryParams && options.queryParams.projects ? options.queryParams.projects : xtens.session.get('activeProject');
             if(filter != 'all'){
                 filter += " ";
                 table.search( filter ).draw();
@@ -222,7 +222,7 @@
         },
 
         filterGroups: function(opt){
-            var rex = opt && opt.projects ? new RegExp(opt.projects) : new RegExp($('#btn-project').val());
+            var rex = opt && opt.projects ? new RegExp(opt.projects) : new RegExp(xtens.session.get('activeProject'));
 
             if(rex =="/all/"){this.clearFilter();}else{
                 $('.group_val').hide();

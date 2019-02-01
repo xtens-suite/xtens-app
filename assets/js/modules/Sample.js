@@ -221,6 +221,7 @@
                 }
             }, this);
             this.render();
+            $('barcode-cnt').tooltip();
             if ($('#biobank-code')[0].value && $('#biobank-code')[0].value != "") {
                 $("#barcode").JsBarcode($('#biobank-code')[0].value);
             }
@@ -234,7 +235,7 @@
             'click #editDonor': 'editDonor',
             "submit .edit-sample-form": "saveSample",
             "click button.delete": "deleteSample",
-            "click button.print": "printBarCode"
+            "click #barcode": "printBarCode"
         },
 
         /**
@@ -405,8 +406,14 @@
 
         printBarCode: function () {
             // var newWndw = window.open().document.write('<img src="' + $("#barcode")[0].toDataURL("image/png") + '" />');
-            var newWndw = window.open();
-            newWndw.document.write('<img src="' + $("#barcode")[0].toDataURL("image/png") + '" />');
+            // var newWndw = window.open();
+            var img = document.getElementById('barcode');
+            // var url=img.getAttribute('src');
+            // var newWndw = window.open(url,'Image');
+            var newWndw = window.open("");
+            newWndw.document.write(img.outerHTML);
+
+            // newWndw.document.write($("#barcode")[0].toDataURL("image/png") + '" />');
 
             newWndw.print();
             newWndw.close();
@@ -610,6 +617,7 @@
                 dataTypes: this.dataTypes.models
             }));
             this.table = this.$('.table').DataTable({
+                scrollY: '50vh',
                 "paging": false,
                 "info": false
             });
@@ -627,7 +635,7 @@
         },
 
         filterSamples: function(opt){
-            var rex = opt && opt.projects ? new RegExp(opt.projects) : new RegExp($('#btn-project').val());
+            var rex = opt && opt.projects ? new RegExp(opt.projects) : new RegExp(xtens.session.get('activeProject'));
 
             if(rex =="/all/"){this.clearFilter();}else{
                 $('.content').hide();

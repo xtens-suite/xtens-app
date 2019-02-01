@@ -439,6 +439,7 @@
             this.addLinksToModels();
             this.$el.html(this.template({__: i18n, subjects: this.subjects.models, dataTypePrivileges: this.dataTypePrivileges, dataTypes:this.dataTypes.models}));
             this.table = this.$('.table').DataTable({
+                scrollY: '50vh',
                 "paging": false,
                 "info": false
             });
@@ -455,7 +456,7 @@
         },
 
         filterSubjects: function(opt){
-            var rex = opt && opt.projects ? new RegExp(opt.projects) : new RegExp($('#btn-project').val());
+            var rex = opt && opt.projects ? new RegExp(opt.projects) : new RegExp(xtens.session.get('activeProject'));
 
             if(rex =="/all/"){this.clearFilter();}else{
                 $('.content').hide();

@@ -36,17 +36,19 @@
                         <td><%= subject.get("sex") %></td>
                         <td style="display:none;"><%= subjProject ? subjProject.name : null %></td>
                         <td class="text-right">
+                          <div class="btn-group btn-group-sm" role="group" style="margin-top:0.5vh;">
                           <% var privilege = dataTypePrivileges.find(function(model) {
                             return model.get('dataType') === subject.get("type"); });
                            if(privilege && privilege.get("privilegeLevel") === "edit" ){ %>
-                            <a class="btn" href="<%= subject.get("editLink") %>" ><%=__("edit") %></a>
+                            <a type="button" class="btn btn-primary" href="<%= subject.get("editLink") %>" ><%=__("edit") %></a>
                             <%} %>
                             <% if (subject.get("newSampleLink") && subject.get("newSampleLink").length) {%>
-                                <a class="btn" href="<%= subject.get("newSampleLink") %>"><%=__("new-derivative-sample") %></a>
+                                <a type="button" class="btn btn-default" href="<%= subject.get("newSampleLink") %>"><%=__("new-derivative-sample") %></a>
                             <%} %>
                             <% if (subject.get("newDataLink") && subject.get("newDataLink").length) {%>
-                                <a class="btn" href="<%= subject.get("newDataLink") %>"><%=__("new-data") %></a>
+                                <a type="button" class="btn btn-default" href="<%= subject.get("newDataLink") %>"><%=__("new-data") %></a>
                             <%} %>
+                          </div>
                         </td>
                     </tr>
                     <% }) %>

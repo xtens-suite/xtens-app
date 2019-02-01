@@ -124,7 +124,7 @@
         },
 
         render: function()  {
-            this.$el.html(this.template({__:i18n, data: this.model}));
+            this.$el.html(this.template({__:i18n, data: this.model, isWheel: xtens.session.get("isWheel")}));
             this.$form = this.$("form");
             this.$form.parsley(parsleyOpts);
             this.$modal = this.$(".operator-modal");

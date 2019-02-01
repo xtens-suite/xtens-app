@@ -1,0 +1,65 @@
+<nav id="sidebar">
+  <div class="sidebar-header">
+    <p>XTENS 2</p>
+  </div>
+
+  <ul class="list-unstyled components">
+    <p><%= __("current-project") %>:</p>
+    <div class="p-data-comp">
+      <b><%= currentProject %></b>
+      <i id="p-project-selector" for="project-selector"
+       data-placement="right" data-toggle="tooltip" title="<%= __('click-to-change-project')%>" class="fa fa-cogs i-comp"></i>
+     </div>
+
+     <p><%= __("user") %>: </p>
+     <div class="p-data-comp" style="margin-bottom:2vh;">
+       <b><%= login %></b>
+       <a href="#/operators/edit/<%= operatorId %>">
+         <i id="p-edit-operator" for="project-selector"
+         data-placement="right" data-toggle="tooltip" title="<%= __('edit-profile')%>" class="fa fa-user i-comp"></i>
+       </a>
+    </div>
+    <li class="active">
+      <a href="#management" data-toggle="collapse" aria-expanded="false"><%= __("management")%></a>
+      <ul class="collapse list-unstyled" id="management">
+        <% if (session.get("isWheel")) {%>
+          <!-- <p id="title"><%= __("super-user")%></p> -->
+          <li> <a href="#/projects"> <%= __("projects") %></a> </li>
+          <li> <a href="#/groups"> <%= __("groups") %></a> </li>
+          <li> <a href="#/operators">   <%= __("operators") %></a> </li>
+          <li> <a href="#/biobanks">   <%= __("biobanks") %></a> </li>
+          <li> <a href="#/datatypes">   <%= __("data-types") %></a> </li>
+          <%}
+      else if (session.get("isAdmin")) {%>
+        <!-- <p id="title"><%= __("manager")%></p> -->
+          <li><a href="#/biobanks"> <%= __("biobanks") %></a> </li>
+          <li><a href="#/datatypes"> <%= __("data-types") %></a> </li>
+          <%}
+      else {%>
+          <!-- <p id="title"><%= __("standard")%></p> -->
+          <%}%>
+          <li><a href="#/operators/updatePassword"> <%= __("change-password") %></a> </li>
+      </ul>
+    </li>
+    <li>
+      <a href="#data-management" data-toggle="collapse" aria-expanded="false"><%= __("data-management") %></a>
+      <ul class="collapse list-unstyled" id="data-management">
+        <li> <a href="#/subjects"> <%= __("subjects") %></a> </li>
+        <li> <a href="#/samples"> <%= __("samples") %></a> </li>
+        <li> <a href="#/getFromBarCode"> <%= __("get-from-bar-code") %></a> </li>
+        <li> <a href="#/data"> <%= __("data") %></a> </li>
+        <li> <a href="#/data/dedicated"> <%= __("customised-data") %> </a> </li>
+      </ul>
+    </li>
+    <li>
+      <a href="#search" data-toggle="collapse" aria-expanded="false"><%= __("search") %></a>
+      <ul class="collapse list-unstyled" id="search">
+        <li><a href="#/query"><%= __("advanced-search") %></a></li>
+      </ul>
+    </li>
+  </ul>
+
+  <ul class="list-unstyled CTAs">
+    <li hidden><a class="btn btn-default" href="#/logout"><%= __("logout") %></a></li>
+  </ul>
+</nav>

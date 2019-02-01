@@ -34,17 +34,19 @@
                         <td><%= metadata.sample_codification && metadata.sample_codification.value %></td>
                         <td style="display:none;"><%= sampleProject ? sampleProject.name : null %></td>
                         <td  class="text-right">
+                          <div class="btn-group btn-group-sm" role="group" style="margin-top:0.5vh;">
                           <% var privilege = dataTypePrivileges.find(function(model) {
                             return model.get('dataType') === sample.get("type"); });
                            if(privilege && privilege.get("privilegeLevel") === "edit" ){ %>
-                            <a class="btn" href="<%= sample.get("editLink") %>"><%=__("edit") %></a>
+                            <a type="button" class="btn btn-primary" href="<%= sample.get("editLink") %>"><%=__("edit") %></a>
                             <%} %>
                             <% if (sample.get("newDerivativeLink") && sample.get("newDerivativeLink").length > 0) {%>
-                            <a class="btn" href="<%= sample.get("newDerivativeLink") %>"><%=__("new-derivative-sample") %></a>
+                            <a type="button" class="btn btn-default" href="<%= sample.get("newDerivativeLink") %>"><%=__("new-derivative-sample") %></a>
                             <%} %>
                             <% if (sample.get("newDataLink") && sample.get("newDataLink").length > 0) {%>
-                            <a class="btn" href="<%= sample.get("newDataLink") %>"><%= __("new-data") %></a>
+                            <a type="button" class="btn btn-default" href="<%= sample.get("newDataLink") %>"><%= __("new-data") %></a>
                             <%} %>
+                          </div>
                         </td>
                       </tr>
                     <% }) %>
