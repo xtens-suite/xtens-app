@@ -242,7 +242,7 @@
                   else{
                       this.tableOpts.fixedColumns=false;
                   }
-                  var excelPlainData = [];
+                  var filterColumn = ':visible';
                   if (this.isLeafSearch) {
                       this.childrenRowsHandler();
                       $.fn.dataTable.ext.search.push(
@@ -251,16 +251,13 @@
                         }
                       );
 
-                      excelPlainData = [{
-                          extend: 'excelHtml5',
-                          text: 'Excel - child Rows',
-                          title: null,
-                          filename: 'XTENS_'+ moment().format("YYYY_MM_DD_hh_mm_ss"),
-                          exportOptions: {
-                              orthogonal: 'export', // to export source data and not rendered data
-                              columns:  ':not(.actions):not(.details-control)' //not export actions column
+                      this.table.on( 'column-visibility.dt', function ( e, settings, column, state ) {
+                          if (!that.childColumns.find(function(c) { return that.table.column(column).header().className.indexOf(c.className.replace(/ /g,"_").toLowerCase()) >= 0;})) {
+                              $(that.table.column(column).header()).toggleClass( 'notexport' );
                           }
-                      }];
+                      } );
+
+                      filterColumn = ':not(.notexport)'; //not export actions column
                   }
 
                   var buttons = [
@@ -272,7 +269,7 @@
                           extend: 'copyHtml5',
                           exportOptions: {
                               orthogonal: 'export', // to export source data and not rendered data
-                              columns:  ':visible:not(.actions):not(.details-control)' //not export actions and details column
+                              columns:  filterColumn + ':not(.actions):not(.details-control)' //not export actions and details column
                           }
                       },
                       {
@@ -281,7 +278,7 @@
                           filename:'XTENS_'+ moment().format("YYYY_MM_DD_hh_mm_ss"),
                           exportOptions: {
                               orthogonal: 'export', // to export source data and not rendered data
-                              columns:  ':visible:not(.actions):not(.details-control)' //not export actions and details column
+                              columns:  filterColumn + ':not(.actions):not(.details-control)' //not export actions and details column
                           }
                       }
                   ];
@@ -310,7 +307,7 @@
                       });
                   }
 
-                  buttons = buttons.concat(excelPlainData);
+                  // buttons = buttons.concat(excelPlainData);
                   this.colvisButtons.push(buttons);
                   this.colvisButtons = _.flatten(this.colvisButtons);
                   new $.fn.dataTable.Buttons(this.table, {
@@ -382,7 +379,7 @@
               var fieldsVCF2 = ["chrom", "pos", "id", "qual", "ref", "alt", "filter"];
               var found = 0, found2 = 0;
               var fieldsNames = [];
-              var schemabody;
+              var schemaBody;
               if (this.dataTypes.models) {
                   schemaBody = _.flatten(_.map(this.dataTypes.models, 'attributes.superType.schema.body'));
               }
