@@ -85,7 +85,7 @@
               if (this.isLeafSearch) {
                   this.buildPlainData();
               }
-              this.$modal = $(".query-modal");
+              this.$modal = $(".modal-cnt");
               this.prepareDataForRenderingJSON(results.dtps, results.dts, this.queryArgs);
             // this.render();
           },
@@ -198,7 +198,8 @@
                   that.$modal.append(modal.render().el);
                   modal.show();
 
-                  that.$('.query-modal').on('hidden.bs.modal', function (e) {
+                  $('.modal-cnt').on('hidden.bs.modal', function (e) {
+                      e.preventDefault();
                       modal.remove();
                       $('.modal-backdrop').remove();
                   });
@@ -382,7 +383,7 @@
               var fieldsVCF2 = ["chrom", "pos", "id", "qual", "ref", "alt", "filter"];
               var found = 0, found2 = 0;
               var fieldsNames = [];
-              var schemabody;
+              var schemaBody;
               if (this.dataTypes.models) {
                   schemaBody = _.flatten(_.map(this.dataTypes.models, 'attributes.superType.schema.body'));
               }

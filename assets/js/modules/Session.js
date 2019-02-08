@@ -132,9 +132,9 @@
                 this.initializeProjectSelectorModal();
             }
 
-            $('#p-edit-operator').tooltip();
-            $('#logout').tooltip();
-            $('#show-hide-bar').tooltip();
+            $('#p-edit-operator').tooltip({ trigger : 'hover' });
+            $('#logout').tooltip({ trigger : 'hover' });
+            $('#show-hide-bar').tooltip({ trigger : 'hover' });
 
             return this;
         },
@@ -157,12 +157,13 @@
 
             $('#sidebarCollapse').on('click', function () {
                 $('#sidebar').toggleClass('active');
+                $('.title-menu-cnt').fadeToggle( "slow", "linear");
                 $(this).toggleClass('active');
             });
         },
 
         initializeProjectSelectorModal: function () {
-            this.$modalProjectSelector = $(".project-modal");
+            this.$modalProjectSelector = $(".modal-cnt");
 
             var that = this;
 
@@ -208,7 +209,7 @@
                             });
                         });
 
-                        that.$('.project-modal').on('hidden.bs.modal', function (e) {
+                        that.$('.modal-cnt').on('hidden.bs.modal', function (e) {
                             modal.remove();
                             $('.modal-backdrop').remove();
                         });

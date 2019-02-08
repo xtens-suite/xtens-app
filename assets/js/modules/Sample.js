@@ -252,7 +252,7 @@
 
             if (this.schemaView && this.schemaView.serialize) {
                 var that = this;
-                this.$modal = this.$(".sample-modal");
+                this.$modal = $(".modal-cnt");
                 var metadata = this.schemaView.serialize(useFormattedNames);
                 this.model.set("metadata", metadata);
                 this.model.get("notes") === "" ? this.model.set("notes", null) : null;
@@ -281,7 +281,7 @@
                         setTimeout(function() {
                             modal.hide();
                         }, 1200);
-                        that.$('.sample-modal').on('hidden.bs.modal', function(e) {
+                        $('.modal-cnt').on('hidden.bs.modal', function(e) {
                             modal.remove();
                             that.savingSample = false;
 
@@ -305,7 +305,7 @@
 
             ev.preventDefault();
             var that = this;
-            this.$modal = this.$(".sample-modal");
+            this.$modal = $(".modal-cnt");
             if (this.modal) {
                 this.modal.hide();
             }
@@ -320,9 +320,10 @@
             this.$modal.append(modal.render().el);
             modal.show();
 
-            this.$('#confirm').click(function(e) {
+            $('#confirm').click(function(e) {
                 modal.hide();
                 that.$modal.one('hidden.bs.modal', function (e) {
+                    e.preventDefault();
                     $('.waiting-modal').modal('show');
                     var targetRoute = $(ev.currentTarget).data('targetRoute') || 'samples';
 
@@ -786,19 +787,19 @@
                     project: this.idProject
                 },
                 contentType: 'application/json',
-                beforeSend: function() { $('.loader-gif').css("display","block"); },
+                // beforeSend: function() { $('.loader-gif').css("display","block"); },
                 success: function(sample, options, res) {
                     if (sample && sample.id && sample.id > 0) {
                         $("#bc-mess-succ").fadeIn( 0, function() {
-                            $("#bc-mess-succ").fadeOut( 2000,function () {
+                            $("#bc-mess-succ").fadeOut( 1500, function () {
                                 xtens.router.navigate('samples/edit/' + sample.id, {
                                     trigger: true
                                 });
                             });
                         });
                     } else {
-                        $("#bc-mess-err").fadeIn( 10, function() {
-                            $("#bc-mess-err").fadeOut( 4000 );
+                        $("#bc-mess-err").fadeIn( 0, function() {
+                            $("#bc-mess-err").fadeOut( 1500 );
                         });
                         $('#biobank-code').focus();
                     }

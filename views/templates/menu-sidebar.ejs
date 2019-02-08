@@ -1,6 +1,6 @@
 <nav id="sidebar">
   <div class="sidebar-header">
-    <p>XTENS 2</p>
+    <a href="#homepage"><h1 style="margin: 0.2em 0 0 0;">XTENS 2</h1></a>
   </div>
 
   <ul class="list-unstyled components">
@@ -19,9 +19,10 @@
          data-placement="right" data-toggle="tooltip" title="<%= __('edit-profile')%>" class="fa fa-user i-comp"></i>
        </a>
     </div>
-    <li class="active">
-      <a href="#management" data-toggle="collapse" aria-expanded="false"><%= __("management")%></a>
-      <ul class="collapse list-unstyled" id="management">
+    <% if (session.get("isWheel") || session.get("isAdmin")) {%>
+    <li class="">
+      <a href="#administration" data-toggle="collapse" aria-expanded="false"><%= __("administration")%></a>
+      <ul class="collapse list-unstyled" id="administration">
         <% if (session.get("isWheel")) {%>
           <!-- <p id="title"><%= __("super-user")%></p> -->
           <li> <a href="#/projects"> <%= __("projects") %></a> </li>
@@ -38,15 +39,14 @@
       else {%>
           <!-- <p id="title"><%= __("standard")%></p> -->
           <%}%>
-          <li><a href="#/operators/updatePassword"> <%= __("change-password") %></a> </li>
       </ul>
     </li>
+    <%}%>
     <li>
       <a href="#data-management" data-toggle="collapse" aria-expanded="false"><%= __("data-management") %></a>
       <ul class="collapse list-unstyled" id="data-management">
         <li> <a href="#/subjects"> <%= __("subjects") %></a> </li>
         <li> <a href="#/samples"> <%= __("samples") %></a> </li>
-        <li> <a href="#/getFromBarCode"> <%= __("get-from-bar-code") %></a> </li>
         <li> <a href="#/data"> <%= __("data") %></a> </li>
         <li> <a href="#/data/dedicated"> <%= __("customised-data") %> </a> </li>
       </ul>
@@ -55,6 +55,14 @@
       <a href="#search" data-toggle="collapse" aria-expanded="false"><%= __("search") %></a>
       <ul class="collapse list-unstyled" id="search">
         <li><a href="#/query"><%= __("advanced-search") %></a></li>
+        <li> <a href="#/getFromBarCode"> <%= __("get-from-bar-code") %></a></li>
+      </ul>
+    </li>
+    <li>
+      <a href="#account" data-toggle="collapse" aria-expanded="false"><%= __("account") %></a>
+      <ul class="collapse list-unstyled" id="account">
+        <li><a href="#/operators/edit/<%= operatorId %>"> <%= __("edit-profile") %></a> </li>
+        <li><a href="#/operators/updatePassword"> <%= __("change-password") %></a> </li>
       </ul>
     </li>
   </ul>

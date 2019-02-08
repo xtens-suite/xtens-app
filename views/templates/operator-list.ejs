@@ -21,7 +21,11 @@
                 <td class="oper_val"><%= operator.get("sex") %></td>
                 <td class="oper_val"><%= operator.get("email") %></td>
                 <td class="oper_val"><%= operator.get("login") %></td>
-                <td><a id="edit" class="btn" href="#/operators/edit/<%= operator.id %>"><%=__("edit") %></a></td>
+                <td>
+                  <div class="btn-group btn-group-sm" role="group" style="margin-top:0.5vh;">
+                  <a type="button" class="btn btn-info" id="edit" href="#/operators/edit/<%= operator.id %>"><%=__("edit") %></a>
+                </div>
+              </td>
             </tr>
             <% }) %>
             </tbody>

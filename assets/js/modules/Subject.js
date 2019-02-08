@@ -197,7 +197,7 @@
          */
         saveSubject: function(ev) {
             this.savingSubject = true;
-            this.$modal = this.$(".subject-modal");
+            this.$modal = $(".modal-cnt");
             var that = this;
             var metadata = this.schemaView && this.schemaView.serialize(useFormattedNames);
             this.model.set("metadata", metadata);
@@ -228,7 +228,8 @@
                     $('.modal-header').addClass('alert-success');
                     modal.show();
                     setTimeout(function(){ modal.hide(); }, 1200);
-                    that.$('.subject-modal').on('hidden.bs.modal', function (e) {
+                    $('.modal-cnt').on('hidden.bs.modal', function (e) {
+                        e.preventDefault();
                         modal.remove();
                         this.savingSubject = false;
                         xtens.router.navigate('subjects', {trigger: true});
@@ -246,7 +247,7 @@
             this.savingSubject = true;
             ev.preventDefault();
             var that = this;
-            this.$modal = this.$(".subject-modal");
+            this.$modal = $(".modal-cnt");
             if (this.modal) {
                 this.modal.hide();
             }
@@ -261,7 +262,7 @@
             this.$modal.append(modal.render().el);
             modal.show();
 
-            this.$('#confirm').click( function (e) {
+            $('#confirm').click( function (e) {
                 modal.hide();
                 that.$modal.one('hidden.bs.modal', function (e) {
                     $('.waiting-modal').modal('show');

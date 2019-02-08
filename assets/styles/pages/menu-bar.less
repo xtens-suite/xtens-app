@@ -1,6 +1,9 @@
 @import "https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700";
+@import "https://fonts.googleapis.com/css?family=PT Mono:300,400,500,600,700";
 
-body {}
+body {
+  font-family: 'Poppins', sans-serif;
+}
 
 p {
   font-family: 'Poppins', sans-serif;
@@ -8,6 +11,15 @@ p {
   font-weight: 300;
   line-height: 1.7em;
   color: #999;
+}
+
+h1,
+h3 {
+  font-family: 'PT Mono', sans-serif;
+}
+
+h2 {
+  font-family: 'Poppins', sans-serif;
 }
 
 a,
@@ -23,7 +35,7 @@ a:hover {
   background: #fff;
   border: none;
   border-radius: 0;
-  margin-bottom: 0px;
+  margin-bottom: 0;
   box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
 }
 
@@ -51,7 +63,7 @@ a:hover {
 #sidebar {
   min-width: 250px;
   max-width: 250px;
-  background: #7386D5;
+  background: #4476b5;
   color: #fff;
   transition: all 0.6s cubic-bezier(0.945, 0.020, 0.270, 0.665);
   transform-origin: bottom left;
@@ -63,10 +75,11 @@ a:hover {
   font-family: 'Poppins',sans-serif;
   margin-top: -2vh;
 }
+
 #sidebar .i-comp {
-  cursor:pointer;
-  float:right;
-  margin-right:1vw;
+  cursor: pointer;
+  float: right;
+  margin-right: 1vw;
 }
 
 #sidebar.active {
@@ -76,14 +89,11 @@ a:hover {
 
 #sidebar .sidebar-header {
   padding: 20px;
-  background: #6d7fcc;
+  background: #29406d;
 }
 
 #sidebar ul.components {
-  padding-top: 0px;
-    padding-right: 0px;
-    padding-bottom: 20px;
-    padding-left: 0px;
+  padding: 0 0 20px;
   border-bottom: 1px solid #47748b;
 }
 
@@ -99,14 +109,14 @@ a:hover {
 }
 
 #sidebar ul li a:hover {
-  color: #7386D5;
+  color: #4476b5;
   background: #fff;
 }
 
 #sidebar ul li.active > a,
 a[aria-expanded="true"] {
   color: #fff;
-  background: #6d7fcc;
+  background: #29406d;
 }
 
 a[data-toggle="collapse"] {
@@ -130,7 +140,7 @@ a[aria-expanded="true"]::before {
 ul ul a {
   font-size: 0.9em !important;
   padding-left: 30px !important;
-  background: #6d7fcc;
+  background: #36538a;
 }
 
 ul.CTAs {
@@ -145,15 +155,9 @@ ul.CTAs a {
   margin-bottom: 5px;
 }
 
-a.download {
-  background: #fff;
-  color: #7386D5;
-}
-
-a.article,
-a.article:hover {
-  background: #6d7fcc !important;
-  color: #fff !important;
+.title-menu-cnt {
+  color: #29406c;
+  display: none;
 }
 /* ---------------------------------------------------
     CONTENT STYLE

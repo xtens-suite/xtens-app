@@ -569,15 +569,21 @@
             var that = this;
             var operator = new Operator.Model();
             if (id) {
-                operator.fetch({
-                    data:$.param({id: id, populate:['addressInformation']}),
-                    success: function(operator) {
-                        that.loadView(new Operator.Views.Edit({model: operator}));
-                    },
-                    error: function(err) {
-                        xtens.error(err);
-                    }
-                });
+                if (xtens.session.get('userId') == id || xtens.session.get('isWheel')) {
+                    operator.fetch({
+                        data:$.param({id: id, populate:['addressInformation']}),
+                        success: function(operator) {
+                            that.loadView(new Operator.Views.Edit({model: operator}));
+                        },
+                        error: function(err) {
+                            xtens.error(err);
+                        }
+                    });
+                } else {
+                    var err = "Logged user has not the privileges to modify other users";
+                    xtens.error(err);
+                    this.navigate('homepage', {trigger: true});
+                }
             }
             else {
                 this.loadView(new Operator.Views.Edit({model: operator}));

@@ -15,7 +15,7 @@
     function handleError(res, type){
         var modal, body;
 
-        var error = res.responseJSON.error._internal ? res.responseJSON.error._internal : res.responseJSON.error;
+        var error = _.isObject(res) ? res.responseJSON.error._internal ? res.responseJSON.error._internal : res.responseJSON.error : res;
 
         if (_.isObject(error)){
           //error is an object
@@ -39,8 +39,8 @@
           //error is a string
             var spl = error && error.split(/\r?\n/);
             var splitted = spl && spl[0].split(":");
-            body = splitted && splitted.length > 1 ? splitted[1] : splitted;
-            if(res.responseJSON.error.raw){
+            body = splitted && _.isArray(splitted) ? splitted.length > 1 ? splitted[1] : splitted[0] : splitted;
+            if(_.isObject(res) && res.responseJSON.error.raw){
                 var err = res.responseJSON.error.raw;
                 body = "Error on column <b>" + err.column + "</b> in  <b>" + err.table + "</b>";
             }
@@ -54,12 +54,12 @@
             type: type ? type : "delete"
         });
 
-        $("#main").append(modal.render().el);
+        $(".modal-cnt").append(modal.render().el);
         $('.modal-header').addClass('alert-danger');
         modal.show();
 
-        $('#main .xtens-modal').on('hidden.bs.modal', function (e) {
-
+        $('.modal-cnt').on('hidden.bs.modal', function (e) {
+            e.preventDefault();
             modal.remove();
             if (res.status === (403 || 401) && Backbone.history.getFragment() !== "login" && body != "Expired Password") {
                 window.location.replace('/#/homepage');

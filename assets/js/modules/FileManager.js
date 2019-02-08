@@ -159,7 +159,7 @@
                 __:i18n,
                 files: this.files
             }));
-            this.$fileModal = this.$(".file-modal");  // the modal dialog HTML element
+            this.$fileModal = $(".modal-cnt");  // the modal dialog HTML element
             this.dropzoneDiv = this.$(".dropzone")[0];       // the dropzone HTML element
             return this;
         },

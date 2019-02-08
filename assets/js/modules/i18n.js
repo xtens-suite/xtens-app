@@ -123,6 +123,8 @@
         "super-type-name": "Name new Schema",
         /* view/templates/menu-bar.ejs */
         "management": "Management",
+        "administration": "Administration",
+        "account": "Account",
         "super-user": "Super User",
         "manager":"Manager",
         "standard":"Standard",
@@ -136,7 +138,7 @@
         "click-to-change-project":"Click to change project",
         "data-management": "Data Management",
         "search": "Search",
-        "get-from-bar-code": "Get Sample from Barcode",
+        "get-from-bar-code": "Scan Sample",
         "advanced-search": "Advanced Search",
         "logout": "Logout",
         "change-project":"Change Project",

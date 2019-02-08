@@ -731,7 +731,7 @@
             this.stickit();
             this.listenTo(this.model, 'change:type', this.dataTypeOnChange);
             this.$('#tags').select2({tags: []});
-            this.$modal = this.$(".data-modal");
+            this.$modal = $(".modal-cnt");
             // initialize Parsley
             this.$form.parsley(parsleyOpts);
             /*
@@ -890,7 +890,8 @@
                         modal.show();
 
                         setTimeout(function(){ modal.hide(); }, 1200);
-                        that.$('.data-modal').on('hidden.bs.modal', function (e) {
+                        $('.modal-cnt').on('hidden.bs.modal', function (e) {
+                            e.preventDefault();
                             this.savingData = false;
                             modal.remove();
                             xtens.router.navigate(targetRoute, {trigger: true});
@@ -964,7 +965,7 @@
             this.$modal.append(modal.render().el);
             modal.show();
 
-            this.$('#confirm').click( function (e) {
+            $('#confirm').click( function (e) {
                 modal.hide();
                 $('.waiting-modal').modal('show');
                 that.$modal.one('hidden.bs.modal', function (e) {
@@ -1409,7 +1410,7 @@
 
             this.render();
             this.$tableCnt = this.$("#daemon-table-cnt");
-            this.$modal = this.$(".customised-data-modal");
+            this.$modal = $(".modal-cnt");
             this.$daemonNoResultCnt = this.$("#daemonNoResultCnt");
             // this.$aDeamonTableTag = $("#collapse-daemons");
             this.daemons = options.daemons;
@@ -1484,6 +1485,7 @@
                         that.modal.hide();
                     }
                     that.$modal.one('hidden.bs.modal', function (e) {
+                        e.preventDefault();
                         xtens.error(err);
                         that.dropzone.removeAllFiles(true);
                     });

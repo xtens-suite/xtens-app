@@ -106,7 +106,7 @@
 
         render: function()  {
             this.$el.html(this.template({__:i18n, group: this.model}));
-            this.$modal = this.$(".group-modal");
+            this.$modal = $(".modal-cnt");
             this.$form = this.$('form');
             this.$form.parsley(parsleyOpts);
             this.stickit();
@@ -130,7 +130,8 @@
                     modal.show();
 
                     setTimeout(function(){ modal.hide(); }, 1200);
-                    that.$('.group-modal').on('hidden.bs.modal', function (e) {
+                    $('.modal-cnt').on('hidden.bs.modal', function (e) {
+                        e.preventDefault();
                         modal.remove();
                         xtens.router.navigate('groups', {trigger: true});
                     });
@@ -158,9 +159,11 @@
             this.$modal.append(modal.render().el);
             modal.show();
 
-            this.$('#confirm').click( function (e) {
+            $('#confirm').click( function (e) {
+                e.preventDefault();
                 modal.hide();
                 that.$modal.one('hidden.bs.modal', function (e) {
+                    e.preventDefault();
                     $('.waiting-modal').modal('show');
                     var targetRoute = $(ev.currentTarget).data('targetRoute') || 'data';
 
@@ -206,7 +209,7 @@
 
             // this.filterGroups(options.queryParams);
             var table = $('.table').DataTable({
-                scrollY:        '40vh',
+                scrollY:        '50vh',
                 scrollCollapse: true,
                 "searching": true
                 // "columnDefs": [

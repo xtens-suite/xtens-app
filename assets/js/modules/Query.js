@@ -1418,7 +1418,7 @@
             });
             this.$tableCnt = this.$("#result-table-cnt");
             this.$querySelectorCnt = this.$(".query-selector-cnt");
-            this.$queryModal = this.$(".query-modal");
+            this.$queryModal = $(".modal-cnt");
             this.$queryNoResultCnt = this.$("#queryNoResultCnt");
             this.$queryErrorCnt = this.$("#queryErrorCnt");
             this.tableView = null;
@@ -1528,8 +1528,8 @@
                 body: JST["views/templates/progressbar.ejs"]({valuemin: 0, valuemax: 100, valuenow: 100})
             });
             this.$queryModal.append(this.modal.render().el);
-            $('.query-modal .modal').modal({backdrop: 'static', keyboard: false});
-            $('.query-modal button').addClass('hidden');
+            $('.modal-cnt .modal').modal({backdrop: 'static', keyboard: false});
+            $('.modal-cnt button').addClass('hidden');
             this.modal.show();
             return false;
         },
@@ -1623,6 +1623,7 @@
             this.tableView = new XtensTable.Views.DataTable({result: result, leafSearch: this.leafSearch, multiProject: this.multiProject, queryArgs: queryArgs});
             this.$tableCnt.append(this.tableView.render().el);
             this.tableView.displayDataTable();
+            $(document).scrollTop( $("#result-table-cnt").offset().top );
         },
 
         /**
@@ -1673,7 +1674,7 @@
             this.template = JST["views/templates/query-selector.ejs"];
             this.$querySelectorCnt = $(".query-selector-cnt");
             this.setElement(this.$querySelectorCnt);
-            this.$queryModal = $(".query-modal");
+            this.$queryModal = $(".modal-cnt");
 
             this.myQueries = JSON.parse(this.operator.get('queries'));
             if (xtens.session.get('activeProject')!=='all') {

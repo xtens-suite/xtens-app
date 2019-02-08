@@ -93,7 +93,7 @@
                 // dataType: this.dataType || {},
                 // privilegeLevels: _.values(DataTypePrivilegeLevels)
             }));
-            this.$modal = this.$(".privilege-modal");
+            this.$modal = $(".modal-cnt");
             this.stickit();
             if (this.dataType) {
                 this.setGroupByDataTypeProject();
@@ -223,7 +223,8 @@
                     modal.show();
 
                     setTimeout(function(){ modal.hide(); }, 1200);
-                    that.$('.privilege-modal').on('hidden.bs.modal', function (e) {
+                    $('.modal-cnt').on('hidden.bs.modal', function (e) {
+                        e.preventDefault();
                         modal.remove();
                         if (xtens.session.get("isWheel")) {
                             router.navigate('datatypeprivileges?groupId=' + dataTypePrivileges.get("group"), {trigger: true});
@@ -257,7 +258,7 @@
             this.$modal.append(modal.render().el);
             modal.show();
 
-            this.$('#confirm').click( function (e) {
+            $('#confirm').click( function (e) {
                 modal.hide();
                 that.$modal.one('hidden.bs.modal', function (e) {
                     $('.waiting-modal').modal('show');

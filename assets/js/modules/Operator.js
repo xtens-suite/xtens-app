@@ -127,7 +127,7 @@
             this.$el.html(this.template({__:i18n, data: this.model, isWheel: xtens.session.get("isWheel")}));
             this.$form = this.$("form");
             this.$form.parsley(parsleyOpts);
-            this.$modal = this.$(".operator-modal");
+            this.$modal = $(".modal-cnt");
             this.stickit();
             return this;
         },
@@ -154,7 +154,8 @@
                             modal.show();
 
                             setTimeout(function(){ modal.hide(); }, 1200);
-                            that.$('.operator-modal').on('hidden.bs.modal', function (e) {
+                            $('.modal-cnt').on('hidden.bs.modal', function (e) {
+                                e.preventDefault();
                                 modal.remove();
                                 xtens.router.navigate('operators', {trigger: true});
                             });
@@ -188,7 +189,7 @@
             this.$modal.append(modal.render().el);
             modal.show();
 
-            this.$('#confirm').click( function (e) {
+            $('#confirm').click( function (e) {
                 modal.hide();
                 that.$modal.one('hidden.bs.modal', function (e) {
                     $('.waiting-modal').modal('show');
@@ -236,7 +237,7 @@
             $('#confirm').removeClass('btn-default').addClass('btn-warning');
             modal.show();
 
-            this.$('#confirm').click( function (e) {
+            $('#confirm').click( function (e) {
                 modal.hide();
                 that.$modal.one('hidden.bs.modal', function (e) {
                     $('.waiting-modal').modal('show');
@@ -297,7 +298,7 @@
             this.$el.html(this.template({__: i18n, operators: this.operators.models}));
 
             $('.table').DataTable({
-                scrollY:        '40vh',
+                scrollY:        '50vh',
                 scrollCollapse: true,
                 "searching": true
             });
@@ -324,7 +325,7 @@
 
         render: function() {
             this.$el.html(this.template({__:i18n}));
-            this.$modal = this.$(".project-modal");
+            this.$modal = $(".modal-cnt");
             this.$('form').parsley(parsleyOpts);
             $(document).bind('keyup', function(e) {
                 if(e.which==13){
@@ -368,15 +369,14 @@
                         // $('.modal-header').addClass('alert-success');
                             modal.show();
 
-                            that.$('#project-selector').on('change.bs.select', function (e) {
+                            $('#project-selector').on('change.bs.select', function (e) {
 
                                 xtens.session.set('activeProject', e.target.value);
                                 $('#confirm-project').text( i18n('confirm') + " " + e.target.value);
                                 $('#confirm-project').prop('disabled', false);
                                 $('#confirm-project').addClass('btn-success');
-                                that.$('#confirm-project').on('click.bs.button', function (e) {
+                                $('#confirm-project').on('click.bs.button', function (e) {
                                     e.preventDefault();
-
                                     modal.hide();
                                     that.$modal.on('hidden.bs.modal', function (e) {
                                         modal.remove();
@@ -453,7 +453,7 @@
             this.template = JST['views/templates/update-password.ejs'];
             this.pswdExpired = xtens.session.get("expiredPassword");
             this.render();
-            this.$modal = this.$('.updated-password-modal');
+            this.$modal = $('.modal-cnt');
         },
 
         render: function()  {
@@ -509,7 +509,8 @@
             modal.show();
 
             setTimeout(function(){ modal.hide(); }, 1200);
-            this.$('.xtens-modal').on('hidden.bs.modal', function (e) {
+            this.$modal.on('hidden.bs.modal', function (e) {
+                e.preventDefault();
                 modal.remove();
                 xtens.session.set("bearerAuth", null);
                 xtens.session.set("expiredPassword", false);
