@@ -38,7 +38,7 @@
             }
             this.daemons = options.daemons.toJSON();
             this.operator = options.operator;
-            this.$modal = $(".customised-data-modal");
+            this.$modal = $(".modal-cnt");
 
             this.render();
         },
@@ -199,6 +199,7 @@
                     that.modal.show();
 
                     that.$modal.on('hidden.bs.modal', function (e) {
+                        e.preventDefault();
                         that.modal.remove();
                     });
                 });

@@ -95,6 +95,7 @@ module.exports.routes = {
     // Sample Controller
     'GET /sample/edit': {controller: 'sample', action: 'edit'},
     'GET /sample/getNextBiobankCode': {controller: 'sample', action: 'getNextBiobankCode'},
+    'GET /sample/findByBiobankCode': {controller: 'sample', action: 'findByBiobankCode'},
 
     // Subject Controller
     'GET /subject/edit': {controller: 'subject', action: 'edit'},

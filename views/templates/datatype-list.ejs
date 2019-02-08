@@ -29,7 +29,11 @@
                         -->
                         <td><%= dataType.get("parents").map(function(parent) { return (" " + parent.name); }).toString().trim() %></td>
                         <td><%= dataType.get("project") ? dataType.get("project").name : '' %></td>
-                        <td><a class="btn" href="#/datatypes/edit/<%= dataType.id %>"><%=__("edit") %></a></td>
+                        <td>
+                          <div class="btn-group btn-group-sm" role="group" style="margin-top:0.5vh;">
+                            <a type="button" class="btn btn-info" href="#/datatypes/edit/<%= dataType.id %>"><%=__("edit") %></a>
+                          </div>
+                        </td>
                     </tr>
                     <% }) %>
                     </tbody>

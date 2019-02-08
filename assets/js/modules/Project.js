@@ -43,7 +43,7 @@
 
             this.$el.html(this.template({__: i18n, projects: this.projects.models}));
             $('.table').DataTable({
-                scrollY:        '40vh',
+                scrollY:        '50vh',
                 scrollCollapse: true,
                 "searching": true
             });
@@ -117,7 +117,7 @@
         render: function()  {
             var that = this;
             this.$el.html(this.template({__:i18n, project: this.model, assDt: this.assDt, noAssGr: this.noAssGr, assGr: this.assGr}));
-            this.$modal = this.$(".project-modal");
+            this.$modal = $(".modal-cnt");
             this.$form = this.$('form');
             this.$form.parsley(parsleyOpts);
             // this.dataTypesToBeSaved = _.map(this.assDt, 'id');
@@ -171,7 +171,7 @@
                     modal.show();
 
                     setTimeout(function(){ modal.hide(); }, 1200);
-                    that.$('.project-modal').on('hidden.bs.modal', function (e) {
+                    that.$('.modal-cnt').on('hidden.bs.modal', function (e) {
                         modal.remove();
                         xtens.router.navigate('projects', {trigger: true});
                     });
@@ -199,7 +199,7 @@
             this.$modal.append(modal.render().el);
             modal.show();
 
-            this.$('#confirm').click( function (e) {
+            $('#confirm').click( function (e) {
                 modal.hide();
                 $('.modal-backdrop').remove();
                 that.$modal.one('hidden.bs.modal', function (e) {

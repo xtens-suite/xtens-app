@@ -66,7 +66,7 @@
 
         render: function() {
             this.$el.html(this.template({__: i18n, biobank: this.model}));
-            this.$modal = this.$(".biobank-modal");
+            this.$modal = $(".modal-cnt");
             this.stickit();
             return this;
         },
@@ -91,7 +91,8 @@
                             modal.show();
 
                             setTimeout(function(){ modal.hide(); }, 1200);
-                            that.$('.biobank-modal').on('hidden.bs.modal', function (e) {
+                            $('.modal-cnt').on('hidden.bs.modal', function (e) {
+                                e.preventDefault();
                                 modal.remove();
                                 xtens.router.navigate('biobanks', {trigger: true});
                             });
@@ -130,7 +131,7 @@
             this.$modal.append(modal.render().el);
             modal.show();
 
-            this.$('#confirm').click( function (e) {
+            $('#confirm').click( function (e) {
                 modal.hide();
                 that.$modal.one('hidden.bs.modal', function (e) {
                     $('.waiting-modal').modal('show');
@@ -179,7 +180,7 @@
             this.$el.html(this.template({__: i18n, biobanks: this.biobanks.models}));
 
             $('.table').DataTable({
-                scrollY:        '40vh',
+                scrollY:        '50vh',
                 scrollCollapse: true,
                 "searching": true
             });

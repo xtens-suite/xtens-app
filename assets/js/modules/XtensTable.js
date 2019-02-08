@@ -85,7 +85,7 @@
               if (this.isLeafSearch) {
                   this.buildPlainData();
               }
-              this.$modal = $(".query-modal");
+              this.$modal = $(".modal-cnt");
               this.prepareDataForRenderingJSON(results.dtps, results.dts, this.queryArgs);
             // this.render();
           },
@@ -198,7 +198,8 @@
                   that.$modal.append(modal.render().el);
                   modal.show();
 
-                  that.$('.query-modal').on('hidden.bs.modal', function (e) {
+                  $('.modal-cnt').on('hidden.bs.modal', function (e) {
+                      e.preventDefault();
                       modal.remove();
                       $('.modal-backdrop').remove();
                   });

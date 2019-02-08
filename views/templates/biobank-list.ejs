@@ -25,7 +25,11 @@
                         <td><%= biobank.get("url") %></td>
                         <td><%= biobank.get("juristicPerson") %></td>
                         <td><%= biobank.get("country") %></td>
-                        <td><a class="btn" href="#/biobanks/edit/<%= biobank.id %>"><%=__("edit") %></a></td>
+                        <td>
+                          <div class="btn-group btn-group-sm" role="group" style="margin-top:0.5vh;">
+                            <a type="button" class="btn btn-info" href="#/biobanks/edit/<%= biobank.id %>"><%=__("edit") %></a>
+                          </div>
+                      </td>
                     </tr>
                     <% }) %>
                     </tbody>

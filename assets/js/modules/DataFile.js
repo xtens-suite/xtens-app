@@ -51,7 +51,7 @@
 
         render: function() {
             this.$el.html(this.template({__:i18n, dataFiles: this.collection.models}));
-            this.$queryModal = this.$(".query-modal");
+            this.$queryModal = $(".modal-cnt");
             return this;
         },
 

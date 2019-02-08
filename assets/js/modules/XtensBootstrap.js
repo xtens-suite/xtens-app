@@ -38,8 +38,8 @@
                 this.$(".modal-body").html(this.body);
             }
             this.$('.modal-header').addClass(this.type === "Edit" ? "alert-warning" : this.type === "Delete" ? "alert-danger" : "");
-            this.$('#confirm').addClass(this.type === "Edit" ? "btn-warning" : this.type === "Delete" ? "btn-danger" : "");
-            // this.$('#confirm').addClass("btn-warning");
+            $('#confirm').addClass(this.type === "Edit" ? "btn-warning" : this.type === "Delete" ? "btn-danger" : "");
+            // $('#confirm').addClass("btn-warning");
             return this;
         },
 

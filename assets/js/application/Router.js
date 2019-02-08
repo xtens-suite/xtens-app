@@ -116,7 +116,9 @@
             "subjects/graph":"subjectGraph",
             "homepage":"homepage",
             "file-download/:id": "downloadFile",
-            "data/dedicated": "dedicatedDataManagement"
+            "data/dedicated": "dedicatedDataManagement",
+            "getFromBarCode": "getFromBarCode",
+            "getFromBarCode/": "getFromBarCode"
         },
 
         publicRoutes: ["login"],
@@ -165,6 +167,16 @@
 
             // load new view
             this.view = view;
+        },
+
+        /**
+         * @method
+         * @name getFromBarCode
+         * @description opens the view to create/edit DataTypePrivileges for a user group
+         * @param{integer} dataTypePrivilegesId - the ID of the dataTypePrivileges
+         */
+        getFromBarCode: function() {
+            this.loadView(new Sample.Views.GetFromBarCode());
         },
 
         /**
@@ -557,15 +569,21 @@
             var that = this;
             var operator = new Operator.Model();
             if (id) {
-                operator.fetch({
-                    data:$.param({id: id, populate:['addressInformation']}),
-                    success: function(operator) {
-                        that.loadView(new Operator.Views.Edit({model: operator}));
-                    },
-                    error: function(err) {
-                        xtens.error(err);
-                    }
-                });
+                if (xtens.session.get('userId') == id || xtens.session.get('isWheel')) {
+                    operator.fetch({
+                        data:$.param({id: id, populate:['addressInformation']}),
+                        success: function(operator) {
+                            that.loadView(new Operator.Views.Edit({model: operator}));
+                        },
+                        error: function(err) {
+                            xtens.error(err);
+                        }
+                    });
+                } else {
+                    var err = "Logged user has not the privileges to modify other users";
+                    xtens.error(err);
+                    this.navigate('homepage', {trigger: true});
+                }
             }
             else {
                 this.loadView(new Operator.Views.Edit({model: operator}));
@@ -599,7 +617,17 @@
         },
 
         projectList:function() {
-            this.loadView(new Project.Views.List());
+            var that = this;
+            var projects= new Project.List();
+            projects.fetch({
+                data: $.param({sort:'id ASC'}),
+                success: function(projects) {
+                    that.loadView(new Project.Views.List({projects: projects}));
+                },
+                error: function(err) {
+                    xtens.error(err);
+                }
+            });
         },
 
         updatePassword:function() {

@@ -233,7 +233,7 @@
             this.$el.html(this.template({__: i18n, dataType: this.model, isMultiProject: this.isMultiProject}));
             this.$form = this.$("form");
             this.$form.parsley(parsleyOpts);
-            this.$modal = this.$(".datatype-modal");
+            this.$modal = $(".modal-cnt");
             this.stickit();
 
             if(xtens.session.get('activeProject') !== 'all' && !this.duplicate){
@@ -307,9 +307,11 @@
                                 that.$modal.append(modal.render().el);
                                 modal.show();
 
-                                that.$('#confirm').click( function () {
+                                $('#confirm').click( function (e) {
+                                    e.preventDefault();
                                     modal.hide();
-                                    that.$('.datatype-modal').on('hidden.bs.modal', function () {
+                                    $('.modal-cnt').on('hidden.bs.modal', function (e) {
+                                        e.preventDefault();
                                         modal.remove();
                                         $("#schema-title-icon").empty();
                                         $("#schema-title-icon").append('<i class="fa fa-unlock-alt fa-lg right"></i>');
@@ -408,7 +410,8 @@
                     modal.show();
 
                     setTimeout(function(){ modal.hide(); }, 1200);
-                    that.$('.datatype-modal').on('hidden.bs.modal', function () {
+                    $('.modal-cnt').on('hidden.bs.modal', function (e) {
+                        e.preventDefault();
                         modal.remove();
                         if (xtens.session.get("isWheel") || !that.isCreation) {
                             router.navigate('datatypes', {trigger: true});
@@ -441,7 +444,7 @@
             this.$modal.append(modal.render().el);
             modal.show();
 
-            this.$('#confirm').click( function () {
+            $('#confirm').click( function () {
                 modal.hide();
 
                 that.model.destroy({
@@ -507,10 +510,10 @@
         render: function(options) {
 
             this.$el.html(this.template({ __: i18n, dataTypes: this.dataTypes.models}));
-            this.$modal = this.$(".data-type-modal");
+            this.$modal = $(".modal-cnt");
             xtens.session.get("projects").length < 2 ? $('#duplicate').prop('disabled',true) :null;
             var table = $('.table').DataTable({
-                scrollY:        '40vh',
+                scrollY:        '50vh',
                 scrollCollapse: true,
                 "searching": true
                 // "columnDefs": [
@@ -518,7 +521,7 @@
                 // ]
             });
             // this.filterDataTypes(options.queryParams);
-            var filter = options.queryParams && options.queryParams.projects ? options.queryParams.projects : $('#btn-project').val();
+            var filter = options.queryParams && options.queryParams.projects ? options.queryParams.projects : xtens.session.get('activeProject');
             if(filter != 'all'){
                 filter += " ";
                 table.search( filter ).draw();
@@ -527,7 +530,7 @@
         },
 
         filterDataTypes: function(opt){
-            var rex = opt && opt.projects ? new RegExp(opt.projects) : new RegExp($('#btn-project').val());
+            var rex = opt && opt.projects ? new RegExp(opt.projects) : new RegExp(xtens.session.get('activeProject'));
 
             if(rex =="/all/"){this.clearFilter();}else{
                 $('.content').hide();
@@ -565,24 +568,25 @@
             }
 
             $('#project-source').on('change.bs.select', function () {
-                this.projectSource= $('#project-source').val();
+                var projectSource= $('#project-source').val();
+                var projectName = $('#project-source option:selected').text();
                 $("label[for='data-type']").prop('hidden',false);
+                var filteredDatatypes = that.dataTypes.toJSON().filter(function(d) {return d.project.id == parseInt(projectSource);});
+                var html = "<optgroup label='" + projectName + "' id=" + projectSource + ">";
+                _.forEach(filteredDatatypes, function (dt) {
+                    html = html + '<option value=' + dt.id + '>' + dt.name +'</option>';
+                });
+                html = html + '</optgroup>';
+                $('#data-type-selector').html(html);
                 $('#data-type-selector').selectpicker('show');
-                $('#data-type-selector optgroup').prop('disabled', true);
-                $('#data-type-selector optgroup#'+this.projectSource).prop('disabled', false);
                 $('#data-type-selector').selectpicker('refresh');
-                $('#project-dest option').prop('disabled', false);
-                $('#project-dest option[value='+this.projectSource +']').prop('disabled', true);
+                $('#project-dest option').removeClass('hidden');
+                $('#project-dest option[value='+ projectSource +']').addClass('hidden');
                 $('#project-dest').selectpicker('refresh');
 
                 $('#data-type-selector').on('change.bs.select', function () {
                     var dataTypeSelected= $('#data-type-selector').val();
                     $("label[for='project-dest']").prop('hidden',false);
-                    // if (xtens.session.get('activeProject') !== 'all') {
-                    //     var project = xtens.session.get('activeProject');
-                    //     $('#project-dest').selectpicker('val', project);
-                    //     $('#project-dest').selectpicker('refresh');
-                    // }
                     $('#project-dest').selectpicker('show');
                     if (xtens.session.get("activeProject") !=  "all") {
                         $('#project-dest').selectpicker('val', _.find(xtens.session.get('projects'),function (p) { return p.name === xtens.session.get('activeProject'); }).id );

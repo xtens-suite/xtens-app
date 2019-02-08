@@ -140,7 +140,7 @@ const coroutines = {
         const biobankValidation = yield SampleService.validateBiobank(sample, dataType);
         if (!biobankValidation) {
             throw new ValidationError(`Biobank ${sample.biobank} not associated with Project ${dataType.project}`);
-        }        
+        }
         const dataTypeName = dataType && dataType.name;
         sample = validationRes.value;
         const updatedSample = yield crudManager.updateSample(sample, dataTypeName);
@@ -233,6 +233,18 @@ const coroutines = {
         const nextCode = yield crudManager.getNextBiobankCode(params);
 
         if (!nextCode){ throw new Error(`Error getting last biobank code for type ${params.type} and project ${params.project}`); }
+
+        return res.json(nextCode);
+    }),
+
+    findByBiobankCode: BluebirdPromise.coroutine(function *(req, res) {
+        const operator = TokenService.getToken(req);
+        const params = req.allParams();
+        sails.log.info("SampleController.findByBiobankCode - Decoded ID is: " + operator.id);
+
+        const nextCode = yield crudManager.findByBiobankCode(params);
+
+        //if (!nextCode){ throw new Error(`Error getting sample id for biobank code ${params.biobankCode} and project ${params.project}`); }
 
         return res.json(nextCode);
     })
@@ -351,6 +363,19 @@ module.exports = {
           sails.log.error(err);
           return co.error(err);
       });
-    }
+    },
 
+    /**
+    * @method
+    * @name findByBiobankCode
+    * @description retrieve last biobank code for creating a Sample via client web-form
+    */
+    findByBiobankCode: function(req, res) {
+        const co = new ControllerOut(res);
+        coroutines.findByBiobankCode(req,res)
+       .catch(err => {
+           sails.log.error(err);
+           return co.error(err);
+       });
+    }
 };

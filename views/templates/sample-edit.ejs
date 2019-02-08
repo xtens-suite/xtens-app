@@ -15,8 +15,11 @@
                     </div>
                     <div class="form-group metadataform-group">
                         <label for="biobank-code" class="data-label"><%= __('biobank-code') %></label>
-                        <div class="data-input-div">
+                        <div class="data-input-div" style="width:auto;">
                             <input text class="form-control" id="biobank-code" name="biobank-code"></input>
+                        </div>
+                        <div class="input-group-append">
+                          <span class="input-group-text barcode-cnt" data-toggle="tooltip" title="Print Barcode" id="basic-addon2"><img style="height: 6vh; cursor:pointer;" id="barcode"></span>
                         </div>
                     </div>
                     <div class="form-group metadataform-group">

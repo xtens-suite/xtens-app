@@ -6,18 +6,21 @@
                 <tr>
                     <th><%= __("name") %></th>
                     <th><%= __("projects") %></th>
-                    <th></th>
-                    <th></th>
-                    <th></th>
+                    <th><%= __("actions") %></th>
+
                 </tr>
             </thead>
             <tbody>  <% _.each(groups, function(group) { %>
             <tr class="group_val">
               <td><%= group.get("name") %></td>
-              <td><%= group.get("projects").length < 11 ? _.map(group.get("projects"), 'name').join(" ") : "all" %></td>
-              <td><a id="edit" class="btn" href="#/groups/edit/<%= group.id %>"><%=__("edit") %></a></td>
-              <td><a id="edit" class="btn" href="#/groups/operator/<%= group.id %>"><%=__("member-operators") %></a></td>
-              <td><a id="edit" class="btn" href="#/datatypeprivileges?groupId=<%= group.id %>"><%=__("data-type-privileges") %></a></td>
+              <td><%= _.map(group.get("projects"), 'name').join(" ") %></td>
+              <td class="groups-actions">
+                <div class="btn-group btn-group-sm" role="group" style="margin-top:0.5vh;">
+                  <a type="button" class="btn btn-info" id="edit" href="#/groups/edit/<%= group.id %>"><%=__("edit") %></a>
+                  <a type="button" class="btn btn-primary" id="edit" href="#/groups/operator/<%= group.id %>"><%=__("member-operators") %></a>
+                  <a type="button" class="btn btn-primary" id="edit" href="#/datatypeprivileges?groupId=<%= group.id %>"><%=__("data-type-privileges") %></a>
+              </div>
+              </td>
             </tr>
             <% }) %>
             </tbody>
