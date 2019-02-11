@@ -198,7 +198,7 @@
                     $('.modal-header').addClass('alert-info');
                     that.modal.show();
 
-                    that.$modal.on('hidden.bs.modal', function (e) {
+                    that.$modal.one('hidden.bs.modal', function (e) {
                         e.preventDefault();
                         that.modal.remove();
                     });

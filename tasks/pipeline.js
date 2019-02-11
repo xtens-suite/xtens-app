@@ -16,6 +16,7 @@
 //  to change `assets/styles/importer.less` instead.)
 var cssFilesToInject = [
     'styles/importer.css',
+    'styles/fonts/**/*.css',
     'dependencies/bootstrap-select/css/bootstrap-select.css',
     'dependencies/font-awesome/styles/font-awesome.css',
     'dependencies/select2/select2.css',

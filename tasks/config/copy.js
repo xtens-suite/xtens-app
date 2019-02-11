@@ -28,6 +28,12 @@ module.exports = function(grunt) {
                 cwd: './assets/dependencies/bootstrap',
                 src: ['fonts/*.*'],
                 dest: '.tmp/public'
+            }, {
+                expand: true,
+                dot: true,
+                cwd: './assets/styles/fonts/files',
+                src: ['**'],
+                dest: '.tmp/public/fonts'
             }]
         },
         build: {

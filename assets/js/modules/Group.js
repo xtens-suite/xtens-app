@@ -130,7 +130,7 @@
                     modal.show();
 
                     setTimeout(function(){ modal.hide(); }, 1200);
-                    $('.modal-cnt').on('hidden.bs.modal', function (e) {
+                    $('.modal-cnt').one('hidden.bs.modal', function (e) {
                         e.preventDefault();
                         modal.remove();
                         xtens.router.navigate('groups', {trigger: true});
@@ -177,7 +177,7 @@
                             $('.modal-header').addClass('alert-success');
                             modal.show();
                             setTimeout(function(){ modal.hide(); }, 1200);
-                            that.$modal.on('hidden.bs.modal', function (e) {
+                            that.$modal.one('hidden.bs.modal', function (e) {
                                 modal.remove();
                                 xtens.router.navigate('groups', {trigger: true});
                             });

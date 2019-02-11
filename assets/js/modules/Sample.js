@@ -281,7 +281,7 @@
                         setTimeout(function() {
                             modal.hide();
                         }, 1200);
-                        $('.modal-cnt').on('hidden.bs.modal', function(e) {
+                        $('.modal-cnt').one('hidden.bs.modal', function (e) {
                             modal.remove();
                             that.savingSample = false;
 
@@ -340,7 +340,7 @@
                             setTimeout(function() {
                                 modal.hide();
                             }, 1200);
-                            that.$modal.on('hidden.bs.modal', function(e) {
+                            that.$modal.one('hidden.bs.modal', function (e) {
                                 this.savingSample = false;
                                 modal.remove();
                                 xtens.router.navigate(targetRoute, {

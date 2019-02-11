@@ -154,7 +154,7 @@
                             modal.show();
 
                             setTimeout(function(){ modal.hide(); }, 1200);
-                            $('.modal-cnt').on('hidden.bs.modal', function (e) {
+                            $('.modal-cnt').one('hidden.bs.modal', function (e) {
                                 e.preventDefault();
                                 modal.remove();
                                 xtens.router.navigate('operators', {trigger: true});
@@ -203,7 +203,7 @@
                             $('.modal-header').addClass('alert-success');
                             modal.show();
                             setTimeout(function(){ modal.hide(); }, 1200);
-                            that.$modal.on('hidden.bs.modal', function (e) {
+                            that.$modal.one('hidden.bs.modal', function (e) {
                                 modal.remove();
                                 xtens.router.navigate('operators', {trigger: true});
                             });
@@ -268,7 +268,7 @@
                             $('.modal-header').addClass('alert-success');
                             modal.show();
 
-                            that.$modal.on('hidden.bs.modal', function (e) {
+                            that.$modal.one('hidden.bs.modal', function (e) {
                                 modal.remove();
                                 xtens.router.navigate('operators', {trigger: true});
                             });
@@ -378,7 +378,7 @@
                                 $('#confirm-project').on('click.bs.button', function (e) {
                                     e.preventDefault();
                                     modal.hide();
-                                    that.$modal.on('hidden.bs.modal', function (e) {
+                                    that.$modal.one('hidden.bs.modal', function (e) {
                                         modal.remove();
                                         router.navigate('homepage', {trigger: true});
                                     });
@@ -509,7 +509,7 @@
             modal.show();
 
             setTimeout(function(){ modal.hide(); }, 1200);
-            this.$modal.on('hidden.bs.modal', function (e) {
+            this.$modal.one('hidden.bs.modal', function (e) {
                 e.preventDefault();
                 modal.remove();
                 xtens.session.set("bearerAuth", null);

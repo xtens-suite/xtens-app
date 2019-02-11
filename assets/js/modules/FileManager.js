@@ -181,7 +181,7 @@
 
             this.modal.$("#confirm").on('click',function(){
                 that.modal.hide();
-                that.$fileModal.on('hidden.bs.modal', function () {
+                that.$fileModal.one('hidden.bs.modal', function (e) {
                     that.modal.remove();
                     that.deleteFileContent(idFile);
                 });

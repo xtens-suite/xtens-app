@@ -1828,7 +1828,7 @@
                             that.modal.show();
 
                             setTimeout(function(){ that.modal.hide(); }, 1200);
-                            that.$queryModal.on('hidden.bs.modal', function (e) {
+                            that.$queryModal.one('hidden.bs.modal', function (e) {
                                 that.modal.remove();
                                 that.$querySelectorCnt.empty();
                                 that.myQueries = JSON.parse(that.operator.get('queries'));
@@ -1893,7 +1893,7 @@
                             that.modal.show();
 
                             setTimeout(function(){ that.modal.hide(); }, 1200);
-                            that.$queryModal.on('hidden.bs.modal', function (e) {
+                            that.$queryModal.one('hidden.bs.modal', function (e) {
                                 that.modal.remove();
                                 that.$querySelectorCnt.empty();
                                 that.myQueries = JSON.parse(that.operator.get('queries'));
