@@ -59,7 +59,7 @@
             // this.set("standardProjects", _.uniq(_.flatten(mapPrivProject.standard)));
             this.set("adminProjects", _.uniq(_.flatten(mapPrivProject.admin)));
             this.set("isWheel", privilegeLevelArr.indexOf(GroupPrivilegeLevels.WHEEL) > -1);
-            this.set("isAdmin", this.get("isWheel") || privilegeLevelArr.indexOf(GroupPrivilegeLevels.ADMIN) > -1);
+            this.set("isAdmin", this.get("isWheel") ? this.get("isWheel") : privilegeLevelArr.indexOf(GroupPrivilegeLevels.ADMIN) > -1);
             this.set("canAccessPersonalData", _.map(options.user.groups, 'canAccessPersonalData').indexOf(true) > -1);
             this.set("canAccessSensitiveData", _.map(options.user.groups, 'canAccessSensitiveData').indexOf(true) > -1);
             // this.set("canAccessSensitiveData", _.map(options.user.groups, 'canAccessSensitiveData').indexOf(true) > -1);
@@ -109,14 +109,10 @@
             this.sideTemplate = JST['views/templates/menu-sidebar.ejs'];
             this.navTemplate = JST['views/templates/menu-navbar.ejs'];
 
-            this.adminProjects = null;
-            this.idProject = null;
-            this.isAdminProject = null;
             if (xtens.session.get('activeProject') !== 'all') {
-                this.adminProjects = xtens.session.get("adminProjects");
-                this.idProject = _.find(xtens.session.get('projects'),function (p) { return p.name === xtens.session.get('activeProject'); }).id;
-                this.isAdminProject = _.find(this.adminProjects, function(pr){ return pr === this.idProject;});
-                xtens.session.set("isAdmin", this.isAdminProject ? true : false);
+                var idProject = _.find(xtens.session.get('projects'),function (p) { return p.name === xtens.session.get('activeProject'); }).id;
+                var isAdminProject = _.find(xtens.session.get("adminProjects") , function(pr){ return pr == idProject;});
+                xtens.session.set("isAdmin", isAdminProject ? true : false);
             }
             this.projects = xtens.session.get("projects");
 
