@@ -136,6 +136,7 @@
         },
 
         renderMenuBar: function () {
+            var that = this;
             $('.sidebar-cnt').html(this.sideTemplate({
                 __:i18n,
                 session: xtens.session,
@@ -151,11 +152,21 @@
                 login: xtens.session.get('login')
             }));
 
+            this.ToggleTitleMenu();
+
             $('#sidebarCollapse').on('click', function () {
                 $('#sidebar').toggleClass('active');
-                $('.title-menu-cnt').fadeToggle( "slow", "linear");
+                that.ToggleTitleMenu();
                 $(this).toggleClass('active');
             });
+        },
+
+        ToggleTitleMenu : function () {
+            if ($('#sidebar').hasClass( "active" )) {
+                $('.title-menu-cnt').fadeOut( "slow", "linear");
+            } else {
+                $('.title-menu-cnt').fadeIn( "slow", "linear");
+            }
         },
 
         initializeProjectSelectorModal: function () {
@@ -227,6 +238,22 @@
 
 
 
+
+    });
+
+    Session.Views.MenuBarLogin = Backbone.View.extend({
+
+
+        initialize : function(){
+            _.bindAll(this);
+            this.template = JST['views/templates/menu-navbar-login.ejs'];
+            this.render();
+        },
+
+        render: function() {
+            $('.navbar-cnt').html(this.template({ __:i18n }));
+            return this;
+        }
 
     });
 

@@ -539,6 +539,8 @@
             if (this.menuBarView && this.menuBarView.$el.children().length > 0) {
                 this.menuBarView.$el.children().remove();
             }
+            this.menuBarView = new Session.Views.MenuBarLogin();
+
             this.loadView(new Operator.Views.Login());
         },
 
