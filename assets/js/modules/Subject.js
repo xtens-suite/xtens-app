@@ -587,7 +587,7 @@
                     // set margins, width and height of the svg container
                     var margin = {top: 40, right: 120, bottom: 40, left: 120},
                         width = $('.subject').width() - margin.left - margin.right,
-                        height = $('#wrapper').height() - $('#header').height() - $('.subject').height() - margin.top - margin.bottom;
+                        height = $('#content-cnt').height() - $('.navbar-cnt').height() - $('.subject').height() - margin.top - margin.bottom;
 
                     var color = d3.scale.category20();
 
