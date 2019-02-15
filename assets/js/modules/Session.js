@@ -161,7 +161,7 @@
         },
 
         ToggleTitleMenu : function () {
-            if (!$('#sidebarCollapse').hasClass( "active" )) {
+            if ($('#sidebarCollapse').hasClass( "active" )) {
                 $('.title-menu-cnt').fadeIn( "slow", "linear",  function() {
                     $('.title-menu-cnt').attr("style", "display: block !important");
                 });
