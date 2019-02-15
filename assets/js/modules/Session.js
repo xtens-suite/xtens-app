@@ -152,20 +152,23 @@
                 login: xtens.session.get('login')
             }));
 
-            this.ToggleTitleMenu();
 
             $('#sidebarCollapse').on('click', function () {
                 $('#sidebar').toggleClass('active');
-                that.ToggleTitleMenu();
                 $(this).toggleClass('active');
+                that.ToggleTitleMenu();
             });
         },
 
         ToggleTitleMenu : function () {
-            if ($('#sidebar').hasClass( "active" )) {
-                $('.title-menu-cnt').fadeOut( "slow", "linear");
+            if (!$('#sidebarCollapse').hasClass( "active" )) {
+                $('.title-menu-cnt').fadeIn( "slow", "linear",  function() {
+                    $('.title-menu-cnt').attr("style", "display: block !important");
+                });
             } else {
-                $('.title-menu-cnt').fadeIn( "slow", "linear");
+                $('.title-menu-cnt').fadeOut( "slow", "linear",  function() {
+                    $('.title-menu-cnt').attr("style", "display: none !important");
+                });
             }
         },
 
