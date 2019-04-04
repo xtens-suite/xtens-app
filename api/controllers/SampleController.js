@@ -31,7 +31,7 @@ const coroutines = {
      * @param{Response} res
      * @description coroutine for new Sample instance creation
      */
-    create: BluebirdPromise.coroutine(function *(req, res) {
+    create: BluebirdPromise.coroutine(function * (req, res) {
         let sample = req.allParams();
         const operator = TokenService.getToken(req);
         const dataTypePrivilege = yield DataTypeService.getDataTypePrivilegeLevel(operator.groups, sample.type);
@@ -61,7 +61,7 @@ const coroutines = {
         return res.json(201, result);
     }),
 
-    findOne: BluebirdPromise.coroutine(function *(req, res) {
+    findOne: BluebirdPromise.coroutine(function * (req, res) {
         const id = req.param('id');
         const operator = TokenService.getToken(req);
 
@@ -69,26 +69,23 @@ const coroutines = {
         query = actionUtil.populateRequest(query, req);
 
         let sample = yield BluebirdPromise.resolve(query);
-        const idSampleType = sample ? _.isObject(sample.type) ? sample.type.id :  sample.type : undefined;
+        const idSampleType = sample ? _.isObject(sample.type) ? sample.type.id : sample.type : undefined;
         const dataTypePrivilege = yield DataTypeService.getDataTypePrivilegeLevel(operator.groups, idSampleType);
 
-              //filter Out Metadata if operator has not the privilege
-        if (!dataTypePrivilege || _.isEmpty(dataTypePrivilege)){ sample = {}; }
-        else if( dataTypePrivilege.privilegeLevel === VIEW_OVERVIEW) { sample.metadata = {}; }
+        // filter Out Metadata if operator has not the privilege
+        if (!dataTypePrivilege || _.isEmpty(dataTypePrivilege)) { sample = {}; } else if (dataTypePrivilege.privilegeLevel === VIEW_OVERVIEW) { sample.metadata = {}; }
 
-        if( !operator.canAccessSensitiveData && !_.isEmpty(sample.metadata) ){
+        if (!operator.canAccessSensitiveData && !_.isEmpty(sample.metadata)) {
             sample = yield DataService.filterOutSensitiveInfo(sample, operator.canAccessSensitiveData);
         }
 
-        DbLog(logMessages.FINDONE, SAMPLE, id, sample.owner, idSampleType, operator.id );
+        DbLog(logMessages.FINDONE, SAMPLE, id, sample.owner, idSampleType, operator.id);
         return res.json(sample);
-
     }),
 
-    find: BluebirdPromise.coroutine(function *(req, res) {
-
+    find: BluebirdPromise.coroutine(function * (req, res) {
         const operator = TokenService.getToken(req);
-        let allPrivileges = yield DataTypePrivileges.find({group:operator.groups});
+        let allPrivileges = yield DataTypePrivileges.find({ group: operator.groups });
         allPrivileges = operator.groups.length > 1 ? DataTypeService.getHigherPrivileges(allPrivileges) : allPrivileges;
         let params = req.allParams();
         params.model = SAMPLE;
@@ -97,21 +94,20 @@ const coroutines = {
 
         let samples = yield crudManager.findData(params);
         const dataTypesId = !_.isEmpty(samples) ? _.isObject(samples[0].type) ? _.uniq(_.map(_.map(samples, 'type'), 'id')) : _.uniq(_.map(samples, 'type')) : [];
-        const pagePrivileges = allPrivileges.filter( obj => {
-            return _.find(dataTypesId, id =>{ return id === obj.dataType;});
+        const pagePrivileges = allPrivileges.filter(obj => {
+            return _.find(dataTypesId, id => { return id === obj.dataType; });
         });
 
-        const [payload, headerInfo]  = yield BluebirdPromise.all([
+        const [payload, headerInfo] = yield BluebirdPromise.all([
             DataService.filterListByPrivileges(samples, dataTypesId, pagePrivileges, operator.canAccessSensitiveData),
             QueryService.composeHeaderInfo(req, params)
         ]);
 
-        //DbLog(logMessages.FIND, SAMPLE, samples.length, _.uniq(_.map(samples, 'owner')), dataTypesId, operator.id);
+        // DbLog(logMessages.FIND, SAMPLE, samples.length, _.uniq(_.map(samples, 'owner')), dataTypesId, operator.id);
         return DataService.prepareAndSendResponse(res, payload, headerInfo);
-
     }),
 
-    update: BluebirdPromise.coroutine(function *(req, res) {
+    update: BluebirdPromise.coroutine(function * (req, res) {
         let sample = req.allParams();
         const operator = TokenService.getToken(req);
 
@@ -149,11 +145,11 @@ const coroutines = {
         qUpdate = actionUtil.populateRequest(qUpdate, req);
         let upSample = yield BluebirdPromise.resolve(qUpdate);
 
-        DbLog(logMessages.UPDATE, SAMPLE, updatedSample.id, updatedSample.owner, updatedSample.type, operator.id, {prevData: prevSample, upData: upSample});
+        DbLog(logMessages.UPDATE, SAMPLE, updatedSample.id, updatedSample.owner, updatedSample.type, operator.id, { prevData: prevSample, upData: upSample });
         return res.json(updatedSample);
     }),
 
-    destroy: BluebirdPromise.coroutine(function *(req, res, co) {
+    destroy: BluebirdPromise.coroutine(function * (req, res, co) {
         const id = req.param('id');
         const operator = TokenService.getToken(req);
 
@@ -165,7 +161,7 @@ const coroutines = {
         if (!sample) {
             throw new NonexistentResourceError("Missing Resource");
         }
-            //retrieve dataType id
+        // retrieve dataType id
         const idSampleType = _.isObject(sample.type) ? sample.type.id : sample.type;
 
         const dataTypePrivilege = yield DataTypeService.getDataTypePrivilegeLevel(operator.groups, idSampleType);
@@ -176,13 +172,12 @@ const coroutines = {
 
         const deleted = yield crudManager.deleteSample(id);
         if (deleted > 0) {
-            DbLog(logMessages.DELETE, SAMPLE, sample.id, sample.owner, sample.type, operator.id, {deletedData: JSON.stringify(sample)});
+            DbLog(logMessages.DELETE, SAMPLE, sample.id, sample.owner, sample.type, operator.id, { deletedData: JSON.stringify(sample) });
         }
         return res.json(200, { deleted: deleted });
-
     }),
 
-    edit: BluebirdPromise.coroutine(function *(req, res) {
+    edit: BluebirdPromise.coroutine(function * (req, res) {
         const operator = TokenService.getToken(req);
         const params = req.allParams();
         sails.log.info("SampleController.edit - Decoded ID is: " + operator.id);
@@ -202,51 +197,63 @@ const coroutines = {
             parentSample: SampleService.getOneAsync(params.parentSample)
         });
         // if(payload.sample){ throw new ValidationError('No sample found with id: ${params.id}'); }
-              //if operator has not the privilege to EDIT datatype, then return forbidden
-        if (_.isEmpty(payload.dataTypes)){ throw new PrivilegesError(`Authenticated user has not edit privileges on any sample type`); }
+        // if operator has not the privilege to EDIT datatype, then return forbidden
+        if (_.isEmpty(payload.dataTypes)) { throw new PrivilegesError(`Authenticated user has not edit privileges on any sample type`); }
 
-
-        if (payload.sample){
-
+        if (payload.sample) {
             let operators = yield OperatorService.getOwners(payload.sample);
             payload.operators = operators;
-          // if operator has not access to Sensitive Data and dataType has sensitive data, then return forbidden
+            // if operator has not access to Sensitive Data and dataType has sensitive data, then return forbidden
             const sensitiveRes = yield DataService.hasDataSensitive(payload.sample.id, SAMPLE);
             if (sensitiveRes && ((sensitiveRes.hasDataSensitive && !operator.canAccessSensitiveData))) {
                 throw new PrivilegesError("Authenticated user is not allowed to edit sensitive data");
                 // if edit sample exists and operator has not the privilege to EDIT datatype, then throw Privileges Error
             }
-            if(_.isEmpty(payload.dataTypes) || !_.find(payload.dataTypes, {id : payload.sample.type.id})) {
+            if (_.isEmpty(payload.dataTypes) || !_.find(payload.dataTypes, { id: payload.sample.type.id })) {
                 throw new PrivilegesError(`Authenticated user has not edit privileges on the sample type`);
             }
         }
         return res.json(payload);
-
-
     }),
 
-    getNextBiobankCode: BluebirdPromise.coroutine(function *(req, res) {
+    getNextBiobankCode: BluebirdPromise.coroutine(function * (req, res) {
         const operator = TokenService.getToken(req);
         const params = req.allParams();
         sails.log.info("SampleController.getNextBiobankCode - Decoded ID is: " + operator.id);
 
         const nextCode = yield crudManager.getNextBiobankCode(params);
 
-        if (!nextCode){ throw new Error(`Error getting last biobank code for type ${params.type} and project ${params.project}`); }
+        if (!nextCode) { throw new Error(`Error getting last biobank code for type ${params.type} and project ${params.project}`); }
 
         return res.json(nextCode);
     }),
 
-    findByBiobankCode: BluebirdPromise.coroutine(function *(req, res) {
+    findByBiobankCode: BluebirdPromise.coroutine(function * (req, res) {
         const operator = TokenService.getToken(req);
         const params = req.allParams();
         sails.log.info("SampleController.findByBiobankCode - Decoded ID is: " + operator.id);
 
         const nextCode = yield crudManager.findByBiobankCode(params);
 
-        //if (!nextCode){ throw new Error(`Error getting sample id for biobank code ${params.biobankCode} and project ${params.project}`); }
+        // if (!nextCode){ throw new Error(`Error getting sample id for biobank code ${params.biobankCode} and project ${params.project}`); }
 
         return res.json(nextCode);
+    }),
+
+    getInfoForBarChart: BluebirdPromise.coroutine(function * (req, res) {
+        const dataTypeId = req.param('dataType');
+        let fieldName = req.param('fieldName');
+        const model = req.param('model');
+        const period = req.param('period');
+
+        if (!fieldName) {
+            fieldName = "created_at";
+        }
+        // const operator = TokenService.getToken(req);
+
+        const results = yield crudManager.getInfoForBarChart(dataTypeId, fieldName, model, period);
+
+        return res.json(results);
     })
 
 };
@@ -259,14 +266,13 @@ module.exports = {
      *  @name create
      *  @description: create a new sample; transaction-safe implementation
      */
-    create: function(req, res) {
+    create: function (req, res) {
         const co = new ControllerOut(res);
-        coroutines.create(req,res)
-        .catch(error => {
-            sails.log.error("SampleController.create: " + error.message);
-            return co.error(error);
-        });
-
+        coroutines.create(req, res)
+            .catch(error => {
+                sails.log.error("SampleController.create: " + error.message);
+                return co.error(error);
+            });
     },
 
     /**
@@ -275,14 +281,13 @@ module.exports = {
      * @name findOne
      * @description - retrieve an existing sample
      */
-    findOne: function(req, res) {
+    findOne: function (req, res) {
         const co = new ControllerOut(res);
-        coroutines.findOne(req,res)
-        .catch(/* istanbul ignore next */ function(err) {
-            sails.log.error(err);
-            return co.error(err);
-        });
-
+        coroutines.findOne(req, res)
+            .catch(/* istanbul ignore next */ function (err) {
+                sails.log.error(err);
+                return co.error(err);
+            });
     },
 
     /**
@@ -293,13 +298,13 @@ module.exports = {
      * @name find
      * @description Find samples based on criteria provided in the request
      */
-    find: function(req, res) {
+    find: function (req, res) {
         const co = new ControllerOut(res);
-        coroutines.find(req,res)
-        .catch(/* istanbul ignore next */ function(err) {
-            sails.log.error(err);
-            return co.error(err);
-        });
+        coroutines.find(req, res)
+            .catch(/* istanbul ignore next */ function (err) {
+                sails.log.error(err);
+                return co.error(err);
+            });
     },
 
     /**
@@ -309,14 +314,13 @@ module.exports = {
      * @description - update an existing sample.
      *              Transaction-safe implementation
      */
-    update: function(req, res) {
+    update: function (req, res) {
         const co = new ControllerOut(res);
-        coroutines.update(req,res)
-        .catch(error => {
-            sails.log.error(error);
-            return co.error(error);
-        });
-
+        coroutines.update(req, res)
+            .catch(error => {
+                sails.log.error(error);
+                return co.error(error);
+            });
     },
 
     /**
@@ -325,16 +329,16 @@ module.exports = {
      * @name destroy
      * @description
      */
-    destroy: function(req, res) {
+    destroy: function (req, res) {
         const co = new ControllerOut(res);
-        coroutines.destroy(req,res,co)
-        .catch(err => {
-            if (err instanceof NonexistentResourceError) {
-                return res.json(200, { deleted: 0 });
-            }
-            sails.log.error(err);
-            return co.error(err);
-        });
+        coroutines.destroy(req, res, co)
+            .catch(err => {
+                if (err instanceof NonexistentResourceError) {
+                    return res.json(200, { deleted: 0 });
+                }
+                sails.log.error(err);
+                return co.error(err);
+            });
     },
 
     /**
@@ -342,27 +346,27 @@ module.exports = {
     * @name edit
     * @description retrieve all required models for editing/creating a Sample via client web-form
     */
-    edit: function(req, res) {
+    edit: function (req, res) {
         const co = new ControllerOut(res);
-        coroutines.edit(req,res)
-       .catch(err => {
-           sails.log.error(err);
-           return co.error(err);
-       });
+        coroutines.edit(req, res)
+            .catch(err => {
+                sails.log.error(err);
+                return co.error(err);
+            });
     },
 
-   /**
-   * @method
-   * @name getNextBiobankCode
-   * @description retrieve last biobank code for creating a Sample via client web-form
-   */
-    getNextBiobankCode: function(req, res) {
+    /**
+    * @method
+    * @name getNextBiobankCode
+    * @description retrieve last biobank code for creating a Sample via client web-form
+    */
+    getNextBiobankCode: function (req, res) {
         const co = new ControllerOut(res);
-        coroutines.getNextBiobankCode(req,res)
-      .catch(err => {
-          sails.log.error(err);
-          return co.error(err);
-      });
+        coroutines.getNextBiobankCode(req, res)
+            .catch(err => {
+                sails.log.error(err);
+                return co.error(err);
+            });
     },
 
     /**
@@ -370,12 +374,28 @@ module.exports = {
     * @name findByBiobankCode
     * @description retrieve last biobank code for creating a Sample via client web-form
     */
-    findByBiobankCode: function(req, res) {
+    findByBiobankCode: function (req, res) {
         const co = new ControllerOut(res);
-        coroutines.findByBiobankCode(req,res)
-       .catch(err => {
-           sails.log.error(err);
-           return co.error(err);
-       });
+        coroutines.findByBiobankCode(req, res)
+            .catch(err => {
+                sails.log.error(err);
+                return co.error(err);
+            });
+    },
+
+    /**
+    * GET /dataType/getInfoForBarChart
+    *
+    * @method
+    * @name getInfoForBarChart
+    * @description Find dataTypes based on criteria
+    */
+    getInfoForBarChart: function (req, res) {
+        const co = new ControllerOut(res);
+        coroutines.getInfoForBarChart(req, res, co)
+            .catch(/* istanbul ignore next */ function (err) {
+                sails.log.error(err);
+                return co.error(err);
+            });
     }
 };

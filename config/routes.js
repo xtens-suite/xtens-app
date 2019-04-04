@@ -42,6 +42,8 @@ module.exports.routes = {
 
     // Data Controller
     'GET /data/edit': {controller: 'data', action: 'edit'},
+    'GET /data/getInfoForBarChart': {controller: 'data', action: 'getInfoForBarChart'},
+
     /*
     'GET /data': {controller: 'data', action: 'find'},
     'POST /data': {controller: 'data', action: 'create'},
@@ -55,6 +57,7 @@ module.exports.routes = {
     // DataType Controller
     'GET /dataType/edit': {controller: 'dataType', action: 'edit'},
     'POST /graph': {controller:'dataType',action:'buildGraph'},
+    'GET /dataType/getDataForDashboard': {controller:'dataType',action:'getDataForDashboard'},
     // 'GET /graph/buildHierarchy':{controller:'dataType',action:'buildHierarchy'},
 
     // DataTypePrivileges Controller
@@ -96,12 +99,14 @@ module.exports.routes = {
     'GET /sample/edit': {controller: 'sample', action: 'edit'},
     'GET /sample/getNextBiobankCode': {controller: 'sample', action: 'getNextBiobankCode'},
     'GET /sample/findByBiobankCode': {controller: 'sample', action: 'findByBiobankCode'},
+    'GET /sample/getInfoForBarChart': {controller: 'sample', action: 'getInfoForBarChart'},
 
     // Subject Controller
     'GET /subject/edit': {controller: 'subject', action: 'edit'},
     'POST /subjectGraph': {controller:'subject',action:'createGraph'},
     'POST /subjectGraphSimple': {controller:'subject',action:'createGraphSimple'},
     'GET /subject/getNextSubjectCode': {controller: 'subject', action: 'getNextSubjectCode'},
+    'GET /subject/getInfoForBarChart': {controller: 'subject', action: 'getInfoForBarChart'},
 
     'GET /app': {
         controller: 'main',

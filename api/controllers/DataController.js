@@ -5,7 +5,7 @@
  * @help        :: See http://links.sailsjs.org/docs/controllers
  */
 /* jshint node: true */
-/* globals _, sails, Data, DataType, DataService, DataTypeService, SubjectService, OperatorService, SampleService, QueryService, LogDbService, TokenService, DataTypePrivileges */
+/* globals _, sails, Data, DataType, DataService, DataTypeService, SubjectService, OperatorService, SampleService, QueryService, TokenService, DataTypePrivileges */
 "use strict";
 const BluebirdPromise = require('bluebird');
 const ControllerOut = require("xtens-utils").ControllerOut;
@@ -110,7 +110,7 @@ const coroutines = {
         const operator = TokenService.getToken(req);
 
         let result = yield DataService.hasDataSensitive(data.id, DATA);
-        console.log(result,operator);
+        // console.log(result,operator);
         if (result.hasDataSensitive && !operator.canAccessSensitiveData) {
             throw new PrivilegesError("Authenticated user is not allowed to modify sensitive data");
         }
@@ -210,6 +210,22 @@ const coroutines = {
         return res.json(payload);
 
 
+    }),
+
+    getInfoForBarChart: BluebirdPromise.coroutine(function *(req, res) {
+        const dataTypeId = req.param('dataType');
+        let fieldName = req.param('fieldName');
+        const model = req.param('model');
+        const period = req.param('period');        
+
+        if (!fieldName) {
+            fieldName = "created_at";
+        }
+        // const operator = TokenService.getToken(req);
+
+        const results = yield crudManager.getInfoForBarChart(dataTypeId, fieldName, model, period);
+
+        return res.json(results);
     })
 };
 
@@ -316,6 +332,22 @@ module.exports = {
                 return co.error(err);
             });
 
+    },
+
+    /**
+    * GET /dataType/getInfoForBarChart
+    *
+    * @method
+    * @name getInfoForBarChart
+    * @description Find dataTypes based on criteria
+    */
+    getInfoForBarChart: function(req, res) {
+        const co = new ControllerOut(res);
+        coroutines.getInfoForBarChart(req, res, co)
+        .catch(/* istanbul ignore next */ function(err) {
+            sails.log.error(err);
+            return co.error(err);
+        });
     }
 
 };

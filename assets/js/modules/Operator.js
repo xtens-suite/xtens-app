@@ -4,9 +4,10 @@
     // dependencies
     var i18n = xtens.module('i18n').en;
     var router = xtens.router;
-    var Group = xtens.module('group');
+    // var Group = xtens.module('group');
     var AddressInformation = xtens.module("addressinformation");
-    var GroupsOperator =xtens.module('groupsOperator');
+    // var GroupsOperator =xtens.module('groupsOperator');
+    // var DashBoard =xtens.module('dashboard');
     var sexOptions = xtens.module('xtensconstants').SexOptions;
     var ModalDialog = xtens.module('xtensbootstrap').Views.ModalDialog;
 
@@ -342,7 +343,7 @@
             xtens.session.set("expiredPassword", false);
             var username = this.$('#username').val();
             var password = this.$('#password').val();
-
+            this.landingUrl = 'homepage';
             if (this.$('form').parsley().validate()) {
                 $.post('/login', {
                     identifier: username,
@@ -352,12 +353,17 @@
                         $(document).unbind('keyup');
                         var projects = xtens.session.get("projects");
                         if (xtens.session.get("isWheel")) {
+                            that.landingUrl = 'dashboard/admin';
                             xtens.session.set('activeProject', 'all');
-                            router.navigate('homepage', {trigger: true});
+                            router.navigate(that.landingUrl, {trigger: true});
                         }
                         else if (projects.length < 2 ) {
                             xtens.session.set('activeProject', projects[0].name);
-                            router.navigate('homepage', {trigger: true});
+                            var idProject = _.find(xtens.session.get('projects'), { 'name': xtens.session.get('activeProject')}).id;
+                            if ((xtens.session.get("isAdmin") && _.find(xtens.session.get('adminProjects'), function(p){ return p === idProject;})) ) {
+                                that.landingUrl = 'dashboard/'+xtens.session.get('activeProject');
+                            }
+                            router.navigate(that.landingUrl, {trigger: true});
                         }
                         else{
                             var modal = new ModalDialog({
@@ -380,7 +386,11 @@
                                     modal.hide();
                                     that.$modal.one('hidden.bs.modal', function (e) {
                                         modal.remove();
-                                        router.navigate('homepage', {trigger: true});
+                                        var idProject = _.find(xtens.session.get('projects'), { 'name': xtens.session.get('activeProject')}).id;
+                                        if ((xtens.session.get("isAdmin") && _.find(xtens.session.get('adminProjects'), function(p){ return p === idProject;})) ) {
+                                            that.landingUrl = 'dashboard/'+xtens.session.get('activeProject');
+                                        }
+                                        router.navigate(that.landingUrl, {trigger: true});
                                     });
 
                                 });

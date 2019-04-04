@@ -46,6 +46,7 @@ assets/bundles
 assets.json
 config/autoreload.js
 config/ssl/
+.vscode/
 .bowerrc
 
 ################################################

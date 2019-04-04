@@ -7,7 +7,7 @@
 /* jshint node: true */
 /* globals _, sails, DataType, DataTypeService, TokenService, Group, Project, SuperTypeService */
 "use strict";
-const ControllerOut = require("xtens-utils").ControllerOut, ValidationError = require('xtens-utils').Errors.ValidationError;
+const ControllerOut = require("xtens-utils").ControllerOut; const ValidationError = require('xtens-utils').Errors.ValidationError;
 const PrivilegesError = require('xtens-utils').Errors.PrivilegesError;
 const crudManager = sails.hooks.persistence.crudManager;
 const DbLog = sails.hooks.dblog.log;
@@ -24,29 +24,28 @@ const coroutines = {
     * @param{Response} res
     * @description coroutine for retrieval of a list of Data Types
     */
-    find: BluebirdPromise.coroutine(function *(req, res) {
+    find: BluebirdPromise.coroutine(function * (req, res) {
         const operator = TokenService.getToken(req);
         let query = DataType.find()
-        .where(actionUtil.parseCriteria(req))
-        .limit(actionUtil.parseLimit(req))
-        .skip(actionUtil.parseSkip(req))
-        .sort(actionUtil.parseSort(req));
+            .where(actionUtil.parseCriteria(req))
+            .limit(actionUtil.parseLimit(req))
+            .skip(actionUtil.parseSkip(req))
+            .sort(actionUtil.parseSort(req));
         if (!req.param('limit')) {
-            query.limit(1000);  // default limit for dataTypes
+            query.limit(1000); // default limit for dataTypes
         }
         if (!req.param('populate')) {
-            query.populate(['parents', 'superType']);  // by default populate only with 'parents' dataTypes and 'superType'
-        }
-        else {
+            query.populate(['parents', 'superType']); // by default populate only with 'parents' dataTypes and 'superType'
+        } else {
             query = actionUtil.populateRequest(query, req);
         }
-        //populateRequest does not support array params on integer attribute so if there is project param and it is an array, it is parsed "manually"
+        // populateRequest does not support array params on integer attribute so if there is project param and it is an array, it is parsed "manually"
         query = DataTypeService.parseProject(query);
         let dataTypes = yield BluebirdPromise.resolve(query);
 
         let groups = yield Group.find(operator.groups);
         let privilegeLevelGroups = _.uniq(_.flatten(_.map(groups, 'privilegeLevel')));
-        if(_.indexOf(privilegeLevelGroups, 'wheel') < 0){
+        if (_.indexOf(privilegeLevelGroups, 'wheel') < 0) {
             dataTypes = yield DataTypeService.filterDataTypes(operator.groups, dataTypes);
         }
 
@@ -60,28 +59,28 @@ const coroutines = {
     * @param{Response} res
     * @description coroutine for new DataType creation
     */
-    create: BluebirdPromise.coroutine(function *(req, res) {
+    create: BluebirdPromise.coroutine(function * (req, res) {
         const operator = TokenService.getToken(req);
         let dataType = req.allParams();
-      //if user tries to create a datatype in a project where is not ADMIN it will throw a Privilege error
+        // if user tries to create a datatype in a project where is not ADMIN it will throw a Privilege error
         let adminGroups = yield Group.find(operator.adminGroups).populate('projects');
         const adminProjects = _.uniq(_.flatten(_.map(_.flatten(_.map(adminGroups, 'projects')), 'id')));
-        if (!operator.isWheel && !_.find(adminProjects, function(dt){ return dt === _.parseInt(dataType.project);})) {
+        if (!operator.isWheel && !_.find(adminProjects, function (dt) { return dt === _.parseInt(dataType.project); })) {
             throw new PrivilegesError('User has not privilege as Admin on this project');
         }
 
         if (!dataType.name) dataType.name = dataType.superType.schema && dataType.superType.schema.name;
         if (!dataType.model) dataType.model = dataType.superType.schema && dataType.superType.schema.model;
-        if(dataType.parents){
-            const idParents = _.isObject(dataType.parents[0]) ? _.map(dataType.parents,'id') : dataType.parents;
+        if (dataType.parents) {
+            const idParents = _.isObject(dataType.parents[0]) ? _.map(dataType.parents, 'id') : dataType.parents;
             const idProject = _.isObject(dataType.project) ? dataType.project.id : dataType.project;
-            const parents = yield DataType.find({ id:idParents });
+            const parents = yield DataType.find({ id: idParents });
             const forbiddenParents = _.filter(parents, function (p) {
                 return p.project !== idProject;
             });
-            if (forbiddenParents.length > 0 ) {
-                let dataTypesName = _.map(forbiddenParents,'name').join(", "), dataTypesId = _.map(forbiddenParents,'id').join(", ");
-                let error = 'ValidationError - Cannot set ' + dataTypesName +' ( id: ['+ dataTypesId +'] ) as parents - different projects';
+            if (forbiddenParents.length > 0) {
+                let dataTypesName = _.map(forbiddenParents, 'name').join(", "); let dataTypesId = _.map(forbiddenParents, 'id').join(", ");
+                let error = 'ValidationError - Cannot set ' + dataTypesName + ' ( id: [' + dataTypesId + '] ) as parents - different projects';
                 throw new ValidationError(error);
             }
         }
@@ -95,7 +94,7 @@ const coroutines = {
 
         DbLog(logMessages.CREATE, "DataType", dataType.id, dataType.project, dataType.superType, operator.id);
 
-        //add edit privileges for manager and wheel groups of operator
+        // add edit privileges for manager and wheel groups of operator
         // let projectGroups= yield GroupService.getGroupsByProject(dataType.project);
         // let wheelGroups = _.map(_.where(projectGroups,{privilegeLevel:"wheel"}),'id');
         // projectGroups = _.map(projectGroups, 'id');
@@ -116,15 +115,15 @@ const coroutines = {
     * @param{Response} res
     * @description coroutine for existing DataType update
     */
-    update: BluebirdPromise.coroutine(function *(req, res) {
+    update: BluebirdPromise.coroutine(function * (req, res) {
         let dataType = req.allParams();
         const operator = TokenService.getToken(req);
-      //if user tries to update a datatype in a project where is not ADMIN it will throw a Privilege error
+        // if user tries to update a datatype in a project where is not ADMIN it will throw a Privilege error
         let adminGroups = yield Group.find(operator.adminGroups).populate('projects');
         const adminProjects = _.uniq(_.flatten(_.map(_.flatten(_.map(adminGroups, 'projects')), 'id')));
-        let adminDataTypes = yield DataType.find({project:adminProjects});
+        let adminDataTypes = yield DataType.find({ project: adminProjects });
 
-        if (!operator.isWheel && !_.find(adminDataTypes, function(dt){ return dt.id === _.parseInt(dataType.id);})) {
+        if (!operator.isWheel && !_.find(adminDataTypes, function (dt) { return dt.id === _.parseInt(dataType.id); })) {
             throw new PrivilegesError('User has not privilege as Admin on this project');
         }
 
@@ -134,16 +133,16 @@ const coroutines = {
 
         // Validate data type (schema included)
         const validationRes = DataTypeService.validate(dataType, true);
-        if(dataType.parents){
-            const idParents = _.isObject(dataType.parents[0]) ? _.map(dataType.parents,'id') : dataType.parents;
+        if (dataType.parents) {
+            const idParents = _.isObject(dataType.parents[0]) ? _.map(dataType.parents, 'id') : dataType.parents;
             const idProject = _.isObject(dataType.project) ? dataType.project.id : dataType.project;
-            const parents = yield DataType.find({ id:idParents });
+            const parents = yield DataType.find({ id: idParents });
             const forbiddenParents = _.filter(parents, function (p) {
                 return p.project !== idProject;
             });
-            if (forbiddenParents.length > 0 ) {
-                let dataTypesName = _.map(forbiddenParents,'name').join(", "), dataTypesId = _.map(forbiddenParents,'id').join(", ");
-                let error = 'ValidationError - Cannot set ' + dataTypesName +' ( id: ['+ dataTypesId +'] ) as parents - different projects';
+            if (forbiddenParents.length > 0) {
+                let dataTypesName = _.map(forbiddenParents, 'name').join(", "); let dataTypesId = _.map(forbiddenParents, 'id').join(", ");
+                let error = 'ValidationError - Cannot set ' + dataTypesName + ' ( id: [' + dataTypesId + '] ) as parents - different projects';
                 throw new ValidationError(error);
             }
         }
@@ -156,23 +155,23 @@ const coroutines = {
         qUpdate = actionUtil.populateRequest(qUpdate, req);
         let upDatatype = yield BluebirdPromise.resolve(qUpdate);
 
-        DbLog(logMessages.UPDATE, "DataType", dataType.id, dataType.project, dataType.superType, operator.id, {prevData: prevDataType, upData: upDatatype});
+        DbLog(logMessages.UPDATE, "DataType", dataType.id, dataType.project, dataType.superType, operator.id, { prevData: prevDataType, upData: upDatatype });
 
         sails.log(dataType);
         return res.json(dataType);
     }),
 
-    edit: BluebirdPromise.coroutine(function *(req, res) {
+    edit: BluebirdPromise.coroutine(function * (req, res) {
         const operator = TokenService.getToken(req);
         const params = req.allParams();
-        let isMultiProject, resObject = {};
+        let isMultiProject; let resObject = {};
         sails.log.info("DataTypeController.edit - Decoded ID is: " + operator.id);
 
         const projects = yield Project.find().sort('id ASC');
 
-        const dataTypes= yield DataType.find({ project:_.map(projects,'id') }).populate(['project','parents','superType']).sort('id ASC');
+        const dataTypes = yield DataType.find({ project: _.map(projects, 'id') }).populate(['project', 'parents', 'superType']).sort('id ASC');
         if (params.id) {
-            const dataType = _.find(dataTypes,{'id': parseInt(params.id)});
+            const dataType = _.find(dataTypes, { 'id': parseInt(params.id) });
             isMultiProject = yield SuperTypeService.isMultiProject(dataType.superType);
             resObject.isMultiProject = isMultiProject;
         }
@@ -181,19 +180,19 @@ const coroutines = {
         return res.json(resObject);
     }),
 
-    destroy: BluebirdPromise.coroutine(function *(req, res, co) {
+    destroy: BluebirdPromise.coroutine(function * (req, res, co) {
         const id = req.param('id');
         if (!id) {
-            return co.badRequest({message: 'Missing dataType ID on DELETE request'});
+            return co.badRequest({ message: 'Missing dataType ID on DELETE request' });
         }
-      //if user tries to destroy a datatype in a project where is not ADMIN it will throw a Privilege error
+        // if user tries to destroy a datatype in a project where is not ADMIN it will throw a Privilege error
         const operator = TokenService.getToken(req);
         sails.log.info("DataTypeController.destroy - Decoded ID is: " + operator.id);
         let adminGroups = yield Group.find(operator.adminGroups).populate('projects');
         const adminProjects = _.uniq(_.flatten(_.map(_.flatten(_.map(adminGroups, 'projects')), 'id')));
-        let adminDataTypes = yield DataType.find({project: adminProjects});
+        let adminDataTypes = yield DataType.find({ project: adminProjects });
 
-        if (!operator.isWheel && !_.find(adminDataTypes, function(dt){ return dt.id === _.parseInt(id);})) {
+        if (!operator.isWheel && !_.find(adminDataTypes, function (dt) { return dt.id === _.parseInt(id); })) {
             throw new PrivilegesError('User has not privilege as Admin on this project');
         }
 
@@ -203,13 +202,33 @@ const coroutines = {
 
         const deleted = yield crudManager.deleteDataType(id);
         if (deleted > 0) {
-            DbLog(logMessages.DELETE, "DataType", deletedDataType.id, deletedDataType.project, deletedDataType.superType.id, operator.id, {deletedData: JSON.stringify(deletedDataType)});
+            DbLog(logMessages.DELETE, "DataType", deletedDataType.id, deletedDataType.project, deletedDataType.superType.id, operator.id, { deletedData: JSON.stringify(deletedDataType) });
         }
-        return res.json({deleted: deleted});
+        return res.json({ deleted: deleted });
+    }),
+
+    getDataForDashboard: BluebirdPromise.coroutine(function * (req, res, co) {
+        const projectId = req.param('projectId');
+        // if (!projectId) {
+        //     return co.badRequest({message: 'Missing dataType ID on getDataForDashboard request'});
+        // }
+        const operator = TokenService.getToken(req);
+        let adminGroups = yield Group.find(operator.adminGroups).populate('projects');
+        const adminProjects = _.uniq(_.flatten(_.map(_.flatten(_.map(adminGroups, 'projects')), 'id')));
+
+        if (!operator.isWheel && !_.find(adminProjects, function (p) { return p === _.parseInt(projectId); })) {
+            throw new PrivilegesError('User has not privilege as Admin on this project');
+        }
+        const results = yield crudManager.getCountsForDashboard(projectId);
+        var params = {};
+        if (projectId) {
+            params = { project: projectId };
+        }
+        const dataTypeSource = yield DataType.find(params).populate('superType');
+        results.DataTypeSource = dataTypeSource;
+        return res.json(results);
     })
 };
-
-
 
 const DataTypeController = {
 
@@ -221,13 +240,13 @@ const DataTypeController = {
     * @name find
     * @description Find dataTypes based on criteria
     */
-    find: function(req, res) {
+    find: function (req, res) {
         const co = new ControllerOut(res);
         coroutines.find(req, res)
-        .catch(/* istanbul ignore next */ function(err) {
-            sails.log.error(err);
-            return co.error(err);
-        });
+            .catch(/* istanbul ignore next */ function (err) {
+                sails.log.error(err);
+                return co.error(err);
+            });
     },
 
     /**
@@ -235,13 +254,13 @@ const DataTypeController = {
     * @method
     * @name create
     */
-    create: function(req, res) {
+    create: function (req, res) {
         const co = new ControllerOut(res);
         coroutines.create(req, res)
-        .catch(err => {
-            sails.log.error(err);
-            return co.error(err);
-        });
+            .catch(err => {
+                sails.log.error(err);
+                return co.error(err);
+            });
     },
 
     /**
@@ -249,13 +268,13 @@ const DataTypeController = {
     * @method
     * @name update
     */
-    update: function(req, res) {
+    update: function (req, res) {
         const co = new ControllerOut(res);
         coroutines.update(req, res)
-        .catch(err => {
-            sails.log.error(err);
-            return co.error(err);
-        });
+            .catch(err => {
+                sails.log.error(err);
+                return co.error(err);
+            });
     },
 
     /**
@@ -263,15 +282,13 @@ const DataTypeController = {
     * @name destroy
     * @description DELETE /dataType/:id
     */
-    destroy: function(req, res) {
-
+    destroy: function (req, res) {
         let co = new ControllerOut(res);
-        coroutines.destroy(req,res,co)
-        .catch(/* istanbul ignore next */ function(err) {
-            sails.log(err);
-            return co.error(err);
-        });
-
+        coroutines.destroy(req, res, co)
+            .catch(/* istanbul ignore next */ function (err) {
+                sails.log(err);
+                return co.error(err);
+            });
     },
 
     /**
@@ -279,14 +296,29 @@ const DataTypeController = {
     * @name edit
     * @description return all the info required for a datatype edit
     */
-    edit: function(req, res) {
+    edit: function (req, res) {
         let co = new ControllerOut(res);
-        coroutines.edit(req,res)
-        .catch(/* istanbul ignore next */ function(err) {
-            sails.log(err);
-            return co.error(err);
-        });
+        coroutines.edit(req, res)
+            .catch(/* istanbul ignore next */ function (err) {
+                sails.log(err);
+                return co.error(err);
+            });
+    },
 
+    /**
+    * GET /dataType/getDataForDashboard
+    *
+    * @method
+    * @name getDataForDashboard
+    * @description Find dataTypes based on criteria
+    */
+    getDataForDashboard: function (req, res) {
+        const co = new ControllerOut(res);
+        coroutines.getDataForDashboard(req, res, co)
+            .catch(/* istanbul ignore next */ function (err) {
+                sails.log.error(err);
+                return co.error(err);
+            });
     },
 
     /**
@@ -295,77 +327,72 @@ const DataTypeController = {
     * @description generate and visualize the datatype graph given a root datatype.
     */
 
-    buildGraph : function(req,res) {
+    buildGraph: function (req, res) {
         const idGroups = TokenService.getToken(req).groups;
         const idDataType = req.param("idDataType");
         const fetchDataTypeTree = sails.hooks['persistence'].getDatabaseManager().recursiveQueries.fetchDataTypeTree;
         sails.log(req.param("idDataType"));
 
-        return Group.find({id:idGroups}).populate('projects').then(function (groups) {
-
-            let projectsGroups = _.map(groups, function (g) { return _.map(g.projects,'id'); });
+        return Group.find({ id: idGroups }).populate('projects').then(function (groups) {
+            let projectsGroups = _.map(groups, function (g) { return _.map(g.projects, 'id'); });
             projectsGroups = _.uniq(_.flatten(projectsGroups));
 
-            return DataType.findOne({id: idDataType, project: projectsGroups});
+            return DataType.findOne({ id: idDataType, project: projectsGroups });
         })
-        .then(function(result) {
-            const id = result.id;
-            const name = result.name;
+            .then(function (result) {
+                const id = result.id;
+                const name = result.name;
 
-            const template = result.model;
+                const template = result.model;
 
-            // This query returns the parent-child associations among the datatypes
-            function dataTypeTreeCb (err, resp) {
+                // This query returns the parent-child associations among the datatypes
+                function dataTypeTreeCb (err, resp) {
+                    var links = []; var loops = [];
 
-                var links= [],loops = [];
-
-                // if there aren't children do not print any link
-                if(resp.rows.length === 0) {
-                    links.push({
-                        'source': name,
-                        'depth': 0,
-                        'target': null,
-                        'source_template': template,
-                        'target_template': null
-                    });
-                }
-                // populate the links array
-                for(let i =0; i<resp.rows.length; i++) {
-
-                    if(resp.rows[i].cycle === false){
+                    // if there aren't children do not print any link
+                    if (resp.rows.length === 0) {
                         links.push({
-                            'source':resp.rows[i].parentname,
-                            'target':resp.rows[i].childname,
-                            'depth':resp.rows[i].depth,
-                            'source_template':resp.rows[i].parenttemplate,
-                            'target_template':resp.rows[i].childtemplate,
-                            'cycle':resp.rows[i].cycle
+                            'source': name,
+                            'depth': 0,
+                            'target': null,
+                            'source_template': template,
+                            'target_template': null
                         });
                     }
-                    else {
-                        loops.push({
-                            'source':resp.rows[i].parentname,
-                            'target':resp.rows[i].childname,
-                            'depth':resp.rows[i].depth,
-                            'source_template':resp.rows[i].parenttemplate,
-                            'target_template':resp.rows[i].childtemplate,
-                            'cycle':resp.rows[i].cycle
-                        });
+                    // populate the links array
+                    for (let i = 0; i < resp.rows.length; i++) {
+                        if (resp.rows[i].cycle === false) {
+                            links.push({
+                                'source': resp.rows[i].parentname,
+                                'target': resp.rows[i].childname,
+                                'depth': resp.rows[i].depth,
+                                'source_template': resp.rows[i].parenttemplate,
+                                'target_template': resp.rows[i].childtemplate,
+                                'cycle': resp.rows[i].cycle
+                            });
+                        } else {
+                            loops.push({
+                                'source': resp.rows[i].parentname,
+                                'target': resp.rows[i].childname,
+                                'depth': resp.rows[i].depth,
+                                'source_template': resp.rows[i].parenttemplate,
+                                'target_template': resp.rows[i].childtemplate,
+                                'cycle': resp.rows[i].cycle
+                            });
+                        }
                     }
+
+                    const json = {
+                        'links': links,
+                        'loops': loops
+                    };
+                    sails.log(json);
+                    return res.json(json);
                 }
 
-                const json = {
-                    'links': links,
-                    'loops': loops
-                };
-                sails.log(json);
-                return res.json(json);
-            }
-
-            fetchDataTypeTree(id, dataTypeTreeCb);
-        });
+                fetchDataTypeTree(id, dataTypeTreeCb);
+            });
     }
-
 
 };
 

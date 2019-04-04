@@ -668,7 +668,7 @@
                 beforeSend: function() { $('.loader-gif').css("display","block"); },
                 success: function (res, textStatus, jqXHR) {
                     //Get parentWidth
-                    var parentWidth=d3.select('#main');
+                    var parentWidth = d3.select('#main')._groups[0];
                     // clean the previous graph if present
                     d3.select("#data-type-graph")
                     .remove();
@@ -689,26 +689,19 @@
                     maxDepth=findMaxDepth(links);
                     // set margins, dynamic width and height of the svg container
                     var margin = {top: 40, right: 120, bottom: 40, left: 120},
-                        width = parentWidth[0][0].offsetWidth - margin.left - margin.right,
+                        width = parentWidth[0].offsetWidth - margin.left - margin.right,
                         height = (180*maxDepth) - margin.top - margin.bottom;
 
                     // generate a data hierarchy tree
-                    var tree = d3.layout.tree()
-                    .size([height, width]);
+                    var tree = d3.tree().size([height, width]);
 
-                    //function to draw the slanted arcs
-                    var diagonal = d3.svg.diagonal()
-                    .projection(function(d) {
-                        return [d.x, d.y-39];
-                    }
-                               );
-
-                               // create the svg container
+                    // create the svg container
                     var svg = d3.select("#main").append("svg")
                                .attr("id","data-type-graph")
                                .attr("width", width + margin.left + margin.right)
                                .attr("height", height + margin.top + margin.bottom)
                                .attr("overflow-y","auto")
+                               .style("margin-top","2vh")
                                .append("g")
                                .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
@@ -716,9 +709,7 @@
 
                     var nodesByName = {};
 
-                    // console.log(links);
-
-                               // Create nodes for each unique source and target.
+                    // Create nodes for each unique source and target.
                     links.forEach(function(link) {
                         var parent,child;
                         if (link.target !== null){
@@ -731,38 +722,34 @@
                         }
                         if (parent.children) parent.children.push(child);
                         else parent.children = [child];
-
-
-
-                    }
-                                            );
+                    });
                                             //Define countDepth to count nodes for every depth
-                    var index,i1;
+
                     var countDepth = new Array(links.length);
 
 
-                                            // find the root node
+                    // initialize countDepth to 0
                     for(var i=0;i<links.length;i++){
-                        if(links[i].source.name === nameDatatype ){
-                            index = i;
-                        }
-                        i1=links[i].depth;
                         countDepth[i]=0;
                     }
 
-                                            //generate the tree
-                    var nodes = tree.nodes(links[0].source);
-                    nodes =_.uniq(nodes,'name');
-                    // console.log(nodes);
+                    //generate the tree
+                    var treeRoot = d3.hierarchy(links[0].source)
+                    tree(treeRoot);
+                    // nodes
+                    var nodes = treeRoot.descendants();
+                    nodes = _.uniq(nodes, function(n) {return n.data.name;});
+                    // links
+                    var linkss = treeRoot.links();
+                    linkss = _.uniq(linkss, function(l) {return l.source.data.name && l.target.data.name;});
 
-
-                                            //Count nodes/depth
+                    //Count nodes/depth
                     nodes.forEach(function(d){
                         countDepth[d.depth] = countDepth[d.depth] + 1;
                     });
 
                     var c= new Array(links.length);
-                                            // for each node define its position dynamically
+                    // for each node define its position dynamically
                     nodes.forEach(function(d){
 
                         d.y= d.depth*150;
@@ -772,12 +759,11 @@
                             c[d.depth] = c[d.depth] + 1 ;
                             d.x= (( c[d.depth] / countDepth[d.depth] ) * width - ( 1 / countDepth[d.depth ]) * width / 2 );
                         }
-
                     });
 
                                             // define the links format/appereance
                     svg.append("svg:defs").selectAll("marker")
-                                            .data(links)
+                                            .data(linkss)
                                             .enter().append("svg:marker")
                                             .attr("id","arrowhead")
                                             .attr("viewBox", "0 -5 10 10")
@@ -793,18 +779,23 @@
 
                                             //draw the links
                     svg.selectAll(".link")
-                                            .data(links.filter(function(d){return d.target.name;}))
+                                            .data(linkss.filter(function(d){return d.target.data.name;}))
                                             .enter().append("path")
                                             .attr("class", "link")
                                             .attr("marker-end","url(#arrowhead)")
-                                            .attr("d",diagonal);
+                                            .attr("d",function(d) {
+                                                return "M" + d.source.x + "," + d.source.y
+                                                  + "C" + d.source.x + "," + (d.source.y + d.target.y) / 2
+                                                  + " " + d.target.x + "," +  (d.source.y + d.target.y) / 2
+                                                  + " " + d.target.x + "," + d.target.y;
+                                            });
 
                                             // draw the nodes
                     svg.selectAll(".node")
-                                            .data(nodes.filter(function(d){return d.name;}))
+                                            .data(nodes.filter(function(d){return d.data.name;}))
                                             .enter().append("ellipse")
                                             .attr("id",function(d){
-                                                var arr = d.name.split(" ");
+                                                var arr = d.data.name.split(" ");
                                                 return arr[arr.length-1];
                                             })
                                             .attr("class", "node")
@@ -818,8 +809,8 @@
                                             .data(nodes)
                                             .enter().append("text")
                                             .each(function (d) {
-                                                if(d.name !== null){
-                                                    var arr = d.name.split(" ");
+                                                if(d.data.name !== null){
+                                                    var arr = d.data.name.split(" ");
                                                     if (arr !== undefined) {
                                                         for (var i = 0; i < arr.length; i++) {
                                                             d3.select(this).append("tspan")

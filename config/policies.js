@@ -30,6 +30,21 @@ module.exports.policies = {
         '*': true
     },
 
+    DataController: {
+        '*': ['bearerAuth', 'expiredPassword'],
+        'getInfoForBarChart': ['bearerAuth', 'expiredPassword', 'isAdmin']
+    },
+
+    SampleController: {
+        '*': ['bearerAuth', 'expiredPassword'],
+        'getInfoForBarChart': ['bearerAuth', 'expiredPassword', 'isAdmin']
+    },
+
+    SubjectController: {
+        '*': ['bearerAuth', 'expiredPassword'],
+        'getInfoForBarChart': ['bearerAuth', 'expiredPassword', 'isAdmin']
+    },
+
     GroupController: {
         '*': ['bearerAuth', 'expiredPassword', 'isWheel'],
         find: ['bearerAuth', 'expiredPassword', 'isAdmin'],
@@ -62,7 +77,8 @@ module.exports.policies = {
     DataTypeController: {
         '*':  ['bearerAuth', 'expiredPassword', 'isAdmin'],
         find: ['bearerAuth', 'expiredPassword'],
-        'edit':  ['bearerAuth', 'expiredPassword', 'isAdmin']
+        'edit':  ['bearerAuth', 'expiredPassword', 'isAdmin'],
+        'getDataForDashboard': ['bearerAuth', 'expiredPassword', 'isAdmin']
     },
 
     SuperTypeController: {

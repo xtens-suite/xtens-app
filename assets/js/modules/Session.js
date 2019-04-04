@@ -152,6 +152,17 @@
                 login: xtens.session.get('login')
             }));
 
+            if (window.matchMedia("(max-width: 1438px)").matches) {
+              /* the viewport is at least 1438 pixels wide */
+                $('#sidebar').addClass('active');
+                $('#sidebarCollapse').addClass('active');
+
+            } else {
+              /* the viewport is less than 1438 pixels wide */
+                $('#sidebarCollapse').removeClass('active');
+                $('#sidebar').removeClass('active');
+            }
+            this.ToggleTitleMenu();
 
             $('#sidebarCollapse').on('click', function () {
                 $('#sidebar').toggleClass('active');
@@ -161,7 +172,7 @@
         },
 
         ToggleTitleMenu : function () {
-            if ($('#sidebarCollapse').hasClass( "active" )) {
+            if (!$('#sidebarCollapse').hasClass( "active" )) {
                 $('.title-menu-cnt').fadeIn( "slow", "linear",  function() {
                     $('.title-menu-cnt').attr("style", "display: block !important");
                 });

@@ -61,7 +61,7 @@ var jsFilesToInject = [
     'dependencies/**/buttons.colVis.js',
     'dependencies/**/async.js',
     'dependencies/**/d3.js',
-    'dependencies/d3-tip/index.js',
+    'dependencies/**/d3-tip.js',
     'dependencies/**/Sortable.js',
     'dependencies/**/JsBarcode.all.js',
     '/dependencies/**/bootstrap-select.js',
@@ -100,7 +100,8 @@ var jsFilesToInject = [
     'js/modules/Sample.js',
     'js/modules/AdminAssociation.js',
     'js/modules/SuperType.js',
-    'js/modules/Query.js'
+    'js/modules/Query.js',
+    'js/modules/DashBoard.js'
 
     // All of the rest of your client-side js files
     // will be injected here in no particular order.

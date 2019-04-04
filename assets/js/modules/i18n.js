@@ -268,6 +268,9 @@
         "arrival-code": "Arrival Code",
         "anatomical-position": "Anatomical Position",
         "new-derivative-sample": "New Derivative Sample",
+        /* views/templates/sample-list */
+        "field": "Field Date",
+        "period": "Period Filter",
         /* view/templates/biobank-edit */
         "new-biobank": "New Biobank",
         "biobank-manager": "Biobank Manager",

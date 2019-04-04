@@ -14,6 +14,7 @@
     var SuperType = xtens.module("supertype");
     var Query = xtens.module("query");
     var Operator = xtens.module("operator");
+    var DashBoard = xtens.module("dashboard");
     var Daemon = xtens.module("daemon");
     var Group = xtens.module("group");
     var AdminAssociation = xtens.module("adminassociation");
@@ -118,7 +119,8 @@
             "file-download/:id": "downloadFile",
             "data/dedicated": "dedicatedDataManagement",
             "getFromBarCode": "getFromBarCode",
-            "getFromBarCode/": "getFromBarCode"
+            "getFromBarCode/": "getFromBarCode",
+            "dashboard/:project":"dashboard"
         },
 
         publicRoutes: ["login"],
@@ -533,6 +535,27 @@
 
         homepage:function() {
             this.loadView(new Operator.Views.Homepage());
+        },
+
+        dashboard:function(project) {
+            var that = this;
+            var activeProject = xtens.session.get('activeProject') !== 'all' ? _.find(xtens.session.get('projects'), { 'name': xtens.session.get('activeProject')}).id : "";
+
+            $.ajax({
+                url: '/dataType/getDataForDashboard?',
+                type: 'GET',
+                headers: {
+                    'Authorization': 'Bearer ' + xtens.session.get("accessToken")
+                },
+                data: {projectId:activeProject},
+                contentType: 'application/json',
+                success: function(results) {
+                    that.loadView(new DashBoard.Views.HomePage(results));
+                },
+                error: function(err) {
+                    xtens.error(err);
+                }
+            });
         },
 
         logIn: function() {

@@ -152,10 +152,6 @@ ul.CTAs a {
   margin-bottom: 5px;
 }
 
-.title-menu-cnt {
-  color: #29406c;
-  display: none;
-}
 .title-menu-cnt-login {
   color: #29406c;
   margin-left: 1em;
@@ -208,13 +204,19 @@ ul.CTAs a {
 ----------------------------------------------------- */
 @media (min-width: 1439px) {
   .title-menu-cnt {
-    display: none !important; 
+    color: #29406c;
+    display: none;
   }
 }
 @media (max-width: 1438px) {
   #sidebar {
     margin-left: -250px;
     transform: rotateY(90deg);
+  }
+
+  .title-menu-cnt {
+    color: #29406c;
+    display: block;
   }
 
   #sidebar.active {
@@ -232,12 +234,6 @@ ul.CTAs a {
 
   #sidebarCollapse.active span {
     margin: 0 auto;
-  }
-
-  .title-menu-cnt {
-    color: #29406c;
-    margin-left: 1em;
-    display: block !important;
   }
 
   #sidebarCollapse.active span:first-of-type {
