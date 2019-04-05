@@ -347,6 +347,9 @@ const DataTypeController = {
 
                 // This query returns the parent-child associations among the datatypes
                 function dataTypeTreeCb (err, resp) {
+                    if (err) {
+                        throw new Error(err);
+                    }
                     var links = []; var loops = [];
 
                     // if there aren't children do not print any link
