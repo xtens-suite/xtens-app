@@ -2,7 +2,7 @@
  * @author  Massimiliano Izzo
  * @description This file conatins all the Backbone classes for handling Samples
  */
-(function(xtens, Sample) {
+(function (xtens, Sample) {
     var useFormattedNames = xtens.module("xtensconstants").useFormattedMetadataFieldNames;
     var Constants = xtens.module("xtensconstants").Constants;
     var i18n = xtens.module("i18n").en;
@@ -21,7 +21,6 @@
         DNA: '02',
         Fluid: '03'
     };
-
 
     Sample.Model = Backbone.Model.extend({
         urlRoot: '/sample'
@@ -51,23 +50,23 @@
                         value: null
                     }
                 },
-                initialize: function($el) {
+                initialize: function ($el) {
                     $el.select2({
                         placeholder: i18n('please-select')
                     });
                 },
-                getVal: function($el, ev, options) {
+                getVal: function ($el, ev, options) {
                     var value = parseInt($el.val());
-                    value ? $('#editDonor').prop('disabled',false) : null;
+                    value ? $('#editDonor').prop('disabled', false) : null;
                     return _.isNaN(value) ? null : value;
-          // return _.findWhere(options.view.dataTypes, {id: value });
+                    // return _.findWhere(options.view.dataTypes, {id: value });
                 },
-                onGet: function(val, options) {
-          // if you get the whole DataType object you must retrieve the ID
+                onGet: function (val, options) {
+                    // if you get the whole DataType object you must retrieve the ID
                     if (_.isObject(val)) {
                         return (val && val.id);
                     }
-          // otherwise you've already the ID
+                    // otherwise you've already the ID
                     else {
                         return val;
                     }
@@ -76,14 +75,14 @@
 
             '#owner': {
                 observe: 'owner',
-                initialize: function($el) {
-                    $el.select2({placeholder: i18n("please-select") });
+                initialize: function ($el) {
+                    $el.select2({ placeholder: i18n("please-select") });
                 },
                 selectOptions: {
-                    collection: function() {
+                    collection: function () {
                         var coll = [];
-                        _.each(this.operators, function(op){
-                            coll.push({label:op.lastName + ' ' + op.firstName ,value:op.id});
+                        _.each(this.operators, function (op) {
+                            coll.push({ label: op.lastName + ' ' + op.firstName, value: op.id });
                         });
                         return coll;
                     },
@@ -92,7 +91,7 @@
                         value: null
                     }
                 },
-                onGet: function(val) {
+                onGet: function (val) {
                     return val && val.id;
                 }
             },
@@ -108,18 +107,18 @@
                         value: null
                     }
                 },
-                initialize: function($el) {
+                initialize: function ($el) {
                     $el.select2({
                         placeholder: i18n('please-select')
                     });
                 },
-                getVal: function($el, ev, options) {
+                getVal: function ($el, ev, options) {
                     var value = parseInt($el.val());
                     return _.findWhere(options.view.biobanks, {
                         id: value
                     });
                 },
-                onGet: function(val, options) {
+                onGet: function (val, options) {
                     return (val && val.id);
                 }
             },
@@ -187,7 +186,7 @@
 
             '#tags': {
                 observe: 'tags',
-                getVal: function($el, ev, option) {
+                getVal: function ($el, ev, option) {
                     return $el.val().split(",");
                 }
             },
@@ -198,7 +197,7 @@
 
         },
 
-        initialize: function(options) {
+        initialize: function (options) {
             _.bindAll(this, 'fetchDonorsOnSuccess');
             $('#main').html(this.el);
             this.template = JST["views/templates/sample-edit.ejs"];
@@ -215,7 +214,7 @@
                     biobank: this.biobanks[0]
                 });
             }
-            _.each(["donor", "parentSample"], function(parent) {
+            _.each(["donor", "parentSample"], function (parent) {
                 if (options[parent]) {
                     this.model.set(parent, _.isArray() ? options[parent] : [options[parent]]);
                 }
@@ -225,10 +224,9 @@
             if ($('#biobank-code')[0].value && $('#biobank-code')[0].value != "") {
                 $("#barcode").JsBarcode($('#biobank-code')[0].value);
             }
-            $('#biobank-code').on('input',function (e) {
+            $('#biobank-code').on('input', function (e) {
                 $("#barcode").JsBarcode(e.currentTarget.value);
             });
-
         },
 
         events: {
@@ -246,7 +244,7 @@
          * @param {event} - the form submission event
          * @return {false} - to suppress the HTML form submission
          */
-        saveSample: function(ev) {
+        saveSample: function (ev) {
             this.savingSample = true;
             var targetRoute = $(ev.currentTarget).data('targetRoute') || 'samples';
 
@@ -265,8 +263,7 @@
                 this.model.get("childrenData") && this.model.get("childrenData").length > 0 ? this.model.set("childrenData", _.map(this.model.get("childrenData"), "id")) : null;
 
                 this.model.save(null, {
-                    success: function(data) {
-
+                    success: function (data) {
                         if (that.modal) {
                             that.modal.hide();
                         }
@@ -278,20 +275,19 @@
                         $('.modal-header').addClass('alert-success');
                         modal.show();
 
-                        setTimeout(function() {
+                        setTimeout(function () {
                             modal.hide();
                         }, 1200);
                         $('.modal-cnt').one('hidden.bs.modal', function (e) {
                             modal.remove();
                             that.savingSample = false;
-
-                            xtens.router.navigate(targetRoute, {
-                                trigger: true
-                            });
+                            window.history.back();
+                            // xtens.router.navigate(targetRoute, {
+                            //     trigger: true
+                            // });
                         });
-
                     },
-                    error: function(model, res) {
+                    error: function (model, res) {
                         that.savingSample = false;
                         xtens.error(res);
                     }
@@ -300,7 +296,7 @@
             return false;
         },
 
-        deleteSample: function(ev) {
+        deleteSample: function (ev) {
             this.savingSample = true;
 
             ev.preventDefault();
@@ -320,7 +316,7 @@
             this.$modal.append(modal.render().el);
             modal.show();
 
-            $('#confirm').click(function(e) {
+            $('#confirm').click(function (e) {
                 modal.hide();
                 that.$modal.one('hidden.bs.modal', function (e) {
                     e.preventDefault();
@@ -328,7 +324,7 @@
                     var targetRoute = $(ev.currentTarget).data('targetRoute') || 'samples';
 
                     that.model.destroy({
-                        success: function(model, res) {
+                        success: function (model, res) {
                             $('.waiting-modal').modal('hide');
 
                             modal.template = JST["views/templates/dialog-bootstrap.ejs"];
@@ -337,18 +333,19 @@
                             that.$modal.append(modal.render().el);
                             $('.modal-header').addClass('alert-success');
                             modal.show();
-                            setTimeout(function() {
+                            setTimeout(function () {
                                 modal.hide();
                             }, 1200);
                             that.$modal.one('hidden.bs.modal', function (e) {
                                 this.savingSample = false;
                                 modal.remove();
-                                xtens.router.navigate(targetRoute, {
-                                    trigger: true
-                                });
+                                window.history.back();
+                                // xtens.router.navigate(targetRoute, {
+                                //     trigger: true
+                                // });
                             });
                         },
-                        error: function(model, res) {
+                        error: function (model, res) {
                             this.savingSample = false;
                             xtens.error(res);
                         }
@@ -356,23 +353,21 @@
                 });
                 return false;
             });
-
         },
 
-      /**
-       * @method
-       * @name dataTypeOnChange
-       */
+        /**
+         * @method
+         * @name dataTypeOnChange
+         */
 
-        dataTypeOnChange: function() {
+        dataTypeOnChange: function () {
             if (!this.savingSample) {
-
                 var that = this;
                 Data.Views.Edit.prototype.dataTypeOnChange.call(this);
-                var typeName = this.$('#data-type :selected').text(),
-                    parentSample = this.model.get("parentSample") && this.model.get("parentSample").length > 0 ? this.model.get("parentSample")[0].biobankCode : null,
-                    biobank = this.model.get("biobank").id;
-                var type = _.find(this.dataTypes, function(dt){ return dt.name === typeName;});
+                var typeName = this.$('#data-type :selected').text();
+                var parentSample = this.model.get("parentSample") && this.model.get("parentSample").length > 0 ? this.model.get("parentSample")[0].biobankCode : null;
+                var biobank = this.model.get("biobank").id;
+                var type = _.find(this.dataTypes, function (dt) { return dt.name === typeName; });
                 var params = {
                     sample: {
                         type: type.id,
@@ -389,11 +384,11 @@
                     },
                     data: params,
                     contentType: 'application/json',
-                    success: function(result) {
+                    success: function (result) {
                         that.model.set('biobankCode', result);
                         $("#barcode").JsBarcode(result);
                     },
-                    error: function(err) {
+                    error: function (err) {
                         xtens.error(err);
                     }
                 });
@@ -402,7 +397,6 @@
                     this.fetchDonorsOnSuccess(this.subjects, $('#donor'));
                 }
             }
-
         },
 
         printBarCode: function () {
@@ -420,22 +414,22 @@
             newWndw.close();
         },
 
-      /**
-       * @method
-       * @name editDonor
-       *
-       */
-        editDonor: function(ev) {
-            var donors = new Subject.List(),
-                that = this;
-            var idProject = xtens.session.get('activeProject') !== 'all' ? _.find(xtens.session.get('projects'),function (p) { return p.name === xtens.session.get('activeProject'); }).id : undefined;
+        /**
+         * @method
+         * @name editDonor
+         *
+         */
+        editDonor: function (ev) {
+            var donors = new Subject.List();
+            var that = this;
+            var idProject = xtens.session.get('activeProject') !== 'all' ? _.find(xtens.session.get('projects'), function (p) { return p.name === xtens.session.get('activeProject'); }).id : undefined;
 
             donors.fetch({
                 data: $.param({
                     select: JSON.stringify(["id", "code", "personalInfo", "type"]),
                     project: idProject
                 }),
-                success: function(donors) {
+                success: function (donors) {
                     that.fetchDonorsOnSuccess(donors, ev.target);
                 },
                 error: xtens.error
@@ -443,10 +437,10 @@
             return false;
         },
 
-        fetchDonorsOnSuccess: function(donors, targetElem) {
+        fetchDonorsOnSuccess: function (donors, targetElem) {
             this.subjects = donors.models ? donors.toJSON() : donors;
-            var dataTypeSample = _.find(this.dataTypes, {id: _.parseInt($('#data-type').val())});
-            if(dataTypeSample){
+            var dataTypeSample = _.find(this.dataTypes, { id: _.parseInt($('#data-type').val()) });
+            if (dataTypeSample) {
                 this.filteredSubjects = _.filter(this.subjects, function (subj) {
                     return subj.project === dataTypeSample.project;
                 });
@@ -455,11 +449,11 @@
             var $select = $('<select>').addClass('form-control').attr({
                 'id': 'donor',
                 'name': 'donor'
-            }).prop('required',true);
+            }).prop('required', true);
 
             var parent = targetElem.parentNode ? targetElem.parentNode : targetElem.closest('.form-group')[0];
 
-      // remove all subelements but the label
+            // remove all subelements but the label
             while (parent.children.length > 1) {
                 parent.removeChild(parent.lastChild);
             }
@@ -471,10 +465,10 @@
             this.addBinding(null, '#donor', {
                 observe: 'donor',
                 selectOptions: {
-                    collection: function() {
-                        return this.filteredSubjects.map(function(subj) {
+                    collection: function () {
+                        return this.filteredSubjects.map(function (subj) {
                             var label = subj.given_name && subj.surname ? subj.code + ": " + subj.surname +
-                " " + subj.given_name : subj.code;
+                                " " + subj.given_name : subj.code;
                             return {
                                 label: label,
                                 value: subj.id
@@ -486,18 +480,18 @@
                         value: null
                     }
                 },
-                initialize: function($el) {
+                initialize: function ($el) {
                     $el.select2({
                         placeholder: i18n('please-select')
                     });
                 },
-                getVal: function($el, ev, options) {
+                getVal: function ($el, ev, options) {
                     var value = parseInt($el.val());
                     return _.filter(options.view.subjects, {
                         id: value
                     });
                 },
-                onGet: function(val, options) {
+                onGet: function (val, options) {
                     return (val && val.id);
                 }
             });
@@ -506,26 +500,26 @@
 
     });
 
-  /**
-   * @class
-   * @name Sample.Views.Details
-   * @extends Data.Views.Details
-   * @description view containing the details (metadata and files) of a Sample (Sample.Model) instance
-   */
+    /**
+     * @class
+     * @name Sample.Views.Details
+     * @extends Data.Views.Details
+     * @description view containing the details (metadata and files) of a Sample (Sample.Model) instance
+     */
     Sample.Views.Details = Data.Views.Details.fullExtend({
 
-      /**
-       * @method
-       * @name initialize
-       */
-        initialize: function(options) {
+        /**
+         * @method
+         * @name initialize
+         */
+        initialize: function (options) {
             $("#main").html(this.el);
             this.template = JST["views/templates/sample-details.ejs"];
             this.fields = options.fields;
             this.render();
         },
 
-        render: function() {
+        render: function () {
             // var dataType = new DataTypeModel(this.model.get("type"));
             // var superType = new SuperTypeModel(this.model.get("type").superType);
 
@@ -539,7 +533,7 @@
             }));
 
             if (MISSING_VALUE_ALERT) {
-                this.$('div[name="metadata-value"]').filter(function() {
+                this.$('div[name="metadata-value"]').filter(function () {
                     return $(this).text().trim() === '';
                 }).addClass("text-warning").html(i18n("missing-value"));
             }
@@ -558,7 +552,7 @@
             'click #newSample': 'openNewSampleView'
         },
 
-        initialize: function(options) {
+        initialize: function (options) {
             $("#main").html(this.el);
             this.dataTypes = options.dataTypes;
             this.samples = options.samples;
@@ -575,16 +569,17 @@
             this.render();
         },
 
-        addLinksToModels: function() {
-            _.each(this.samples.models, function(sample) {
-                var privilege = _.find(this.dataTypePrivileges, function(model) {
+        addLinksToModels: function () {
+            _.each(this.samples.models, function (sample) {
+                var privilege = _.find(this.dataTypePrivileges, function (model) {
                     return model.get('dataType') === sample.get("type");
                 });
                 if (privilege && privilege.get('privilegeLevel') === "edit") {
                     sample.set("editLink", "#/samples/edit/" + sample.id);
                 }
-                if(privilege && privilege.get('privilegeLevel') !== "view_overview" ){
-                    sample.set("detailsLink", "#/samples/details/" + sample.id);}
+                if (privilege && privilege.get('privilegeLevel') !== "view_overview") {
+                    sample.set("detailsLink", "#/samples/details/" + sample.id);
+                }
                 var typeId = sample.get("type");
                 var type = this.dataTypes.get(typeId);
                 if (type && type.get("children") && type.get("children").length > 0) {
@@ -608,8 +603,7 @@
             }, this);
         },
 
-        render: function(options) {
-
+        render: function (options) {
             this.addLinksToModels();
             this.$el.html(this.template({
                 __: i18n,
@@ -635,23 +629,23 @@
             return this;
         },
 
-        filterSamples: function(opt){
+        filterSamples: function (opt) {
             var rex = opt && opt.projects ? new RegExp(opt.projects) : new RegExp(xtens.session.get('activeProject'));
 
-            if(rex =="/all/"){this.clearFilter();}else{
+            if (rex == "/all/") { this.clearFilter(); } else {
                 $('.content').hide();
-                $('.content').filter(function() {
+                $('.content').filter(function () {
                     return rex.test($(this).text());
                 }).show();
             }
-            this.headers.notFiltered = $('tr').filter(function() { return $(this).css('display') !== 'none'; }).length - 1;
+            this.headers.notFiltered = $('tr').filter(function () { return $(this).css('display') !== 'none'; }).length - 1;
         },
 
-        clearFilter: function(){
+        clearFilter: function () {
             // $('#project-selector').val('');
             $('.content').show();
         },
-        changePage: function(ev) {
+        changePage: function (ev) {
             ev.preventDefault();
             var that = this;
 
@@ -661,12 +655,12 @@
                 headers: {
                     'Authorization': 'Bearer ' + xtens.session.get("accessToken")
                 },
-                data:{
-                    populate:'donor'
+                data: {
+                    populate: 'donor'
                 },
                 contentType: 'application/json',
-                beforeSend: function() { $('.loader-gif').css("display","block"); },
-                success: function(results, options, res) {
+                beforeSend: function () { $('.loader-gif').css("display", "block"); },
+                success: function (results, options, res) {
                     var headers = {
                         'Link': xtens.parseLinkHeader(res.getResponseHeader('Link')),
                         'X-Total-Count': parseInt(res.getResponseHeader('X-Total-Count')),
@@ -679,19 +673,19 @@
                     headers['startRow'] = startRow;
                     headers['endRow'] = endRow;
                     that.headers = headers;
-                    $('.loader-gif').css("display","none");
+                    $('.loader-gif').css("display", "none");
                     that.samples.reset(results);
                 },
-                error: function(err) {
+                error: function (err) {
                     xtens.error(err);
                 }
             });
         },
 
-        setPaginationInfo: function() {
+        setPaginationInfo: function () {
             var links = this.headers.Link;
             var linkNames = ['previous', 'first', 'next', 'last'];
-            _.forEach(linkNames, function(ln) {
+            _.forEach(linkNames, function (ln) {
                 if (links[ln]) {
                     $('#' + ln).removeClass('disabled');
                     $('#' + ln).prop('disabled', false);
@@ -704,13 +698,13 @@
             });
         },
 
-        openNewSampleView: function(ev) {
+        openNewSampleView: function (ev) {
             ev.preventDefault();
             var donorQuery = this.donor ? 'donor=' + this.donor : '';
             var donorCodeQuery = this.donorCode ? 'donorCode=' + this.donorCode : '';
             var parentSampleQuery = this.parentSample ? 'parentSample=' + this.parentSample : '';
             var parentDataTypeQuery = this.parentDataType ? 'parentDataType=' + this.parentDataType : '';
-      // var queryString = _.trim([donorQuery, donorCodeQuery, parentSampleQuery].join('&'), '&');
+            // var queryString = _.trim([donorQuery, donorCodeQuery, parentSampleQuery].join('&'), '&');
             var queryString = _.compact([donorQuery, donorCodeQuery, parentSampleQuery, parentDataTypeQuery]).join('&');
             var route = _.trim(['/samples/new', queryString].join('/0?'));
             xtens.router.navigate(route, {
@@ -732,26 +726,24 @@
          * @method
          * @name initialize
          */
-        initialize: function(options) {
+        initialize: function (options) {
             $("#main").html(this.el);
             this.template = JST["views/templates/sample-get-from-barcode.ejs"];
-            this.idProject = xtens.session.get('activeProject') !== 'all' ? _.find(xtens.session.get('projects'),function (p) { return p.name === xtens.session.get('activeProject'); }).id : undefined;
+            this.idProject = xtens.session.get('activeProject') !== 'all' ? _.find(xtens.session.get('projects'), function (p) { return p.name === xtens.session.get('activeProject'); }).id : undefined;
             this.render();
         },
 
-        render: function() {
+        render: function () {
+            var disabled = !this.idProject;
 
-            var disabled = this.idProject ? false : true;
-
-            this.$el.html(this.template({ __: i18n, disabled: disabled}));
+            this.$el.html(this.template({ __: i18n, disabled: disabled }));
             this.initializeBarCodeReader(disabled);
 
             return this;
-
         },
 
         initializeBarCodeReader: function (disable) {
-            var that = this ,timer, delay = 500;
+            var that = this; var timer; var delay = 500;
 
             $('#biobank-code').prop('disabled', disable);
             if (disable) {
@@ -762,20 +754,18 @@
             $('#biobank-code').focusin(function (e) {
                 e.currentTarget.value = null;
             });
-            $('#biobank-code').bind('keydown blur change', function(e) {
-
+            $('#biobank-code').bind('keydown blur change', function (e) {
                 clearTimeout(timer);
-                timer = setTimeout(function() {
+                timer = setTimeout(function () {
                     if (e.currentTarget.value && e.currentTarget.value != "") {
                         e.preventDefault();
                         that.getSampleByBiobankCode(e.currentTarget.value);
                     }
-                }, delay );
+                }, delay);
             });
         },
 
         getSampleByBiobankCode: function (biobankCode) {
-
             $.ajax({
                 url: '/sample/findByBiobankCode',
                 type: 'GET',
@@ -788,28 +778,26 @@
                 },
                 contentType: 'application/json',
                 // beforeSend: function() { $('.loader-gif').css("display","block"); },
-                success: function(sample, options, res) {
+                success: function (sample, options, res) {
                     if (sample && sample.id && sample.id > 0) {
-                        $("#bc-mess-succ").fadeIn( 0, function() {
-                            $("#bc-mess-succ").fadeOut( 1500, function () {
+                        $("#bc-mess-succ").fadeIn(0, function () {
+                            $("#bc-mess-succ").fadeOut(1500, function () {
                                 xtens.router.navigate('samples/edit/' + sample.id, {
                                     trigger: true
                                 });
                             });
                         });
                     } else {
-                        $("#bc-mess-err").fadeIn( 0, function() {
-                            $("#bc-mess-err").fadeOut( 1500 );
+                        $("#bc-mess-err").fadeIn(0, function () {
+                            $("#bc-mess-err").fadeOut(1500);
                         });
                         $('#biobank-code').focus();
                     }
                 },
-                error: function(err) {
+                error: function (err) {
                     xtens.error(err);
                 }
             });
         }
     });
-
-
 }(xtens, xtens.module("sample")));

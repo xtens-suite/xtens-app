@@ -8,8 +8,6 @@
  * for matching multiple files.)
  */
 
-
-
 // CSS files to inject in order
 //
 // (if you're using LESS with the built-in default config, you'll want
@@ -27,7 +25,6 @@ var cssFilesToInject = [
     'dependencies/**/*.css',
     'styles/xtens.css'
 ];
-
 
 // Client-side javascript files to inject in order
 // (uses Grunt-style wildcard/glob/splat expressions)
@@ -66,6 +63,7 @@ var jsFilesToInject = [
     'dependencies/**/JsBarcode.all.js',
     '/dependencies/**/bootstrap-select.js',
     '/dependencies/**/bootstrap-notify.js',
+    '/dependencies/**/jquery.contextMenu.js',
     // Customised client-side js files
 
     'js/application/xtens.js',
@@ -107,7 +105,6 @@ var jsFilesToInject = [
     // will be injected here in no particular order.
 ];
 
-
 // Client-side HTML templates are injected using the sources below
 // The ordering of these templates shouldn't matter.
 // (uses Grunt-style wildcard/glob/splat expressions)
@@ -122,17 +119,15 @@ var templateFilesToInject = [
     'templates/**/*.ejs'
 ];
 
-
-
 // Prefix relative paths to source files so they point to the proper locations
 // (i.e. where the other Grunt tasks spit them out, or in some cases, where
 // they reside in the first place)
-module.exports.cssFilesToInject = cssFilesToInject.map(function(path) {
+module.exports.cssFilesToInject = cssFilesToInject.map(function (path) {
     return '.tmp/public/' + path;
 });
-module.exports.jsFilesToInject = jsFilesToInject.map(function(path) {
+module.exports.jsFilesToInject = jsFilesToInject.map(function (path) {
     return '.tmp/public/' + path;
 });
-module.exports.templateFilesToInject = templateFilesToInject.map(function(path) {
+module.exports.templateFilesToInject = templateFilesToInject.map(function (path) {
     return 'views/' + path;
 });

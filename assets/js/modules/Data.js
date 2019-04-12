@@ -4,8 +4,7 @@
  *              metadata instances
  */
 
-(function(xtens, Data) {
-
+(function (xtens, Data) {
     // TODO: retrieve this info FROM DATABASE ideally or from the server-side anyway
     var useFormattedNames = xtens.module("xtensconstants").useFormattedMetadataFieldNames;
 
@@ -32,20 +31,18 @@
         // excluded: "select[name='fieldUnit']",
         successClass: "has-success",
         errorClass: "has-error",
-        classHandler: function(el) {
+        classHandler: function (el) {
             return el.$element.parent();
         },
         errorsWrapper: "<span class='help-block'></span>",
         errorTemplate: "<span></span>"
     };
 
-
     /**
      *  @description general purpose function to retrieve the value from a field
      */
-    function getFieldValue($el, ev, options) {
+    function getFieldValue ($el, ev, options) {
         switch (options.view.component.fieldType) {
-
             case FieldTypes.INTEGER:
                 return parseInt($el.val());
 
@@ -55,18 +52,17 @@
             // return the date string in ISO format
             case FieldTypes.DATE:
                 var dateArray = $el.val().split("/");
-                return dateArray[2] + '-'+ dateArray[1] + '-' + dateArray[0];
+                return dateArray[2] + '-' + dateArray[1] + '-' + dateArray[0];
 
             default:
                 return $el.val();
-
         }
     }
 
     /**
      * @description render a Date from the model to a view
      */
-    function renderDateValue(value) {
+    function renderDateValue (value) {
         if (value) {
             var dateArray = value instanceof Date ? value.toISOString().split('-') : value.split('-');
             return dateArray[2] + '/' + dateArray[1] + '/' + dateArray[0];
@@ -79,35 +75,30 @@
      * @description Factory Method implementation for the Data.Views.* components
      */
 
-    Data.Factory = function() {
-
-        this.createComponentView = function(component, metadatarecord, groupName, params) {
-
+    Data.Factory = function () {
+        this.createComponentView = function (component, metadatarecord, groupName, params) {
             var model;
             if (component.label === Constants.METADATA_GROUP) {
-                model = new Data.MetadataGroupModel(null, {metadata: metadatarecord, groupName: groupName});
-                return new Data.Views.MetadataGroup({model: model, component: component});
+                model = new Data.MetadataGroupModel(null, { metadata: metadatarecord, groupName: groupName });
+                return new Data.Views.MetadataGroup({ model: model, component: component });
             }
             if (component.label === Constants.METADATA_LOOP) {
-                model = new Data.MetadataLoopModel(null, {metadata: metadatarecord, groupName: groupName});
-                return new Data.Views.MetadataLoop({model: model, component: component });
-            }
-            else if (component.label === Constants.METADATA_FIELD) {
-                model = new Data.MetadataFieldModel(null, {field: component, metadata: metadatarecord, groupName: groupName, loopParams: params});
+                model = new Data.MetadataLoopModel(null, { metadata: metadatarecord, groupName: groupName });
+                return new Data.Views.MetadataLoop({ model: model, component: component });
+            } else if (component.label === Constants.METADATA_FIELD) {
+                model = new Data.MetadataFieldModel(null, { field: component, metadata: metadatarecord, groupName: groupName, loopParams: params });
                 if (component.fieldType === FieldTypes.BOOLEAN) {
-                    return new Data.Views.MetadataFieldCheckbox({model: model, component: component});
+                    return new Data.Views.MetadataFieldCheckbox({ model: model, component: component });
                 }
                 if (component.isList) {
-                    return new Data.Views.MetadataFieldSelect({model: model, component: component});
+                    return new Data.Views.MetadataFieldSelect({ model: model, component: component });
                 }
                 /* else if (component.hasRange) {
                    return new Data.Views.MetadataFieldRange({model: model, component: component});
                    } */
-                return new Data.Views.MetadataFieldInput({model: model, component: component});
+                return new Data.Views.MetadataFieldInput({ model: model, component: component });
             }
-
         };
-
     };
 
     // local Data.Factory instance - to be used inside the model
@@ -132,7 +123,7 @@
          * @description initialize a generic MetadataField for editing purposes
          */
 
-        initialize: function(attributes, options) {
+        initialize: function (attributes, options) {
             var field = options.field || {};
 
             this.set("name", field.name);
@@ -190,7 +181,7 @@
      *  @description Backbone Model for a metadata group
      */
     Data.MetadataGroupModel = Backbone.Model.extend({
-        initialize: function(attributes, options) {
+        initialize: function (attributes, options) {
             this.set("groupName", options && options.groupName);
             if (options && options.metadata) {
                 this.metadata = options.metadata;
@@ -204,7 +195,7 @@
      * @description Backbone Model for a metadata loop
      */
     Data.MetadataLoopModel = Backbone.Model.extend({
-        initialize: function(attributes, options) {
+        initialize: function (attributes, options) {
             this.set("name", options && options.name);
             this.set("groupName", options && options.groupName);
             if (options && options.metadata) {
@@ -224,21 +215,21 @@
         tagName: 'div',
         className: 'metadata',
 
-        initialize: function(options) {
+        initialize: function (options) {
             this.template = options.template;
             this.component = options.component;
             this.nestedViews = [];
         },
 
-        render: function() {
-            this.$el.html(this.template({ __:i18n, component: this.component}));
+        render: function () {
+            this.$el.html(this.template({ __: i18n, component: this.component }));
             if (this.model) {
                 this.stickit();
             }
             if (this.component) {
                 var content = this.component.body || this.component.content;
                 var len = content && content.length;
-                for (var i=0; i<len; i++) {
+                for (var i = 0; i < len; i++) {
                     var groupName = content[i].label === Constants.METADATA_GROUP ? content[i].name : this.model.get("groupName");
                     this.add(content[i], this.model.metadata, groupName);
                 }
@@ -255,7 +246,7 @@
          *                 we are updating an existing Data/Metadata record
          * @param {string} groupName - the name of the parent metadataGroup NOTE: this should be moved somewhere else?? Set as a param object?
          */
-        add: function(subcomponent, metadatarecord, groupName) {
+        add: function (subcomponent, metadatarecord, groupName) {
             var view = factory.createComponentView(subcomponent, metadatarecord, groupName);
             this.$el.children('.metadatacomponent-body').last().append(view.render().el);
             this.nestedViews.push(view);
@@ -266,9 +257,9 @@
          * @name removeMe
          * @description remove the current object and all its subcomponents from the DOM tree
          */
-        removeMe: function() {
+        removeMe: function () {
             var len = this.nestedViews || this.nestedViews.length;
-            for (var i=0; i<len; i++) {
+            for (var i = 0; i < len; i++) {
                 this.nestedViews[i].removeMe();
                 delete this.nestedViews[i];
             }
@@ -283,7 +274,7 @@
          * @param {integer} - the zero-based index of the child
          * @return {Object} the required subcomponent
          */
-        getChild: function(index) {
+        getChild: function (index) {
             return this.nestedViews[index];
         },
 
@@ -293,11 +284,11 @@
          * @description iterate the serialize call through all the nested (i.e. children) views.
          * @return {Array} an array containg all the serialized components.
          */
-        serialize: function(useFormattedNames) {
+        serialize: function (useFormattedNames) {
             // var json = {name: this.component.name, instances: []};
             var arr = [];
             if (this.nestedViews && this.nestedViews.length) {
-                for (var i=0, len=this.nestedViews.length; i<len; i++) {
+                for (var i = 0, len = this.nestedViews.length; i < len; i++) {
                     arr.push(this.nestedViews[i].serialize(useFormattedNames));
                 }
             }
@@ -307,7 +298,7 @@
     });
 
     Data.MetadataSchemaModel = Backbone.Model.extend({
-        initialize: function(attributes, options) {
+        initialize: function (attributes, options) {
             var data = options && options.data;
             if (data) {
                 this.metadata = data.get("metadata");
@@ -326,7 +317,7 @@
         id: 'metadata-schema',
         className: 'metadataschema',
 
-        initialize: function(options) {
+        initialize: function (options) {
             this.template = JST["views/templates/data-edit-partial.ejs"];
             this.component = options.component;
             this.nestedViews = [];
@@ -340,17 +331,17 @@
          *  @return {Object} - an array containing all the metadata name-value-unit properties
          *  @override
          */
-        serialize: function(useFormattedNames) {
+        serialize: function (useFormattedNames) {
             var arr = [];
             var i, len;
             if (this.nestedViews && this.nestedViews.length) {
-                for (i=0, len=this.nestedViews.length; i<len; i++) {
+                for (i = 0, len = this.nestedViews.length; i < len; i++) {
                     arr.push(this.nestedViews[i].serialize(useFormattedNames));
                 }
             }
             var serialized = _.flatten(arr, true);
             var metadata = {};
-            for (i=0, len=serialized.length; i<len; i++) {
+            for (i = 0, len = serialized.length; i < len; i++) {
                 var unit = serialized[i].unit || undefined;
 
                 // if formattedNames are used select the appropriate fieldName
@@ -358,18 +349,17 @@
 
                 // if it's not a field of a loop just store the value/unit pair as an object
                 if ((serialized[i].value || !isNaN(serialized[i].value)) && serialized[i].value != null && serialized[i].value !== "") {
-
-                    if (!serialized[i].loop ) {
-                        metadata[fieldName] = {value: serialized[i].value, unit: unit, group: serialized[i].groupName};
+                    if (!serialized[i].loop) {
+                        metadata[fieldName] = { value: serialized[i].value, unit: unit, group: serialized[i].groupName };
                     }
 
-                // if it's a field within a loop store the value unit pair within two arrays
+                    // if it's a field within a loop store the value unit pair within two arrays
                     else {
                         if (!metadata[fieldName]) {
-                            metadata[fieldName] = {values: [serialized[i].value], group: serialized[i].groupName, loop: serialized[i].loop};
+                            metadata[fieldName] = { values: [serialized[i].value], group: serialized[i].groupName, loop: serialized[i].loop };
                             metadata[fieldName].units = unit ? [unit] : undefined;
                         }
-                    // if the loop value/unit arrays already exists push them in the arrays
+                        // if the loop value/unit arrays already exists push them in the arrays
                         else {
                             metadata[fieldName].values.push(serialized[i].value);
                             if (unit && _.isArray(metadata[fieldName].units)) {
@@ -387,7 +377,7 @@
     Data.Views.MetadataGroup = Data.Views.MetadataComponent.fullExtend({
         className: 'metadatagroup',
 
-        initialize: function(options) {
+        initialize: function (options) {
             this.template = JST["views/templates/metadatagroup-form.ejs"];
             this.component = options.component;
             this.nestedViews = [];
@@ -397,15 +387,14 @@
     Data.Views.MetadataLoop = Data.Views.MetadataComponent.fullExtend({
         className: 'metadataloop',
 
-        initialize: function(options) {
+        initialize: function (options) {
             this.template = JST["views/templates/metadataloop-form.ejs"];
             this.component = options.component;
             this.nestedViews = [];
             if (this.model.metadata) {
-                var loopInstance = this.model.metadata[this.component.content[0].name.replace(" ","_").toLowerCase()];
+                var loopInstance = this.model.metadata[this.component.content[0].name.replace(" ", "_").toLowerCase()];
                 this.loopRecords = loopInstance ? loopInstance.values.length : 0;
-            }
-            else {
+            } else {
                 this.loopRecords = 0;
             }
         },
@@ -413,14 +402,14 @@
         /**
          *  overrides the basic Data.Views.MetadataComponent render() method
          */
-        render: function() {
-            this.$el.html(this.template({ __:i18n, component: this.component}));
+        render: function () {
+            this.$el.html(this.template({ __: i18n, component: this.component }));
             this.$metadataloopBody = this.$(".metadataloop-body");
             if (this.component) {
                 var content = this.component.content;
-                var i, len = content && content.length;
+                var i; var len = content && content.length;
                 if (this.loopRecords > 0) {
-                    for (i=0; i<this.loopRecords; i++) {
+                    for (i = 0; i < this.loopRecords; i++) {
                         this.addLoopBody(i);
                     }
                 }
@@ -433,7 +422,7 @@
          *  @name add
          *  @description override  the basic Data,Views.MetadataComponent add() method
          */
-        add: function(subcomponent, metadatarecord, groupName, loopParams) {
+        add: function (subcomponent, metadatarecord, groupName, loopParams) {
             // create a new field
             var view = factory.createComponentView(subcomponent, metadatarecord, groupName, loopParams);
             // add it to the current loop
@@ -451,7 +440,7 @@
          * @description add a new body to the Loop view. Each body contains all the fields of the loop
          * @param {integer} the index of the body element, starting from 0
          */
-        addLoopBody: function(index) {
+        addLoopBody: function (index) {
             var newLoopbody = '<div class="metadatacomponent-body"></div>';
             this.$metadataloopBody.append(newLoopbody);
             /*
@@ -459,7 +448,7 @@
                $last.after(newLoopbody); */
             var len = this.component && this.component.content && this.component.content.length;
             var loopParams = { name: this.component.name, index: index };
-            for (var i=0; i<len; i++) {
+            for (var i = 0; i < len; i++) {
                 this.add(this.component.content[i], this.model.metadata, this.model.get("groupName"), loopParams);
             }
         }
@@ -476,7 +465,7 @@
          * @description no operation - you can't add subcomponents to a leaf object
          * @override
          */
-        add: function() {},
+        add: function () { },
 
         /**
          * @method
@@ -485,13 +474,13 @@
          * @return {null}
          * @override
          */
-        getChild: function(i) {
+        getChild: function (i) {
             return null;
         },
 
-        render: function() {
+        render: function () {
             var that = this;
-            this.$el.html(this.template({ __:i18n, component: this.component, format: replaceUnderscoreAndCapitalize}));
+            this.$el.html(this.template({ __: i18n, component: this.component, format: replaceUnderscoreAndCapitalize }));
             this.stickit();
             if (!_.isEmpty(this.component.possibleUnits)) {
                 this.addBinding(null, 'select[name=fieldUnit]', {
@@ -508,12 +497,12 @@
                 this.setValidationOptions();
             }
             if (this.component.description) {
-                var btnDescription =  JST["views/templates/field-description-button.ejs"]({__:i18n, component: this.component});
+                var btnDescription = JST["views/templates/field-description-button.ejs"]({ __: i18n, component: this.component });
                 $(this.el.children).append(btnDescription);
 
                 this.$el.hover(
-                  function(){ $('.'+ that.component.formattedName).popover('show'); },
-                  function(){ $('.'+ that.component.formattedName).popover('hide'); }
+                    function () { $('.' + that.component.formattedName).popover('show'); },
+                    function () { $('.' + that.component.formattedName).popover('hide'); }
                 );
             }
             return this;
@@ -527,7 +516,7 @@
          * @override
          */
 
-        serialize: function() {
+        serialize: function () {
             return _.clone(this.model.attributes);
         }
 
@@ -539,18 +528,17 @@
             ':text[name=fieldValue]': {
                 observe: 'value',
                 getVal: getFieldValue,
-                onGet: function(value, options) {
+                onGet: function (value, options) {
                     if (options.view.component && options.view.component.fieldType === FieldTypes.DATE) {
                         return renderDateValue(value);
-                    }
-                    else {
+                    } else {
                         return value;
                     }
                 }
             }
         },
 
-        initialize: function(options) {
+        initialize: function (options) {
             this.template = JST["views/templates/metadatafieldinput-form.ejs"];
             this.component = options.component;
         },
@@ -561,7 +549,7 @@
          * @description add HTML5/data tags to the metadata field for client-side validation
          *              with Parsley
          */
-        setValidationOptions: function() {
+        setValidationOptions: function () {
             if (this.component.required) {
                 this.$fieldValue.prop('required', true);
             }
@@ -586,7 +574,7 @@
             }
         },
 
-        initDatepicker: function() {
+        initDatepicker: function () {
             var picker = new Pikaday({
                 field: this.$fieldValue[0],
                 format: 'DD/MM/YYYY',
@@ -602,19 +590,18 @@
         bindings: {
             ':checkbox[name=fieldValue]': {
                 observe: 'value',
-                getVal: function($el, ev, options) {
+                getVal: function ($el, ev, options) {
                     return $el.prop('checked');
                 }
             }
         },
 
-        initialize: function(options) {
+        initialize: function (options) {
             this.template = JST["views/templates/metadatafieldcheckbox-form.ejs"];
             this.component = options.component;
         }
 
     });
-
 
     Data.Views.MetadataFieldSelect = Data.Views.MetadataField.fullExtend({
 
@@ -630,8 +617,8 @@
                         value: null
                     }
                 },
-                initialize: function($el) {
-                    $el.select2({ placeholder: i18n("please-select")});
+                initialize: function ($el) {
+                    $el.select2({ placeholder: i18n("please-select") });
                 }
             }
         },
@@ -642,13 +629,13 @@
          * @description add HTML5/data tags to the metadata field for client-side validation
          *              with Parsley
          */
-        setValidationOptions: function() {
+        setValidationOptions: function () {
             if (this.component.required) {
                 this.$fieldValue.prop('required', true);
             }
         },
 
-        initialize: function(options) {
+        initialize: function (options) {
             this.template = JST["views/templates/metadatafieldselect-form.ejs"];
             this.component = options.component;
         }
@@ -663,7 +650,7 @@
             }
         },
 
-        initialize: function(options) {
+        initialize: function (options) {
             this.template = JST["views/templates/metadatafieldrange-form.ejs"];
             this.component = options.component;
         }
@@ -700,7 +687,7 @@
         tagName: 'div',
         className: 'data',
 
-        initialize: function(options) {
+        initialize: function (options) {
             // _.bindAll(this, 'fetchSuccess');
             $('#main').html(this.el);
             this.template = JST["views/templates/data-edit.ejs"];
@@ -712,25 +699,24 @@
 
             if (options.data) {
                 this.model = new Data.Model(options.data);
-            }
-            else {
+            } else {
                 this.model = new Data.Model();
             }
-            _.each(["parentSubject","parentSample", "parentData"], function(parent) {
-                if(options[parent]) {
+            _.each(["parentSubject", "parentSample", "parentData"], function (parent) {
+                if (options[parent]) {
                     this.model.set(parent, _.isArray() ? options[parent] : [options[parent]]);
                 }
             }, this);
             this.render();
         },
 
-        render: function() {
-            this.$el.html(this.template({__: i18n, data: this.model}));
+        render: function () {
+            this.$el.html(this.template({ __: i18n, data: this.model }));
             this.$form = this.$('form');
             this.$fileCnt = this.$("#data-header-row");
             this.stickit();
             this.listenTo(this.model, 'change:type', this.dataTypeOnChange);
-            this.$('#tags').select2({tags: []});
+            this.$('#tags').select2({ tags: [] });
             this.$modal = $(".modal-cnt");
             // initialize Parsley
             this.$form.parsley(parsleyOpts);
@@ -760,12 +746,12 @@
                         value: null
                     }
                 },
-                getVal: function($el, ev, options) {
+                getVal: function ($el, ev, options) {
                     var value = parseInt($el.val());
                     return _.isNaN(value) ? null : value;
                     // return _.findWhere(options.view.dataTypes, {id: value });
                 },
-                onGet: function(val, options) {
+                onGet: function (val, options) {
                     // if you get the whole DataType object you must retrieve the ID
                     if (_.isObject(val)) {
                         return (val && val.id);
@@ -779,14 +765,14 @@
 
             '#owner': {
                 observe: 'owner',
-                initialize: function($el) {
-                    $el.select2({placeholder: i18n("please-select") });
+                initialize: function ($el) {
+                    $el.select2({ placeholder: i18n("please-select") });
                 },
                 selectOptions: {
-                    collection: function() {
+                    collection: function () {
                         var coll = [];
-                        _.each(this.operators, function(op){
-                            coll.push({label:op.lastName + ' ' + op.firstName ,value:op.id});
+                        _.each(this.operators, function (op) {
+                            coll.push({ label: op.lastName + ' ' + op.firstName, value: op.id });
                         });
                         return coll;
                     },
@@ -795,7 +781,7 @@
                         value: null
                     }
                 },
-                onGet: function(val) {
+                onGet: function (val) {
                     return val && val.id;
                 }
             },
@@ -804,7 +790,7 @@
                 observe: 'date',
 
                 // format date on model as ISO (YYYY-MM-DD)
-                onSet: function(val, options) {
+                onSet: function (val, options) {
                     // var dateArray = val.split("/");
                     if (!val || val == "") {
                         return null;
@@ -815,7 +801,7 @@
                 },
 
                 // store data in view (from model) as DD/MM/YYYY (European format)
-                onGet: function(value, options) {
+                onGet: function (value, options) {
                     if (value) {
                         /*
                         var dateArray = value instanceof Date ? value.toISOString().split('-') : moment(value).format('L');
@@ -827,7 +813,7 @@
                 },
 
                 // initialize Pikaday + Moment.js
-                initialize: function($el, model, options) {
+                initialize: function ($el, model, options) {
                     var picker = new Pikaday({
                         field: $el[0],
                         // lang: 'it',
@@ -840,7 +826,7 @@
             },
             '#tags': {
                 observe: 'tags',
-                getVal: function($el, ev, option) {
+                getVal: function ($el, ev, option) {
                     return $el.val().split(",");
                 }
             },
@@ -859,7 +845,7 @@
          * @param {event} - the form submission event
          * @return {false} - to suppress the HTML form submission
          */
-        saveData: function(ev) {
+        saveData: function (ev) {
             this.savingData = true;
             var targetRoute = $(ev.currentTarget).data('targetRoute') || 'data';
             if (this.schemaView && this.schemaView.serialize) {
@@ -876,8 +862,7 @@
                 this.retrieveAndSetFiles();
 
                 this.model.save(null, {
-                    success: function(data) {
-
+                    success: function (data) {
                         if (that.modal) {
                             that.modal.hide();
                         }
@@ -889,16 +874,16 @@
                         $('.modal-header').addClass('alert-success');
                         modal.show();
 
-                        setTimeout(function(){ modal.hide(); }, 1200);
+                        setTimeout(function () { modal.hide(); }, 1200);
                         $('.modal-cnt').one('hidden.bs.modal', function (e) {
                             e.preventDefault();
                             this.savingData = false;
                             modal.remove();
-                            xtens.router.navigate(targetRoute, {trigger: true});
+                            window.history.back();
+                            // xtens.router.navigate(targetRoute, {trigger: true});
                         });
-
                     },
-                    error: function(model, res) {
+                    error: function (model, res) {
                         this.savingData = false;
                         xtens.error(res);
                     }
@@ -908,38 +893,38 @@
         },
 
         setOwnerList: function () {
-            var that = this, project, projectId;
+            var that = this; var project; var projectId;
             if ($('#data-type').val()) {
                 var dataTypeSelected = _.parseInt($('#data-type').val());
-                projectId = _.find(this.dataTypes,{id:dataTypeSelected}).project;
+                projectId = _.find(this.dataTypes, { id: dataTypeSelected }).project;
                 project = _.find(xtens.session.get('projects'), function (p) {
                     return p.id === projectId;
                 });
-            }else {
+            } else {
                 project = _.find(xtens.session.get('projects'), function (p) {
                     return p.name === xtens.session.get('activeProject');
                 });
             }
             var groups = new Group.List();
 
-            var groupIds =  _.compact(_.map(project.groups,function (g) {
-                if ((g.privilegeLevel === "admin") ) { // excluding superusers g.privilegeLevel === "wheel"
+            var groupIds = _.compact(_.map(project.groups, function (g) {
+                if ((g.privilegeLevel === "admin")) { // excluding superusers g.privilegeLevel === "wheel"
                     return g.id;
                 }
             }));
 
             var groupsDeferred = groups.fetch({
-                data: $.param({where: {id: groupIds}, sort:'id ASC', limit:100, populate:['members']})
+                data: $.param({ where: { id: groupIds }, sort: 'id ASC', limit: 100, populate: ['members'] })
             });
-            $.when(groupsDeferred).then(function(groupRes) {
-                that.operators = _.isArray(groupRes) ?_.flatten(_.map(groupRes,'members')) :groupRes.members;
+            $.when(groupsDeferred).then(function (groupRes) {
+                that.operators = _.isArray(groupRes) ? _.flatten(_.map(groupRes, 'members')) : groupRes.members;
                 var newColl = [];
                 that.operators.forEach(function (op) {
-                    newColl.push({label:op.lastName + ' ' + op.firstName ,value:op.id});
+                    newColl.push({ label: op.lastName + ' ' + op.firstName, value: op.id });
                 });
-                var options = {selectOptions:{collection:newColl}};
-                Backbone.Stickit.getConfiguration($('#owner')).update($('#owner'),{},{},options);
-                $('#owner').select2('val','').trigger("change");
+                var options = { selectOptions: { collection: newColl } };
+                Backbone.Stickit.getConfiguration($('#owner')).update($('#owner'), {}, {}, options);
+                $('#owner').select2('val', '').trigger("change");
             });
         },
         /**
@@ -947,7 +932,7 @@
          * @name deleteDate
          * TODO - not implemented yet
          */
-        deleteData: function(ev) {
+        deleteData: function (ev) {
             this.savingData = true;
             ev.preventDefault();
             var that = this;
@@ -965,29 +950,30 @@
             this.$modal.append(modal.render().el);
             modal.show();
 
-            $('#confirm').click( function (e) {
+            $('#confirm').click(function (e) {
                 modal.hide();
                 $('.waiting-modal').modal('show');
                 that.$modal.one('hidden.bs.modal', function (e) {
                     var targetRoute = $(ev.currentTarget).data('targetRoute') || 'data';
 
                     that.model.destroy({
-                        success: function(model, res) {
+                        success: function (model, res) {
                             $('.waiting-modal').modal('hide');
-                            modal.template= JST["views/templates/dialog-bootstrap.ejs"];
-                            modal.title= i18n('ok');
-                            modal.body= i18n('data-deleted');
+                            modal.template = JST["views/templates/dialog-bootstrap.ejs"];
+                            modal.title = i18n('ok');
+                            modal.body = i18n('data-deleted');
                             that.$modal.append(modal.render().el);
                             $('.modal-header').addClass('alert-success');
                             modal.show();
-                            setTimeout(function(){ modal.hide(); }, 1200);
+                            setTimeout(function () { modal.hide(); }, 1200);
                             that.$modal.one('hidden.bs.modal', function (e) {
                                 this.savingData = false;
                                 modal.remove();
-                                xtens.router.navigate(targetRoute, {trigger: true});
+                                window.history.back();
+                                // xtens.router.navigate(targetRoute, { trigger: true });
                             });
                         },
-                        error: function(model, res) {
+                        error: function (model, res) {
                             this.savingData = false;
                             xtens.error(res);
                         }
@@ -995,21 +981,19 @@
                 });
                 return false;
             });
-
         },
 
-        getSelectedSchema: function(dataType) {
+        getSelectedSchema: function (dataType) {
             var idDataType;
             if (typeof dataType === "object") {
                 idDataType = dataType && dataType.id;
-            }
-            else {
+            } else {
                 idDataType = dataType;
             }
-            return _.findWhere(this.dataTypes, {id: idDataType}).schema;
+            return _.findWhere(this.dataTypes, { id: idDataType }).schema;
         },
 
-        dataTypeOnChange: function() {
+        dataTypeOnChange: function () {
             if (!this.savingData) {
                 $('#owner').prop('disabled', false);
                 this.setOwnerList();
@@ -1024,7 +1008,7 @@
          * @param {Object} data - the Data model to populate the form (e.g. on data update)
          *
          */
-        renderDataTypeSchema: function(data) {
+        renderDataTypeSchema: function (data) {
             if (this.fileUploadView) {
                 this.fileUploadView.remove();
             }
@@ -1036,7 +1020,7 @@
             var type = this.model.get('type');
             if (type) {
                 var schema = this.getSelectedSchema(type);
-                var schemaModel = new Data.MetadataSchemaModel(null, {data: data});
+                var schemaModel = new Data.MetadataSchemaModel(null, { data: data });
                 this.schemaView = new Data.Views.MetadataSchema({
                     component: schema,
                     model: schemaModel
@@ -1045,8 +1029,7 @@
                 if (schema.header.fileUpload) {
                     this.enableFileUpload();
                 }
-            }
-            else {
+            } else {
                 this.$("#buttonbardiv").before();
             }
             // reinitialize parsley
@@ -1059,22 +1042,22 @@
          * @description open the view for uploading files to the Distributes File System
          *
          */
-        enableFileUpload: function() {
+        enableFileUpload: function () {
             var _this = this;
-            //_this.$fileCnt.empty()
-            //var fileManager = new FileManager.Model();
+            // _this.$fileCnt.empty()
+            // var fileManager = new FileManager.Model();
             $.ajax({
                 url: '/fileManager',
                 type: 'GET',
                 contentType: 'application/json',
-                success: function(fileSystem) {
+                success: function (fileSystem) {
                     _this.fileSystem = fileSystem;
                     _this.fileUploadView = new FileManager.Views.Dropzone({
                         files: _this.model.get("files"),
                         fileSystem: fileSystem,
                         datum: _this.model,
                         // added the second condition for the scenarios where the dataType is not populated
-                        dataTypeName: _this.model.get("type").name || _.findWhere(_this.dataTypes, {id: _.parseInt(_this.model.get("type"))}).name
+                        dataTypeName: _this.model.get("type").name || _.findWhere(_this.dataTypes, { id: _.parseInt(_this.model.get("type")) }).name
                     });
                     _this.$fileCnt.append(_this.fileUploadView.render().el);
                     _this.fileUploadView.initializeDropzone();
@@ -1086,13 +1069,13 @@
 
         refreshFileCnt: function (fileId) {
             var files = this.model.get("files");
-            this.model.set("files", files.filter(function(f) { return f.id != fileId;}));
+            this.model.set("files", files.filter(function (f) { return f.id != fileId; }));
             this.fileUploadView = new FileManager.Views.Dropzone({
                 files: this.model.get("files"),
                 fileSystem: this.fileSystem,
                 datum: this.model,
-              // added the second condition for the scenarios where the dataType is not populated
-                dataTypeName: this.model.get("type").name || _.findWhere(this.dataTypes, {id: _.parseInt(this.model.get("type"))}).name
+                // added the second condition for the scenarios where the dataType is not populated
+                dataTypeName: this.model.get("type").name || _.findWhere(this.dataTypes, { id: _.parseInt(this.model.get("type")) }).name
             });
             $('.filemanager').remove();
             this.$fileCnt.append(this.fileUploadView.render().el);
@@ -1100,7 +1083,7 @@
             this.listenTo(this.fileUploadView, 'fileDeleted', this.refreshFileCnt);
         },
 
-        retrieveAndSetFiles: function() {
+        retrieveAndSetFiles: function () {
             if (this.fileUploadView) {
                 var files = this.fileUploadView.fileList.toJSON();
                 if (!_.isEmpty(files)) {
@@ -1109,7 +1092,7 @@
             }
         },
 
-        showValidationErrorTooltip: function(formElement) {
+        showValidationErrorTooltip: function (formElement) {
             var messages = ParsleyUI.getErrorsMessages(formElement);
             formElement.$element.tooltip('destroy');
             formElement.$element.tooltip({
@@ -1121,7 +1104,7 @@
             }).tooltip('show');
         },
 
-        removeValidationErrorTooltip: function(formElement) {
+        removeValidationErrorTooltip: function (formElement) {
             formElement.$element.tooltip('destroy');
         }
 
@@ -1140,14 +1123,14 @@
         /**
          * @extends Backbone.View.initialize
          */
-        initialize: function(options) {
+        initialize: function (options) {
             $("#main").html(this.el);
             this.template = JST["views/templates/data-details.ejs"];
-            this.fields = options.fields;          //  this.model.set("filename", filename);
+            this.fields = options.fields; //  this.model.set("filename", filename);
             this.render();
         },
 
-        render: function() {
+        render: function () {
             // var dataType = new DataTypeModel(this.model.get("type"));
             // var superType = new SuperTypeModel(this.model.get("type").superType);
             //
@@ -1161,7 +1144,7 @@
             }));
 
             if (MISSING_VALUE_ALERT) {
-                this.$('div[name="metadata-value"]').filter(function() {
+                this.$('div[name="metadata-value"]').filter(function () {
                     return $(this).text().trim() === '';
                 }).addClass("text-warning").html(i18n("missing-value"));
             }
@@ -1175,13 +1158,13 @@
                 observe: 'date',
 
                 // store data in view (from model) as DD/MM/YYYY (European format)
-                onGet: function(value, options) {
+                onGet: function (value, options) {
                     if (value) {
-                      /*
-                      var dateArray = value instanceof Date ? value.toISOString().split('-') : moment(value).format('L');
-                      var dateArray2 = dateArray[2].split('T');
-                      dateArray[2] = dateArray2[0];
-                      return dateArray[2] + '/' + dateArray[1] + '/' + dateArray[0]; */
+                        /*
+                        var dateArray = value instanceof Date ? value.toISOString().split('-') : moment(value).format('L');
+                        var dateArray2 = dateArray[2].split('T');
+                        dateArray[2] = dateArray2[0];
+                        return dateArray[2] + '/' + dateArray[1] + '/' + dateArray[0]; */
                         return moment(value).lang("it").format('L');
                     }
                 }
@@ -1189,7 +1172,7 @@
             },
             '#tags': {
                 observe: 'tags',
-                getVal: function($el, ev, option) {
+                getVal: function ($el, ev, option) {
                     return $el.val().split(", ");
                 }
             },
@@ -1212,8 +1195,6 @@
           return this.filename;
         } */
 
-
-
     });
 
     /**
@@ -1235,7 +1216,7 @@
         /**
          * @extends Backbone.View.initialize
          */
-        initialize: function(options) {
+        initialize: function (options) {
             $("#main").html(this.el);
             this.dataTypes = options.dataTypes;
             this.data = options.data;
@@ -1252,25 +1233,27 @@
             this.render();
         },
 
-        addLinksToModels: function() {
-            _.each(this.data.models, function(data) {
-                var privilege = _.find(this.dataTypePrivileges, function(model){ return model.get('dataType') === data.get("type");});
-                if(privilege && privilege.get('privilegeLevel') === "edit" ){
-                    data.set("editLink", "#/data/edit/" + data.id);}
-                if(privilege && privilege.get('privilegeLevel') !== "view_overview" ){
-                    data.set("detailsLink", "#/data/details/" + data.id);}
+        addLinksToModels: function () {
+            _.each(this.data.models, function (data) {
+                var privilege = _.find(this.dataTypePrivileges, function (model) { return model.get('dataType') === data.get("type"); });
+                if (privilege && privilege.get('privilegeLevel') === "edit") {
+                    data.set("editLink", "#/data/edit/" + data.id);
+                }
+                if (privilege && privilege.get('privilegeLevel') !== "view_overview") {
+                    data.set("detailsLink", "#/data/details/" + data.id);
+                }
                 var type = this.dataTypes.get(data.get("type"));
-                var dataTypeChildren = _.where(type.get("children"), {"model": Classes.DATA});
+                var dataTypeChildren = _.where(type.get("children"), { "model": Classes.DATA });
                 if (dataTypeChildren.length > 0) {
                     var dids = _.map(dataTypeChildren, 'id').join();
-                    data.set("newDataLink", "#/data/new/0?idDataTypes="+dids+"&parentData="+data.id);
+                    data.set("newDataLink", "#/data/new/0?idDataTypes=" + dids + "&parentData=" + data.id);
                 }
             }, this);
         },
 
-        render: function() {
+        render: function () {
             this.addLinksToModels();
-            this.$el.html(this.template({__: i18n, data: this.data.models, dataTypePrivileges: this.dataTypePrivileges, dataTypes: this.dataTypes.models}));
+            this.$el.html(this.template({ __: i18n, data: this.data.models, dataTypePrivileges: this.dataTypePrivileges, dataTypes: this.dataTypes.models }));
             this.table = this.$('.table').DataTable({
                 scrollY: '50vh',
                 "paging": false,
@@ -1319,8 +1302,8 @@
                     'Authorization': 'Bearer ' + xtens.session.get("accessToken")
                 },
                 contentType: 'application/json',
-                beforeSend: function() { $('.loader-gif').css("display","block"); },
-                success: function(results, options, res) {
+                beforeSend: function () { $('.loader-gif').css("display", "block"); },
+                success: function (results, options, res) {
                     var headers = {
                         'Link': xtens.parseLinkHeader(res.getResponseHeader('Link')),
                         'X-Total-Count': parseInt(res.getResponseHeader('X-Total-Count')),
@@ -1328,16 +1311,16 @@
                         'X-Total-Pages': parseInt(res.getResponseHeader('X-Total-Pages')),
                         'X-Current-Page': parseInt(res.getResponseHeader('X-Current-Page')) + 1
                     };
-                    var startRow = (headers['X-Page-Size']*parseInt(res.getResponseHeader('X-Current-Page')))+1;
-                    var endRow = headers['X-Page-Size']*headers['X-Current-Page'];
+                    var startRow = (headers['X-Page-Size'] * parseInt(res.getResponseHeader('X-Current-Page'))) + 1;
+                    var endRow = headers['X-Page-Size'] * headers['X-Current-Page'];
                     headers['startRow'] = startRow;
                     headers['endRow'] = endRow;
                     that.headers = headers;
-                    $('.loader-gif').css("display","none");
+                    $('.loader-gif').css("display", "none");
                     that.data.reset(results);
                     // that.filterData();
                 },
-                error: function(err) {
+                error: function (err) {
                     xtens.error(err);
                 }
             });
@@ -1347,20 +1330,19 @@
             var links = this.headers.Link;
             var linkNames = ['previous', 'first', 'next', 'last'];
             _.forEach(linkNames, function (ln) {
-                if(links[ln]){
-                    $('#'+ln).removeClass('disabled');
-                    $('#'+ln).prop('disabled', false);
-                    $('#'+ln).val(links[ln]);
-                }
-                else {
-                    $('#'+ln).prop('disabled', true);
-                    $('#'+ln).addClass('disabled');
-                    $('#'+ln).val('');
+                if (links[ln]) {
+                    $('#' + ln).removeClass('disabled');
+                    $('#' + ln).prop('disabled', false);
+                    $('#' + ln).val(links[ln]);
+                } else {
+                    $('#' + ln).prop('disabled', true);
+                    $('#' + ln).addClass('disabled');
+                    $('#' + ln).val('');
                 }
             });
         },
 
-        openNewDataView: function(ev) {
+        openNewDataView: function (ev) {
             ev.preventDefault();
             var parentSubjectQuery = this.parentSubject ? 'parentSubject=' + this.parentSubject : '';
             var parentSubjectCodeQuery = this.parentSubjectCode ? 'parentSubjectCode=' + this.parentSubjectCode : '';
@@ -1368,9 +1350,9 @@
             var parentDataQuery = this.parentData ? 'parentData=' + this.parentData : '';
             var parentDataTypeQuery = this.parentDataType ? 'parentDataType=' + this.parentDataType : '';
             var queryString = _.compact([parentSubjectQuery, parentSubjectCodeQuery,
-                                        parentSampleQuery, parentDataQuery, parentDataTypeQuery]).join('&');
+                parentSampleQuery, parentDataQuery, parentDataTypeQuery]).join('&');
             var route = _.trim(['/data/new', queryString].join('/0?'));
-            xtens.router.navigate(route, {trigger: true});
+            xtens.router.navigate(route, { trigger: true });
             return false;
         }
 
@@ -1391,7 +1373,7 @@
         tagName: 'div',
         className: 'data',
 
-        initialize: function(options) {
+        initialize: function (options) {
             _.bindAll(this, 'saveOnSuccess');
             $("#main").html(this.el);
             this.template = JST["views/templates/dedicated-data-edit.ejs"];
@@ -1417,16 +1399,14 @@
             this.initializeDaemonsTable(this.daemons, options.operator);
         },
 
-
-
-        render: function() {
+        render: function () {
             var that = this;
             var textHtml = "";
-            this.$el.html(this.template({__: i18n}));
+            this.$el.html(this.template({ __: i18n }));
             _.forEach(procedures, function (procedure) {
-                var dt = _.find(that.dataTypes, function(dt){ return dt.superType.id === procedure.superType; });
-                if( dt && _.find(that.privileges, { 'dataType': dt.id } )){
-                    textHtml = textHtml + '<option value=\"' + procedure.value + '\">' + procedure.label +'</option>';
+                var dt = _.find(that.dataTypes, function (dt) { return dt.superType.id === procedure.superType; });
+                if (dt && _.find(that.privileges, { 'dataType': dt.id })) {
+                    textHtml = textHtml + '<option value=\"' + procedure.value + '\">' + procedure.label + '</option>';
                 }
             });
             $("#data-type").html(textHtml).selectpicker();
@@ -1435,34 +1415,34 @@
             this.$('form').parsley(parsleyOpts);
             this.dropzone = new Dropzone(this.$(".dropzone")[0], this.dropzoneOpts);
 
-            this.dropzone.on("sending", function(file, xhr, formData) {
+            this.dropzone.on("sending", function (file, xhr, formData) {
                 xhr.setRequestHeader("Authorization", "Bearer " + xtens.session.get("accessToken"));
                 console.log(file.name);
                 formData.append("fileName", file.name);
             });
 
-            this.dropzone.on("success", function(file, xhr, formData) {
+            this.dropzone.on("success", function (file, xhr, formData) {
                 that.$("#save").prop("disabled", false);
 
                 console.log("Data.Views.DedicatedUpload -  file uploaded successfully");
             });
 
-            $("#collapse-button").click(function(){
+            $("#collapse-button").click(function () {
                 $("#collapse-import").collapse('show');
             });
 
-            xtens.router.on("route", function(route, params) {
+            xtens.router.on("route", function (route, params) {
                 clearInterval(that.interval);
             });
 
             return this;
         },
 
-        saveCustomisedData: function(ev) {
+        saveCustomisedData: function (ev) {
             ev.preventDefault();
 
-            var that = this, dataType = this.$("select option:selected").val(), superType = _.find(procedures, {'value': dataType}).superType, owner = _.find(procedures, {'value': dataType}).owner;
-            var activeProject = xtens.session.get('activeProject') !== 'all' ? _.find(xtens.session.get('projects'), { 'name': xtens.session.get('activeProject')}) : undefined;
+            var that = this; var dataType = this.$("select option:selected").val(); var superType = _.find(procedures, { 'value': dataType }).superType; var owner = _.find(procedures, { 'value': dataType }).owner;
+            var activeProject = xtens.session.get('activeProject') !== 'all' ? _.find(xtens.session.get('projects'), { 'name': xtens.session.get('activeProject') }) : undefined;
             $.ajax({
                 url: '/customisedData',
                 type: 'POST',
@@ -1480,8 +1460,8 @@
 
                 success: this.saveOnSuccess,
 
-                error: function(err) {
-                    if (that.modal){
+                error: function (err) {
+                    if (that.modal) {
                         that.modal.hide();
                     }
                     that.$modal.one('hidden.bs.modal', function (e) {
@@ -1494,22 +1474,21 @@
             return false;
         },
 
-        initializeDaemonsTable: function(results, operator) {
-
+        initializeDaemonsTable: function (results, operator) {
             if (this.tableView) {
                 this.tableView.destroy();
             }
-            this.tableView = new Daemon.Views.DaemonsTable({daemons: results, operator: operator});
+            this.tableView = new Daemon.Views.DaemonsTable({ daemons: results, operator: operator });
             this.$tableCnt.append(this.tableView.render().el);
             this.tableView.displayDaemonsTable();
-            this.interval = setInterval((function(self) {         //Self-executing func which takes 'this' as self
-                return function() {   //Return a function in the context of 'self'
+            this.interval = setInterval((function (self) { // Self-executing func which takes 'this' as self
+                return function () { // Return a function in the context of 'self'
                     self.tableView.refreshDaemonsTable();
                 };
-            })(this),3000);
+            })(this), 3000);
         },
 
-        saveOnSuccess: function(infoObj) {
+        saveOnSuccess: function (infoObj) {
             var that = this;
             if (this.modal) {
                 this.modal.hide();
@@ -1520,14 +1499,14 @@
             // this.$modal.one('hidden.bs.modal', function (e) {
             this.modal = new ModalDialog({
                 title: i18n('data-correctly-loaded-on-server'),
-                body: JST["views/templates/dedicated-data-dialog-bootstrap.ejs"]({__: i18n})
+                body: JST["views/templates/dedicated-data-dialog-bootstrap.ejs"]({ __: i18n })
             });
 
             this.$modal.append(this.modal.render().el);
             $('.modal-header').addClass('alert-info');
             this.modal.show();
 
-            setTimeout(function(){ that.modal.hide(); }, 1500);
+            setTimeout(function () { that.modal.hide(); }, 1500);
             that.$modal.one('hidden.bs.modal', function (e) {
                 that.dropzone.removeAllFiles(true);
                 that.modal.remove();
@@ -1537,6 +1516,4 @@
         }
 
     });
-
-
-} (xtens, xtens.module("data")));
+}(xtens, xtens.module("data")));

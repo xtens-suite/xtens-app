@@ -716,8 +716,8 @@
                         }
                         if (parent.children) parent.children.push(child);
                         else parent.children = [child];
-                    }
-                    );
+                    });
+
                     // Define countDepth to count nodes for every depth
                     var index, i1;
                     var countDepth = new Array(data.length);

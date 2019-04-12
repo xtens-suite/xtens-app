@@ -29,6 +29,7 @@
     "d3-tip": "https://github.com/VACLab/d3-tip.git",
     "datatables": "https://github.com/gicaz/DataTables.git#1.10.14-dev",
     "datatables.net": "https://github.com/gicaz/Dist-DataTables.git#1.10.13",
+    "context-menu": "https://github.com/swisnl/jQuery-contextMenu.git",
     "datatables-buttons": "~1.4.2",
     "datatables-plugins": "~1.10.7",
     "datatables.net-fixedcolumns": "^3.2.2",
@@ -70,6 +71,10 @@
     },
     "lodash": {
       "js": "lodash.js"
+    },
+    "context-menu": {
+      "js": "dist/jquery.contextMenu.js",
+      "css": "dist/jquery.contextMenu.css"
     },
     "backbone": {
       "js": "**/backbone.js"

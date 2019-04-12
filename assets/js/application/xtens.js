@@ -5,13 +5,13 @@
 
 var xtens = {
     // create this closure to contain the cached modules
-    module: function() {
+    module: (function () {
         // Internal module cache.
         var modules = {};
 
         /* Create a new module reference scaffold or load an
          * existing module */
-        return function(name) {
+        return function (name) {
             // If this module has already been created return it
             if (modules[name]) {
                 return modules[name];
@@ -20,21 +20,20 @@ var xtens = {
             // Create a module and save it under this name
             return modules[name] = { Views: {} };
         };
-
-    }(),
+    }()),
 
     app: _.extend({}, Backbone.Events),
 
     parseLinkHeader: function (header) {
-        if (header.length == 0) {
+        if (header.length === 0) {
             return [];
         }
 
-  // Split parts by comma
+        // Split parts by comma
         var parts = header.split(',');
         var links = {};
-  // Parse each part into a named link
-        _.each(parts, function(p) {
+        // Parse each part into a named link
+        _.each(parts, function (p) {
             var section = p.split(';');
             if (section.length != 2) {
                 throw new Error("section could not be split on ';'");
@@ -47,19 +46,19 @@ var xtens = {
         return links;
     },
 
-    infoBrowser: (function() {
-        var ua= navigator.userAgent, tem,
-            M= ua.match(/(opera|chrome|safari|firefox|msie|trident(?=\/))\/?\s*(\d+)/i) || [];
-        if(/trident/i.test(M[1])){
-            tem=  /\brv[ :]+(\d+)/g.exec(ua) || [];
-            return 'IE '+(tem[1] || '');
+    infoBrowser: (function () {
+        var ua = navigator.userAgent; var tem;
+        var M = ua.match(/(opera|chrome|safari|firefox|msie|trident(?=\/))\/?\s*(\d+)/i) || [];
+        if (/trident/i.test(M[1])) {
+            tem = /\brv[ :]+(\d+)/g.exec(ua) || [];
+            return 'IE ' + (tem[1] || '');
         }
-        if(M[1]=== 'Chrome'){
-            tem= ua.match(/\b(OPR|Edge)\/(\d+)/);
-            if(tem!= null) return tem.slice(1).join(' ').replace('OPR', 'Opera');
+        if (M[1] === 'Chrome') {
+            tem = ua.match(/\b(OPR|Edge)\/(\d+)/);
+            if (tem != null) return tem.slice(1).join(' ').replace('OPR', 'Opera');
         }
-        M= M[2] ? [M[1], M[2]]: [navigator.appName, navigator.appVersion, '-?'];
-        if((tem= ua.match(/version\/(\d+)/i))!= null) M.splice(1, 1, tem[1]);
+        M = M[2] ? [M[1], M[2]] : [navigator.appName, navigator.appVersion, '-?'];
+        if ((tem = ua.match(/version\/(\d+)/i)) != null) M.splice(1, 1, tem[1]);
         return M;
     })()
 
@@ -69,17 +68,16 @@ var xtens = {
 // // code has been downloaded and evaluated and is ready to be
 // // initialized. Treat this as your single entry point into the
 // // application
-jQuery(function($) {
+jQuery(function ($) {
     // create Session object
-    var Session = xtens.module("session"), userSession;
+    var Session = xtens.module("session"); var userSession;
     xtens.session = new Session.Model();
 
     // retrieve user session info from sessionStorage on page reload (if available)
     if (window.sessionStorage.getItem('xtensUserSession')) {
         try {
             userSession = JSON.parse(window.sessionStorage.getItem('xtensUserSession'));
-        }
-        catch(err) {
+        } catch (err) {
             console.log(err);
         }
     }
@@ -91,7 +89,7 @@ jQuery(function($) {
     xtens.session.set(userSession);
 
     // if the page is refreshed store the user session object (login, accessToken, ...) on the sessionStorage
-    window.addEventListener("beforeunload", function(event) {
+    window.addEventListener("beforeunload", function (event) {
         console.log("window.onBeforeunload fired!");
         window.sessionStorage.setItem('xtensUserSession', JSON.stringify(xtens.session));
         console.log(window.sessionStorage.getItem('xtensUserSession'));
@@ -99,5 +97,4 @@ jQuery(function($) {
 
     // start backbone history
     Backbone.history.start();
-
 });

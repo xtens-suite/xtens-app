@@ -1,5 +1,4 @@
-(function(xtens, i18n) {
-
+(function (xtens, i18n) {
     var en = {
         "operation-in-progress": "Operation in Progress...",
         "welcome": "Welcome",
@@ -14,18 +13,18 @@
         "edit-profile": "Edit Profile",
         "show-hide-bar": "Show/Hide Side Bar",
         // views/templates/datatype-list.ejs
-        "active-project":"Active Project",
-        "selected-project":"Selected Project",
+        "active-project": "Active Project",
+        "selected-project": "Selected Project",
         "data-type-list": "Data Type List",
-        "id":"ID",
+        "id": "ID",
         "duplicate-data-type": "Duplicate Data Type",
         // views/templates/dedicated-data-dialog-bootstrap.ejs
-        "created":"Created",
-        "updated":"Updated",
-        "not-updated":"Not Updated",
+        "created": "Created",
+        "updated": "Updated",
+        "not-updated": "Not Updated",
         "process-loaded": "Process correctly launched. You'll find progress in the process list below.",
         // views/templates/datatype-duplicate.ejs
-        "edit-data-type":"Edit Data Type",
+        "edit-data-type": "Edit Data Type",
         "from": "From",
         "to": "To",
         "please-select-source-project": "Please select Source project",
@@ -45,7 +44,7 @@
         "get-parent-code": "Get Parent Code",
         "no-parent-prefix": "If Parent Sample no Prefix",
         "model": "Model",
-        "class-template": "Class Template", //TODO
+        "class-template": "Class Template", // TODO
         "parent": "Parent",
         "description": "Description",
         "version": "Version",
@@ -94,19 +93,19 @@
         "data-type-name": "Data Type Name",
         "define-new-schema": "Define a new Schema",
         "please-select-an-existing-schema": "Please select an existing Schema",
-        "new-operator" : "New Operator",
-        "first-name" : "First Name",
+        "new-operator": "New Operator",
+        "first-name": "First Name",
         "last-name": "Last Name",
         "birth-date": "Birth Date",
-        "sex" : "Sex",
-        "email" : "Email",
-        "login" : "Login",
-        "password" : "Password",
-        "operator-list" : "Operator List",
-        "create-a-new-operator" : "Create a New Operator",
-        "m" : "M",
-        "f" : "F",
-        "xtens-login":"XTENS Login",
+        "sex": "Sex",
+        "email": "Email",
+        "login": "Login",
+        "password": "Password",
+        "operator-list": "Operator List",
+        "create-a-new-operator": "Create a New Operator",
+        "m": "M",
+        "f": "F",
+        "xtens-login": "XTENS Login",
         'please-select-a-project': "Please select a project",
         'project-selection': "Project selection",
         /* views/templates/login.ejs */
@@ -126,22 +125,22 @@
         "administration": "Administration",
         "account": "Account",
         "super-user": "Super User",
-        "manager":"Manager",
-        "standard":"Standard",
-        "all-samples":"All Samples",
+        "manager": "Manager",
+        "standard": "Standard",
+        "all-samples": "All Samples",
         "groups": "Groups",
         "all-projects": "All projects",
-        "i-confirm":"I confirm",
+        "i-confirm": "I confirm",
         "warning-change-project": "Changing project, all unsaved data will be lost",
         "projects": "Projects",
         "operators": "Operators",
-        "click-to-change-project":"Click to change project",
+        "click-to-change-project": "Click to change project",
         "data-management": "Data Management",
         "search": "Search",
         "get-from-bar-code": "Scan Sample",
         "advanced-search": "Advanced Search",
         "logout": "Logout",
-        "change-project":"Change Project",
+        "change-project": "Change Project",
         /* views/templates/data-edit.ejs */
         "data-manager": "Data Manager",
         "select-a-data-type": "Select a Data Type",
@@ -161,8 +160,8 @@
         "confirm": "Confirm",
         "min-8-characters": "Minimum of 8 characters",
         "create-operator": "Create Operator",
-        "save-operator" : "Save Operator",
-        "update-operator" : "Update Operator",
+        "save-operator": "Save Operator",
+        "update-operator": "Update Operator",
         "operator-deleted": "Operator Deleted",
         "operator-will-be-permanently-deleted-are-you-sure": "Operator will be permanently deleted. Are you sure?",
         "confirm-reset": "Confirm Password Reset",
@@ -176,10 +175,10 @@
         "notes": "Notes",
         "save": "Save",
         /* views/templates/... */
-        "associate-datatype":"Associate a Datatype",
-        "dissociate-datatype":"Dissociate a Datatype",
+        "associate-datatype": "Associate a Datatype",
+        "dissociate-datatype": "Dissociate a Datatype",
         /* views/templates/group-list.ejs */
-        "member-operators":"Member Operators",
+        "member-operators": "Member Operators",
         "group-list": "Group List",
         "data-type-privileges": "Data Type Privileges",
         "new-group": "New Group",
@@ -202,11 +201,11 @@
         /* views/templates/project-list.ejs */
         "project-list": "Project List",
         "new-project": "New Project",
-        "member-groups":"Member Groups",
-        "associated-data-type":"Associated Data Types",
-        /*views/templates/association.ejs */
-        "associated":"Associated",
-        "no-associated":"Not Associated",
+        "member-groups": "Member Groups",
+        "associated-data-type": "Associated Data Types",
+        /* views/templates/association.ejs */
+        "associated": "Associated",
+        "no-associated": "Not Associated",
         /* views/templates/data-list.ejs */
         "data-list": "Data List",
         "data-details": "Data Details",
@@ -225,11 +224,12 @@
         "given-name": "Name",
         "surname": "Surname",
         /* views/templates/subject-details */
-        "subject-details":"Subject Details",
+        "subject-details": "Subject Details",
         /* views/templates/subject-list */
         "subject-list": "Subject List",
         "new-subject": "New Subject",
         "more-data": "More Data",
+        "subject-dashboard": "Subject Dashboard",
         "subject-graph": "Subject Graph",
         "select-a-patient": "Select a Patient",
         /* views/templates/subject-edit.ejs */
@@ -314,7 +314,7 @@
         "save-query": "Save Current Query",
         "load-query": "Load Selected Query",
         "delete-query": "Delete Selected Query",
-        "query-correctly-stored-on-server":"Query correctly stored on server",
+        "query-correctly-stored-on-server": "Query correctly stored on server",
         "select-a-query": "Select a query",
         "query-deleted": "Query Deleted",
         "query-will-be-permanently-deleted-are-you-sure": "Query will be permanently deleted. Are you sure?",
@@ -353,7 +353,7 @@
         "the-file": "The file",
         "has-been-successfully-uploaded": "has beeen successfully uploaded.",
         /* views/templates/datafile-list.ejs */
-        "file-list" : "File List",
+        "file-list": "File List",
         "download": "Download",
         /* assets/js/modules/DataFile.js */
         "could-not-download-file": "Could Not Download File",
@@ -374,12 +374,12 @@
         "customised-data-daemon": "Processes List",
         "daemons-list-empty": "Daemons List Empty",
         "please-select-a-customised-type": "Please select a Data Import procedure",
-        "status" :"Status",
-        "file-name":"File Name",
-        "progress":"Progress",
-        "total-rows":"Total Rows",
-        "imported-rows":"Imported Rows",
-        "discarded-rows":"Discarded Rows",
+        "status": "Status",
+        "file-name": "File Name",
+        "progress": "Progress",
+        "total-rows": "Total Rows",
+        "imported-rows": "Imported Rows",
+        "discarded-rows": "Discarded Rows",
         "process-id": "Process ID",
         /* views/templates/dedicated-notprocessedrows-dialog-bootstrap */
         "file": "File",
@@ -395,10 +395,10 @@
         "data-correctly-loaded-on-server": "Data correctly loaded on server",
         "please-wait-for-data-registration-to-complete": "Please wait for data registration to complete",
         /* views/templates/update-password.ejs */
-        "update-password" : "Update Password",
+        "update-password": "Update Password",
         "old-password": "Old Password",
         "password-complexity-error": "It must contain at least one lower case character, an uppercase character, a number, a special character (!@#$%^&*) and be at least 8 characters long",
-        "update-exp-password" : "Update Expired Password",
+        "update-exp-password": "Update Expired Password",
         "new-password-at-least": "New Password (At Least 8 Characters)",
         "cnew-password": "Confirm New Password",
         "change-password": "Change Password",
@@ -407,8 +407,7 @@
 
     var it = {};
 
-    i18n.en = function(key) {
+    i18n.en = function (key) {
         return en[key];
     };
-
-} (xtens, xtens.module("i18n")));
+}(xtens, xtens.module("i18n")));
