@@ -645,7 +645,7 @@
 
                     if (uniqueTypes.length > 10) {
                         var generatedColors = [];
-                        for (let index = 0; index < uniqueTypes.length; index++) {
+                        for (var index = 0; index < uniqueTypes.length; index++) {
                             var newColor = Math.floor(Math.random() * 16777215);
                             while (_.find(generatedColors, function (gc) { return Math.abs(gc - newColor) < 100000; }) || newColor < 1000000) {
                                 newColor = Math.floor(Math.random() * 16777215);
