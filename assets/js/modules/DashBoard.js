@@ -170,7 +170,7 @@
         createGraph: function () {
             var that = this;
             var data = this.data;
-            var totalData = this.data.reduce((s, f) => {
+            var totalData = this.data.reduce(function (s, f) {
                 return s + parseInt(f.value); // return the sum of the accumulator and the current time, as the the new accumulator
             }, 0);
 
@@ -433,7 +433,7 @@
             var height = 300 - margin.top - margin.bottom;
             var xAxisTraslation = 35;
 
-            var totalData = this.data.reduce((s, f) => {
+            var totalData = this.data.reduce(function (s, f) {
                 return s + parseInt(f.value); // return the sum of the accumulator and the current time, as the the new accumulator
             }, 0);
 
