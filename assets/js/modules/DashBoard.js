@@ -64,6 +64,8 @@
         },
 
         render: function () {
+            $('.loader-gif').css("display", "none");
+
             var that = this;
             this.$el.html(this.template({
                 __: i18n,
@@ -76,7 +78,6 @@
                 that.renderChartsByModel(model);
             });
 
-            $('.loader-gif').css("display", "none");
             return this;
         },
 
