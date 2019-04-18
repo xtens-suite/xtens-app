@@ -1,8 +1,7 @@
-<nav id="menu-bar" class="navbar navbar-default" role="navigation">
-  <!-- Brand and toggle get grouped for better mobile display -->
+<nav id="menubar" class="navbar navbar-default">
   <div class="container-fluid">
     <div class="row">
-      <div class="col-md-2">
+      <div class="col-md-3">
         <div class="navbar-header">
           <div class="row">
             <a href="#homepage">
@@ -21,21 +20,23 @@
           </div>
         </div>
       </div>
-      <div class="col-md-10">
-        <!-- Collect the nav links, forms, and other content for toggling -->
-        <div class="collapse navbar-collapse row">
-          <ul class="nav navbar-nav" id="menubar-ul-item">
-            <% if (accessDashboard) {%>
+      <div class="col-md-9">
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+          <ul class="nav navbar-nav navbar-right">
             <li>
-              <a href="#/<%= accessDashboard %>"><%= __("project-dashboard")%></a>
+              <a href="#/logout" type="button" id="sidebarCollapse" class="navbar-btn logout" style="float:right;"
+                data-placement="left" data-toggle="tooltip" title="<%= __('logout')%>">
+                <i style="margin: -1em -0.2em;" class="fa fa-sign-out fa-2x" /></a>
+            </li>
+            <% if (accessDashboard) {%>
+            <li class="">
+              <a href="#/<%= accessDashboard %>" aria-expanded="false"><%= __("project-dashboard")%></a>
             </li>
             <%}%>
-            <% if (session.get("isWheel") || session.get("isAdmin")) {%>
+              <% if (session.get("isWheel") || session.get("isAdmin")) {%>
             <li class="">
-              <a href="#" data-toggle="dropdown" class="dropdown-toggle"
-                aria-expanded="false"><%= __("administration")%>
-                &nbsp;&nbsp;&nbsp;&nbsp;</a>
-              <ul class="dropdown-menu">
+              <a href="#administration" data-toggle="collapse" aria-expanded="false"><%= __("administration")%></a>
+              <ul class="collapse list-unstyled" id="administration">
                 <% if (session.get("isWheel")) {%>
                 <!-- <p id="title"><%= __("super-user")%></p> -->
                 <li> <a href="#/projects"> <%= __("projects") %></a> </li>
@@ -44,22 +45,21 @@
                 <li> <a href="#/biobanks"> <%= __("biobanks") %></a> </li>
                 <li> <a href="#/datatypes"> <%= __("data-types") %></a> </li>
                 <%}
-                else if (session.get("isAdmin")) {%>
+                  else if (session.get("isAdmin")) {%>
                 <!-- <p id="title"><%= __("manager")%></p> -->
                 <li><a href="#/biobanks"> <%= __("biobanks") %></a> </li>
                 <li><a href="#/datatypes"> <%= __("data-types") %></a> </li>
                 <%}
-                else {%>
+                  else {%>
                 <!-- <p id="title"><%= __("standard")%></p> -->
                 <%}%>
-                </ul>
-              </li>
-              <%}%>
+                  </ul>
+                </li>
+                <%}%>
                 <li>
-                  <a href="#" data-toggle="dropdown" class="dropdown-toggle"
-                    aria-expanded="false"><%= __("data-management")%>
-                    &nbsp;&nbsp;&nbsp;&nbsp;</a>
-                  <ul class="dropdown-menu">
+                  <a href="#data-management" data-toggle="collapse"
+                    aria-expanded="false"><%= __("data-management") %></a>
+                  <ul class="collapse list-unstyled" id="data-management">
                     <li> <a href="#/subjects"> <%= __("subjects") %></a> </li>
                     <li> <a href="#/samples"> <%= __("samples") %></a> </li>
                     <li> <a href="#/data"> <%= __("data") %></a> </li>
@@ -67,31 +67,31 @@
                   </ul>
                 </li>
                 <li>
-                  <a href="#" data-toggle="dropdown" class="dropdown-toggle" aria-expanded="false"><%= __("search")%>
-                    &nbsp;&nbsp;&nbsp;&nbsp;</a>
-                  <ul class="dropdown-menu">
+                  <a href="#search" data-toggle="collapse" aria-expanded="false"><%= __("search") %></a>
+                  <ul class="collapse list-unstyled" id="search">
                     <li><a href="#/query"><%= __("advanced-search") %></a></li>
                     <li> <a href="#/getFromBarCode"> <%= __("get-from-bar-code") %></a></li>
                   </ul>
                 </li>
                 <li>
-                  <a href="#" data-toggle="dropdown" class="dropdown-toggle" aria-expanded="false"><%= __("account")%>
-                    &nbsp;&nbsp;&nbsp;&nbsp;</a>
-                  <ul class="dropdown-menu">
+                  <a href="#account" data-toggle="collapse" aria-expanded="false"><%= __("account") %></a>
+                  <ul class="collapse list-unstyled" id="account">
                     <li><a href="#/operators/edit/<%= operatorId %>"> <%= __("edit-profile") %></a> </li>
                     <li><a href="#/operators/updatePassword"> <%= __("change-password") %></a> </li>
                   </ul>
                 </li>
               </ul>
-              <ul class="nav navbar-nav navbar-right">
-                <li style="margin-right:1em;">
-                  <a href="#/logout" type="button" id="sidebarCollapse" class="navbar-btn logout" style="float:right;"
-                    data-placement="left" data-toggle="tooltip" title="<%= __('logout')%>">
-                    <i style="margin: -1em -0.2em;" class="fa fa-sign-out fa-2x" /></a>
-                </li>
-              </ul>
-        </div><!-- /.navbar-collapse -->
+          </ul>
+          <ul class="nav navbar-nav navbar-right" style="margin-right:2vh;">
+            <!-- <li hidden><a href="#" id="current"><%= currentProject %></a></li> -->
+            <!-- <li><a href="#">Page</a></li>
+        <li><a href="#">Page</a></li> -->
+
+          </ul>
+        </div>
       </div>
+
+
     </div>
   </div>
 </nav>

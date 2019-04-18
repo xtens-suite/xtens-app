@@ -1,0 +1,22 @@
+<style>
+    .form-group {
+        margin-bottom: 0px !important;
+    }
+</style>
+
+<div id="dashboard-content" style="margin-top:2vh;margin-bottom:2vh;">
+    <div class="row" style="text-align:center;">
+        <div class="col-md-2 vcenter">
+            <label for="subject-selector" class="text-uppercase"><%= __("subject-dashboard") %>:</label>
+        </div>
+        <div class="col-md-5 vcenter">
+            <select id='subject-selector' title="<%= __("select-a-patient") %>" class="form-group selectpicker"
+                data-live-search="true" data-width="100%">
+                <% _.each(subjects, function(subject) {
+                var label = subject.givenName && subject.surname ? subject.surname + " " + subject.givenName + " - " + subject.code : subject.code; %>
+                <option value='<%= subject.id %>'><%= label %></option>
+                <% }) %>
+            </select>
+        </div>
+    </div>
+</div>

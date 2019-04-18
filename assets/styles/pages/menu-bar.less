@@ -62,8 +62,8 @@ a:hover {
   max-width: 250px;
   background: #4476b5;
   color: #fff;
-  transition: all 0.6s cubic-bezier(0.945, 0.020, 0.270, 0.665);
-  transform-origin: bottom left;
+  // transition: all 0.6s cubic-bezier(0.945, 0.020, 0.270, 0.665);
+  // transform-origin: bottom left;
   height: 100%;
 }
 
@@ -79,10 +79,10 @@ a:hover {
   margin-right: 1vw;
 }
 
-#sidebar.active {
-  margin-left: -250px;
-  transform: rotateY(100deg);
-}
+// #sidebar.active {
+//   margin-left: -250px;
+//   transform: rotateY(100deg);
+// }
 
 #sidebar .sidebar-header {
   padding: 20px;
@@ -134,7 +134,33 @@ a[aria-expanded="true"]::before {
   content: '\e260';
 }
 
-ul ul a {
+#menubar-ul-item .dropdown-menu {
+  background-color: #4476b5;
+  min-width: 160px;
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  z-index: 99;
+  border-radius: 5px;
+}
+
+#menubar-ul-item .dropdown-menu a {
+  color: white;
+  padding: 12px 16px;
+  text-decoration: none;
+  display: block;
+}
+
+#menubar-ul-item .dropdown-menu a:hover {
+  background-color: white;
+  color: #4476b5;
+}
+
+/* Show the dropdown menu on hover */
+#menubar-ul-item .dropdown-menu:hover {display: block;}
+
+/* Change the background color of the dropdown button when the dropdown menu is shown */
+// .dropdown:hover .dropbtn {background-color: #3e8e41;}
+
+#sidebar ul ul a {
   font-size: 0.9em !important;
   padding-left: 30px !important;
   background: #36538a;
@@ -209,20 +235,20 @@ ul.CTAs a {
   }
 }
 @media (max-width: 1438px) {
-  #sidebar {
-    margin-left: -250px;
-    transform: rotateY(90deg);
-  }
+  // #sidebar {
+  //   margin-left: -250px;
+  //   transform: rotateY(90deg);
+  // }
 
   .title-menu-cnt {
     color: #29406c;
     display: block;
   }
 
-  #sidebar.active {
-    margin-left: 0;
-    transform: none;
-  }
+  // #sidebar.active {
+  //   margin-left: 0;
+  //   transform: none;
+  // }
 
   #sidebarCollapse span:first-of-type,
   #sidebarCollapse span:last-of-type,

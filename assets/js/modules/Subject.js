@@ -114,7 +114,14 @@
                 this.model = new Subject.Model();
             }
             this.render();
-            !options.subject ? this.dataType ? this.model.set("type", this.dataType.id) : this.setDataTypeSelection() : null;
+            if (!options.subject) {
+                if (this.dataType) {
+                    this.model.set("type", this.dataType.id);
+                } else {
+                    this.setDataTypeSelection();
+                }
+            }
+            // !options.subject ? this.dataType ? this.model.set("type", this.dataType.id) : this.setDataTypeSelection() : null;
             if (xtens.session.get('canAccessPersonalData')) {
                 this.addPersonalDetailsView();
                 var that = this;
@@ -208,8 +215,15 @@
             } else {
                 this.model.set("personalInfo", null);
             }
-            this.model.get("notes") === "" ? this.model.set("notes", null) : null;
-            this.model.get("owner").id ? this.model.set("owner", this.model.get("owner").id) : null;
+
+            if (this.model.get("notes") === "") {
+                this.model.set("notes", null);
+            }
+            if (this.model.get("owner").id) {
+                this.model.set("owner", this.model.get("owner").id);
+            }
+            // this.model.get("notes") === "" ? this.model.set("notes", null) : null;
+            // this.model.get("owner").id ? this.model.set("owner", this.model.get("owner").id) : null;
 
             this.model.save(null, {
                 success: function (subject) {
@@ -454,7 +468,7 @@
         filterSubjects: function (opt) {
             var rex = opt && opt.projects ? new RegExp(opt.projects) : new RegExp(xtens.session.get('activeProject'));
 
-            if (rex == "/all/") { this.clearFilter(); } else {
+            if (rex === "/all/") { this.clearFilter(); } else {
                 $('.content').hide();
                 $('.content').filter(function () {
                     return rex.test($(this).text());
@@ -541,10 +555,11 @@
         render: function () {
             this.$el.html(this.template({ __: i18n }));
 
-            this.$graphCnt = $('graph-cnt');
+            this.$graphCnt = $('.graph-cnt');
 
             this.GraphView = new Subject.Views.Graph(this.optionsGraph);
             this.$graphCnt.append(this.GraphView.render().el);
+            this.GraphView.renderSelectPatient();
 
             return this;
         }
@@ -562,7 +577,7 @@
         },
 
         initialize: function (options) {
-            $("#main").html(this.el);
+            // $("#main").html(this.el);
             this.template = JST["views/templates/subject-graph.ejs"];
             this.idPatient = options.idPatient || undefined;
             // this.dataTypes = options.dataTypes.models || undefined;
@@ -576,11 +591,7 @@
         render: function () {
             this.$el.html(this.template({ __: i18n, idPatient: this.idPatient, subjects: this.subjects }));
 
-            $('#subject-selector').selectpicker();
-
             if (this.idPatient) {
-                $('#subject-selector').val(this.idPatient);
-                $('#subject-selector').selectpicker('refresh');
                 this.createGraph();
                 this.initRightClick();
             }
@@ -588,14 +599,24 @@
             return this;
         },
 
+        renderSelectPatient: function () {
+            $('#subject-selector').selectpicker();
+
+            if (this.idPatient) {
+                $('#subject-selector').val(this.idPatient);
+                $('#subject-selector').selectpicker('refresh');
+            }
+        },
+
         createGraph: function () {
             var _this = this;
 
-            this.idPatient = $('#subject-selector').val();
+            if ($('#subject-selector').val()) {
+                this.idPatient = $('#subject-selector').val();
+            }
 
             $('.loader-gif').css("display", "block");
             // retrieve all the descendant subjects and data for the given idPatient
-            // setTimeout(function () {
             $.ajax({
                 url: '/subjectGraph',
                 type: 'POST',
@@ -611,7 +632,7 @@
                     var path = "subjects/dashboard?idPatient=" + that.idPatient;
                     xtens.router.navigate(path, { trigger: false });
                     // clean the previous graph if present
-                    d3.select("#subject-graph").remove();
+                    d3.select("#subject-svg-graph").remove();
                     that.data = res.links;
 
                     // set margins, width and height of the svg container
@@ -625,8 +646,14 @@
                     if (uniqueTypes.length > 10) {
                         var generatedColors = [];
                         for (let index = 0; index < uniqueTypes.length; index++) {
-                            generatedColors.push('#' + Math.floor(Math.random() * 16777215).toString(16));
+                            var newColor = Math.floor(Math.random() * 16777215);
+                            while (_.find(generatedColors, function (gc) { return Math.abs(gc - newColor) < 100000; }) || newColor < 1000000) {
+                                newColor = Math.floor(Math.random() * 16777215);
+                            }
+                            // newColor = newColor.toString(16);
+                            generatedColors.push(newColor);
                         }
+                        generatedColors = _.map(generatedColors, function (gc) { return '#' + gc.toString(16); });
                         color = d3.scaleOrdinal().range(_.values(generatedColors));
                     } else {
                         color = d3.scaleOrdinal().range(d3.schemeCategory10);
@@ -639,10 +666,10 @@
                         .separation(function (a, b) { return (a.parent === b.parent ? 1 : 2) / a.depth; });
 
                     // create the svg container
-                    var svg = d3.select("#main").append("svg")
+                    var svg = d3.select(".subject-graph").append("svg")
                         .attr("width", width + margin.left + margin.right)
                         .attr("height", height + margin.top + margin.bottom)
-                        .attr("id", "subject-graph");
+                        .attr("id", "subject-svg-graph");
                     var g = svg.append("g")
                         .attr("width", width + margin.left + margin.right)
                         .attr("height", height + margin.top + margin.bottom)
@@ -659,7 +686,7 @@
                             // return "<strong>Value:</strong> <span style='color:#4476b5'>" + d.data.value + "</span> - " + Math.floor(d.data.value / totalData * 100) + "%";
                             if (d.data.metadata !== undefined) {
                                 var id = d.data.name.split("_")[1];
-                                content = "ID: " + id + "<br />" + d.data.type;
+                                content = "<b id='tip-subj-title' style='color:" + color(d.data.type) + ";'>&nbsp;" + d.data.type + '&nbsp;</b> <br /><br />' + "ID: " + id;
                                 if (d.data.privilege !== 'view_overview') {
                                     var numberOfProperty = _.keys(d.data.metadata).length;
                                     var index = 0;
@@ -684,7 +711,7 @@
                                     }
                                 }
                                 content = content + "<br /> <br />" + dato;
-                            } else { content = 'Patient' + " " + that.idPatient; }
+                            } else { content = '<b>Patient</b><br />' + "ID: " + that.idPatient; }
                             var rightClicktext = "<br /> <br /> Right Click to Show Option";
                             return content + rightClicktext;
                         });
@@ -862,7 +889,6 @@
                     xtens.error(res);
                 }
             });
-            // }, 1000);
         },
 
         initRightClick: function () {
@@ -954,7 +980,7 @@
                 // rightClick Links
                 var dataType;
                 var id;
-                if (datum.type) {
+                if (datum.type && datum.type !== 'Patient') {
                     dataType = _.find(that.dataTypes, function (dt) {
                         return datum.type.toLowerCase() === dt.name.toLowerCase();
                     });
@@ -980,11 +1006,19 @@
                     if (sampleTypeChildren.length) {
                         var sids = _.map(sampleTypeChildren, 'id').join();
                         datum["new_sample"] = "/samples/new/0?idDataTypes=" + sids + "&donor=" + that.idPatient;
+                        if (dataType.model === 'Sample') {
+                            datum["new_sample"] += "&parentSample=" + id;
+                        }
                     }
                     var dataTypeChildren = _.where(dataType.children, { "model": Classes.DATA });
                     if (dataTypeChildren.length) {
                         var dids = _.map(dataTypeChildren, 'id').join();
                         datum["new_data"] = "/data/new/0?idDataTypes=" + dids + "&parentSubject=" + that.idPatient;
+                        if (dataType.model === 'Sample') {
+                            datum["new_data"] += "&parentSample=" + id;
+                        } else if (dataType.model === 'Data') {
+                            datum["new_data"] += "&parentData=" + id;
+                        }
                     }
                 }
                 return datum;

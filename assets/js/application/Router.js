@@ -112,7 +112,7 @@
             "datatypeprivileges/new/:skipme?*queryString": "dataTypePrivilegesEdit",
             "downIrods": "downIrods",
             "datatypes/graph": "dataTypeGraph",
-            "subjects/dashboard": "subjectGraph",
+            "subjects/dashboard": "subjectDashboard",
             "homepage": "homepage",
             "file-download/:id": "downloadFile",
             "data/dedicated": "dedicatedDataManagement",
@@ -528,9 +528,10 @@
         },
 
         dashboard: function (project) {
+            $('.loader-gif').css("display", "block");
             var that = this;
             var activeProject = xtens.session.get('activeProject') !== 'all' ? _.find(xtens.session.get('projects'), { 'name': xtens.session.get('activeProject') }).id : "";
-
+            // get all info for dashboard
             $.ajax({
                 url: '/dataType/getDataForDashboard?',
                 type: 'GET',
@@ -540,7 +541,28 @@
                 data: { projectId: activeProject },
                 contentType: 'application/json',
                 success: function (results) {
-                    that.loadView(new DashBoard.Views.HomePage(results));
+                    // get all project subjects
+                    $.ajax({
+                        url: '/subject',
+                        type: 'GET',
+                        headers: {
+                            'Authorization': 'Bearer ' + xtens.session.get("accessToken")
+                        },
+                        data: {
+                            project: activeProject,
+                            populate: ['type'],
+                            limit: 10000,
+                            sort: 'created_at ASC'
+                        },
+                        contentType: 'application/json',
+                        success: function (subjects, options, res) {
+                            results.subjects = new Subject.List(subjects);
+                            that.loadView(new DashBoard.Views.HomePage(results));
+                        },
+                        error: function (err) {
+                            xtens.error(err);
+                        }
+                    });
                 },
                 error: function (err) {
                     xtens.error(err);
@@ -769,7 +791,7 @@
          * @method
          * @name subjectGraph
          */
-        subjectGraph: function (queryString) {
+        subjectDashboard: function (queryString) {
             var that = this;
             var queryParams = parseQueryString(queryString);
             var dataTypes = new DataType.List();

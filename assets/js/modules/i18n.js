@@ -8,6 +8,7 @@
         "customised-data": "Import Data",
         "subjects": "Subjects",
         "samples": "Samples",
+        "project-dashboard": "Project Dashboard",
         "user": "User",
         "current-project": "Current Project",
         "edit-profile": "Edit Profile",
@@ -232,6 +233,7 @@
         "subject-dashboard": "Subject Dashboard",
         "subject-graph": "Subject Graph",
         "select-a-patient": "Select a Patient",
+        "search-patient": "Search Patient",
         /* views/templates/subject-edit.ejs */
         "subject-manager": "Subject Manager",
         "create-subject": "Create Subject",

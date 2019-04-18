@@ -42,12 +42,18 @@
         tagName: 'div',
         className: 'dashboard-cnt',
 
+        events: {
+            'change #subject-selector': 'goToSubjectDashboard'
+        },
+
         initialize: function (options) {
             $('#main').html(this.el);
             this.DataTypesCount = options.DataTypes;
             this.DataTypes = options.DataTypeSource;
             this.SamplesCount = options.Samples;
             this.DataCount = options.Data;
+            this.subjects = options.subjects && options.subjects.toJSON();
+
             this.dataTypesModelsColors = {
                 "Data": "#DB222A", // "#FB3640",//#FF4B3E",
                 "Subject": "#0066AA", // green-yellow #baff29
@@ -59,13 +65,26 @@
 
         render: function () {
             var that = this;
+            this.$el.html(this.template({
+                __: i18n,
+                subjects: this.subjects
+            }));
+            $('#subject-selector').selectpicker();
 
             _.forEach(["Subject", "Sample", "Data"], function (model) {
                 that.$el.append('<div class="row ' + model + '" >');
                 that.renderChartsByModel(model);
             });
+
+            $('.loader-gif').css("display", "none");
             return this;
         },
+
+        goToSubjectDashboard: function () {
+            var idPatient = $('#subject-selector').val();
+            xtens.router.navigate('#/subjects/dashboard?idPatient=' + idPatient, { trigger: true });
+        },
+
         renderChartsByModel: function (model) {
             var pieData; var title; var colors; var writeTag = false;
             switch (model) {
