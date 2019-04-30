@@ -15,7 +15,10 @@ SET client_min_messages = warning;
 
 CREATE EXTENSION IF NOT EXISTS plpgsql WITH SCHEMA pg_catalog;
 
+CREATE USER xtenspg WITH PASSWORD 'xtenspg';
 
+CREATE DATABASE xtensdb OWNER xtenspg;
+\c xtensdb
 --
 -- Name: EXTENSION plpgsql; Type: COMMENT; Schema: -; Owner:
 --
@@ -1817,7 +1820,7 @@ ALTER SEQUENCE daemon_id_seq OWNED BY daemon.id;
 --
 
 CREATE TABLE sample (
-    id integer NOT NULL,
+    id integer UNIQUE NOT NULL,
     type integer NOT NULL,
     parent_subject integer NOT NULL,
     parent_sample integer,
@@ -1893,7 +1896,7 @@ ALTER SEQUENCE somatic_variant_id_seq OWNED BY somatic_variant.id;
 --
 
 CREATE TABLE subject (
-    id integer NOT NULL,
+    id integer UNIQUE NOT NULL,
     type integer NOT NULL,
     personal_info integer,
     code text NOT NULL,
@@ -3096,13 +3099,6 @@ CREATE INDEX gin_index_subject ON subject USING gin (metadata);
 
 CREATE INDEX privileges_index ON datatype_privileges (data_type, xtens_group);
 
-
---
--- Name: updated_at_index; Type: INDEX; Schema: public; Owner: xtenspg; Tablespace:
---
-
-CREATE INDEX privileges_index ON datatype_privileges (data_type, xtens_group);
-
 --
 -- Name: join_data_data_index; Type: INDEX; Schema: public; Owner: xtenspg; Tablespace:
 --
@@ -3198,7 +3194,7 @@ ALTER TABLE ONLY datatype_privileges
 --
 
 ALTER TABLE ONLY data_type
-    ADD CONSTRAINT project_fkey FOREIGN KEY (project) REFERENCES project(id) MATCH FULL ON DELETE CASCADE;ù
+    ADD CONSTRAINT project_fkey FOREIGN KEY (project) REFERENCES project(id) MATCH FULL ON DELETE CASCADE;
 
 --
 -- Name: super_type_fkey; Type: FK CONSTRAINT; Schema: public; Owner: xtenspg
