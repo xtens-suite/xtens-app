@@ -11,7 +11,7 @@
             postgresql: {                       //your database connection
 
                 adapter: 'sails-postgresql',    //sails adapter
-                host: '127.0.0.1',              //ip host
+                host: 'postgres',              //ip host
                 port: '5432',                   //db port (postgresql default port 5432)
                 user: 'xtenspg',                   //db user
                 password: 'xtenspg',           //db user password
