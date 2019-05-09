@@ -54,7 +54,7 @@
                 sex: 'N.A.',
                 email: 'email@domain.com',
                 login: 'defaultAdmin',
-                password: 'password',
+                password: 'Admin1234!',
                 groups: [1]                      //operator "defaultAdmin" is associated with group "admin"
             }, {
                 firstName: 'default user',
@@ -63,7 +63,7 @@
                 sex: 'N.A.',
                 email: 'email@domain.com',
                 login: 'demouser',
-                password: 'password',
+                password: 'Demouser1234!',
                 groups: [2]                     //operator "demouser" is associated with group "public"
             }
         ]
