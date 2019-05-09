@@ -178,7 +178,7 @@
             var width = 500;
             var height = 280;
             var radius = Math.min(width, height) / 2;
-            var colorLength = data.length < 9 ? data.length : 9;
+            var colorLength = data.length < 3 ? 3 : data.length < 9 ? data.length : 9;
             var color = this.colors ? d3.scaleOrdinal().range(_.values(this.colors))
                 : this.model === "Sample" ? d3.scaleOrdinal(d3.schemeGreens[colorLength])
                     : d3.scaleOrdinal().range(data.length < 9 ? d3.schemeReds[3] : d3.schemeCategory10);
