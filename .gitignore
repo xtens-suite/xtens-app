@@ -102,6 +102,7 @@ lib-cov
 *.out
 *.pid
 npm-debug.log
+npm-debug.log.*
 
 
 
