@@ -73,7 +73,6 @@ config/ssl/
 
 node_modules
 bower_components
-ecosystem.config.js
 
 
 
