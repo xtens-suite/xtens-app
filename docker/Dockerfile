@@ -2,6 +2,7 @@ FROM ubuntu
 RUN mkdir app
 WORKDIR /app
 COPY . /app
+COPY ./docker/config/local.js /app/config/local.js
 # RUN git clone https://github.com/xtens-suite/xtens-app.git
 # ADD . /xtens-app
 RUN apt-get update

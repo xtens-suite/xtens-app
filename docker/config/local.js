@@ -52,7 +52,7 @@
                 lastName: 'sysadmin',
                 birthDate: '1970-01-01',
                 sex: 'N.A.',
-                email: 'email@domain.com',
+                email: 'admin@xtens.com',
                 login: 'defaultAdmin',
                 password: 'Admin1234!',
                 groups: [1]                      //operator "defaultAdmin" is associated with group "admin"
@@ -61,7 +61,7 @@
                 lastName: 'demo user',
                 birthDate: '1970-01-01',
                 sex: 'N.A.',
-                email: 'email@domain.com',
+                email: 'demouser@xtens.com',
                 login: 'demouser',
                 password: 'Demouser1234!',
                 groups: [2]                     //operator "demouser" is associated with group "public"
