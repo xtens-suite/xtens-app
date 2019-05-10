@@ -26,7 +26,7 @@
 
             localConnection: {
                 type: 'local',             
-                path: '/filesystem/home/path/',   // your fs home path
+                path: '/app/xtens-filesystem/',   // your fs home path
                 repoDirectory: 'xtens-repo',   // default Directory name
                 landingDirectory: 'landing',   // landing directory name
             }
