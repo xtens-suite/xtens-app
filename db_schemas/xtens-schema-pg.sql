@@ -1596,7 +1596,7 @@ CREATE TABLE operator (
     birth_date timestamp with time zone NOT NULL,
     sex text NOT NULL,
     email text NOT NULL,
-    address_information integer NOT NULL,
+    address_information integer,
     last_pswd_update timestamp with time zone NOT NULL DEFAULT now(),
     reset_pswd boolean NOT NULL DEFAULT FALSE,
     queries text NOT NULL DEFAULT '[]',
