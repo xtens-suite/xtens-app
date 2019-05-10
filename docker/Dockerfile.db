@@ -1,0 +1,4 @@
+FROM postgres
+WORKDIR docker-entrypoint-initdb.d/
+COPY db_schemas/xtens-schema-pg.sql ./
+EXPOSE 5432

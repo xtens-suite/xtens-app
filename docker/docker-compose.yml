@@ -1,0 +1,13 @@
+version: "2"
+services:
+  xtensapp_docker: 
+    image: nicozana/xtensapp-docker:latest
+    ports: 
+      - "1337"
+    command: bash -c 'while !</dev/tcp/postgres/5432; do sleep 5; done; NODE_ENV=production node app.js'
+    depends_on:
+      - postgres
+    environment:
+      - PORT=1337   
+  postgres:
+    image: nicozana/xtensapp-db-docker:latest
