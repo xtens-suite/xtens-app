@@ -30,6 +30,28 @@
         "to": "To",
         "please-select-source-project": "Please select Source project",
         "please-select-a-data-type": "Please select a Data Type",
+        "choose-import": "Choose a type of import",
+        "bulk": "Bulk",
+        "bulk-message": "Please rename files to upload following this istructions: </br>" +
+            "<ul><li><b>Patient ID</b> : Prefix - number (es. AA-12345) </li>" +
+            "<li><b>Tissue</b> : Sample Type, one among: BL, FB, SO, UR, SW (BL->Blood, FB->Fibroblast, SO->Solid, UR->Urine, SW->Swab) - sample code (es.BL-5543) </li>" +
+            "<li><b>Machine</b> : Machine Type, one among: ILL, ION (ILL->Illumina, ION->ION torrent)  </li>" +
+            "<li><b>Capture</b>:  Free Text (es. Exome, Panel1, Panel2, Genome, etc.) </li></ul>" +
+            "An Example: <b>AA-12345_BL-5543_ILL_Panel2.vcf</b>",
+        "by-patient": "By Patient",
+        "please-select-a-subject": "Please select a Subject or create",
+        "please-select-a-sample": "Select an existing Sample Code or get",
+        "new-sample-code": "New Sample Code",
+        "ion_torrent": "ION TORRENT",
+        "illumina": "ILLUMINA",
+        "blood": "BLOOD",
+        "tissue": "TISSUE",
+        "swab": "SWAB",
+        "fibroblast": "FIBROBLAST",
+        "urine": "URINE",
+        "please-select-a-sample-type": "Select a Sample Type",
+        "please-select-a-machine": "Select a Machine Type",
+        "please-insert-a-capture": "Insert a Capture",
         "please-select-destination-project": "Please select Destination project",
         // views/templates/datatype-edit.ejs
         "please-select": "Please Select",

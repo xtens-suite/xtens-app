@@ -1367,7 +1367,14 @@
     Data.Views.DedicatedManagement = Backbone.View.extend({
 
         events: {
-            'submit .edit-data-form': 'saveCustomisedData'
+            'submit .edit-data-form': 'saveCustomisedData',
+            'click #by-patient': 'showByPatient',
+            'click #bulk': 'hideByPatient',
+            'change #data-type': 'showSelectorIfVcf',
+            'change #subject-selector': 'getSubjectSamples',
+            'click #new-subject': 'goToNewSubject',
+            'click #new-sample': 'goToNewSample',
+            'change #sample-selector': 'setSampleTypeSelector'
         },
 
         tagName: 'div',
@@ -1429,6 +1436,7 @@
 
             $("#collapse-button").click(function () {
                 $("#collapse-import").collapse('show');
+                $(".new-import-btn-cnt").css('display', 'none ');
             });
 
             xtens.router.on("route", function (route, params) {
@@ -1436,6 +1444,141 @@
             });
 
             return this;
+        },
+        showByPatient: function (params) {
+            $('#subject-selector').prop('required', true);
+            $('#sample-selector').prop('required', true);
+            $('#sample-type-selector').prop('required', true);
+            $('#machine-selector').prop('required', true);
+            $('#capture-input').prop('required', true);
+            $('.selector-cnt').removeClass('hidden');
+            $('#bulk').removeClass('btn-success');
+            $('#bulk').addClass('btn-default');
+            $('#bulk-message').addClass('hidden');
+            $('#by-patient').removeClass('btn-default');
+            $('#by-patient').addClass('btn-success');
+            this.getSubjects();
+            this.getSampleTypes();
+            this.getMachineTypes();
+        },
+
+        hideByPatient: function (params) {
+            $('#subject-selector').prop('required', false);
+            $('#sample-selector').prop('required', false);
+            $('#sample-type-selector').prop('required', false);
+            $('#machine-selector').prop('required', false);
+            $('#capture-input').prop('required', false);
+            $('.selector-cnt').addClass('hidden');
+            $('#bulk').addClass('btn-success');
+            $('#bulk').removeClass('btn-default');
+            $('#bulk-message').removeClass('hidden');
+            $('#by-patient').addClass('btn-default');
+            $('#by-patient').removeClass('btn-success');
+        },
+
+        showSelectorIfVcf: function () {
+            if ($('#data-type').val() !== 'VCF') {
+                $('#buttonseldiv').addClass('hidden');
+            } else {
+                $('#buttonseldiv').removeClass('hidden');
+            }
+        },
+
+        goToNewSubject: function () {
+            xtens.router.navigate('#/subjects/new', { trigger: true });
+        },
+
+        goToNewSample: function () {
+            var idPatient = $('#subject-selector').val();
+            xtens.router.navigate('#/samples/new/0?donor=' + idPatient, { trigger: true });
+        },
+
+        setSampleTypeSelector: function () {
+            var samplesubtext = $('#sample-selector').find(':selected').data('subtext');
+            $('#sample-type-selector').val(samplesubtext);
+            $('#sample-type-selector').selectpicker('refresh');
+        },
+
+        getSubjects: function () {
+            var that = this;
+            var textHtml = "";
+            var activeProjectId = xtens.session.get('activeProject') !== 'all' ? _.find(xtens.session.get('projects'), { 'name': xtens.session.get('activeProject') }).id : "";
+
+            $.ajax({
+                url: '/subject',
+                type: 'GET',
+                headers: {
+                    'Authorization': 'Bearer ' + xtens.session.get("accessToken")
+                },
+                data: {
+                    project: activeProjectId,
+                    limit: 10000,
+                    sort: 'created_at ASC'
+                },
+                contentType: 'application/json',
+                success: function (subjects, options, res) {
+                    _.forEach(subjects, function (subject) {
+                        textHtml = textHtml + '<option value=\"' + subject.id + '\">' + subject.code + '</option>';
+                    });
+                    $("#subject-selector").html(textHtml).selectpicker();
+                    $("#sample-selector").selectpicker();
+                    that.$("#save").prop("disabled", true);
+                    that.$("#save").prop('title', 'Select a patient and sample to perform a procedure and load at least a file');
+                    that.$('form').parsley(parsleyOpts);
+                },
+                error: function (err) {
+                    xtens.error(err);
+                }
+            });
+        },
+
+        getSubjectSamples: function () {
+            // var that = this;
+            // var activeProjectId = xtens.session.get('activeProject') !== 'all' ? _.find(xtens.session.get('projects'), { 'name': xtens.session.get('activeProject') }).id : "";
+            var textHtml = "";
+            var idPatient = $('#subject-selector').val();
+
+            $.ajax({
+                url: '/sample',
+                type: 'GET',
+                headers: {
+                    'Authorization': 'Bearer ' + xtens.session.get("accessToken")
+                },
+                data: {
+                    donor: idPatient,
+                    limit: 10000,
+                    sort: 'created_at ASC'
+                },
+                contentType: 'application/json',
+                success: function (samples, options, res) {
+                    _.forEach(samples, function (sample) {
+                        textHtml = textHtml + '<option value=\"' + sample.id + '-' + sample.biobankCode + '\" data-subtext=\"' + sample.metadata.type.value + '\">' + sample.biobankCode + '</option>';
+                    });
+                    $("#new-sample").prop("disabled", false);
+                    $("#sample-selector").prop("disabled", false);
+                    $("#sample-selector").html(textHtml).selectpicker('refresh');
+                    $('#sample-type-selector').val('');
+                    $('#sample-type-selector').selectpicker('refresh');
+                    $('#machine-selector').val('');
+                    $('#machine-selector').selectpicker('refresh');
+                    $('#capture-input').val('');
+                    $('#capture-input');
+                },
+                error: function (err) {
+                    xtens.error(err);
+                }
+            });
+            // get samples from subjectsamples table joined with samples
+        },
+
+        getSampleTypes: function () {
+            // at the moment we set directly into html
+            $('#sample-type-selector').selectpicker();
+        },
+
+        getMachineTypes: function () {
+            // at the moment we set directly into html
+            $('#machine-selector').selectpicker();
         },
 
         saveCustomisedData: function (ev) {
@@ -1485,7 +1628,7 @@
                 return function () { // Return a function in the context of 'self'
                     self.tableView.refreshDaemonsTable();
                 };
-            })(this), 3000);
+            })(this), 65000);
         },
 
         saveOnSuccess: function (infoObj) {

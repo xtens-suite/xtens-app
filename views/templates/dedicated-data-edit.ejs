@@ -1,7 +1,8 @@
 <h1><%= __("customised-data-management") %></h1>
 <div id="content" style="margin-top:2em;">
-  <div class="row">
-    <button id="collapse-button" type="button" class="btn btn-success" name="button"><%= __("new-customised-data-import") %></button>
+  <div class="text-center new-import-btn-cnt">
+    <button id="collapse-button" type="button" class="btn btn-success"
+      name="button"><%= __("new-customised-data-import") %></button>
   </div>
   <div id="collapse-import" class="collapse">
     <div class="row">
@@ -9,33 +10,106 @@
       <div id="customised-form" class="col-xs-offset-2 col-xs-8">
         <form class="form-horizontal edit-data-form" role="form" data-parsley-focus="first" data-parsley-validate>
           <div class="row text-center">
-            <div class="col-xs-offset-3 col-xs-6" style="padding:1em;">
-              <div class="form-group">
-                <select required id="data-type" name="data-type" title="<%= __('please-select-a-data-type') %>" class="selectpicker form-control"></select>
+            <div class="row text-center">
+              <div class="col-xs-offset-3 col-xs-6" style="padding:1em;">
+                <div class="form-group">
+                  <select required id="data-type" name="data-type" title="<%= __('please-select-a-data-type') %>"
+                    class="selectpicker form-control"></select>
+                </div>
               </div>
             </div>
-            <div class="row text-center">
-              <div class="col-xs-12">
-                <div class="dropzone" style="width: 18%;">
-                  <div class="dz-default dz-message text-center">
-                    <span><%= __('drop-files-here') %></span>
+
+            <div id="buttonseldiv" class="row text-center hidden">
+              <h4><%= __('choose-import') %></h4>
+              <div class="btn-group btn-group-margin">
+                <input type="button" id="bulk" class="btn btn-default" value="<%=__('bulk') %>">
+                <input type="button" id="by-patient" class="btn btn-default" value="<%=__('by-patient') %>">
+              </div>
+            </div>
+            <div id="bulk-message" class="row text-left hidden" style="font-size:12px">
+              <div><%=__('bulk-message') %></div>
+
+            </div>
+
+            <div class="row text-center selector-cnt hidden">
+              <div class="row">
+                <div class="col-xs-4" style="padding:1em;">
+                  <div class="form-group">
+                    <select id="subject-selector" name="subject-selector" data-live-search="true"
+                      title="<%= __('please-select-a-subject') %>" class="selectpicker form-control"></select>
                   </div>
-                  <div class="fallback">
-                    <input name="file" type="file">
+                </div>
+                <div class="col-xs-1" style="padding:1em;">
+                  <div class="form-group">
+                    <input type="button" id="new-subject" class="btn btn-primary" value="<%=__('new-subject') %>">
+                  </div>
+                </div>
+                <div class="col-xs-offset-1 col-xs-4" style="padding:1em;">
+                  <div class="form-group">
+                    <select disabled id="sample-selector" name="sample-selector" data-live-search="true"
+                      title="<%= __('please-select-a-sample') %>" class="selectpicker form-control"></select>
+                  </div>
+                </div>
+                <div class="col-xs-1" style="padding:1em;">
+                  <div class="form-group">
+                    <input disabled type="button" id="new-sample" class="btn btn-primary"
+                      value="<%=__('new-sample') %>">
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-xs-3" style="padding:1em;">
+                  <div class="form-group">
+                    <select id="sample-type-selector" name="sample-type-selector" data-live-search="true"
+                      title="<%= __('please-select-a-sample-type') %>" class="selectpicker form-control">
+                      <option value="BLOOD"><%=__('blood') %></option>
+                      <option value="TISSUE"><%=__('tissue') %></option>
+                      <option value="SWAB"><%=__('swab') %></option>
+                      <option value="FIBROBLAST"><%=__('fibroblast') %></option>
+                      <option value="URINE"><%=__('urine') %></option>
+                    </select>
+                  </div>
+                </div>
+                <div class="col-xs-offset-1 col-xs-4" style="padding:1em;">
+                  <div class="form-group">
+                    <select id="machine-selector" name="machine-selector" data-live-search="true"
+                      title="<%= __('please-select-a-machine') %>" class="selectpicker form-control">
+                      <option value="ILLUMINA"><%=__('illumina') %></option>
+                      <option value="ION TORRENT"><%=__('ion_torrent') %></option>
+                    </select>
+                  </div>
+                </div>
+                <div class="col-xs-offset-1 col-xs-3" style="padding:1em;">
+                  <div class="form-group">
+                    <input type="text" id="capture-input" class="form-control"
+                      placeholder="<%= __('please-insert-a-capture') %>">
                   </div>
                 </div>
               </div>
             </div>
-            <div id="buttonbardiv" class="row text-center">
-              <div class="btn-group btn-group-margin">
-                <input type="submit" id="save" class="btn btn-primary" value="<%=__('save') %>">
+          </div>
+          <div class="row text-center">
+            <div class="col-xs-12">
+              <div class="dropzone" style="width: 18%;">
+                <div class="dz-default dz-message text-center">
+                  <span><%= __('drop-files-here') %></span>
+                </div>
+                <div class="fallback">
+                  <input name="file" type="file">
+                </div>
               </div>
             </div>
           </div>
-        </form>
+          <div id="buttonbardiv" class="row text-center">
+            <div class="btn-group btn-group-margin">
+              <input type="submit" id="save" class="btn btn-primary" value="<%=__('save') %>">
+            </div>
+          </div>
       </div>
+      </form>
     </div>
   </div>
+</div>
 </div>
 
 <div class="row" style="margin-top: 2em;">
