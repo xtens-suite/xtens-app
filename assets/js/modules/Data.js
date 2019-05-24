@@ -1641,7 +1641,7 @@
                 return function () { // Return a function in the context of 'self'
                     self.tableView.refreshDaemonsTable();
                 };
-            })(this), 65000);
+            })(this), 2000);
         },
 
         saveOnSuccess: function (infoObj) {
