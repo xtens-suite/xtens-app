@@ -41,7 +41,7 @@
     /**
      *  @description general purpose function to retrieve the value from a field
      */
-    function getFieldValue ($el, ev, options) {
+    function getFieldValue($el, ev, options) {
         switch (options.view.component.fieldType) {
             case FieldTypes.INTEGER:
                 return parseInt($el.val());
@@ -62,7 +62,7 @@
     /**
      * @description render a Date from the model to a view
      */
-    function renderDateValue (value) {
+    function renderDateValue(value) {
         if (value) {
             var dateArray = value instanceof Date ? value.toISOString().split('-') : value.split('-');
             return dateArray[2] + '/' + dateArray[1] + '/' + dateArray[0];
@@ -392,7 +392,7 @@
             this.component = options.component;
             this.nestedViews = [];
             if (this.model.metadata) {
-                var loopInstance = this.model.metadata[this.component.content[0].name.replace(" ", "_").toLowerCase()];
+                var loopInstance = this.model.metadata[this.component.content[0].formattedName];
                 this.loopRecords = loopInstance ? loopInstance.values.length : 0;
             } else {
                 this.loopRecords = 0;
@@ -1387,6 +1387,7 @@
             this.dataTypes = options.dataTypes && options.dataTypes.toJSON();
             this.privileges = options.dataTypePrivileges && options.dataTypePrivileges.toJSON();
             this.tableView = null;
+            this.sendVcfByPatient = false;
             this.randomFolder = Math.floor(Math.random() * 20001) + 10000;
             var url = '/fileContent?folder=' + this.randomFolder;
             this.dropzoneOpts = {
@@ -1460,6 +1461,7 @@
             this.getSubjects();
             this.getSampleTypes();
             this.getMachineTypes();
+            this.sendVcfByPatient = true;
         },
 
         hideByPatient: function (params) {
@@ -1474,6 +1476,7 @@
             $('#bulk-message').removeClass('hidden');
             $('#by-patient').addClass('btn-default');
             $('#by-patient').removeClass('btn-success');
+            this.sendVcfByPatient = false;
         },
 
         showSelectorIfVcf: function () {
@@ -1489,7 +1492,7 @@
         },
 
         goToNewSample: function () {
-            var idPatient = $('#subject-selector').val();
+            var idPatient = $('#subject-selector').val().split('#')[0];
             xtens.router.navigate('#/samples/new/0?donor=' + idPatient, { trigger: true });
         },
 
@@ -1518,7 +1521,7 @@
                 contentType: 'application/json',
                 success: function (subjects, options, res) {
                     _.forEach(subjects, function (subject) {
-                        textHtml = textHtml + '<option value=\"' + subject.id + '\">' + subject.code + '</option>';
+                        textHtml = textHtml + '<option value=\"' + subject.id + '#' + subject.code + '\">' + subject.code + '</option>';
                     });
                     $("#subject-selector").html(textHtml).selectpicker();
                     $("#sample-selector").selectpicker();
@@ -1536,7 +1539,7 @@
             // var that = this;
             // var activeProjectId = xtens.session.get('activeProject') !== 'all' ? _.find(xtens.session.get('projects'), { 'name': xtens.session.get('activeProject') }).id : "";
             var textHtml = "";
-            var idPatient = $('#subject-selector').val();
+            var idPatient = $('#subject-selector').val().split('#')[0];
 
             $.ajax({
                 url: '/sample',
@@ -1552,7 +1555,7 @@
                 contentType: 'application/json',
                 success: function (samples, options, res) {
                     _.forEach(samples, function (sample) {
-                        textHtml = textHtml + '<option value=\"' + sample.id + '-' + sample.biobankCode + '\" data-subtext=\"' + sample.metadata.type.value + '\">' + sample.biobankCode + '</option>';
+                        textHtml = textHtml + '<option value=\"' + sample.id + '#' + sample.biobankCode + '\" data-subtext=\"' + sample.metadata.type.value + '\">' + sample.biobankCode + '</option>';
                     });
                     $("#new-sample").prop("disabled", false);
                     $("#sample-selector").prop("disabled", false);
@@ -1583,7 +1586,16 @@
 
         saveCustomisedData: function (ev) {
             ev.preventDefault();
-
+            var vcfData = {};
+            if ($('#data-type').val() === 'VCF' && this.sendVcfByPatient) {
+                vcfData.subjectId = parseInt($('#subject-selector').val().split('#')[0]);
+                vcfData.subjectCode = $('#subject-selector').val().split('#')[1];
+                vcfData.sampleId = parseInt($('#sample-selector').val().split('#')[0]);
+                vcfData.sampleBiobankCode = $('#sample-selector').val().split('#')[1];
+                vcfData.sampleType = $('#sample-type-selector').val();
+                vcfData.machine = $('#machine-selector').val();
+                vcfData.capture = $('#capture-input').val();
+            }
             var that = this; var dataType = this.$("select option:selected").val(); var superType = _.find(procedures, { 'value': dataType }).superType; var owner = _.find(procedures, { 'value': dataType }).owner;
             var activeProject = xtens.session.get('activeProject') !== 'all' ? _.find(xtens.session.get('projects'), { 'name': xtens.session.get('activeProject') }) : undefined;
             $.ajax({
@@ -1597,7 +1609,8 @@
                     superType: superType,
                     owner: owner,
                     idProject: activeProject && activeProject.id,
-                    folder: this.randomFolder
+                    folder: this.randomFolder,
+                    vcfData: vcfData
                 }),
                 contentType: 'application/json',
 

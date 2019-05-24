@@ -20,7 +20,7 @@ const MainController = {
      * @name getFileSystemManager
      * @description retrieve the FileSystem coordinates for the client
      */
-    getFileSystemStrategy: function(req, res) {
+    getFileSystemStrategy: function (req, res) {
         let conn = sails.hooks['persistence'].getFileSystem().defaultConnection;
         return res.json(conn);
     },
@@ -30,39 +30,39 @@ const MainController = {
      * @name getAppUI
      * @description ships the index.html file
      */
-    getAppUI: function(req, res) {
-        return res.sendfile(path.resolve(__dirname, '..' , '..', 'assets', 'bundles', 'index.html'));
+    getAppUI: function (req, res) {
+        return res.sendfile(path.resolve(__dirname, '..', '..', 'assets', 'bundles', 'index.html'));
     },
 
     /**
      * @method
      * @name excuteCustomDataMangement
      */
-    executeCustomDataManagement: function(req, res) {
-        let error="";
+    executeCustomDataManagement: function (req, res) {
+        let error = "";
         let co = new ControllerOut(res);
         let key = req.param('dataType');
         let superType = req.param('superType');
         let idProject = req.param('idProject');
         let folder = req.param('folder');
+        let vcfData = req.param('vcfData');
         let deafultOwner = req.param('owner');
         const operator = TokenService.getToken(req);
-        let obj = { bearerToken: req.headers.authorization.split(' ')[1], idProject: idProject};
+        let obj = { bearerToken: req.headers.authorization.split(' ')[1], idProject: idProject };
         // let summary = {};
 
-        return DataType.findOne({superType: superType, project: idProject}).populate('parents').then( (dataType) => {
-            if(dataType) {
-                let parentSubjectDt = _.find(dataType.parents, {model: 'Subject'});
+        return DataType.findOne({ superType: superType, project: idProject }).populate('parents').then((dataType) => {
+            if (dataType) {
+                let parentSubjectDt = _.find(dataType.parents, { model: 'Subject' });
                 obj.dataTypeId = dataType.id;
                 obj.parentSubjectDtId = parentSubjectDt ? parentSubjectDt.id : null;
-
             }
             folder = obj.folder = folder && folder != null && folder != "undefined" ? folder : undefined;
-            obj.owner = deafultOwner ? deafultOwner : operator.id;
+            obj.owner = deafultOwner || operator.id;
             obj.executor = operator.id;
-            
+            obj.vcfData = vcfData;
             sails.log("MainController.executeCustomDataManagement - executing customised function");
-            const ps = require("child_process").spawn(sails.config.xtens.customisedDataMap.get(key),[JSON.stringify(obj)], {stdio:['ipc']});
+            const ps = require("child_process").spawn(sails.config.xtens.customisedDataMap.get(key), [JSON.stringify(obj)], { stdio: ['ipc'] });
 
             // ps.stdout.on('data', (data) => {
             //     console.log(data.toString());
@@ -85,7 +85,7 @@ const MainController = {
                 let lastFolder = folder ? folder + '/' : '*';
                 let command = folder ? 'rm -r ' : 'rm ';
                 let cmd = command + DEFAULT_LOCAL_STORAGE + '/tmp/' + lastFolder;
-                require("child_process").exec(cmd, function(err, stdout, stderr) {
+                require("child_process").exec(cmd, function (err, stdout, stderr) {
                     if ((code !== 0 && error)) {
                         sails.log('stderr: ' + stderr);
                         // return co.error(error);
@@ -97,7 +97,6 @@ const MainController = {
             });
             return res.json(obj);
         });
-
     }
 
 };
