@@ -349,6 +349,7 @@ CREATE TABLE data_type (
     name text NOT NULL,
     model text NOT NULL,
     biobank_code text,
+    biobank_prefix text,
     parent_code boolean NOT NULL DEFAULT FALSE,
     parent_no_prefix boolean NOT NULL DEFAULT FALSE,
     super_type integer NOT NULL,
