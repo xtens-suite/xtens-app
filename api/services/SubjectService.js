@@ -5,7 +5,7 @@
  */
 /* jshint esnext: true */
 /* jshint node: true */
-/* globals _, sails, Subject, DataService, DataTypeService*/
+/* globals _, sails, Subject, DataService, DataTypeService */
 "use strict";
 
 let XRegExp = require('xregexp');
@@ -16,8 +16,7 @@ let SUBJECT = sails.config.xtens.constants.DataTypeClasses.SUBJECT;
 const UNICODE_NAME_REGEX = new XRegExp("^[\\p{L} .'-]+$");
 
 const coroutines = {
-    validate: BluebirdPromise.coroutine(function *(subject, performMetadataValidation, dataType) {
-
+    validate: BluebirdPromise.coroutine(function * (subject, performMetadataValidation, dataType) {
         if (dataType.model !== SUBJECT) {
             return {
                 error: "This data type is for another model: " + dataType.model
@@ -26,8 +25,8 @@ const coroutines = {
 
         let personalInfoValidationSchema = {
             id: Joi.number().integer().positive(),
-            givenName: Joi.string().uppercase().regex(UNICODE_NAME_REGEX).trim(),
-            surname: Joi.string().uppercase().regex(UNICODE_NAME_REGEX).trim(),
+            givenName: Joi.string().uppercase().trim(), // .regex(UNICODE_NAME_REGEX).trim(),
+            surname: Joi.string().uppercase().trim(), // .regex(UNICODE_NAME_REGEX).trim(),
             birthDate: Joi.string().isoDate(),
             createdAt: Joi.date(),
             updatedAt: Joi.date()
@@ -40,7 +39,7 @@ const coroutines = {
             code: Joi.string().uppercase(),
             sex: Joi.string().required().valid(_.values(sails.config.xtens.constants.SexOptions)),
             personalInfo: Joi.object().keys(personalInfoValidationSchema).allow(null),
-          // projects: Joi.array().allow(null),
+            // projects: Joi.array().allow(null),
             samples: Joi.array().allow(null),
             childrenData: Joi.array().allow(null),
             tags: Joi.array().allow(null),
@@ -49,7 +48,6 @@ const coroutines = {
             createdAt: Joi.date(),
             updatedAt: Joi.date()
         };
-
 
         if (performMetadataValidation) {
             let metadataValidationSchema = {};
@@ -73,7 +71,7 @@ let SubjectService = BluebirdPromise.promisifyAll({
      * @name simplify
      * @description removes all associated Objects if present keeping only their primary keys (i.e. IDs)
      */
-    simplify: function(subject) {
+    simplify: function (subject) {
         ["type"].forEach(elem => {
             if (subject[elem]) {
                 subject[elem] = subject[elem].id || subject[elem];
@@ -94,7 +92,6 @@ let SubjectService = BluebirdPromise.promisifyAll({
         // }
         //
         // console.log("simplified project array: " + subject.projects);
-
     },
 
     /**
@@ -107,13 +104,12 @@ let SubjectService = BluebirdPromise.promisifyAll({
      *                      - error: null if the Data is validated, an Error object otherwise
      *                      - value: the validated data object if no error is returned
      */
-    validate: function(subject, performMetadataValidation, dataType) {
-
+    validate: function (subject, performMetadataValidation, dataType) {
         return coroutines.validate(subject, performMetadataValidation, dataType)
-        .catch(/* istanbul ignore next */ function(err) {
-            sails.log(err);
-            return err;
-        });
+            .catch(/* istanbul ignore next */ function (err) {
+                sails.log(err);
+                return err;
+            });
     },
 
     /**
@@ -122,11 +118,10 @@ let SubjectService = BluebirdPromise.promisifyAll({
      * @description find a Subject if ID is provided
      * @return {Object} - the found Subject
      */
-    getOne: function(id, code, next) {
+    getOne: function (id, code, next) {
         if (!id && !code) {
             next(null, null);
-        }
-        else {
+        } else {
             let criteria = {};
 
             if (id) criteria.id = id;
