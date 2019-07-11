@@ -31,7 +31,7 @@ const coroutines = {
      * @param{Response} res
      * @description coroutine for new Subject instance creation
      */
-    create: BluebirdPromise.coroutine(function *(req, res) {
+    create: BluebirdPromise.coroutine(function * (req, res) {
         let subject = req.allParams();
         const operator = TokenService.getToken(req);
         const dataTypePrivilege = yield DataTypeService.getDataTypePrivilegeLevel(operator.groups, subject.type);
@@ -55,7 +55,7 @@ const coroutines = {
         return res.json(201, result);
     }),
 
-    findOne: BluebirdPromise.coroutine(function *(req, res) {
+    findOne: BluebirdPromise.coroutine(function * (req, res) {
         const id = req.param('id');
         const operator = TokenService.getToken(req);
 
@@ -67,26 +67,23 @@ const coroutines = {
         }
 
         let subject = yield BluebirdPromise.resolve(query);
-        const idSubjectType = subject ? _.isObject(subject.type) ? subject.type.id :  subject.type : undefined;
+        const idSubjectType = subject ? _.isObject(subject.type) ? subject.type.id : subject.type : undefined;
         const dataTypePrivilege = yield DataTypeService.getDataTypePrivilegeLevel(operator.groups, idSubjectType);
 
-              //filter Out Metadata if operator has not the privilege
-        if (!dataTypePrivilege || _.isEmpty(dataTypePrivilege)){ subject = {}; }
-        else if( dataTypePrivilege.privilegeLevel === VIEW_OVERVIEW) { subject.metadata = {}; }
+        // filter Out Metadata if operator has not the privilege
+        if (!dataTypePrivilege || _.isEmpty(dataTypePrivilege)) { subject = {}; } else if (dataTypePrivilege.privilegeLevel === VIEW_OVERVIEW) { subject.metadata = {}; }
 
-        if( !operator.canAccessSensitiveData && !_.isEmpty(subject.metadata) ){
+        if (!operator.canAccessSensitiveData && !_.isEmpty(subject.metadata)) {
             subject = yield DataService.filterOutSensitiveInfo(subject, operator.canAccessSensitiveData);
         }
 
-        DbLog(logMessages.FINDONE, SUBJECT, id, subject.owner, idSubjectType, operator.id );
+        DbLog(logMessages.FINDONE, SUBJECT, id, subject.owner, idSubjectType, operator.id);
         return res.json(subject);
-
     }),
 
-    find: BluebirdPromise.coroutine(function *(req, res) {
-
+    find: BluebirdPromise.coroutine(function * (req, res) {
         const operator = TokenService.getToken(req);
-        let allPrivileges = yield DataTypePrivileges.find({group:operator.groups});
+        let allPrivileges = yield DataTypePrivileges.find({ group: operator.groups });
         allPrivileges = operator.groups.length > 1 ? DataTypeService.getHigherPrivileges(allPrivileges) : allPrivileges;
 
         let params = req.allParams();
@@ -100,22 +97,21 @@ const coroutines = {
         let subjects = yield crudManager.findData(params);
         // let subjects = yield BluebirdPromise.resolve(query);
         const dataTypesId = !_.isEmpty(subjects) ? _.isObject(subjects[0].type) ? _.uniq(_.map(_.map(subjects, 'type'), 'id')) : _.uniq(_.map(subjects, 'type')) : [];
-        const pagePrivileges = allPrivileges.filter( obj => {
-            return _.find(dataTypesId, id =>{ return id === obj.dataType;});
+        const pagePrivileges = allPrivileges.filter(obj => {
+            return _.find(dataTypesId, id => { return id === obj.dataType; });
         });
 
-        const [payload, headerInfo]  = yield BluebirdPromise.all([
+        const [payload, headerInfo] = yield BluebirdPromise.all([
             DataService.filterListByPrivileges(subjects, dataTypesId, pagePrivileges, operator.canAccessSensitiveData),
             QueryService.composeHeaderInfo(req, params)
         ]);
 
         // NOTE: Log or not Log this is question
-        //DbLog(logMessages.FIND, SUBJECT, subjects.length, _.uniq(_.map(subjects, 'owner')), dataTypesId, operator.id);
+        // DbLog(logMessages.FIND, SUBJECT, subjects.length, _.uniq(_.map(subjects, 'owner')), dataTypesId, operator.id);
         return DataService.prepareAndSendResponse(res, payload, headerInfo);
-
     }),
 
-    update: BluebirdPromise.coroutine(function *(req, res) {
+    update: BluebirdPromise.coroutine(function * (req, res) {
         let subject = req.allParams();
         const operator = TokenService.getToken(req);
 
@@ -149,11 +145,11 @@ const coroutines = {
         qUpdate = actionUtil.populateRequest(qUpdate, req);
         let upSubject = yield BluebirdPromise.resolve(qUpdate);
 
-        DbLog(logMessages.UPDATE, SUBJECT, updatedSubject.id, updatedSubject.owner, updatedSubject.type, operator.id, {prevData: prevSubject, upData: upSubject});
+        DbLog(logMessages.UPDATE, SUBJECT, updatedSubject.id, updatedSubject.owner, updatedSubject.type, operator.id, { prevData: prevSubject, upData: upSubject });
         return res.json(updatedSubject);
     }),
 
-    destroy: BluebirdPromise.coroutine(function *(req, res, co) {
+    destroy: BluebirdPromise.coroutine(function * (req, res, co) {
         const id = req.param('id');
         const operator = TokenService.getToken(req);
 
@@ -165,7 +161,7 @@ const coroutines = {
         if (!subject) {
             throw new NonexistentResourceError("Missing Resource");
         }
-            //retrieve dataType id
+        // retrieve dataType id
         const idSubjectType = _.isObject(subject.type) ? subject.type.id : subject.type;
 
         const dataTypePrivilege = yield DataTypeService.getDataTypePrivilegeLevel(operator.groups, idSubjectType);
@@ -176,15 +172,14 @@ const coroutines = {
 
         const deleted = yield crudManager.deleteSubject(id);
         if (deleted > 0) {
-            DbLog(logMessages.DELETE, SUBJECT, subject.id, subject.owner, subject.type, operator.id, {deletedData: JSON.stringify(subject)});
+            DbLog(logMessages.DELETE, SUBJECT, subject.id, subject.owner, subject.type, operator.id, { deletedData: JSON.stringify(subject) });
         }
         return res.json(200, { deleted: deleted });
-
     }),
 
-    edit: BluebirdPromise.coroutine(function *(req, res) {
+    edit: BluebirdPromise.coroutine(function * (req, res) {
         const operator = TokenService.getToken(req);
-        const id = req.param("id"), code = req.param("code"), project = req.param("project");
+        const id = req.param("id"); const code = req.param("code"); const project = req.param("project");
         sails.log.info("SubjectController.edit - Decoded ID is: " + operator.id);
 
         const payload = yield BluebirdPromise.props({
@@ -197,38 +192,36 @@ const coroutines = {
             })
         });
 
-        if (_.isEmpty(payload.dataTypes)){ throw new PrivilegesError(`Authenticated user has not edit privileges on any subject type`); }
+        if (_.isEmpty(payload.dataTypes)) { throw new PrivilegesError(`Authenticated user has not edit privileges on any subject type`); }
 
-        if (payload.subject){
+        if (payload.subject) {
             let operators = yield OperatorService.getOwners(payload.subject);
             payload.operators = operators;
-          // if operator has not access to Sensitive Data and dataType has sensitive data, then return forbidden
+            // if operator has not access to Sensitive Data and dataType has sensitive data, then return forbidden
             const sensitiveRes = yield DataService.hasDataSensitive(payload.subject.id, SUBJECT);
             if (sensitiveRes && ((sensitiveRes.hasDataSensitive && !operator.canAccessSensitiveData))) {
                 throw new PrivilegesError("Authenticated user is not allowed to edit sensitive data");
                 // if edit subject exists and operator has not the privilege to EDIT datatype, then throw Privileges Error
             }
-            if(_.isEmpty(payload.dataTypes) || !_.find(payload.dataTypes, {id : payload.subject.type.id})) {
+            if (_.isEmpty(payload.dataTypes) || !_.find(payload.dataTypes, { id: payload.subject.type.id })) {
                 throw new PrivilegesError(`Authenticated user has not edit privileges on the subject type`);
             }
         }
         return res.json(payload);
-
-
     }),
 
-    getNextSubjectCode: BluebirdPromise.coroutine(function *(req, res) {
+    getNextSubjectCode: BluebirdPromise.coroutine(function * (req, res) {
         const operator = TokenService.getToken(req);
         const subject = req.allParams();
         sails.log.info("SubjectController.getNextSubjectCode - Decoded ID is: " + operator.id);
-        if (!subject.type){ throw new Error(`Error getting last subject code - Please provide a data type`);}
+        if (!subject.type) { throw new Error(`Error getting last subject code - Please provide a data type`); }
 
         const nextCode = yield crudManager.getNextSubjectCode(subject);
 
         return res.json(nextCode);
     }),
 
-    getInfoForBarChart: BluebirdPromise.coroutine(function *(req, res, co) {
+    getInfoForBarChart: BluebirdPromise.coroutine(function * (req, res, co) {
         const dataTypeId = req.param('dataType');
         let fieldName = req.param('fieldName');
         const model = req.param('model');
@@ -244,7 +237,6 @@ const coroutines = {
         return res.json(results);
     })
 
-
 };
 
 module.exports = {
@@ -255,14 +247,13 @@ module.exports = {
      *  @name create
      *  @description:  create a new subject; transaction-safe implementation
      */
-    create: function(req, res) {
+    create: function (req, res) {
         const co = new ControllerOut(res);
-        coroutines.create(req,res)
-        .catch(error => {
-            sails.log.error("SubjectController.create: " + error.message);
-            return co.error(error);
-        });
-
+        coroutines.create(req, res)
+            .catch(error => {
+                sails.log.error("SubjectController.create: " + error.message);
+                return co.error(error);
+            });
     },
 
     /**
@@ -271,14 +262,13 @@ module.exports = {
      * @name findOne
      * @description - retrieve an existing subject
      */
-    findOne: function(req, res) {
+    findOne: function (req, res) {
         const co = new ControllerOut(res);
-        coroutines.findOne(req,res)
-        .catch(error => {
-          /* istanbul ignore next */
-            return co.error(error);
-        });
-
+        coroutines.findOne(req, res)
+            .catch(error => {
+                /* istanbul ignore next */
+                return co.error(error);
+            });
     },
 
     /**
@@ -289,13 +279,13 @@ module.exports = {
      * @name find
      * @description Find samples based on criteria provided in the request
      */
-    find: function(req, res) {
+    find: function (req, res) {
         const co = new ControllerOut(res);
-        coroutines.find(req,res)
-        .catch(err => {
-            sails.log.error(err);
-            return co.error(err);
-        });
+        coroutines.find(req, res)
+            .catch(err => {
+                sails.log.error(err);
+                return co.error(err);
+            });
     },
 
     /**
@@ -305,13 +295,13 @@ module.exports = {
      * @description - update an existing subject.
      *              Transaction-safe implementation
      */
-    update: function(req, res) {
+    update: function (req, res) {
         const co = new ControllerOut(res);
-        coroutines.update(req,res)
-        .catch(error => {
-            sails.log.error(error);
-            return co.error(error);
-        });
+        coroutines.update(req, res)
+            .catch(error => {
+                sails.log.error(error);
+                return co.error(error);
+            });
     },
 
     /**
@@ -320,17 +310,16 @@ module.exports = {
      * @name destroy
      * @description
      */
-    destroy: function(req, res) {
+    destroy: function (req, res) {
         const co = new ControllerOut(res);
-        coroutines.destroy(req,res,co)
-        .catch(err => {
-            if (err instanceof NonexistentResourceError) {
-                return res.json(200, { deleted: 0 });
-            }
-            sails.log.error(err);
-            return co.error(err);
-        });
-
+        coroutines.destroy(req, res, co)
+            .catch(err => {
+                if (err instanceof NonexistentResourceError) {
+                    return res.json(200, { deleted: 0 });
+                }
+                sails.log.error(err);
+                return co.error(err);
+            });
     },
 
     /**
@@ -338,31 +327,29 @@ module.exports = {
      * @name edit
      * @description retrieve all required models for editing/creating a Subject via client web-form
      */
-    edit: function(req, res) {
+    edit: function (req, res) {
         const co = new ControllerOut(res);
-        coroutines.edit(req,res)
-        .catch(err => {
-          /* istanbul ignore next */
-            sails.log.error(err);
-            return co.error(err);
-        });
-
+        coroutines.edit(req, res)
+            .catch(err => {
+                /* istanbul ignore next */
+                sails.log.error(err);
+                return co.error(err);
+            });
     },
 
-   /**
-   * @method
-   * @name getNextSubjectCode
-   * @description retrieve last biobank code for creating a Sample via client web-form
-   */
-    getNextSubjectCode: function(req, res) {
+    /**
+    * @method
+    * @name getNextSubjectCode
+    * @description retrieve last biobank code for creating a Sample via client web-form
+    */
+    getNextSubjectCode: function (req, res) {
         const co = new ControllerOut(res);
-        coroutines.getNextSubjectCode(req,res)
-      .catch(err => {
-          sails.log.error(err);
-          return co.error(err);
-      });
+        coroutines.getNextSubjectCode(req, res)
+            .catch(err => {
+                sails.log.error(err);
+                return co.error(err);
+            });
     },
-
 
     /**
      * @method
@@ -370,7 +357,7 @@ module.exports = {
      * @description generate and visualize the (nested/multi level) data graph for a given subject.
      *              Note: The current limit for the number of instances is 100.
      */
-    createGraph:function(req,res) {
+    createGraph: function (req, res) {
         const co = new ControllerOut(res);
         const idSubject = req.param("idPatient");
         const fetchSubjectDataTree = sails.hooks['persistence'].getDatabaseManager().recursiveQueries.fetchSubjectDataTree;
@@ -378,73 +365,62 @@ module.exports = {
         let dataTypePrivileges;
 
         return DataTypePrivileges.find({ group: operator.groups[0] }).populate('dataType')
-        .then(results => {
-
-            dataTypePrivileges = results;
-            // operator has not privileges on datatype, then throw Privileges Error
-            if (_.isEmpty(dataTypePrivileges)) {
-                throw new PrivilegesError(`Authenticated user has not privileges`);
-            }
-            return fetchSubjectDataTree(idSubject, subjectTreeCb);
-
-        })
-        .catch(err => {
-            sails.log.error(err);
-            return co.error(err);
-        });
-
-        function subjectTreeCb(err, resp) {
-          /*istanbul ignore if*/
-            if (err){
+            .then(results => {
+                dataTypePrivileges = results;
+                // operator has not privileges on datatype, then throw Privileges Error
+                if (_.isEmpty(dataTypePrivileges)) {
+                    throw new PrivilegesError(`Authenticated user has not privileges`);
+                }
+                return fetchSubjectDataTree(idSubject, subjectTreeCb);
+            })
+            .catch(err => {
                 sails.log.error(err);
                 return co.error(err);
-            }
+            });
 
-            else {
-                let links = [], idRows = [];
-                _.forEach(resp.rows,function (row) {
+        function subjectTreeCb (err, resp) {
+            /* istanbul ignore if*/
+            if (err) {
+                sails.log.error(err);
+                return co.error(err);
+            } else {
+                let links = []; let idRows = [];
+                _.forEach(resp.rows, function (row) {
                     _.find(dataTypePrivileges, function (d) {
                         if (d.dataType.name === row.type) {
                             idRows.push(row.id);
                         }
                     });
                 });
-                BluebirdPromise.map(resp.rows, function(row) {
+                BluebirdPromise.map(resp.rows, function (row) {
                     let privilege;
-                    if(_.find(dataTypePrivileges, function (d) {
+                    if (_.find(dataTypePrivileges, function (d) {
                         privilege = d;
                         return privilege.dataType.name === row.type;
-
-                    })){
-                        if(privilege.privilegeLevel === VIEW_OVERVIEW){ row.metadata = {};}
-                        if (row.parent_data !== null && _.find(idRows, function(i){return i === row.parent_data;})) {
-                            return {'source':row.parent_data,'target':row.id,'name':row.id,'type':row.type,'metadata':row.metadata, privilege: privilege.privilegeLevel};
-                        }
-                        else if(row.parent_sample !== null && _.find(idRows, function(i){return i === row.parent_sample;})) {
-                            return {'source':row.parent_sample,'target':row.id,'name':row.id,'type':row.type,'metadata':row.metadata, privilege: privilege.privilegeLevel};
-                        }
-                        else {
-                            return {'source':'Patient','target':row.id,'name':row.id,'type':row.type,'metadata':row.metadata, privilege: privilege.privilegeLevel};
+                    })) {
+                        if (privilege.privilegeLevel === VIEW_OVERVIEW) { row.metadata = {}; }
+                        if (row.parent_data !== null && _.find(idRows, function (i) { return i === row.parent_data; })) {
+                            return { 'source': row.parent_data, 'target': row.id, 'name': row.id, 'type': row.type, 'metadata': row.metadata, privilege: privilege.privilegeLevel };
+                        } else if (row.parent_sample !== null && _.find(idRows, function (i) { return i === row.parent_sample; })) {
+                            return { 'source': row.parent_sample, 'target': row.id, 'name': row.id, 'type': row.type, 'metadata': row.metadata, privilege: privilege.privilegeLevel };
+                        } else {
+                            return { 'source': 'Patient', 'target': row.id, 'name': row.id, 'type': row.type, 'metadata': row.metadata, privilege: privilege.privilegeLevel };
                             // console.log(privilege);
                         }
                     }
-
                 })
-                .then(function(link){
-
-                    links = _.compact(link);
-                    links = links && links.length > 0 ? links : [{'source':'Patient','target':null,'name': idSubject, 'type': 'Patient', 'metadata': {}}];
-                    let json = {'links':links};
-                    return res.json(json);
-                })
-                .catch(/* istanbul ignore next */ function(err){
-                    sails.log(err);
-                    return co.error(err);
-                });
+                    .then(function (link) {
+                        links = _.compact(link);
+                        links = links && links.length > 0 ? links : [{ 'source': 'Patient', 'target': null, 'name': idSubject, 'type': 'Patient', 'metadata': {} }];
+                        let json = { 'links': links };
+                        return res.json(json);
+                    })
+                    .catch(/* istanbul ignore next */ function (err) {
+                        sails.log(err);
+                        return co.error(err);
+                    });
             }
         }
-
-
     },
 
     /**
@@ -454,13 +430,13 @@ module.exports = {
     * @name getInfoForBarChart
     * @description Find dataTypes based on criteria
     */
-    getInfoForBarChart: function(req, res) {
+    getInfoForBarChart: function (req, res) {
         const co = new ControllerOut(res);
         coroutines.getInfoForBarChart(req, res, co)
-        .catch(/* istanbul ignore next */ function(err) {
-            sails.log.error(err);
-            return co.error(err);
-        });
+            .catch(/* istanbul ignore next */ function (err) {
+                sails.log.error(err);
+                return co.error(err);
+            });
     },
     /**
      * @method
@@ -470,7 +446,7 @@ module.exports = {
      * @deprecated
      *
      */
-    createGraphSimple: function(req,res){
+    createGraphSimple: function (req, res) {
         const co = new ControllerOut(res);
         const fetchSubjectDataTreeSimple = sails.hooks['persistence'].getDatabaseManager().recursiveQueries.fetchSubjectDataTreeSimple;
         const idSubject = req.param("idPatient");
@@ -478,67 +454,62 @@ module.exports = {
         let dataTypePrivileges;
 
         return DataTypePrivileges.find({ group: operator.groups[0] }).populate('dataType')
-        .then(results => {
+            .then(results => {
+                dataTypePrivileges = results;
+                // operator has not the privilege to EDIT datatype, then throw Privileges Error
+                if (_.isEmpty(dataTypePrivileges)) {
+                    throw new PrivilegesError(`Authenticated user has not privileges`);
+                }
+                return fetchSubjectDataTreeSimple(idSubject, subjectTreeSimpleCb);
+            })
+            .catch(err => {
+                sails.log.error(err);
+                return co.error(err);
+            });
 
-            dataTypePrivileges = results;
-            // operator has not the privilege to EDIT datatype, then throw Privileges Error
-            if (_.isEmpty(dataTypePrivileges)) {
-                throw new PrivilegesError(`Authenticated user has not privileges`);
-            }
-            return fetchSubjectDataTreeSimple(idSubject, subjectTreeSimpleCb);
-
-        })
-        .catch(err => {
-            sails.log.error(err);
-            return co.error(err);
-        });
-
-        function subjectTreeSimpleCb(err,resp) {
-
-            let children = [], links = [];
+        function subjectTreeSimpleCb (err, resp) {
+            let children = []; let links = [];
 
             sails.log(resp);
-            /*istanbul ignore if*/
+            /* istanbul ignore if*/
             if (resp.rows.length === 0) {
                 links = [{
                     'source': 'Patient',
                     'target': null
                 }];
 
-                return res.json({links: links});
+                return res.json({ links: links });
             }
 
-            for(let i = 0; i<resp.rows.length; i++) {
+            for (let i = 0; i < resp.rows.length; i++) {
                 children.push(resp.rows[i].id);
             }
 
             sails.log(children);
 
-            BluebirdPromise.map(children,function(child){
+            BluebirdPromise.map(children, function (child) {
                 let privilege, childName;
 
-                return DataType.findOne(child).then(function(dataType){
+                return DataType.findOne(child).then(function (dataType) {
                     childName = dataType.name;
-                    if(_.find(dataTypePrivileges, function (d) {
+                    if (_.find(dataTypePrivileges, function (d) {
                         privilege = d;
                         return privilege.dataType.name === childName;
-                    })){
-                        return {'source':'Patient','target':childName};
+                    })) {
+                        return { 'source': 'Patient', 'target': childName };
                     }
                 });
             })
-            .then(function(link){
-                links = _.reject(link, function(l){ return l === undefined; });
-                let json = {'links':links};
-                return res.json(json);
-            })
-            .catch(/* istanbul ignore next */ function(err){
-                sails.log.error(err);
-                return co.error(err);
-            });
-
+                .then(function (link) {
+                    links = _.reject(link, function (l) { return l === undefined; });
+                    let json = { 'links': links };
+                    return res.json(json);
+                })
+                .catch(/* istanbul ignore next */ function (err) {
+                    sails.log.error(err);
+                    return co.error(err);
+                });
         }
-
     }
 
 };

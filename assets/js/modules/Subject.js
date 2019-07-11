@@ -219,6 +219,7 @@
             if (this.model.get("notes") === "") {
                 this.model.set("notes", null);
             }
+            var ownerBkp = this.model.get("owner");
             if (this.model.get("owner").id) {
                 this.model.set("owner", this.model.get("owner").id);
             }
@@ -248,7 +249,8 @@
                     });
                 },
                 error: function (model, res) {
-                    this.savingSubject = false;
+                    that.model.set("owner", ownerBkp);
+                    that.savingSubject = false;
                     xtens.error(res);
                 }
             });
