@@ -255,6 +255,8 @@
                 this.model.set("metadata", metadata);
                 this.model.get("notes") === "" ? this.model.set("notes", null) : null;
                 this.retrieveAndSetFiles();
+                var ownerBkp = this.model.get("owner");
+
                 this.model.get("owner").id ? this.model.set("owner", this.model.get("owner").id) : null;
 
                 this.model.get("donor") && this.model.get("donor").length > 0 ? this.model.set("donor", _.map(this.model.get("donor"), "id")) : null;
@@ -288,6 +290,7 @@
                         });
                     },
                     error: function (model, res) {
+                        that.model.set("owner", ownerBkp);
                         that.savingSample = false;
                         xtens.error(res);
                     }

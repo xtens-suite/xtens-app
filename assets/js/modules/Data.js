@@ -852,6 +852,7 @@
                 var that = this;
                 var metadata = this.schemaView.serialize(useFormattedNames);
                 this.model.set("metadata", metadata);
+                var ownerBkp = this.model.get("owner");
                 this.model.get("owner").id ? this.model.set("owner", this.model.get("owner").id) : null;
                 this.model.get("notes") === "" ? this.model.set("notes", null) : null;
                 this.model.get("parentSubject") && this.model.get("parentSubject").length > 0 ? this.model.set("parentSubject", _.map(this.model.get("parentSubject"), "id")) : null;
@@ -884,7 +885,8 @@
                         });
                     },
                     error: function (model, res) {
-                        this.savingData = false;
+                        that.model.set("owner", ownerBkp);
+                        that.savingData = false;
                         xtens.error(res);
                     }
                 });
