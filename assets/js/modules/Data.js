@@ -41,7 +41,7 @@
     /**
      *  @description general purpose function to retrieve the value from a field
      */
-    function getFieldValue($el, ev, options) {
+    function getFieldValue ($el, ev, options) {
         switch (options.view.component.fieldType) {
             case FieldTypes.INTEGER:
                 return parseInt($el.val());
@@ -62,7 +62,7 @@
     /**
      * @description render a Date from the model to a view
      */
-    function renderDateValue(value) {
+    function renderDateValue (value) {
         if (value) {
             var dateArray = value instanceof Date ? value.toISOString().split('-') : value.split('-');
             return dateArray[2] + '/' + dateArray[1] + '/' + dateArray[0];
@@ -1643,7 +1643,7 @@
                 return function () { // Return a function in the context of 'self'
                     self.tableView.refreshDaemonsTable();
                 };
-            })(this), 200000);
+            })(this), 2000);
         },
 
         saveOnSuccess: function (infoObj) {
