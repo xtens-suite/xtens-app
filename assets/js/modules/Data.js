@@ -1643,7 +1643,7 @@
                 return function () { // Return a function in the context of 'self'
                     self.tableView.refreshDaemonsTable();
                 };
-            })(this), 2000);
+            })(this), 200000);
         },
 
         saveOnSuccess: function (infoObj) {
@@ -1668,6 +1668,7 @@
             that.$modal.one('hidden.bs.modal', function (e) {
                 that.dropzone.removeAllFiles(true);
                 that.modal.remove();
+                $(".new-import-btn-cnt").css('display', 'block');
                 that.tableView.refreshDaemonsTable();
                 $("#collapse-import").collapse('hide');
             });

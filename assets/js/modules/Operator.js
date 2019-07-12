@@ -345,11 +345,7 @@
                     xtens.session.load(data, function () {
                         $(document).unbind('keyup');
                         var projects = xtens.session.get("projects");
-                        if (xtens.session.get("isWheel")) {
-                            that.landingUrl = 'dashboard/admin';
-                            xtens.session.set('activeProject', 'all');
-                            router.navigate(that.landingUrl, { trigger: true });
-                        } else if (projects.length < 2) {
+                        if (projects.length < 2) {
                             xtens.session.set('activeProject', projects[0].name);
                             var idProject = _.find(xtens.session.get('projects'), { 'name': xtens.session.get('activeProject') }).id;
                             if ((xtens.session.get("isAdmin") && _.find(xtens.session.get('adminProjects'), function (p) { return p === idProject; }))) {
@@ -364,6 +360,7 @@
                             that.$modal.append(modal.render().el);
                             $('.selectpicker').selectpicker();
                             // $('.modal-header').addClass('alert-success');
+                            modal.$modal.modal({ backdrop: 'static', keyboard: false });
                             modal.show();
 
                             $('#project-selector').on('change.bs.select', function (e) {

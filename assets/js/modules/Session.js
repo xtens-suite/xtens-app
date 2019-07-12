@@ -118,7 +118,7 @@
 
         render: function () {
             this.renderMenuBar();
-            if (this.projects.length == 1) {
+            if (this.projects.length === 1) {
                 $('#p-project-selector').hide();
             } else if (this.projects.length > 1) {
                 this.initializeProjectSelectorModal();
@@ -245,6 +245,7 @@
                 $('#project-selector').selectpicker('hide');
 
                 that.$modalProjectSelector.append(modal.render().el);
+                modal.$modal.modal({ backdrop: 'static', keyboard: false });
                 modal.show();
 
                 $("#checkbox").change(function () {
