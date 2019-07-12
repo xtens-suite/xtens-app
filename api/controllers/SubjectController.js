@@ -379,7 +379,7 @@ module.exports = {
             });
 
         function subjectTreeCb (err, resp) {
-            /* istanbul ignore if*/
+            /* istanbul ignore if */
             if (err) {
                 sails.log.error(err);
                 return co.error(err);
@@ -400,11 +400,11 @@ module.exports = {
                     })) {
                         if (privilege.privilegeLevel === VIEW_OVERVIEW) { row.metadata = {}; }
                         if (row.parent_data !== null && _.find(idRows, function (i) { return i === row.parent_data; })) {
-                            return { 'source': row.parent_data, 'target': row.id, 'name': row.id, 'type': row.type, 'metadata': row.metadata, privilege: privilege.privilegeLevel };
+                            return { 'source': row.parent_data, 'target': row.id, 'name': row.id, 'type': row.type, 'biobankCode': row.biobankcode, 'metadata': row.metadata, privilege: privilege.privilegeLevel };
                         } else if (row.parent_sample !== null && _.find(idRows, function (i) { return i === row.parent_sample; })) {
-                            return { 'source': row.parent_sample, 'target': row.id, 'name': row.id, 'type': row.type, 'metadata': row.metadata, privilege: privilege.privilegeLevel };
+                            return { 'source': row.parent_sample, 'target': row.id, 'name': row.id, 'type': row.type, 'biobankCode': row.biobankcode, 'metadata': row.metadata, privilege: privilege.privilegeLevel };
                         } else {
-                            return { 'source': 'Patient', 'target': row.id, 'name': row.id, 'type': row.type, 'metadata': row.metadata, privilege: privilege.privilegeLevel };
+                            return { 'source': 'Patient', 'target': row.id, 'name': row.id, 'type': row.type, 'biobankCode': row.biobankcode, 'metadata': row.metadata, privilege: privilege.privilegeLevel };
                             // console.log(privilege);
                         }
                     }
@@ -471,7 +471,7 @@ module.exports = {
             let children = []; let links = [];
 
             sails.log(resp);
-            /* istanbul ignore if*/
+            /* istanbul ignore if */
             if (resp.rows.length === 0) {
                 links = [{
                     'source': 'Patient',

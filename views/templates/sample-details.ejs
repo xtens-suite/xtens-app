@@ -15,6 +15,14 @@
                 </div>
 
                 <div class="row margin-row">
+                    <label for="biobank-code" class="data-label">
+                        <%= __("biobank-code") %>: </label>
+                    <span class="data-span">
+                        <%= data.get("biobankCode") %>
+                    </span>
+                </div>
+
+                <div class="row margin-row">
 
                     <% if (data.get("donor") && data.get("donor").length > 0) {%>
                     <label for="donor" class="data-label">
@@ -108,13 +116,13 @@
                         </span>
                         <div class="col-md-5 text-left">
 
-                          <% value =  metadata[field.formattedName] ? metadata[field.formattedName].value : null;
+                            <% value =  metadata[field.formattedName] ? metadata[field.formattedName].value : null;
                             values = metadata[field.formattedName] ? metadata[field.formattedName].values : null;
                             if (field.fieldType==="Date" && value != null){value=moment(value).lang("it").format('L');}
                             unit = metadata[field.formattedName] ? metadata[field.formattedName].unit : null; %>
                             <div name="metadata-value" class="data-value">
                                 <% if (_.isArray(values)) { %>
-                                    <%=  !_.isEmpty(values) ? values.join(", ") : "" %>
+                                <%=  !_.isEmpty(values) ? values.join(", ") : "" %>
                                 <% }
                                 else{ %>
                                 <%= value && unit ? value + " [" + unit + "]" :

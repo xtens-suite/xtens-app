@@ -688,7 +688,12 @@
                             // return "<strong>Value:</strong> <span style='color:#4476b5'>" + d.data.value + "</span> - " + Math.floor(d.data.value / totalData * 100) + "%";
                             if (d.data.metadata !== undefined) {
                                 var id = d.data.name.split("_")[1];
-                                content = "<b id='tip-subj-title' style='color:" + color(d.data.type) + ";'>&nbsp;" + d.data.type + '&nbsp;</b> <br /><br />' + "ID: " + id;
+                                content = "<b id='tip-subj-title' style='color:" + color(d.data.type) + ";'>&nbsp;" + d.data.type + '&nbsp;</b> <br /><br />';
+                                if (d.data.biobankCode) {
+                                    content += "Biobank Code: " + d.data.biobankCode;
+                                } else {
+                                    content += "ID: " + id;
+                                }
                                 if (d.data.privilege !== 'view_overview') {
                                     var numberOfProperty = _.keys(d.data.metadata).length;
                                     var index = 0;
@@ -746,6 +751,7 @@
                             if (node.data.name === that.data[i].target.name) {
                                 node.data.type = that.data[i].type;
                                 node.data.metadata = that.data[i].metadata;
+                                node.data.biobankCode = that.data[i].biobankCode;
                                 node.data.privilege = that.data[i].privilege;
                             }
                             if (isNaN(node.x)) {
