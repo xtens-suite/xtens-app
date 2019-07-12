@@ -3,29 +3,26 @@
  * @author Massimiliano Izzo
  *
  */
-function renderDatatablesBoolean(data) {
+function renderDatatablesBoolean (data) {
     if (data) {
         return 'true';
     }
     return 'false';
 }
 
-function renderDatatablesDate(data, type) {
-
-    function pad(s) { return (s < 10) ? '0' + s : s; }
+function renderDatatablesDate (data, type) {
+    function pad (s) { return (s < 10) ? '0' + s : s; }
 
     if (!_.isEmpty(data)) {
         var d = new Date(data);
         if (type === 'display' || type === 'filter' || type === 'export') {
             return pad(d.getDate()) + "/" + pad(d.getMonth() + 1) + "/" + d.getFullYear();
-        }
-        else return new Date(data);
+        } else return new Date(data);
     }
     return "";
 }
 
 (function (xtens, XtensTable) {
-
     var i18n = xtens.module("i18n").en;
     var useFormattedNames = xtens.module("xtensconstants").useFormattedMetadataFieldNames;
     var Classes = xtens.module("xtensconstants").DataTypeClasses;
@@ -98,8 +95,7 @@ function renderDatatablesDate(data, type) {
                     var obj = _.omit(this.data[i], 'parents');
                     if (j == 0) {
                         obj.showRow = true;
-                    }
-                    else {
+                    } else {
                         obj.showRow = false;
                     }
                     that.plainData.push(_.merge(this.data[i].parents[j], obj));
@@ -237,10 +233,9 @@ function renderDatatablesDate(data, type) {
                 if (this.tableOpts.columns.length > 9) {
                     new $.fn.dataTable.FixedColumns(this.table, {
                         leftColumns: !this.isLeafSearch ? this.numLeft : 0,
-                        rightColumns: this.multiProject || this.isLeafSearch ? 0 : 1 //for multiProject search no available actions
+                        rightColumns: this.multiProject || this.isLeafSearch ? 0 : 1 // for multiProject search no available actions
                     });
-                }
-                else {
+                } else {
                     this.tableOpts.fixedColumns = false;
                 }
                 var filterColumn = ':visible';
@@ -258,7 +253,7 @@ function renderDatatablesDate(data, type) {
                         }
                     });
 
-                    filterColumn = ':not(.notexport)'; //not export actions column
+                    filterColumn = ':not(.notexport)'; // not export actions column
                 }
 
                 var buttons = [
@@ -270,7 +265,7 @@ function renderDatatablesDate(data, type) {
                         extend: 'copyHtml5',
                         exportOptions: {
                             orthogonal: 'export', // to export source data and not rendered data
-                            columns: filterColumn + ':not(.actions):not(.details-control)' //not export actions and details column
+                            columns: filterColumn + ':not(.actions):not(.details-control)' // not export actions and details column
                         }
                     },
                     {
@@ -279,19 +274,18 @@ function renderDatatablesDate(data, type) {
                         filename: 'XTENS_' + moment().format("YYYY_MM_DD_hh_mm_ss"),
                         exportOptions: {
                             orthogonal: 'export', // to export source data and not rendered data
-                            columns: filterColumn + ':not(.actions):not(.details-control)' //not export actions and details column
+                            columns: filterColumn + ':not(.actions):not(.details-control)' // not export actions and details column
                         }
                     }
                 ];
 
                 if (this.checkVCF()) {
-
                     buttons.push({
                         extend: 'csvHtml5',
                         text: 'Export as VCF',
                         exportOptions: {
                             orthogonal: 'export', // to export source data and not rendered data
-                            columns: '.vcf', //export only vcf columns
+                            columns: '.vcf', // export only vcf columns
                             format: {
                                 header: function (data, column) {
                                     return data === "CHR" ? "#CHROM" : data;
@@ -315,7 +309,6 @@ function renderDatatablesDate(data, type) {
                     buttons: this.colvisButtons
                 });
                 this.table.buttons().container().appendTo($('.col-sm-6:eq(0)', this.table.table().container()));
-
             }
 
             // the returned dataset is empty
@@ -334,8 +327,7 @@ function renderDatatablesDate(data, type) {
                     // This row is already open - close it
                     row.child.hide();
                     tr.removeClass('shown');
-                }
-                else {
+                } else {
                     var cl = 'child-table-' + row.index();
                     var leafKey = _.find(_.keys(that.data[0]), function (k) { return k.indexOf("_id") > 0; });
                     var data = _.find(that.data, function (d) {
@@ -367,8 +359,7 @@ function renderDatatablesDate(data, type) {
                             leftColumns: that.childNumLeft,
                             rightColumns: 0
                         });
-                    }
-                    else {
+                    } else {
                         tableOptsChild.fixedColumns = false;
                     }
                 }
@@ -378,15 +369,13 @@ function renderDatatablesDate(data, type) {
         checkVCF: function () {
             var fieldsVCF = ["chr", "pos", "id", "qual", "ref", "alt", "filter"];
             var fieldsVCF2 = ["chrom", "pos", "id", "qual", "ref", "alt", "filter"];
-            var found = 0, found2 = 0;
+            var found = 0; var found2 = 0;
             var fieldsNames = [];
             var schemaBody;
             if (this.dataTypes.models) {
                 schemaBody = _.flatten(_.map(this.dataTypes.models, 'attributes.superType.schema.body'));
-            }
-            else {
+            } else {
                 schemaBody = this.dataTypes.get('superType').schema.body;
-
             }
             fieldsNames = _.map(_.flatten(_.map(schemaBody, 'content')), 'formattedName');
             fieldsNames.forEach(function (name) {
@@ -400,8 +389,7 @@ function renderDatatablesDate(data, type) {
 
             if (found == 7 || found2 == 7) {
                 return true;
-            }
-            else {
+            } else {
                 return false;
             }
         },
@@ -437,14 +425,16 @@ function renderDatatablesDate(data, type) {
             // }
             if (this.multiProject) {
                 this.columns.push({
-                    "title": i18n("project-owner"), "data": function (data) {
+                    "title": i18n("project-owner"),
+                    "data": function (data) {
                         var projects = xtens.session.get("projects");
                         var project = _.filter(projects, function (pr) {
                             var dt = that.multiProject || that.isLeafSearch ? _.find(that.dataTypes.models, { 'id': data.type }) : that.dataTypes;
                             return pr.id === dt.get('project');
                         });
                         return project.length > 0 ? project[0].name : "No project";
-                    }, "className": "project-owner"
+                    },
+                    "className": "project-owner"
                 });
             }
 
@@ -452,7 +442,7 @@ function renderDatatablesDate(data, type) {
             this.numLeft = this.columns.length;
 
             var fileUpload = !this.multiProject ? this.isLeafSearch ? dataTypes[0].get("superType").schema.header.fileUpload : dataTypes.get("superType").schema.header.fileUpload : false;
-            var hasDataChildren = false, hasSampleChildren = false;
+            var hasDataChildren = false; var hasSampleChildren = false;
             var dataTypeChildren = !this.multiProject ? _.where(this.isLeafSearch ? dataTypes[0].get("children") : dataTypes.get("children"), { "model": Classes.DATA }) : [];
             var sampleTypeChildren = !this.multiProject ? _.where(this.isLeafSearch ? dataTypes[0].get("children") : dataTypes.get("children"), { "model": Classes.SAMPLE }) : [];
             if (dataTypeChildren.length > 0) {
@@ -484,7 +474,7 @@ function renderDatatablesDate(data, type) {
                 var selectedSuperType = new SuperType.Model(this.multiProject || this.isLeafSearch ? dataTypes[0].get("superType") : dataTypes.get("superType"));
                 var flattenedFields = selectedSuperType.getFlattenedFields(); // get the names of all the madatafields but those within loops;
 
-                var dtpOverview = this.multiProject || this.isLeafSearch ? _.filter(dataTypePrivileges, function (dtp) { return dtp.privilegeLevel === VIEW_OVERVIEW; }) : dataTypePrivileges && dataTypePrivileges.privilegeLevel === VIEW_OVERVIEW ? true : false;
+                var dtpOverview = this.multiProject || this.isLeafSearch ? _.filter(dataTypePrivileges, function (dtp) { return dtp.privilegeLevel === VIEW_OVERVIEW; }) : !!(dataTypePrivileges && dataTypePrivileges.privilegeLevel === VIEW_OVERVIEW);
                 if (!dtpOverview || !dtpOverview.length || (this.multiProject && dtpOverview.length !== dataTypePrivileges.length)) {
                     flattenedFields.forEach(function (field) {
                         if (field.sensitive && idDataType) { that.optLinks.hasDataSensitive = true; }
@@ -496,14 +486,14 @@ function renderDatatablesDate(data, type) {
                 var className = "deafult-label";
                 className = idDataType ? this.rootDataType.get('name').toLowerCase().replace(/[||\-*/,=<>~!^()\ ]/g, "_") : queryArgs.label;
 
-                //set up colvis buttons for any leafs
+                // set up colvis buttons for any leafs
                 if (this.isLeafSearch) {
                     var colvisButton = {
                         extend: 'colvisGroup',
                         text: 'Show only '
                     };
-                    colvisButton.text = + idDataType ? this.rootDataType.get('name') : queryArgs.title;
-                    colvisButton.show = '.' + className; //not(.actions)
+                    colvisButton.text = +idDataType ? this.rootDataType.get('name') : queryArgs.title;
+                    colvisButton.show = '.' + className; // not(.actions)
                     colvisButton.hide = ':not(.' + className + '):not(.header):not(.actions):not(.project-owner)';
                     this.colvisButtons.push(colvisButton);
                 }
@@ -527,9 +517,7 @@ function renderDatatablesDate(data, type) {
 
                     if (colTitle.toLowerCase() === "chr" || colTitle.toLowerCase() === "pos" || colTitle.toLowerCase() === "id" ||
                         colTitle.toLowerCase() === "qual" || colTitle.toLowerCase() === "ref" || colTitle.toLowerCase() === "alt" || colTitle.toLowerCase() === "filter") {
-
                         columnOpts.className = columnOpts.className + " vcf";
-
                     }
                     // if field is loop retrieve multiple values
                     if (field._loop) {
@@ -538,55 +526,48 @@ function renderDatatablesDate(data, type) {
                             var priv = this.multiProject || this.isLeafSearch ? _.findWhere(dataTypePrivileges, { 'dataType': row.type }) : dataTypePrivileges;
                             if (priv && priv.privilegeLevel !== VIEW_OVERVIEW) {
                                 return data && type === 'export' ? data.join() : data ? data.length > 2 ? '<span>List on Details button</span>' : data.join() : null;
-                            }
-                            else {
+                            } else {
                                 return null;
                             }
                         };
-                    }
-                    else {
+                    } else {
                         switch (field.fieldType) {
-                            case "Date":    // if the column has dates render them in the desired format
+                            case "Date": // if the column has dates render them in the desired format
                                 columnOpts.render = function (data, type, row) {
                                     var priv = this.multiProject || this.isLeafSearch ? _.findWhere(dataTypePrivileges, { 'dataType': row.type }) : dataTypePrivileges;
                                     if (priv && priv.privilegeLevel !== VIEW_OVERVIEW) {
-
                                         return renderDatatablesDate(data, type);
-                                    }
-                                    else {
+                                    } else {
                                         return null;
                                     }
                                 };
                                 break;
-                            case "Boolean":    // if the column has booleans render them in the desired format
+                            case "Boolean": // if the column has booleans render them in the desired format
                                 columnOpts.render = function (data, type, row) {
                                     var priv = this.multiProject || this.isLeafSearch ? _.findWhere(dataTypePrivileges, { 'dataType': row.type }) : dataTypePrivileges;
                                     if (priv && priv.privilegeLevel !== VIEW_OVERVIEW) {
                                         return renderDatatablesBoolean(data);
-                                    }
-                                    else {
+                                    } else {
                                         return null;
                                     }
                                 };
                                 break;
-                            case "Link":    // if the column has links render them in the desired format
+                            case "Link": // if the column has links render them in the desired format
                                 columnOpts.render = function (data, type, row) {
                                     var priv = this.multiProject || this.isLeafSearch ? _.findWhere(dataTypePrivileges, { 'dataType': row.type }) : dataTypePrivileges;
                                     if (priv && priv.privilegeLevel !== VIEW_OVERVIEW) {
                                         return data = '<a href="' + data + '" target="_blank">' + data + '</a>';
-                                    }
-                                    else {
+                                    } else {
                                         return null;
                                     }
                                 };
                                 break;
-                            default:      // if the column has numbers, texts, floats render them in the default format
+                            default: // if the column has numbers, texts, floats render them in the default format
                                 columnOpts.render = function (data, type, row) {
                                     var priv = this.multiProject || this.isLeafSearch ? _.findWhere(dataTypePrivileges, { 'dataType': row.type }) : dataTypePrivileges;
                                     if (priv && priv.privilegeLevel !== VIEW_OVERVIEW) {
                                         return data;
-                                    }
-                                    else {
+                                    } else {
                                         return null;
                                     }
                                 };
@@ -622,13 +603,8 @@ function renderDatatablesDate(data, type) {
                         }
                         this.columns.push(tempOptColUn);
                     }
-
                 }, this);
-
-
-
-            }
-            else {
+            } else {
                 this.setLeafIdColumns(queryArgs, nested);
             }
             // handle leafs
@@ -638,12 +614,11 @@ function renderDatatablesDate(data, type) {
                     if (content.dataType) {
                         // get right dataTypes and privileges of nested content
                         var results = that.getCurrentTypeAndPrivileges(content.dataType);
-                        var isLast = _.find(content.content, function (c) { return c.dataType; }) ? false : true;
+                        var isLast = !_.find(content.content, function (c) { return c.dataType; });
                         that.prepareDataForRenderingJSONLeaf(results.dtps, results.dts, content, undefined, !_.has(that.data[0], content.label) && !isLast);
                     }
                 });
             }
-
         },
 
         setLeafIdColumns: function (content, nested) {
@@ -737,17 +712,23 @@ function renderDatatablesDate(data, type) {
                     "title": i18n("surname"),
                     "data": function (data) {
                         return data.surname ? data.surname : "";
-                    }, "className": "header"
+                    },
+                    "className": "header"
                 },
                 {
-                    "title": i18n("given-name"), "data": function (data) {
+                    "title": i18n("given-name"),
+                    "data": function (data) {
                         return data.given_name ? data.given_name : "";
-                    }, "className": "header"
+                    },
+                    "className": "header"
                 },
                 {
-                    "title": i18n("birth-date"), "data": function (data) {
+                    "title": i18n("birth-date"),
+                    "data": function (data) {
                         return data.birth_date ? data.birth_date : "";
-                    }, "render": renderDatatablesDate, "className": "header"
+                    },
+                    "render": renderDatatablesDate,
+                    "className": "header"
                 }
             ];
         },
@@ -755,12 +736,15 @@ function renderDatatablesDate(data, type) {
         insertSubjectColumns: function (nested) {
             return [
                 {
-                    "title": i18n("code"), "data": function (data) {
+                    "title": i18n("code"),
+                    "data": function (data) {
                         return data.code ? data.code : "";
-                    }, "className": "header"
+                    },
+                    "className": "header"
                 },
                 {
-                    "title": i18n("sex"), "data": function (data) {
+                    "title": i18n("sex"),
+                    "data": function (data) {
                         return data.sex ? data.sex : "";
                     },
                     "className": "header"
@@ -771,14 +755,18 @@ function renderDatatablesDate(data, type) {
         insertSampleColumns: function (nested) {
             return [
                 {
-                    "title": i18n("biobank"), "data": function (data) {
+                    "title": i18n("biobank"),
+                    "data": function (data) {
                         return data.biobank_acronym ? data.biobank_acronym : "";
-                    }, "className": "header"
+                    },
+                    "className": "header"
                 },
                 {
-                    "title": i18n("biobank-code"), "data": function (data) {
+                    "title": i18n("biobank-code"),
+                    "data": function (data) {
                         return data.biobank_code ? data.biobank_code : "";
-                    }, "className": "header"
+                    },
+                    "className": "header"
                 }
             ];
         },
@@ -789,7 +777,6 @@ function renderDatatablesDate(data, type) {
          * @description add the proper links to each row in the table given the dataType Model
          */
         addLinks: function (options) {
-
             var btnGroupTemplate = JST["views/templates/xtenstable-buttongroup.ejs"];
             var that = this;
             var privilege = this.multiProject || this.isLeafSearch ? _.find(options.dataTypePrivileges, { 'dataType': this.data[0].type }) : options.dataTypePrivileges;
@@ -810,7 +797,6 @@ function renderDatatablesDate(data, type) {
                 "title": i18n("actions"),
                 "className": "actions"
             });
-
         },
 
         /**
@@ -849,7 +835,6 @@ function renderDatatablesDate(data, type) {
             xtens.router.navigate(path, { trigger: true });
             return false;
         },
-
 
         /**
          * @method
@@ -903,8 +888,7 @@ function renderDatatablesDate(data, type) {
             var dataType = this.multiProject || this.isLeafSearch ? _.find(this.dataTypes.models, { 'id': data.type }) : this.dataTypes;
             var model = dataType && dataType.get("model");
             // DATA cannot have sample child
-            if (model === Classes.DATA)
-                return false;
+            if (model === Classes.DATA) { return false; }
 
             var parentProperty = model === Classes.SUBJECT ? 'donor' : 'parentSample';
             var dataId = data.id;
@@ -932,8 +916,7 @@ function renderDatatablesDate(data, type) {
             var dataType = this.multiProject || this.isLeafSearch ? _.find(this.dataTypes.models, { 'id': data.type }) : this.dataTypes;
             var model = dataType.get("model");
             if (!this[id]) {
-                if (model === Classes.SUBJECT)
-                    return false;
+                if (model === Classes.SUBJECT) { return false; }
 
                 var data = model === Classes.SAMPLE ? new Sample.Model() : new Data.Model();
                 var dataId = currRow.data().id;
@@ -944,29 +927,34 @@ function renderDatatablesDate(data, type) {
                         var files = result.get("files");
                         var dataFiles = new DataFile.List(files);
                         var view = new DataFile.Views.List({ collection: dataFiles, datum: id });
-                        //that.listenTo(view, 'fileDeleted', that.showFileList);
-
+                        // that.listenTo(view, 'fileDeleted', that.showFileList);
+                        var timer;
                         $(ev.currentTarget).popover({
                             trigger: 'manual',
                             container: '.query',
                             html: true,
                             content: view.render().el,
                             placement: 'auto left'
-                        }).on("mouseenter", function () {
+                        }).hover(function () {
                             var _this = this;
-                            $(this).popover("show");
+                            timer = setTimeout(function () {
+                                $(_this).popover("show");
+                            }, 300);
+                        }, function () {
+                            // if leaves early then clear the timer
+                            clearTimeout(timer);
                         }).on("mouseleave", function () {
-                            var _this = this;
                             if (!$(".popover:hover").length && !$(".xtenstable-files:hover").length) {
-                                $(_this).popover("hide");
+                                $('.popover').popover('hide');
                             }
                         }).popover('show');
 
                         $(".popover").on("mouseleave", function () {
                             if (!$(".xtenstable-files:hover").length) {
-                                $(ev.currentTarget).popover("hide");
+                                $('.popover').popover('hide');
                             }
                         });
+
                         that.listenTo(view, 'closeMe', that.removeChild);
                         // that.childrenViews.push(view);
                     },
@@ -1000,5 +988,4 @@ function renderDatatablesDate(data, type) {
         }
 
     });
-
 }(xtens, xtens.module("xtenstable")));

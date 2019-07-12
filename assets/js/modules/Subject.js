@@ -631,6 +631,8 @@
                 // },
                 success: function (res) {
                     var that = _this;
+                    $('.d3-tip').remove();
+
                     var path = "subjects/dashboard?idPatient=" + that.idPatient;
                     xtens.router.navigate(path, { trigger: false });
                     // clean the previous graph if present
@@ -677,7 +679,6 @@
                         .attr("height", height + margin.top + margin.bottom)
                         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-                    $('.d3-tip').remove();
                     var tip = d3.tip()
                         .attr('class', 'd3-tip')
                         .offset([-10, -20])
