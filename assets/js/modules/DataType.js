@@ -298,6 +298,7 @@
 
                                 that.$modal.append(modal.render().el);
                                 modal.show();
+                                $('#confirm').addClass('btn-warning');
 
                                 $('#confirm').click(function (e) {
                                     e.preventDefault();
