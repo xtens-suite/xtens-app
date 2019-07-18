@@ -487,7 +487,7 @@
             var groups = new Group.List();
 
             groups.fetch({
-                data: $.param({ populate: ['projects'], sort: 'id ASC' }),
+                data: $.param({ populate: ['projects'], sort: 'id ASC', limit: 1000 }),
                 success: function (groups) {
                     that.loadView(new Group.Views.List({ queryParams: queryParams, groups: groups.models }));
                 },
