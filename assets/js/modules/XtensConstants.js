@@ -1,6 +1,6 @@
 // TODO: retrieve this info FROM DATABASE ideally or from the server-side anyway
 
-(function(xtens, XtensConstants) {
+(function (xtens, XtensConstants) {
     XtensConstants.DefaultLimit = 10;
     XtensConstants.DefaultLimitPrivileges = 10000;
 
@@ -14,7 +14,7 @@
         PERSONAL_DETAILS: 'Personal Details',
         SUBJECT_PROPERTIES: ['code', 'sex'],
         SAMPLE_PROPERTIES: ['biobank', 'biobankCode'],
-        PATH_SEPARATOR: '/'  // path separator for Unix-like systems
+        PATH_SEPARATOR: '/' // path separator for Unix-like systems
     };
 
     XtensConstants.DataTypeClasses = {
@@ -25,10 +25,11 @@
     };
 
     XtensConstants.Procedures = [
-        {label:'CGH', value:'CGH', superType: 6, owner: 31},
-        {label:'NB Clinical information', value:'CBINFO', superType: 16, owner: 31},
-        {label:'VCF', value:'VCF', superType: 113, owner: undefined},
-        {label:'Biochemistry Analysis', value:'BIOAN', superType: 132, owner: 40}
+        { label: 'CGH', value: 'CGH', superType: 6, owner: 31 },
+        { label: 'NB Clinical information', value: 'CBINFO', superType: 16, owner: 31 },
+        { label: 'VCF', value: 'VCF', superType: 113, owner: undefined },
+        { label: 'Biochemistry Analysis', value: 'BIOAN', superType: 132, owner: 40 },
+        { label: 'NK Cells Phenotype and Function Analysis', value: 'NKCELL', superType: 144, owner: 42 }
 
     ];
 
@@ -70,5 +71,4 @@
     };
 
     XtensConstants.useFormattedMetadataFieldNames = true;
-
-} (xtens, xtens.module("xtensconstants")));
+}(xtens, xtens.module("xtensconstants")));

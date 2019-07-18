@@ -17,13 +17,14 @@ customisedDataMap.set('CGH', '../migrate-utils/createCGH.js');
 customisedDataMap.set('CBINFO', '../migrate-utils/updateCBInfo.js');
 customisedDataMap.set('VCF', '../migrate-utils/createVCF.js');
 customisedDataMap.set('BIOAN', '../migrate-utils/createBIOAN.js');
+customisedDataMap.set('NKCELL', '../migrate-utils/createNKCELL.js');
 
 module.exports = {
 
-  /***************************************************************************
-   * Set the default database connection for models in the development       *
-   * environment (see config/connections.js and config/models.js )           *
-   ***************************************************************************/
+    /***************************************************************************
+     * Set the default database connection for models in the development       *
+     * environment (see config/connections.js and config/models.js )           *
+     ***************************************************************************/
 
     //  models: {
     //      connection: 'pgigg',

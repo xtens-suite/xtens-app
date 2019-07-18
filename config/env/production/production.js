@@ -9,54 +9,55 @@
  * any private information to this file!
  *
  */
- "use strict";
+"use strict";
 
 // ES6 Map for customised data management
- let customisedDataMap = new Map();
- customisedDataMap.set('CGH', '../migrate-utils/createCGH.js');
- customisedDataMap.set('CBINFO', '../migrate-utils/updateCBInfo.js');
- customisedDataMap.set('VCF', '../migrate-utils/createVCF.js');
- customisedDataMap.set('BIOAN', '../migrate-utils/createBIOAN.js');
+let customisedDataMap = new Map();
+customisedDataMap.set('CGH', '../migrate-utils/createCGH.js');
+customisedDataMap.set('CBINFO', '../migrate-utils/updateCBInfo.js');
+customisedDataMap.set('VCF', '../migrate-utils/createVCF.js');
+customisedDataMap.set('BIOAN', '../migrate-utils/createBIOAN.js');
+customisedDataMap.set('NKCELL', '../migrate-utils/createNKCELL.js');
 
- module.exports = {
+module.exports = {
 
-  /***************************************************************************
-   * Set the default database connection for models in the production        *
-   * environment (see config/connections.js and config/models.js )           *
-   ***************************************************************************/
+    /***************************************************************************
+     * Set the default database connection for models in the production        *
+     * environment (see config/connections.js and config/models.js )           *
+     ***************************************************************************/
 
     //  models: {
     //      connection: 'connection',
     //      migrate: 'safe'
     //  },
 
-  /***************************************************************************
-   * Set the port in the production environment to 80                        *
-   ***************************************************************************/
+    /***************************************************************************
+     * Set the port in the production environment to 80                        *
+     ***************************************************************************/
 
-  // port: 80,
+    // port: 80,
 
-  /***************************************************************************
-   * Set the log level in production environment to "silent"                 *
-   ***************************************************************************/
+    /***************************************************************************
+     * Set the log level in production environment to "silent"                 *
+     ***************************************************************************/
 
-  // log: {
-  //   level: "silent"
-  // }
+    // log: {
+    //   level: "silent"
+    // }
 
-     blueprints: {
-         action: false,
-         rest: true,
-         shortcuts: false
-     },
+    blueprints: {
+        action: false,
+        rest: true,
+        shortcuts: false
+    },
 
-     /**
-      *  @description XTENS configuration parameters
-      */
-     xtens: {
+    /**
+     *  @description XTENS configuration parameters
+     */
+    xtens: {
 
-         customisedDataMap: customisedDataMap
+        customisedDataMap: customisedDataMap
 
-     }
+    }
 
- };
+};
