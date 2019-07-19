@@ -19,6 +19,8 @@ customisedDataMap.set('VCF', '../migrate-utils/createVCF.js');
 customisedDataMap.set('BIOAN', '../migrate-utils/createBIOAN.js');
 customisedDataMap.set('NKCELL', '../migrate-utils/createNKCELL.js');
 
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+
 module.exports = {
 
     /***************************************************************************
