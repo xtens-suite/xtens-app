@@ -1,5 +1,6 @@
        module.exports = {
-
+        hookTimeout: 30000,
+        
         port: process.env.PORT || 1337,
 
         environment: process.env.NODE_ENV || 'development',
@@ -18,6 +19,21 @@
                 database: 'xtensdb',      //db name
                 schema: true
             },
+            dblog: {
+
+                adapter: 'sails-postgresql',
+                host: 'postgres',
+                port: 5432,
+                user: 'xtenspg',
+                password: 'xtenspg',
+                database: 'xtens_log',
+                pool: true,
+                ssl: false,
+                schema: true,
+                timezone: 'CET',
+                tableName: 'winston_log'
+                // identity: 'pgigg'
+            }
         },
 
         fileSystemConnections: {
