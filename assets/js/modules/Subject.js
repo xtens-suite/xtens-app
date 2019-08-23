@@ -802,7 +802,7 @@
                         .data(nodes)
                         .enter().append("circle")
                         .attr("id", function (d) {
-                            if (d.data.metadata !== undefined) {
+                            if (d.data.metadata !== undefined && !_.isEmpty(d.data.metadata)) {
                                 var id = d.data.name.split("_")[1];
                                 return id + "_" + d.data.type;
                             } else {
@@ -967,15 +967,22 @@
         addDataExtraInfo: function () {
             var that = this;
             var nodesByName = {};
-
-            _.forEach(this.data, function (datum) {
-                // graphInfo
-                var updated = manageDatum(datum);
-                datum = updated;
-            });
-
-            var newSource = manageDatum(this.data[0].source);
-            this.data.push(newSource);
+            if (this.data && this.data[0].target != null) {
+                _.forEach(this.data, function (datum) {
+                    // graphInfo
+                    var updated = manageDatum(datum);
+                    datum = updated;
+                });
+                if (this.data[0].source.name !== this.data[0].type) {
+                    var newSource = manageDatum(this.data[0].source);
+                    this.data.push(newSource);
+                }
+            } else {
+                delete this.data[0].type;
+                var node = manageDatum(this.data[0]);
+                node.name = node.source.name;
+                this.data = [node];
+            }
 
             function nodeByName (name) {
                 return nodesByName[name] || (nodesByName[name] = { name: name });
@@ -984,7 +991,7 @@
             function manageDatum (datum) {
                 var parent = datum.source = nodeByName(datum.source);
                 var child = datum.target = nodeByName(datum.target);
-                if (parent.children) { parent.children.push(child); } else { parent.children = [child]; }
+                if (parent.children) { parent.children.push(child); } else if (child && child.name) { parent.children = [child]; }
 
                 // rightClick Links
                 var dataType;

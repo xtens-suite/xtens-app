@@ -261,8 +261,10 @@
                                 modal.hide();
 
                                 xtens.session.set('activeProject', projectSelected);
-                                if (location.href.includes("/#query/%7B%22queryArgs")) {
+                                if (location.href.includes("/#query/%7B%22queryArgs") || location.href.includes("/#/query/%7B%22queryArgs")) {
                                     location.href = location.href.split("/%7B%22queryArgs")[0];
+                                } else if (location.href.includes("/#dashboard/") || location.href.includes("/#/dashboard/")) {
+                                    location.href = location.href.substr(0, location.href.lastIndexOf("/")) + '/' + escape(projectSelected);
                                 }
                                 location.reload();
                             });
