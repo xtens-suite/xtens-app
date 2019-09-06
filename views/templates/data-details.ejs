@@ -7,7 +7,7 @@
         <div id="data-header-row" class="row data-header-row">
             <div id="data-header" class="col-md-offset-2 col-md-6">
                 <div class="row margin-row">
-                      <% if (data.get("parentSubject") && data.get("parentSubject").length > 0) {%>
+                    <% if (data.get("parentSubject") && data.get("parentSubject").length > 0) {%>
                     <label for="parentSubject" class="data-label">
                         <%= data.get("parentSubject").length === 1 ? __("subject") : __("subjects")  %>: </label>
                     <span class="data-span">
@@ -18,7 +18,7 @@
                     <label for="parentSample" class="data-label">
                         <%= data.get("parentSample").length === 1 ?  __("sample") :  __("samples") %>: </label>
                     <span class="data-span">
-                       <%= _.map(data.get("parentSample"), "biobankCode").join(",") %>
+                        <%= _.map(data.get("parentSample"), "biobankCode").join(",") %>
                     </span>
                     <%} %>
                 </div>
@@ -79,17 +79,21 @@
     <div id="metadata-schema" class="metadata-schema">
         <div id="metadata-body" class="metadata-body">
             <% var metadata = data.get("metadata"), value, values, unit;
-            _.each(fields, function(field,index) {%>
-            <!--
-      <% var groupname = field._group %>
-        -->
-            <%if (index === 0 || fields[index-1]._group !== field._group ){%>
+            var fieldsGroups = _.groupBy(fields, '_group');
+            _.forEach(fieldsGroups, function(fields, groupName) {%>
             <div class="metadatagroup span7 center">
                 <h4 class="metadatagroup-header text-uppercase">
-                    <%= field._group %>
+                    <%= groupName %>
                 </h4>
                 <div class="metadatacomponent-body">
-                    <%}%>
+                    <% 
+                    var loopsGroups = _.groupBy(fields, '_loop');
+                    if (loopsGroups['false'] && loopsGroups['false'].length > 0) { 
+                    _.each(loopsGroups['false'], function(field,index) {%>
+                    <!--
+      <% var groupname = field._group %>
+        -->
+
                     <% if (!field.sensitive || xtens.session.get('canAccessSensitiveData') ) {%>
                     <div class="row margin-row">
                         <span name="metadata-name" class="col-md-4 text-right" style="padding-left:29px">
@@ -97,27 +101,64 @@
                         </span>
                         <div class="col-md-5 text-left">
 
-                          <% value =  metadata[field.formattedName] ? metadata[field.formattedName].value : null;
-                            values = metadata[field.formattedName] ? metadata[field.formattedName].values : null;
+                            <% value =  metadata[field.formattedName] ? metadata[field.formattedName].value : null;
                             if (field.fieldType==="Date" && value != null){value=moment(value).lang("it").format('L');}
                             unit = metadata[field.formattedName] ? metadata[field.formattedName].unit : null; %>
                             <div name="metadata-value" class="data-value">
-                                <% if (_.isArray(values)) { %>
-                                    <%=  !_.isEmpty(values) ? values.join(", ") : "" %>
-                                <% }
-                                else{ %>
                                 <%= value && unit ? value + " [" + unit + "]" :
                                 value ? value : "" %>
-                                <%};%>
                             </div>
                         </div>
                     </div>
                     <%}%>
-                    <% if (index === fields.length-1 || field._group !== fields[index+1]._group ) {%>
                 </div>
             </div>
-            <%}%>
-            <%});%>
-        </div>
-    </div>
-</div>
+            <%});
+        } 
+        if (loopsGroups['true'] && loopsGroups['true'].length > 0) {
+            var maxLoopNumber = _.max(_.map(_.filter(metadata, function(m) {return m.group == groupName && m.loop; }), function (a) {return a.values ? a.values.length : 0})) 
+            maxLoopNumber = maxLoopNumber > 0 ? maxLoopNumber : 1;
+            for (let index = 1; index <= maxLoopNumber; index++) {%>
+
+                    <div class="metadatagroup span7 center">
+                        <%var loopGroupName = _.filter(metadata, function(m) {return m.group == groupName && m.loop; })
+                        if(loopGroupName.length > 0) {%>
+                        <h4 class="metadatagroup-header text-uppercase">
+                            <%= _.filter(metadata, function(m) {return m.group == groupName && m.loop; })[0].loop %>
+                            #<%=index %>
+                        </h4>
+                        <div class="metadatacomponent-body">
+                            <%}%>
+
+                            <%
+
+                            _.each(loopsGroups['true'], function(field) {%>
+                            <!--
+                  <% var groupname = field._group %>
+                    -->
+
+                            <% if (!field.sensitive || xtens.session.get('canAccessSensitiveData') ) {%>
+                            <div class="row margin-row">
+                                <span name="metadata-name" class="col-md-4 text-right" style="padding-left:29px">
+                                    <%=field.name%>
+                                </span>
+                                <div class="col-md-5 text-left">
+
+                                    <% values = metadata[field.formattedName] ? metadata[field.formattedName].values : null;%>
+                                    <div name="metadata-value" class="data-value">
+                                        <%= values && values[index-1] ? values[index-1] : null %>
+                                    </div>
+                                </div>
+                            </div>
+                            <%}
+                            });
+                            if(loopGroupName.length > 0) {%>
+                        </div>
+                        <%}%>
+                    </div>
+
+                    <%  }}
+                            });%>
+                    </div>
+                </div>
+            </div>

@@ -41,7 +41,7 @@
     /**
      *  @description general purpose function to retrieve the value from a field
      */
-    function getFieldValue ($el, ev, options) {
+    function getFieldValue($el, ev, options) {
         switch (options.view.component.fieldType) {
             case FieldTypes.INTEGER:
                 return parseInt($el.val());
@@ -62,7 +62,7 @@
     /**
      * @description render a Date from the model to a view
      */
-    function renderDateValue (value) {
+    function renderDateValue(value) {
         if (value) {
             var dateArray = value instanceof Date ? value.toISOString().split('-') : value.split('-');
             return dateArray[2] + '/' + dateArray[1] + '/' + dateArray[0];
@@ -604,7 +604,9 @@
     });
 
     Data.Views.MetadataFieldSelect = Data.Views.MetadataField.fullExtend({
-
+        events: {
+            "click .deselect": "clearSelected"
+        },
         bindings: {
             'select[name=fieldValue]': {
                 observe: 'value',
@@ -638,6 +640,11 @@
         initialize: function (options) {
             this.template = JST["views/templates/metadatafieldselect-form.ejs"];
             this.component = options.component;
+        },
+
+        clearSelected: function () {
+            this.$("select[name=fieldValue]").select2("val", "");
+            this.model.set('value', null);
         }
 
     });
