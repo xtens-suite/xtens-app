@@ -1,4 +1,6 @@
 version: "2"
+volumes:
+  xtensdbvolume: {}
 services:
   xtensapp_docker: 
     image: nicozana/xtensapp-docker:latest
@@ -12,7 +14,8 @@ services:
   postgres:
     image: nicozana/xtensapp-db-docker:latest
     volumes:
-      - postgresdbvolume:/var/lib/postgresql/data
+      - xtensdbvolume:/var/lib/postgresql/data
 volumes:
-  postgresdbvolume:
+  xtensdbvolume:
     external: true
+

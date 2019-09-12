@@ -1,5 +1,6 @@
-       module.exports = {
-
+module.exports = {
+        hookTimeout: 30000,
+        
         port: process.env.PORT || 1337,
 
         environment: process.env.NODE_ENV || 'development',
@@ -79,8 +80,7 @@
                 email: 'demouser@xtens.com',
                 login: 'demouser',
                 password: 'Demouser1234!',
-                groups: [2],
-                add                     //operator "demouser" is associated with group "public"
+                groups: [2]                     //operator "demouser" is associated with group "public"
             }
         ]
 };

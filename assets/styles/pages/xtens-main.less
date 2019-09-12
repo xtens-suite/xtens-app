@@ -261,8 +261,12 @@ div.metadataloop-body > div.metadatacomponent-body {
     .make-xs-column(3);
 }
 .data .metadata-value-div {
-    .make-sm-column(6);
-    .make-xs-column(8);
+    .make-sm-column(5);
+    .make-xs-column(7);
+}
+.data .metadata-clear-div {
+    .make-sm-column(1);
+    .make-xs-column(1);
 }
 .data .metadata-descr-div {
     .make-sm-column(1);
@@ -420,3 +424,30 @@ div.targetDt {
 .groups-actions{
   width: 400px;
 }
+
+.deselect {
+    position: absolute;
+    // right: 32px;
+    // top: 32px;
+    width: 32px;
+    height: 32px;
+    opacity: 0.3;
+  }
+  .deselect:hover {
+    opacity: 1;
+  }
+  .deselect:before, .deselect:after {
+    position: absolute;
+    left: 15px;
+    content: ' ';
+    height: 33px;
+    width: 2px;
+    background-color: #333;
+  }
+  .deselect:before {
+    transform: rotate(45deg);
+  }
+  .deselect:after {
+    transform: rotate(-45deg);
+  }
+  

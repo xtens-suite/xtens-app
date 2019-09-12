@@ -48,9 +48,9 @@
 
         initialize: function (options) {
             $('#main').html(this.el);
-            this.DataTypesCount = options.DataTypes;
+            this.SubjectCount = options.DataTypes;
             this.DataTypes = options.DataTypeSource;
-            this.SamplesCount = options.Samples;
+            this.SampleCount = options.Samples;
             this.DataCount = options.Data;
             this.subjects = options.subjects && options.subjects.toJSON();
 
@@ -74,8 +74,10 @@
             $('#subject-selector').selectpicker();
 
             _.forEach(["Subject", "Sample", "Data"], function (model) {
-                that.$el.append('<div class="row ' + model + '" >');
-                that.renderChartsByModel(model);
+                if (that[model + 'Count'] && that[model + 'Count'].length > 0) {
+                    that.$el.append('<div class="row ' + model + '" >');
+                    that.renderChartsByModel(model);
+                }
             });
 
             return this;
@@ -90,13 +92,13 @@
             var pieData; var title; var colors; var writeTag = false;
             switch (model) {
                 case "Subject":
-                    pieData = this.DataTypesCount;
+                    pieData = this.SubjectCount;
                     title = "DataTypes_Pie";
                     colors = this.dataTypesModelsColors;
                     writeTag = true;
                     break;
                 case "Sample":
-                    pieData = this.SamplesCount;
+                    pieData = this.SampleCount;
                     title = "Samples_Pie";
                     break;
                 case "Data":
