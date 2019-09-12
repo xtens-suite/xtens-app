@@ -13,6 +13,8 @@ RUN npm i sails
 RUN npm i
 RUN npm i grunt-cli -g
 RUN npm i bower -g
+RUN rm -rf node_modules/waterline
+RUN npm i waterline@0.11.9
 RUN apt-get install -y ruby
 RUN gem install sass
 RUN grunt bower
