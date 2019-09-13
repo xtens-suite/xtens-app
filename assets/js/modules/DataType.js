@@ -411,7 +411,7 @@
                         }
                     });
                 },
-                error: function (model, res) {
+                error: function (_model, res) {
                     xtens.error(res);
                 }
             });
