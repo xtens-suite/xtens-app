@@ -24,7 +24,7 @@ It is designed with the following features:
 * Execute complex query through a simple and intuitive query builder interface ( based hierarchical data structure dynamically) and then export the query results in Excel format
 * Provided by a RestFul Api Interface to allow direct communication with third application programs
 
-#How to install XTENS 2
+# How to install XTENS 2
 
 * [Using Docker](#using-docker)
 * [Server Installation](#on-your-server)
