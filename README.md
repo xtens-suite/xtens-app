@@ -24,9 +24,10 @@ It is designed with the following features:
 * Execute complex query through a simple and intuitive query builder interface ( based hierarchical data structure dynamically) and then export the query results in Excel format
 * Provided by a RestFul Api Interface to allow direct communication with third application programs
 
-# Getting Started
+# [How to install XTENS](#how-to-install-pipet)
 
-You can install a local copy on your server or use the docker-image:
+	- [Using docker](#using-docker)
+	- [server installation](#on-your-server)
 
 ## Using Docker [<img src="https://live.staticflickr.com/1580/24174642365_68f0c433e2.jpg" target="_blank" alt="drawing" width="60"/>](https://www.docker.com/) <a name="using-docker" />
 
@@ -60,7 +61,8 @@ into the adress bar to access XTENS.
 
 The XTENS Admin User has the username `defaultAdmin` and the password `Admin1234!`. In order to use administrate XTENS, like manage Projects, Groups, Operators, Datatype Privileges, one has to be logged in with this username and password.
 
-## System Prerequisites:
+##Server Installation <a name="on-your-server" />
+### System Prerequisites:
 The following software packages are required to be installed on your system:
 
 * <a href="https://nodejs.org"><img src="https://cloud.githubusercontent.com/assets/14332186/22329480/bf0228ec-e3c1-11e6-9d8b-7840838e177e.png" width="100"></a>   [Node.js v6+](http://nodejs.org/);
