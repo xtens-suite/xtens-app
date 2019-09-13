@@ -1,3 +1,4 @@
+
 # XTENS 2 v.3.0
 
 [![Build Status](https://travis-ci.org/xtens-suite/xtens-app.svg?branch=master)](https://travis-ci.org/xtens-suite/xtens-app)
@@ -62,7 +63,7 @@ into the adress bar to access XTENS.
 
 The XTENS Admin User has the username `defaultAdmin` and the password `Admin1234!`. In order to use administrate XTENS, like manage Projects, Groups, Operators, Datatype Privileges, one has to be logged in with this username and password.
 
-##Server Installation <a name="on-your-server" />
+## Server Installation <a name="on-your-server" />
 ### System Prerequisites:
 The following software packages are required to be installed on your system:
 
