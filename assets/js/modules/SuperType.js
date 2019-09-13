@@ -3,11 +3,10 @@
  * @description This file contains the Backbone classes for handling SuperType
  *              models, collections and views according to the MIABIS standard
  */
-(function(xtens, SuperType) {
+(function (xtens, SuperType) {
     // dependencies
     var i18n = xtens.module("i18n").en;
     var Constants = xtens.module("xtensconstants").Constants;
-
 
     // XTENS router alias
     var router = xtens.router;
@@ -19,22 +18,20 @@
          * @description flattens the metadata schema returning a 1D array containing all the metadata fields
          * @param {boolean} skipFieldsWithinLoops - if true skips all the metadatafields that are contained within metadata loops
          */
-        getFlattenedFields: function(skipFieldsWithinLoops) {
-            var flattened = [], groupName, groupContent, loopContent;
+        getFlattenedFields: function (skipFieldsWithinLoops) {
+            var flattened = []; var groupName; var groupContent; var loopContent;
             var body = this.get("schema") && this.get("schema").body;
             if (!body) return flattened;
-            for (var i=0, len=body.length; i<len; i++) {
+            for (var i = 0, len = body.length; i < len; i++) {
                 groupName = body[i].name;
                 groupContent = body[i] && body[i].content;
-                for (var j=0, l=groupContent.length; j<l; j++) {
+                for (var j = 0, l = groupContent.length; j < l; j++) {
                     if (groupContent[j].label === Constants.METADATA_FIELD) {
-                        flattened.push(_.extend(groupContent[j], {_group: groupName}));
-                    }
-                    else if (groupContent[j].label === Constants.METADATA_LOOP && !skipFieldsWithinLoops) {
+                        flattened.push(_.extend(groupContent[j], { _group: groupName }));
+                    } else if (groupContent[j].label === Constants.METADATA_LOOP && !skipFieldsWithinLoops) {
                         loopContent = groupContent[j] && groupContent[j].content;
-                        for (var k=0; k<loopContent.length; k++) {
+                        for (var k = 0; k < loopContent.length; k++) {
                             if (loopContent[k].label === Constants.METADATA_FIELD) {
-
                                 // add to the field a private flag that specifies its belonging to a loop
                                 flattened.push(_.extend(loopContent[k], {
                                     _group: groupName,
@@ -43,7 +40,6 @@
                             }
                         }
                     }
-
                 }
             }
             return flattened;
@@ -53,11 +49,11 @@
          * @description checks whether the DataType contains at least a loop
          * @return{boolean} - true if the DataType contains at least a loop, false otherwise
          */
-        hasLoops: function() {
+        hasLoops: function () {
             var body = this.get("schema") && this.get("schema").body;
-            for (var i=0, len=body.length; i<len; i++){
+            for (var i = 0, len = body.length; i < len; i++) {
                 var groupContent = body[i] && body[i].content;
-                if (_.where(groupContent, {label: Constants.METADATA_LOOP}).length > 0) {
+                if (_.where(groupContent, { label: Constants.METADATA_LOOP }).length > 0) {
                     return true;
                 }
             }
@@ -70,12 +66,12 @@
          * @description returns a list of the metadata loops contained in the current DataType
          * @return{Array} - an array containing all the Metadata loops
          */
-        getLoops: function() {
+        getLoops: function () {
             var body = this.get("schema") && this.get("schema").body;
             var res = [];
-            for (var i=0, len=body.length; i<len; i++) {
+            for (var i = 0, len = body.length; i < len; i++) {
                 var groupContent = body[i] && body[i].content;
-                res.push(_.where(groupContent, {label: Constants.METADATA_LOOP}));
+                res.push(_.where(groupContent, { label: Constants.METADATA_LOOP }));
             }
             return _.flatten(res, true);
         },
@@ -85,7 +81,7 @@
          * @name validate
          * @description customized client-side validation for DataType Model
          */
-        validate: function(attrs, opts) {
+        validate: function (attrs, opts) {
             var errors = [];
 
             if (!attrs.schema.body || !attrs.schema.body.length) {
@@ -96,21 +92,20 @@
             var tempModel = new SuperType.Model(attrs);
             var flattened = tempModel.getFlattenedFields();
             if (!flattened.length) {
-                errors.push({name:'attributes', message: i18n("please-add-at-least-a-metadata-field")});
+                errors.push({ name: 'attributes', message: i18n("please-add-at-least-a-metadata-field") });
             }
             // check that there are no fields with more than one occurrence
-            var occurrences = {}, duplicates = [];
-            _.each(_.map(flattened, 'name'), function(fieldName) {
+            var occurrences = {}; var duplicates = [];
+            _.each(_.map(flattened, 'name'), function (fieldName) {
                 if (!occurrences[fieldName]) {
                     occurrences[fieldName] = 1;
-                }
-                else {
+                } else {
                     occurrences[fieldName]++;
                     duplicates.push(fieldName);
                 }
             });
             if (!_.isEmpty(duplicates)) {
-                errors.push({name: 'duplicates', message: i18n("data-type-has-the-following-duplicate-names") + ": " + duplicates.join(", ") });
+                errors.push({ name: 'duplicates', message: i18n("data-type-has-the-following-duplicate-names") + ": " + duplicates.join(", ") });
             }
             return errors.length > 0 ? errors : false;
         }
@@ -124,7 +119,7 @@
 
     SuperType.Views.Edit = Backbone.View.extend({
 
-        initialize: function() {
+        initialize: function () {
             this.template = JST["views/templates/supertype-edit.ejs"];
         },
 
@@ -133,8 +128,8 @@
             '#uri': 'uri'
         },
 
-        render: function() {
-            this.$el.html(this.template({__: i18n}));
+        render: function () {
+            this.$el.html(this.template({ __: i18n }));
             this.stickit();
             return this;
         }
@@ -142,7 +137,6 @@
     });
 
     SuperType.Views.List = Backbone.View.extend({
-        //TODO
+        // TODO
     });
-
-} (xtens, xtens.module("supertype")));
+}(xtens, xtens.module("supertype")));
