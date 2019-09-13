@@ -24,10 +24,11 @@ It is designed with the following features:
 * Execute complex query through a simple and intuitive query builder interface ( based hierarchical data structure dynamically) and then export the query results in Excel format
 * Provided by a RestFul Api Interface to allow direct communication with third application programs
 
-# [How to install XTENS](#how-to-install-pipet)
+#How to install XTENS 2
 
-	- [Using docker](#using-docker)
-	- [server installation](#on-your-server)
+* [Using Docker](#using-docker)
+* [Server Installation](#on-your-server)
+
 
 ## Using Docker [<img src="https://live.staticflickr.com/1580/24174642365_68f0c433e2.jpg" target="_blank" alt="drawing" width="60"/>](https://www.docker.com/) <a name="using-docker" />
 
@@ -76,7 +77,7 @@ The following software packages are required to be installed on your system:
 * <a href="https://gruntjs.com/"><img src="https://cloud.githubusercontent.com/assets/14332186/23852502/76eeb570-07e8-11e7-9643-fc6ee8f58a84.png" width="50"></a>   [Grunt](https://gruntjs.com/).
 
 
-## Installation (ubuntu server):
+## Installation packages and environment configuration (ubuntu server):
 * [Download](https://github.com/xtens-suite/xtens-app/releases) the Release file (zip or tar gz) and extract it:
 
 OR:
