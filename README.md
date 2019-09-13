@@ -26,6 +26,40 @@ It is designed with the following features:
 
 # Getting Started
 
+You can install a local copy on your server or use the docker-image:
+
+## Using Docker [<img src="https://live.staticflickr.com/1580/24174642365_68f0c433e2.jpg" target="_blank" alt="drawing" width="60"/>](https://www.docker.com/) <a name="using-docker" />
+
+A dockerized version of Galaxy containing PIPE-T, based on [bgruening galaxy-stable](https://github.com/bgruening/docker-galaxy-stable) is also available.
+
+At first you need to install Docker. Please follow the instructions to install docker based on your machine OS:
+- [<img target="_blank" src="https://upload.wikimedia.org/wikipedia/commons/e/e0/Windows_logo.png" alt="drawing" width="150"/>](https://hub.docker.com/editions/community/docker-ce-desktop-windows)
+- [<img target="_blank" src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/fa/Apple_logo_black.svg/1024px-Apple_logo_black.svg.png" alt="drawing" width="40"/> <img target="_blank" src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/00/MacOS_wordmark.svg/216px-MacOS_wordmark.svg.png" alt="drawing" width="120"/>](https://hub.docker.com/editions/community/docker-ce-desktop-mac  )
+- [<img target="_blank" src="http://pngimg.com/uploads/linux/linux_PNG29.png" alt="drawing" width="150"/>](https://docs.docker.com/install/linux/docker-ce/ubuntu/) 
+
+After the successful installation, run docker and all you need to do is:
+
+```
+cd docker
+docker volume create xtensdbvolume
+docker-compose up
+```
+
+If you already have run xtens-app with docker and want to fetch the last docker image of xtens-app, type (inside xtens-app/docker path)
+
+```
+docker pull iggbiolmol/xtensapp-docker
+docker-compose up
+```
+
+Then, you just need to open a web browser (chrome is recommanded) and type 
+```
+http://localhost:1337
+```
+into the adress bar to access XTENS.
+
+The XTENS Admin User has the username `defaultAdmin` and the password `Admin1234!`. In order to use administrate XTENS, like manage Projects, Groups, Operators, Datatype Privileges, one has to be logged in with this username and password.
+
 ## System Prerequisites:
 The following software packages are required to be installed on your system:
 
@@ -319,6 +353,9 @@ and now you can start your XTENS 2 Platform:
         NODE_ENV=production forever start app.js
 
 Now you can go to the application page http://host:port/#/. (the host is the ip address that you set in local.js and port is the "port: process.env.PORT || #port;" that you set in local.js).
+
+The XTENS Admin User has the username `defaultAdmin` and the password `Admin1234!`. In order to use administrate XTENS, like manage Projects, Groups, Operators, Datatype Privileges, one has to be logged in with this username and password.
+
 
 To discover XTENS 2 RESTful API follow the link: [RESTful API](http://docs.xtens2.apiary.io)
 

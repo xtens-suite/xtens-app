@@ -3,7 +3,7 @@ volumes:
   xtensdbvolume: {}
 services:
   xtensapp_docker: 
-    image: nicozana/xtensapp-docker:latest
+    image: iggbiolmol/xtensapp-docker:latest
     ports: 
       - "1337:1337"
     command: bash -c 'while !</dev/tcp/postgres/5432; do sleep 5; done; NODE_ENV=production node app.js'
@@ -12,7 +12,7 @@ services:
     environment:
       - PORT=1337   
   postgres:
-    image: nicozana/xtensapp-db-docker:latest
+    image: iggbiolmol/xtensapp-db-docker:latest
     volumes:
       - xtensdbvolume:/var/lib/postgresql/data
 volumes:
