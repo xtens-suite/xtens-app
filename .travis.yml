@@ -16,8 +16,8 @@ install:
 branches:
   only:
   - master
-before_script:
-  - mkdir logs
+# before_script:
+  # - mkdir logs
 script:
   - nv=$(node -v)
   - npm run-script build:test
