@@ -364,7 +364,7 @@ module.exports = {
         const operator = TokenService.getToken(req);
         let dataTypePrivileges;
 
-        return DataTypePrivileges.find({ group: operator.groups[0] }).populate('dataType')
+        return DataTypePrivileges.find({ group: operator.groups }).populate('dataType')
             .then(results => {
                 dataTypePrivileges = results;
                 // operator has not privileges on datatype, then throw Privileges Error
@@ -453,7 +453,7 @@ module.exports = {
         const operator = TokenService.getToken(req);
         let dataTypePrivileges;
 
-        return DataTypePrivileges.find({ group: operator.groups[0] }).populate('dataType')
+        return DataTypePrivileges.find({ group: operator.groups }).populate('dataType')
             .then(results => {
                 dataTypePrivileges = results;
                 // operator has not the privilege to EDIT datatype, then throw Privileges Error
