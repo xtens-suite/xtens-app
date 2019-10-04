@@ -103,6 +103,7 @@ lib-cov
 *.pid
 npm-debug.log
 npm-debug.log.*
+.sailsrc
 
 
 
