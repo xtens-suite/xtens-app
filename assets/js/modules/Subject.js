@@ -736,8 +736,8 @@
                     //         index = i;
                     //     }
                     // }
-
-                    var treeRoot = d3.hierarchy(that.data[0].source);
+                    var root = _.find(that.data, { source: { name: 'Patient' } }).source;
+                    var treeRoot = d3.hierarchy(root);
                     tree(treeRoot);
                     // nodes
                     var nodes = treeRoot.descendants();
