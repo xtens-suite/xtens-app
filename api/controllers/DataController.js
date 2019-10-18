@@ -30,12 +30,12 @@ const coroutines = {
      * @param{Response} res
      * @description coroutine for new Data instance creation
      */
-    create: BluebirdPromise.coroutine(function *(req, res) {
+    create: BluebirdPromise.coroutine(function * (req, res) {
         let data = req.allParams();
         const operator = TokenService.getToken(req);
         const dataTypePrivilege = yield DataTypeService.getDataTypePrivilegeLevel(operator.groups, data.type);
         if (!dataTypePrivilege || _.isEmpty(dataTypePrivilege)) {
-          // || dataTypePrivilege.privilegeLevel !== EDIT
+            // || dataTypePrivilege.privilegeLevel !== EDIT
             throw new PrivilegesError(`Authenticated user has not edit privileges on the data type ${data.type}`);
         }
         DataService.simplify(data);
@@ -54,7 +54,7 @@ const coroutines = {
         return res.json(201, result);
     }),
 
-    findOne: BluebirdPromise.coroutine(function *(req, res) {
+    findOne: BluebirdPromise.coroutine(function * (req, res) {
         const id = req.param('id');
         const operator = TokenService.getToken(req);
 
@@ -62,26 +62,23 @@ const coroutines = {
         query = actionUtil.populateRequest(query, req);
 
         let data = yield BluebirdPromise.resolve(query);
-        const idDataType = data ? _.isObject(data.type) ? data.type.id :  data.type : undefined;
+        const idDataType = data ? _.isObject(data.type) ? data.type.id : data.type : undefined;
         const dataTypePrivilege = yield DataTypeService.getDataTypePrivilegeLevel(operator.groups, idDataType);
 
-              //filter Out Metadata if operator has not the privilege
-        if (!dataTypePrivilege || _.isEmpty(dataTypePrivilege)){ data = {}; }
-        else if( dataTypePrivilege.privilegeLevel === VIEW_OVERVIEW) { data.metadata = {}; }
+        // filter Out Metadata if operator has not the privilege
+        if (!dataTypePrivilege || _.isEmpty(dataTypePrivilege)) { data = {}; } else if (dataTypePrivilege.privilegeLevel === VIEW_OVERVIEW) { data.metadata = {}; }
 
-        if( !operator.canAccessSensitiveData && !_.isEmpty(data.metadata) ){
+        if (!operator.canAccessSensitiveData && !_.isEmpty(data.metadata)) {
             data = yield DataService.filterOutSensitiveInfo(data, operator.canAccessSensitiveData);
         }
 
-        DbLog(logMessages.FINDONE, DATA, id, data.owner, idDataType, operator.id );
+        DbLog(logMessages.FINDONE, DATA, id, data.owner, idDataType, operator.id);
         return res.json(data);
-
     }),
 
-    find: BluebirdPromise.coroutine(function *(req, res) {
-
+    find: BluebirdPromise.coroutine(function * (req, res) {
         const operator = TokenService.getToken(req);
-        let allPrivileges = yield DataTypePrivileges.find({group:operator.groups});
+        let allPrivileges = yield DataTypePrivileges.find({ group: operator.groups });
         allPrivileges = operator.groups.length > 1 ? DataTypeService.getHigherPrivileges(allPrivileges) : allPrivileges;
         let params = req.allParams();
         params.model = DATA;
@@ -91,21 +88,20 @@ const coroutines = {
 
         const dataTypesId = !_.isEmpty(data) ? _.isObject(data[0].type) ? _.uniq(_.map(_.map(data, 'type'), 'id')) : _.uniq(_.map(data, 'type')) : [];
 
-        const pagePrivileges = allPrivileges.filter( obj => {
-            return _.find(dataTypesId, id =>{ return id === obj.dataType;});
+        const pagePrivileges = allPrivileges.filter(obj => {
+            return _.find(dataTypesId, id => { return id === obj.dataType; });
         });
 
-        const [payload, headerInfo]  = yield BluebirdPromise.all([
+        const [payload, headerInfo] = yield BluebirdPromise.all([
             DataService.filterListByPrivileges(data, dataTypesId, pagePrivileges, operator.canAccessSensitiveData),
             QueryService.composeHeaderInfo(req, params)
         ]);
         // NOTE: Log or not Log this is question
-        //DbLog(logMessages.FIND, DATA, data.length, _.uniq(_.map(data, 'owner')), dataTypesId, operator.id);
+        // DbLog(logMessages.FIND, DATA, data.length, _.uniq(_.map(data, 'owner')), dataTypesId, operator.id);
         return DataService.prepareAndSendResponse(res, payload, headerInfo);
-
     }),
 
-    update: BluebirdPromise.coroutine(function *(req, res) {
+    update: BluebirdPromise.coroutine(function * (req, res) {
         let data = req.allParams();
         const operator = TokenService.getToken(req);
 
@@ -140,11 +136,11 @@ const coroutines = {
         qUpdate = actionUtil.populateRequest(qUpdate, req);
         let upData = yield BluebirdPromise.resolve(qUpdate);
 
-        DbLog(logMessages.UPDATE, DATA, updatedData.id, updatedData.owner, updatedData.type, operator.id, {prevData: prevData, upData: upData});
+        DbLog(logMessages.UPDATE, DATA, updatedData.id, updatedData.owner, updatedData.type, operator.id, { prevData: prevData, upData: upData });
         return res.json(upData);
     }),
 
-    destroy: BluebirdPromise.coroutine(function *(req, res, co) {
+    destroy: BluebirdPromise.coroutine(function * (req, res, co) {
         const id = req.param('id');
         const operator = TokenService.getToken(req);
 
@@ -156,7 +152,7 @@ const coroutines = {
         if (!data) {
             throw new NonexistentResourceError("Missing Resource");
         }
-            //retrieve dataType id
+        // retrieve dataType id
         const idDataType = _.isObject(data.type) ? data.type.id : data.type;
 
         const dataTypePrivilege = yield DataTypeService.getDataTypePrivilegeLevel(operator.groups, idDataType);
@@ -166,13 +162,12 @@ const coroutines = {
 
         const deleted = yield crudManager.deleteData(id);
         if (deleted > 0) {
-            DbLog(logMessages.DELETE, DATA, data.id, data.owner, data.type, operator.id, {deletedData: JSON.stringify(data)});
+            DbLog(logMessages.DELETE, DATA, data.id, data.owner, data.type, operator.id, { deletedData: JSON.stringify(data) });
         }
         return res.json(200, { deleted: deleted });
-
     }),
 
-    edit: BluebirdPromise.coroutine(function *(req, res) {
+    edit: BluebirdPromise.coroutine(function * (req, res) {
         const operator = TokenService.getToken(req);
         const params = req.allParams();
         sails.log.info("DataController.edit - Decoded ID is: " + operator.id);
@@ -192,31 +187,29 @@ const coroutines = {
             parentData: DataService.getOneAsync(params.parentData)
         });
 
-        if (_.isEmpty(payload.dataTypes)){ throw new PrivilegesError(`Authenticated user has not edit privileges on any data type`); }
+        if (_.isEmpty(payload.dataTypes)) { throw new PrivilegesError(`Authenticated user has not edit privileges on any data type`); }
 
-        if (payload.data){
+        if (payload.data) {
             let operators = yield OperatorService.getOwners(payload.data);
             payload.operators = operators;
-          // if operator has not access to Sensitive Data and dataType has sensitive data, then return forbidden
+            // if operator has not access to Sensitive Data and dataType has sensitive data, then return forbidden
             const sensitiveRes = yield DataService.hasDataSensitive(payload.data.id, DATA);
             if (sensitiveRes && ((sensitiveRes.hasDataSensitive && !operator.canAccessSensitiveData))) {
                 throw new PrivilegesError("Authenticated user is not allowed to edit sensitive data");
                 // if edit data exists and operator has not the privilege to EDIT datatype, then throw Privileges Error
             }
-            if(_.isEmpty(payload.dataTypes) || !_.find(payload.dataTypes, {id : payload.data.type.id})) {
+            if (_.isEmpty(payload.dataTypes) || !_.find(payload.dataTypes, { id: payload.data.type.id })) {
                 throw new PrivilegesError(`Authenticated user has not edit privileges on the data type`);
             }
         }
         return res.json(payload);
-
-
     }),
 
-    getInfoForBarChart: BluebirdPromise.coroutine(function *(req, res) {
+    getInfoForBarChart: BluebirdPromise.coroutine(function * (req, res) {
         const dataTypeId = req.param('dataType');
         let fieldName = req.param('fieldName');
         const model = req.param('model');
-        const period = req.param('period');        
+        const period = req.param('period');
 
         if (!fieldName) {
             fieldName = "created_at";
@@ -229,109 +222,103 @@ const coroutines = {
     })
 };
 
-
 module.exports = {
 
-  /**
-   *  POST /data
-   *  @method
-   *  @name create
-   *  @description -> create a new Data Instance; transaction-safe implementation
-   *
-   */
-    create: function(req, res) {
-
+    /**
+     *  POST /data
+     *  @method
+     *  @name create
+     *  @description -> create a new Data Instance; transaction-safe implementation
+     *
+     */
+    create: function (req, res) {
         const co = new ControllerOut(res);
         coroutines.create(req, res)
-        .catch(error => {
-            sails.log.error("DataController.create: " + error.message);
-            return co.error(error);
-        });
-
+            .catch(error => {
+                sails.log.error("DataController.create: " + error.message);
+                return co.error(error);
+            });
     },
 
-  /**
-   * GET /data/:id
-   * @method
-   * @name findOne
-   * @description - retrieve an existing data
-   */
-    findOne: function(req, res) {
+    /**
+     * GET /data/:id
+     * @method
+     * @name findOne
+     * @description - retrieve an existing data
+     */
+    findOne: function (req, res) {
         const co = new ControllerOut(res);
         coroutines.findOne(req, res)
-        .catch(/* istanbul ignore next */ function(error) {
-            sails.log.error("DataController.findOne: " + error.message);
-            return co.error(error);
-        });
-
+            .catch(/* istanbul ignore next */ function (error) {
+                sails.log.error("DataController.findOne: " + error.message);
+                return co.error(error);
+            });
     },
 
-  /**
-   * GET /data
-   * GET /data/find
-   *
-   * @method
-   * @name find
-   * @description Find data based on criteria
-   */
-    find: function(req, res) {
+    /**
+     * GET /data
+     * GET /data/find
+     *
+     * @method
+     * @name find
+     * @description Find data based on criteria
+     */
+    find: function (req, res) {
         const co = new ControllerOut(res);
-        coroutines.find(req,res)
-        .catch( /* istanbul ignore next */ function(err) {
-            sails.log(err);
-            return co.error(err);
-        });
+        coroutines.find(req, res)
+            .catch(/* istanbul ignore next */ function (err) {
+                sails.log(err);
+                return co.error(err);
+            });
     },
 
-  /**
-   *  PUT /data/:id
-   *  @method
-   *  @name update
-   *  @description  -> update an existing Data Instance; transaction-safe implementation
-   *
-   */
-    update: function(req, res) {
+    /**
+     *  PUT /data/:id
+     *  @method
+     *  @name update
+     *  @description  -> update an existing Data Instance; transaction-safe implementation
+     *
+     */
+    update: function (req, res) {
         const co = new ControllerOut(res);
         coroutines.update(req, res, co)
-        .catch(function(error) {
-            sails.log.error(error);
-            return co.error(error);
-        });
+            .catch(function (error) {
+                sails.log.error(error);
+                return co.error(error);
+            });
     },
 
-  /**
-   * DELETE /data/:id
-   * @method
-   * @name destroy
-   * @description
-   */
-    destroy: function(req, res) {
+    /**
+     * DELETE /data/:id
+     * @method
+     * @name destroy
+     * @description
+     */
+    destroy: function (req, res) {
         const co = new ControllerOut(res);
-        coroutines.destroy(req,res,co)
-        .catch(err => {
-            if (err instanceof NonexistentResourceError) {
-                return res.json(200, { deleted: 0 });
-            }
-            sails.log.error(err);
-            return co.error(err);
-        });
-
+        coroutines.destroy(req, res, co)
+            .catch(err => {
+                if (err instanceof NonexistentResourceError) {
+                    return res.json(200, { deleted: 0 });
+                }
+                sails.log.error(err);
+                return co.error(err);
+            });
     },
 
-  /**
-   * @method
-   * @name edit
-   * @description retrieve all required information to create an EditData form
-   */
+    /**
+     * @method
+     * @name edit
+     * @description retrieve all required information to create an EditData form
+     */
 
-    edit: function(req, res) {
+    edit: function (req, res) {
         const co = new ControllerOut(res);
         coroutines.edit(req, res)
             .catch(err => {
                 sails.log.error(err);
                 return co.error(err);
             });
-
     },
 
     /**
@@ -341,13 +328,13 @@ module.exports = {
     * @name getInfoForBarChart
     * @description Find dataTypes based on criteria
     */
-    getInfoForBarChart: function(req, res) {
+    getInfoForBarChart: function (req, res) {
         const co = new ControllerOut(res);
         coroutines.getInfoForBarChart(req, res, co)
-        .catch(/* istanbul ignore next */ function(err) {
-            sails.log.error(err);
-            return co.error(err);
-        });
+            .catch(/* istanbul ignore next */ function (err) {
+                sails.log.error(err);
+                return co.error(err);
+            });
     }
 
 };
