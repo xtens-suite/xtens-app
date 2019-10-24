@@ -209,7 +209,7 @@
             if (this.personalDetailsView && this.personalDetailsView.model) {
                 this.model.set("personalInfo", _.clone(this.personalDetailsView.model.attributes));
                 var personalInfo = this.model.get("personalInfo");
-                if ((!personalInfo.givenName || personalInfo.givenName == "") && (!personalInfo.surname || personalInfo.surname == "") && (!personalInfo.birthDate || personalInfo.birthDate == "")) {
+                if ((!personalInfo.givenName || personalInfo.givenName === "") || (!personalInfo.surname || personalInfo.surname === "") || (!personalInfo.birthDate || personalInfo.birthDate === "" || personalInfo.birthDate === "Invalid date")) {
                     this.model.set("personalInfo", null);
                 }
             } else {
