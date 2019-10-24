@@ -3,15 +3,15 @@
  * @author Massimiliano Izzo
  *
  */
-function renderDatatablesBoolean (data) {
+function renderDatatablesBoolean(data) {
     if (data) {
         return 'true';
     }
     return 'false';
 }
 
-function renderDatatablesDate (data, type) {
-    function pad (s) { return (s < 10) ? '0' + s : s; }
+function renderDatatablesDate(data, type) {
+    function pad(s) { return (s < 10) ? '0' + s : s; }
 
     if (!_.isEmpty(data)) {
         var d = new Date(data);
@@ -80,27 +80,27 @@ function renderDatatablesDate (data, type) {
 
             this.data = options.result.data;
             if (this.isLeafSearch) {
-                this.buildPlainData();
+                this.plainData = this.buildPlainData(this.data);
             }
             this.$modal = $(".modal-cnt");
             this.prepareDataForRenderingJSON(results.dtps, results.dts, this.queryArgs);
             // this.render();
         },
 
-        buildPlainData: function () {
-            this.plainData = [];
-            var that = this;
-            for (var i = 0; i < this.data.length; i++) {
-                for (var j = 0; j < this.data[i].parents.length; j++) {
-                    var obj = _.omit(this.data[i], 'parents');
-                    if (j == 0) {
+        buildPlainData: function (data) {
+            var plainData = [];
+            for (var i = 0; i < data.length; i++) {
+                for (var j = 0; j < data[i].parents.length; j++) {
+                    var obj = _.omit(data[i], 'parents');
+                    if (j === 0) {
                         obj.showRow = true;
                     } else {
                         obj.showRow = false;
                     }
-                    that.plainData.push(_.merge(this.data[i].parents[j], obj));
+                    plainData.push(_.merge(data[i].parents[j], obj));
                 }
             }
+            return plainData;
         },
 
         getCurrentTypeAndPrivileges: function (dataType) {
@@ -147,9 +147,13 @@ function renderDatatablesDate (data, type) {
         addRowsDataTable: function (data) {
             if (data) {
                 this.data = this.data.concat(data);
+                if (this.isLeafSearch) {
+                    var plainData = this.buildPlainData(data);
+                    this.plainData = this.plainData.concat(plainData);
+                }
                 this.addLinks(this.optLinks);
                 // TODO: disabilitare le actions per i multi projects
-                this.table.rows.add(data);
+                this.table.rows.add(plainData);
                 var currentPage = this.table.page();
                 this.table.page(currentPage).draw(false);
             }

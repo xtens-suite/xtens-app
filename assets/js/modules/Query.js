@@ -1578,6 +1578,7 @@
                         that.tableView.addRowsDataTable(that.buffer);
                     }
                     that.buffer = [];
+                    that.hideProgressbar();
                     return reader.cancel();
                 }
 
@@ -1620,7 +1621,7 @@
                     jsonParsed.data = that.buffer;
                     that.tableInitialized = true;
                     that.buffer = [];
-                    that.initializeDataTable(jsonParsed, queryArgs);
+                    that.initializeDataTable(jsonParsed, queryArgs, true);
                 }
 
                 return that.pumpStream(reader, queryArgs);
@@ -1631,11 +1632,13 @@
          * @method
          * @name initializeDataTable
          */
-        initializeDataTable: function (result, queryArgs) {
+        initializeDataTable: function (result, queryArgs, isStream) {
             if (this.tableView) {
                 this.tableView.destroy();
             }
-            this.hideProgressbar();
+            if (!isStream) {
+                this.hideProgressbar();
+            }
             if (!result) this.queryOnError(null, null, "Missing result object");
 
             if (_.isEmpty(result.data)) {
