@@ -44,7 +44,7 @@ config/models.js
 coverage/*
 assets/dataFiles
 assets/bundles
-assets.json
+app.json
 config/autoreload.js
 config/ssl/
 .vscode/
@@ -144,8 +144,8 @@ expected-schema.json
 # Client side assets
 #
 #################################################
-assets/dependencies
-assets/js/jst.js
+assets/node_modules
+node_modules
 
 #################################################
 # SASS cache
