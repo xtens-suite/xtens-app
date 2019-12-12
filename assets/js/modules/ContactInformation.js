@@ -3,9 +3,10 @@
  * @description This file contains the Backbone classes for handling ContactInformation
  *              models, collections and views according to the MIABIS standard
  */
-(function(xtens, ContactInformation) {
+(function (xtens, ContactInformation) {
     // dependencies
-    var i18n = xtens.module("i18n").en;
+    ContactInformation.Views = {};
+    var i18n = require('./i18n.js').en;
 
     // XTENS router alias
     var router = xtens.router;
@@ -18,11 +19,11 @@
         url: '/contactInformation',
         model: ContactInformation.Model
     });
-    
+
     ContactInformation.Views.Edit = Backbone.View.extend({
-        
-        initialize: function(options) {
-            this.template = JST["views/templates/contactinformation-edit.ejs"];
+
+        initialize: function (options) {
+            this.template = require("./../../templates/contactinformation-edit.ejs");
         },
 
         bindings: {
@@ -30,14 +31,14 @@
             '#surname': 'surname',
             '#phone': 'phone',
             '#email': 'email',
-            '#address':'address',
+            '#address': 'address',
             '#zip': 'zip',
             '#city': 'city',
             '#country': 'country'
         },
 
-        render: function() {
-            this.$el.html(this.template({__: i18n}));
+        render: function () {
+            this.$el.html(this.template({ __: i18n }));
             this.stickit();
             return this;
         }
@@ -45,7 +46,6 @@
     });
 
     ContactInformation.Views.List = Backbone.View.extend({
-        //TODO 
+        // TODO
     });
-
-} (xtens, xtens.module("contactinformation")));
+}(xtens, require('./ContactInformation.js')));

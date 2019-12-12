@@ -4,16 +4,17 @@
  */
 
 (function (xtens, Subject) {
+    Subject.Views = {}
     // TODO: retrieve this info FROM DATABASE ideally or from the server-side anyway
-    var useFormattedNames = xtens.module("xtensconstants").useFormattedMetadataFieldNames;
-    var ModalDialog = xtens.module("xtensbootstrap").Views.ModalDialog;
-    var i18n = xtens.module("i18n").en;
-    var Data = xtens.module("data");
-    // var DataTypeModel = xtens.module("datatype").Model;
-    // var SuperTypeModel = xtens.module("supertype").Model;
-    var PersonalDetails = xtens.module("personaldetails");
-    var Classes = xtens.module("xtensconstants").DataTypeClasses;
-    var sexOptions = xtens.module("xtensconstants").SexOptions;
+    var useFormattedNames = require('./XtensConstants.js').useFormattedMetadataFieldNames;
+    var ModalDialog = require('./XtensBootstrap.js').Views.ModalDialog;
+    var i18n = require('./i18n.js').en;
+    var Data = require('./Data.js');
+    // var DataTypeModel = require('./DataType.js').Model;
+    // var SuperTypeModel = require('./SuperType.js').Model;
+    var PersonalDetails = require('./PersonalDetails.js');
+    var Classes = require('./XtensConstants.js').DataTypeClasses;
+    var sexOptions = require('./XtensConstants.js').SexOptions;
 
     var MISSING_VALUE_ALERT = true;
 
@@ -99,7 +100,7 @@
             // _.bindAll(this, 'fetchSuccess');
             $('#main').html(this.el);
             this.dataTypes = options.dataTypes;
-            this.template = JST["views/templates/subject-edit.ejs"];
+            this.template = require("./../../templates/subject-edit.ejs");
             this.personalDetailsView = null;
             this.schemaView = null;
             this.savingSubject = false;
@@ -267,7 +268,7 @@
             }
 
             var modal = new ModalDialog({
-                template: JST["views/templates/confirm-dialog-bootstrap.ejs"],
+                template: require("./../../templates/confirm-dialog-bootstrap.ejs"),
                 title: i18n('confirm-deletion'),
                 body: i18n('subject-will-be-permanently-deleted-are-you-sure'),
                 type: i18n("delete")
@@ -285,7 +286,7 @@
                     that.model.destroy({
                         success: function (model, res) {
                             $('.waiting-modal').modal('hide');
-                            modal.template = JST["views/templates/dialog-bootstrap.ejs"];
+                            modal.template = require("./../../templates/dialog-bootstrap.ejs");
                             modal.title = i18n('ok');
                             modal.body = i18n('subject-deleted');
                             that.$modal.append(modal.render().el);
@@ -367,7 +368,7 @@
          */
         initialize: function (options) {
             $("#main").html(this.el);
-            this.template = JST["views/templates/subject-details.ejs"];
+            this.template = require("./../../templates/subject-details.ejs");
             this.fields = options.fields;
             this.render();
             if (xtens.session.get('canAccessPersonalData')) {
@@ -417,7 +418,7 @@
             this.headers = options.paginationHeaders;
             this.dataTypePrivileges = options.dataTypePrivileges.models;
             this.params = options.params;
-            this.template = JST["views/templates/subject-list.ejs"];
+            this.template = require("./../../templates/subject-list.ejs");
             this.render();
         },
 
@@ -457,11 +458,11 @@
             });
 
             this.filterSubjects(this.params);
-            $('#pagination').append(JST["views/templates/pagination-bar.ejs"]({
+            $('#pagination').append(require("./../../templates/pagination-bar.ejs")({
                 __: i18n,
                 headers: this.headers,
                 rowsLenght: this.subjects.models.length,
-                DEFAULT_LIMIT: xtens.module("xtensconstants").DefaultLimit
+                DEFAULT_LIMIT: require('./XtensConstants.js').DefaultLimit
             }));
             this.setPaginationInfo();
             return this;
@@ -544,7 +545,7 @@
 
         initialize: function (options) {
             $("#main").html(this.el);
-            this.template = JST["views/templates/subject-dashboard.ejs"];
+            this.template = require("./../../templates/subject-dashboard.ejs");
             this.idPatient = options.idPatient || undefined;
             // this.dataTypes = options.dataTypes.models || undefined;
             this.subjects = options.subjects && options.subjects.toJSON();
@@ -580,7 +581,7 @@
 
         initialize: function (options) {
             // $("#main").html(this.el);
-            this.template = JST["views/templates/subject-graph.ejs"];
+            this.template = require("./../../templates/subject-graph.ejs");
             this.idPatient = options.idPatient || undefined;
             // this.dataTypes = options.dataTypes.models || undefined;
             this.subjects = options.subjects && options.subjects.toJSON();
@@ -984,11 +985,11 @@
                 this.data = [node];
             }
 
-            function nodeByName (name) {
+            function nodeByName(name) {
                 return nodesByName[name] || (nodesByName[name] = { name: name });
             }
 
-            function manageDatum (datum) {
+            function manageDatum(datum) {
                 var parent = datum.source = nodeByName(datum.source);
                 var child = datum.target = nodeByName(datum.target);
                 if (parent.children) { parent.children.push(child); } else if (child && child.name) { parent.children = [child]; }
@@ -1042,4 +1043,4 @@
         }
 
     });
-}(xtens, xtens.module("subject")));
+}(xtens, require('./Subject.js')));

@@ -5,8 +5,9 @@
  */
 (function (xtens, SuperType) {
     // dependencies
-    var i18n = xtens.module("i18n").en;
-    var Constants = xtens.module("xtensconstants").Constants;
+    SuperType.Views = {};
+    var i18n = require('./i18n.js').en;
+    var Constants = require('./XtensConstants.js').Constants;
 
     // XTENS router alias
     var router = xtens.router;
@@ -120,7 +121,7 @@
     SuperType.Views.Edit = Backbone.View.extend({
 
         initialize: function () {
-            this.template = JST["views/templates/supertype-edit.ejs"];
+            this.template = require("./../../templates/supertype-edit.ejs");
         },
 
         bindings: {
@@ -139,4 +140,4 @@
     SuperType.Views.List = Backbone.View.extend({
         // TODO
     });
-}(xtens, xtens.module("supertype")));
+}(xtens, require('./SuperType.js')));

@@ -4,11 +4,12 @@
  */
 
 (function (xtens, Session) {
-    var i18n = xtens.module("i18n").en;
-    var GroupPrivilegeLevels = xtens.module("xtensconstants").GroupPrivilegeLevels;
-    var Project = xtens.module("project");
-    var Utils = xtens.module("utils");
-    var ModalDialog = xtens.module("xtensbootstrap").Views.ModalDialog;
+    Session.Views = {};
+    var i18n = require('./i18n.js').en;
+    var GroupPrivilegeLevels = require('./XtensConstants.js').GroupPrivilegeLevels;
+    var Project = require('./Project.js');
+    var Utils = require('./Utils.js');
+    var ModalDialog = require('./XtensBootstrap.js').Views.ModalDialog;
 
     /**
      * @class
@@ -103,8 +104,8 @@
 
         initialize: function () {
             _.bindAll(this);
-            this.sideTemplate = JST['views/templates/menu-sidebar.ejs'];
-            this.navTemplate = JST['views/templates/menu-navbar.ejs'];
+            this.sideTemplate = require('./../../templates/menu-sidebar.ejs');
+            this.navTemplate = require('./../../templates/menu-navbar.ejs');
 
             if (xtens.session.get('activeProject') !== 'all') {
                 var idProject = _.find(xtens.session.get('projects'), function (p) { return p.name === xtens.session.get('activeProject'); }).id;
@@ -239,7 +240,7 @@
                 }
                 var modal = new ModalDialog({
                     title: i18n('project-selection'),
-                    template: JST["views/templates/project-modal.ejs"],
+                    template: require("./../../templates/project-modal.ejs"),
                     data: { __: i18n, projects: projects }
                 });
                 $('#project-selector').selectpicker('hide');
@@ -295,7 +296,8 @@
 
         initialize: function () {
             _.bindAll(this);
-            this.template = JST['views/templates/menu-navbar-login.ejs'];
+            // var template = require('./../../templates/menu-navbar-login.ejs');
+            this.template = require('./../../templates/menu-navbar-login.ejs');
             this.render();
         },
 
@@ -305,4 +307,4 @@
         }
 
     });
-}(xtens, xtens.module("session")));
+}(xtens, require("./Session.js")));

@@ -1,8 +1,9 @@
-(function(xtens,FileManager) {
-    var i18n = xtens.module("i18n").en;
-    var ModalDialog = xtens.module("xtensbootstrap").Views.ModalDialog;
+(function (xtens, FileManager) {
+    FileManager.Views = {};
+    var i18n = require('./i18n.js').en;
+    var ModalDialog = require('./XtensBootstrap.js').Views.ModalDialog;
     var router = xtens.router;
-
+    var Dropzone = {};
     // TODO: move this to server side config
     // var baseUri = "http://130.251.10.60:8080/irods-rest-4.0.2.1-SNAPSHOT/rest/fileContents/biolabZone/home/xtensdevel";
     // var landingRepo = "landing";
@@ -19,15 +20,15 @@
 
     LocalFileSystemStrategy.prototype = {
 
-        getUrl: function() {
+        getUrl: function () {
             return this.url;
         },
 
-        onProcessing: function() {
+        onProcessing: function () {
             return this.url;
         },
 
-        onSending: function(file, xhr, formData) {
+        onSending: function (file, xhr, formData) {
             xhr.setRequestHeader("Authorization", "Bearer " + xtens.session.get("accessToken"));
             formData.append("fileName", file.name);
         }
@@ -40,7 +41,6 @@
      * @description class implemented according to the strategy pattern to implement client interaction with irods-rest API
      */
     function IrodsRestStrategy(fsConf) {
-
         this.username = fsConf.username;
         this.password = fsConf.password;
         this.url = fsConf.restURL.protocol + '//' + fsConf.restURL.hostname + ':' +
@@ -55,7 +55,7 @@
          * @name getUrl
          *
          */
-        getUrl: function() {
+        getUrl: function () {
             return this.url;
         },
 
@@ -65,7 +65,7 @@
          * @param{string} fileName - the full name of the file (i.e. "fileName.ext")
          * @return{url} the URL for the POST request
          */
-        onProcessing: function(fileName) {
+        onProcessing: function (fileName) {
             return this.url + "/" + fileName;
         },
 
@@ -75,7 +75,7 @@
          * @param xhr
          * @description add custom header on xhr methods
          */
-        onSending: function(file, xhr, formData) {
+        onSending: function (file, xhr, formData) {
             xhr.setRequestHeader("Authorization", "Basic " + btoa(this.username + ":" + this.password));
         }
 
@@ -110,20 +110,19 @@
             maxFilesize: 2048, // max 2 GiB
             uploadMultiple: false,
             method: "POST",
-            accept: function(file, done) {
-                var format =new RegExp(/[!@#$%^&*+=\[\]{};':"\\|,<>\/?]/);
-                if (format.test(file.name)) { //.split(".").slice(0,-1).join(".")
+            accept: function (file, done) {
+                var format = new RegExp(/[!@#$%^&*+=\[\]{};':"\\|,<>\/?]/);
+                if (format.test(file.name)) { // .split(".").slice(0,-1).join(".")
                     done("Please rename file removing special characters. !@#$%^&*+=[]{};':\"\\|,<>\/?");
-                }
-                else { done(); }
+                } else { done(); }
             }
             // withCredentials: true
         },
 
-        initialize: function(options) {
-            this.template = JST['views/templates/filemanager-dropzone.ejs'];
+        initialize: function (options) {
+            this.template = require('./../../templates/filemanager-dropzone.ejs');
             this.fileList = new FileManager.List();
-            switch(options.fileSystem && options.fileSystem.type) {
+            switch (options.fileSystem && options.fileSystem.type) {
                 case "irods-rest":
                     this.fsStrategy = new IrodsRestStrategy(options.fileSystem);
                     break;
@@ -136,14 +135,13 @@
             this.fileSystem = options.fileSystem;
             */
             this.dropzoneOpts.url = this.fsStrategy.getUrl();
-
         },
 
-        computeFileUploadUrl: function() {
-            var fs = this.fileSystem, url;
+        computeFileUploadUrl: function () {
+            var fs = this.fileSystem; var url;
 
             // set the upload URL based on the Distributed FileSystem adopted
-            switch(fs.type) {
+            switch (fs.type) {
                 case "irods-rest":
                     url = fs.restURL.protocol + '//' + fs.restURL.hostname +
                         ':' + fs.restURL.port + fs.restURL.path + '/fileContents' + fs.irodsHome;
@@ -154,13 +152,13 @@
             return url;
         },
 
-        render: function() {
+        render: function () {
             this.$el.html(this.template({
-                __:i18n,
+                __: i18n,
                 files: this.files
             }));
-            this.$fileModal = $(".modal-cnt");  // the modal dialog HTML element
-            this.dropzoneDiv = this.$(".dropzone")[0];       // the dropzone HTML element
+            this.$fileModal = $(".modal-cnt"); // the modal dialog HTML element
+            this.dropzoneDiv = this.$(".dropzone")[0]; // the dropzone HTML element
             return this;
         },
 
@@ -169,7 +167,7 @@
             var that = this;
             var idFile = ev.currentTarget.getAttribute('value');
             this.modal = new ModalDialog({
-                template: JST["views/templates/confirm-dialog-bootstrap.ejs"],
+                template: require("./../../templates/confirm-dialog-bootstrap.ejs"),
                 title: i18n('confirm-deletion'),
                 body: i18n('are-you-sure-delete-file'),
                 type: i18n("delete")
@@ -179,20 +177,18 @@
             $('.modal-header').addClass('alert-danger');
             $('#confirm').addClass('btn-danger');
 
-            this.modal.$("#confirm").on('click',function(){
+            this.modal.$("#confirm").on('click', function () {
                 that.modal.hide();
                 that.$fileModal.one('hidden.bs.modal', function (e) {
                     that.modal.remove();
                     that.deleteFileContent(idFile);
                 });
             });
-
         },
 
-        deleteFileContent: function(idFile) {
-
+        deleteFileContent: function (idFile) {
             var that = this;
-            var url = 'fileContent?file=' + idFile +'&id='+ this.datum.id;
+            var url = 'fileContent?file=' + idFile + '&id=' + this.datum.id;
             $.ajax({
                 url: url,
                 type: 'DELETE',
@@ -200,7 +196,7 @@
                     'Authorization': 'Bearer ' + xtens.session.get("accessToken")
                 },
                 contentType: 'application/json',
-                success: function() {
+                success: function () {
                     that.trigger("fileDeleted", idFile);
                     $.notify('File correctly deleted', {
                         type: 'success',
@@ -212,11 +208,10 @@
                         }
                     });
                 },
-                error: function(err) {
+                error: function (err) {
                     xtens.error(err);
                 }
             });
-
         },
 
         /**
@@ -226,27 +221,27 @@
          * @description initialize a Dropzone area creating the icons of files, if already uploaded/stored.
          *              Set event listeners and related functions
          */
-        initializeDropzone: function(files) {
+        initializeDropzone: function (files) {
             var that = this;
             console.log("DROPZONE opts: " + this.dropzoneOpts);
             this.dropzone = new Dropzone(this.dropzoneDiv, this.dropzoneOpts);
 
-            this.dropzone.on("processing", function(file) {
+            this.dropzone.on("processing", function (file) {
                 // this.options.url = _this.dropzoneOpts.url + "/" + landingRepo + "/" + file.name;
                 this.options.url = that.fsStrategy.onProcessing(file.name);
             });
 
-            this.dropzone.on("sending", function(file, xhr, formData) {
+            this.dropzone.on("sending", function (file, xhr, formData) {
                 // xhr.setRequestHeader("Authorization", "Basic " + btoa(_this.fileSystem.username + ":" + _this.fileSystem.password));
                 that.fsStrategy.onSending(file, xhr, formData);
             });
 
-            this.dropzone.on("success", function(file, xhr, formData) {
+            this.dropzone.on("success", function (file, xhr, formData) {
                 var name = file.name;
-                that.fileList.add(new FileManager.Model({name: name}));
+                that.fileList.add(new FileManager.Model({ name: name }));
             });
 
-            this.dropzone.on("queuecomplete", function(file, xhr, formData) {
+            this.dropzone.on("queuecomplete", function (file, xhr, formData) {
                 // var name = _.last(this.options.url.split("/"));
                 // that.fileList.add(new FileManager.Model({name: name}));
                 that.modal = new ModalDialog({
@@ -257,7 +252,7 @@
                 that.modal.show();
             });
 
-            this.dropzone.on("error", function(err) {
+            this.dropzone.on("error", function (err) {
                 xtens.error(err);
             });
         }
@@ -269,21 +264,20 @@
      * @name FileManager.Views.Download
      * @description TODO
      */
-    FileManager.Views.Download = Backbone.View.extend({
+    // FileManager.Views.Download = Backbone.View.extend({
 
-        tagName: 'div',
-        className: 'download',
+    //     tagName: 'div',
+    //     className: 'download',
 
-        initialize: function(options) {
-            $("#main").html(this.el);
-            this.template = JST["views/templates/DownloadFileIrods.ejs"];
-            this.render();
-        },
+    //     initialize: function (options) {
+    //         $("#main").html(this.el);
+    //         this.template = require("./../../templates/DownloadFileIrods.ejs");
+    //         this.render();
+    //     },
 
-        render: function() {
-            this.$el.html(this.template({__:i18n}));
-            return this;
-        }
-    });
-
-}(xtens,xtens.module("filemanager")));
+    //     render: function () {
+    //         this.$el.html(this.template({ __: i18n }));
+    //         return this;
+    //     }
+    // });
+}(xtens, require('./FileManager.js')));

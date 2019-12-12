@@ -50,4 +50,4 @@
         }
 
     };
-}(xtens, xtens.module("utils")));
+}(xtens, require('./Utils.js')));

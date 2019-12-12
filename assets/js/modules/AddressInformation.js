@@ -3,9 +3,9 @@
  * @description This file contains the Backbone classes for handling AddressInformation
  *              models, collections and views according to the MIABIS standard
  */
-(function(xtens, AddressInformation) {
-    // dependencies
-    var i18n = xtens.module("i18n").en;
+(function (xtens, AddressInformation) {
+    AddressInformation.Views = {};
+    var i18n = require('./i18n.js').en;
 
     // XTENS router alias
     var router = xtens.router;
@@ -21,21 +21,21 @@
 
     AddressInformation.Views.Edit = Backbone.View.extend({
 
-        initialize: function(options) {
-            this.template = JST["views/templates/addressinformation-edit.ejs"];
+        initialize: function (options) {
+            this.template = require("./../../templates/addressinformation-edit.ejs");
         },
 
         bindings: {
             '#office': 'office',
             '#phone': 'phone',
-            '#address':'address',
+            '#address': 'address',
             '#zip': 'zip',
             '#city': 'city',
             '#country': 'country'
         },
 
-        render: function() {
-            this.$el.html(this.template({__: i18n}));
+        render: function () {
+            this.$el.html(this.template({ __: i18n }));
             this.stickit();
             return this;
         }
@@ -43,7 +43,6 @@
     });
 
     AddressInformation.Views.List = Backbone.View.extend({
-        //TODO
+        // TODO
     });
-
-} (xtens, xtens.module("addressinformation")));
+}(xtens, require('./AddressInformation.js')));

@@ -2,10 +2,9 @@
  * @author Massimiliano Izzo
  *
  */
-(function(xtens, XtensBootstrap) {
-
-    var i18n = xtens.module("i18n").en;
-
+(function (xtens, XtensBootstrap) {
+    var i18n = require('./i18n.js').en;
+    XtensBootstrap.Views = {};
     /**
      * @class
      * @name XtensBootstrap.Views.ModalDialog
@@ -19,8 +18,8 @@
             'hidden.bs.modal div.modal': 'removeMe'
         },
 
-        initialize: function(options) {
-            options.template ? this.template = options.template: this.template = JST['views/templates/dialog-bootstrap.ejs'];
+        initialize: function (options) {
+            options.template ? this.template = options.template : this.template = require('./../../templates/dialog-bootstrap.ejs');
             this.title = options.title;
             this.body = options.body;
             this.type = options.type && options.type;
@@ -28,7 +27,7 @@
             this.type ? this.data.type = this.type : this.data.type = null;
         },
 
-        render: function() {
+        render: function () {
             this.$el.html(this.template(this.data));
             this.$modal = this.$("div.modal");
             if (this.title) {
@@ -43,15 +42,15 @@
             return this;
         },
 
-        show: function() {
+        show: function () {
             this.$modal.modal();
         },
 
-        hide: function() {
+        hide: function () {
             this.$modal.modal('hide');
         },
 
-        removeMe: function() {
+        removeMe: function () {
             console.log("removing XtensDialog");
             this.remove();
         }
@@ -62,18 +61,17 @@
      * @class
      * @name XtensBootstrap.Views.Popover
      */
-    XtensBootstrap.Views.Popover = Backbone.View.extend({
+    // XtensBootstrap.Views.Popover = Backbone.View.extend({
 
-        className: 'xtens-popover',
+    //     className: 'xtens-popover',
 
-        initialize: function(options) {
-            this.template = JST["views/templates/popover-bootstrap.ejs"];
-        },
+    //     initialize: function (options) {
+    //         this.template = require("./../../templates/popover-bootstrap.ejs");
+    //     },
 
-        render: function() {
-            return this;
-        }
+    //     render: function () {
+    //         return this;
+    //     }
 
-    });
-
-} (xtens, xtens.module("xtensbootstrap")));
+    // });
+}(xtens, require("./XtensBootstrap.js")));

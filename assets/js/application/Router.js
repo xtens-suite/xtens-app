@@ -4,23 +4,23 @@
  */
 
 (function (xtens) {
-    var DataType = xtens.module("datatype");
-    var Data = xtens.module("data");
-    var Subject = xtens.module("subject");
-    var Project = xtens.module("project");
-    var Sample = xtens.module("sample");
-    var Biobank = xtens.module("biobank");
-    var SuperType = xtens.module("supertype");
-    var Query = xtens.module("query");
-    var Operator = xtens.module("operator");
-    var DashBoard = xtens.module("dashboard");
-    var Daemon = xtens.module("daemon");
-    var Group = xtens.module("group");
-    var AdminAssociation = xtens.module("adminassociation");
-    var DataTypePrivileges = xtens.module("datatypeprivileges");
-    var FileManager = xtens.module("filemanager");
-    var Session = xtens.module("session");
-
+    var DataType = require('./../modules/DataType.js');
+    var Data = require("./../modules/Data.js");
+    var Subject = require("./../modules/Subject.js");
+    var Project = require("./../modules/Project.js");
+    var Sample = require("./../modules/Sample.js");
+    var Biobank = require("./../modules/Biobank.js");
+    var SuperType = require("./../modules/SuperType.js");
+    var Query = require("./../modules/Query.js");
+    var Operator = require("./../modules/Operator.js");
+    var DashBoard = require("./../modules/DashBoard.js");
+    var Daemon = require("./../modules/Daemon.js");
+    var Group = require("./../modules/Group.js");
+    var AdminAssociation = require("./../modules/AdminAssociation.js");
+    var DataTypePrivileges = require("./../modules/DataTypePrivileges.js");
+    var FileManager = require("./../modules/FileManager.js");
+    var Session = require("./../modules/Session.js");
+    var XtensConstants = require('./../modules/XtensConstants.js');
     /**
      * @method
      * @name parseQueryString
@@ -30,7 +30,7 @@
      * @returns{Object} an object containing key-value pairs
      *
      */
-    function parseQueryString (queryString) {
+    function parseQueryString(queryString) {
         var params = {};
         if (queryString) {
             _.each(
@@ -185,7 +185,7 @@
          */
         dataTypePrivilegesList: function (queryString) {
             var queryParams = parseQueryString(queryString);
-            var privilegesParams = { sort: 'id ASC', populate: ['dataType', 'group'], limit: xtens.module("xtensconstants").DefaultLimitPrivileges };
+            var privilegesParams = { sort: 'id ASC', populate: ['dataType', 'group'], limit: XtensConstants.DefaultLimitPrivileges };
             queryParams.groupId ? privilegesParams.group = queryParams.groupId : null;
             queryParams.dataTypeId ? privilegesParams.dataType = queryParams.dataTypeId : null;
             var that = this;
@@ -362,7 +362,7 @@
                     data: $.param({ populate: ['children', 'superType'] })
                 });
                 var $privilegesDeferred = privileges.fetch({
-                    data: $.param({ group: groupId, limit: xtens.module("xtensconstants").DefaultLimitPrivileges })
+                    data: $.param({ group: groupId, limit: XtensConstants.DefaultLimitPrivileges })
                 });
 
                 $.when($dataTypesDeferred, $privilegesDeferred).then(function (dataTypesRes, privilegesRes) {
@@ -378,7 +378,7 @@
                             parentSubject: queryParams.parentSubject,
                             project: activeProject ? activeProject.id : undefined,
                             populate: ['type'],
-                            limit: xtens.module("xtensconstants").DefaultLimit,
+                            limit: XtensConstants.DefaultLimit,
                             sort: 'created_at DESC'
                         },
                         contentType: 'application/json',
@@ -413,9 +413,9 @@
                 });
                 // this.loadView(new Data.Views.List());
             }
-            , function (jqxhr) {
-                xtens.error(jqxhr);
-            });
+                , function (jqxhr) {
+                    xtens.error(jqxhr);
+                });
         },
 
         /**
@@ -683,7 +683,7 @@
                 var groupsOperator = operatorRes && _.uniq(_.map(operatorRes[0].groups, 'id'));
                 var groupId = groupsActiveProject ? _.intersection(groupsActiveProject, groupsOperator) : groupsOperator;
                 var $privilegesDeferred = privileges.fetch({
-                    data: $.param({ group: groupId, limit: xtens.module("xtensconstants").DefaultLimitPrivileges })
+                    data: $.param({ group: groupId, limit: XtensConstants.DefaultLimitPrivileges })
                 });
                 var $dataTypesDeferred = dataTypes.fetch({
                     data: $.param({ populate: ['children', 'superType'] })
@@ -698,7 +698,7 @@
                         data: {
                             project: activeProject ? activeProject.id : undefined,
                             populate: ['type'],
-                            limit: xtens.module("xtensconstants").DefaultLimit,
+                            limit: XtensConstants.DefaultLimit,
                             sort: 'created_at DESC'
                         },
                         contentType: 'application/json',
@@ -857,7 +857,7 @@
                 var groupsOperator = operatorRes && _.uniq(_.map(operatorRes[0].groups, 'id'));
                 var groupId = groupsActiveProject ? _.intersection(groupsActiveProject, groupsOperator) : groupsOperator;
                 var $privilegesDeferred = privileges.fetch({
-                    data: $.param({ group: groupId, limit: xtens.module("xtensconstants").DefaultLimitPrivileges })
+                    data: $.param({ group: groupId, limit: XtensConstants.DefaultLimitPrivileges })
                 });
                 var $dataTypesDeferred = dataTypes.fetch({
                     data: $.param({ populate: ['children', 'superType'] })
@@ -876,7 +876,7 @@
                             parentSample: queryParams.parentSample,
                             project: activeProject ? activeProject.id : undefined,
                             populate: ['type', 'donor'],
-                            limit: xtens.module("xtensconstants").DefaultLimit,
+                            limit: XtensConstants.DefaultLimit,
                             sort: 'created_at DESC'
                         },
                         contentType: 'application/json',
@@ -1028,7 +1028,7 @@
             $.when($operatorDeferred).then(function (operatorRes) {
                 var groupId = operatorRes && _.uniq(_.map(operatorRes[0].groups, 'id'));
                 var $privilegesDeferred = privileges.fetch({
-                    data: $.param({ group: groupId, limit: xtens.module("xtensconstants").DefaultLimitPrivileges })
+                    data: $.param({ group: groupId, limit: XtensConstants.DefaultLimitPrivileges })
                 });
                 var $dataTypesDeferred = dataTypes.fetch({ data: $.param(criteria) });
                 var $biobanksDeferred = biobanks.fetch({ data: $.param({ project: idProject }) });
@@ -1052,7 +1052,7 @@
          * @description loads the view to upload data that is automatically extracted on the server-side
          */
         dedicatedDataManagement: function () {
-            var procedures = xtens.module("xtensconstants").Procedures;
+            var procedures = XtensConstants.Procedures;
             var privileges = new DataTypePrivileges.List();
             var operator = new Operator.List();
             var dataTypes = new DataType.List();

@@ -1,12 +1,11 @@
-(function(xtens, MetadataGroup) {
-
+(function (xtens, MetadataGroup) {
+    MetadataGroup.Views = {};
     // dependencies
-    var i18n = xtens.module("i18n").en;
-    var Constants = xtens.module("xtensconstants").Constants;
-    var MetadataComponent = xtens.module("metadatacomponent");
-    var MetadataField = xtens.module("metadatafield");
-    var MetadataLoop = xtens.module("metadataloop");
-
+    var i18n = require('./i18n.js').en;
+    var Constants = require('./XtensConstants.js').Constants;
+    var MetadataComponent = require('./MetadataComponent.js');
+    var MetadataField = require('./MetadataField.js');
+    var MetadataLoop = require('./MetadataLoop.js');
 
     // XTENS router alias
     var router = xtens.router;
@@ -33,8 +32,8 @@
             'input[name=name]': 'name'
         },
 
-        initialize: function() {
-            this.template = JST["views/templates/metadatagroup-edit.ejs"];
+        initialize: function () {
+            this.template = require("./../../templates/metadatagroup-edit.ejs");
             this.nestedViews = [];
         },
 
@@ -44,28 +43,28 @@
             'click .remove-me': 'closeMe'
         },
 
-        addMetadataFieldOnClick: function(ev) {
-            this.add({label: Constants.METADATA_FIELD});
+        addMetadataFieldOnClick: function (ev) {
+            this.add({ label: Constants.METADATA_FIELD });
             ev.stopPropagation();
         },
 
-        addMetadataLoopOnClick: function(ev) {
-            this.add({label: Constants.METADATA_LOOP});
+        addMetadataLoopOnClick: function (ev) {
+            this.add({ label: Constants.METADATA_LOOP });
             ev.stopPropagation();
         },
 
-        add: function(subcomponent) {
+        add: function (subcomponent) {
             var model, view;
             switch (subcomponent.label) {
                 case Constants.METADATA_FIELD:
                     model = new MetadataField.Model();
                     model.set(subcomponent);
-                    view = new MetadataField.Views.Edit({model: model});
+                    view = new MetadataField.Views.Edit({ model: model });
                     break;
                 case Constants.METADATA_LOOP:
                     model = new MetadataLoop.Model();
                     model.set(subcomponent);
-                    view = new MetadataLoop.Views.Edit({model: model});
+                    view = new MetadataLoop.Views.Edit({ model: model });
                     break;
             }
             this.$('.metadataGroup-body').append(view.render(subcomponent).el);
@@ -74,5 +73,4 @@
         }
 
     });
-
-} (xtens, xtens.module("metadatagroup")));
+}(xtens, require('./MetadataGroup.js')));

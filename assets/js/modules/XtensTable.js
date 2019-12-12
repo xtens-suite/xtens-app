@@ -23,22 +23,23 @@ function renderDatatablesDate(data, type) {
 }
 
 (function (xtens, XtensTable) {
-    var i18n = xtens.module("i18n").en;
-    var useFormattedNames = xtens.module("xtensconstants").useFormattedMetadataFieldNames;
-    var Classes = xtens.module("xtensconstants").DataTypeClasses;
-    var Privileges = xtens.module("xtensconstants").DataTypePrivilegeLevels;
-    var replaceUnderscoreAndCapitalize = xtens.module("utils").replaceUnderscoreAndCapitalize;
-    var DataType = xtens.module("datatype");
-    var Data = xtens.module("data");
-    var SuperType = xtens.module("supertype");
-    var Sample = xtens.module("sample");
-    var DataFile = xtens.module("datafile");
-    var Operator = xtens.module("operator");
+    XtensTable.Views = {};
+    var i18n = require('./i18n.js').en;
+    var useFormattedNames = require('./XtensConstants.js').useFormattedMetadataFieldNames;
+    var Classes = require('./XtensConstants.js').DataTypeClasses;
+    var Privileges = require('./XtensConstants.js').DataTypePrivilegeLevels;
+    // var replaceUnderscoreAndCapitalize = require('./Utils.js').replaceUnderscoreAndCapitalize;
+    var DataType = require('./DataType.js');
+    var Data = require('./Data.js');
+    var SuperType = require('./SuperType.js');
+    var Sample = require('./Sample.js');
+    var DataFile = require('./DataFile.js');
+    var Operator = require('./Operator.js');
     var VIEW_OVERVIEW = Privileges.VIEW_OVERVIEW;
-    var VIEW_DETAILS = Privileges.VIEW_DETAILS;
-    var EDIT = Privileges.EDIT;
-    var DOWNLOAD = Privileges.DOWNLOAD;
-    var ModalDialog = xtens.module("xtensbootstrap").Views.ModalDialog;
+    // var VIEW_DETAILS = Privileges.VIEW_DETAILS;
+    // var EDIT = Privileges.EDIT;
+    // var DOWNLOAD = Privileges.DOWNLOAD;
+    var ModalDialog = require('./XtensBootstrap.js').Views.ModalDialog;
 
     /**
      * @class
@@ -191,7 +192,7 @@ function renderDatatablesDate(data, type) {
                     that.modal.hide();
                 }
                 var modal = new ModalDialog({
-                    template: JST["views/templates/address-modal.ejs"],
+                    template: require("./../../templates/address-modal.ejs"),
                     data: { __: i18n, project: project, data: data, owner: ownerRes, address: ownerRes.addressInformation }
                 });
 
@@ -781,7 +782,7 @@ function renderDatatablesDate(data, type) {
          * @description add the proper links to each row in the table given the dataType Model
          */
         addLinks: function (options) {
-            var btnGroupTemplate = JST["views/templates/xtenstable-buttongroup.ejs"];
+            var btnGroupTemplate = require("./../../templates/xtenstable-buttongroup.ejs");
             var that = this;
             var privilege = this.multiProject || this.isLeafSearch ? _.find(options.dataTypePrivileges, { 'dataType': this.data[0].type }) : options.dataTypePrivileges;
             _.each(!this.isLeafSearch ? this.data : this.plainData, function (datum) {
@@ -992,4 +993,4 @@ function renderDatatablesDate(data, type) {
         }
 
     });
-}(xtens, xtens.module("xtenstable")));
+}(xtens, require('./XtensTable.js')));

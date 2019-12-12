@@ -1,0 +1,6 @@
+<select multiple size="8" name="unit" data-live-search="true" data-selected-text-format="count > 2"
+    data-actions-box="true" title="<%=__('select-unit')%>" class="selectpicker">
+    <% _.each(data, function(d) {%>
+    <option value='<%= d.id %>'><%= d.text %></option>
+    <%})%>
+</select>

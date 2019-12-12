@@ -1,13 +1,14 @@
 (function (xtens, Operator) {
     // dependencies
-    var i18n = xtens.module('i18n').en;
-    var router = xtens.router;
-    // var Group = xtens.module('group');
-    var AddressInformation = xtens.module("addressinformation");
-    // var GroupsOperator =xtens.module('groupsOperator');
-    // var DashBoard =xtens.module('dashboard');
-    var sexOptions = xtens.module('xtensconstants').SexOptions;
-    var ModalDialog = xtens.module('xtensbootstrap').Views.ModalDialog;
+    Operator.Views = {};
+    var i18n = require('./i18n').en;
+    // var router = xtens.router;
+    // var Group = require('./group');
+    var AddressInformation = require('./AddressInformation.js');
+    // var GroupsOperator =require('./GroupsOperator.js');
+    // var DashBoard =require('./Dashboard.js');
+    var sexOptions = require('./XtensConstants.js').SexOptions;
+    var ModalDialog = require('./XtensBootstrap.js').Views.ModalDialog;
 
     var parsleyOpts = {
         priorityEnabled: false,
@@ -43,7 +44,7 @@
 
         initialize: function (options) {
             $('#main').html(this.el);
-            this.template = JST['views/templates/operator-edit.ejs'];
+            this.template = require('./../../templates/operator-edit.ejs');
             this.render();
 
             this.personalAddressView = new AddressInformation.Views.Edit({
@@ -177,7 +178,7 @@
             }
 
             var modal = new ModalDialog({
-                template: JST["views/templates/confirm-dialog-bootstrap.ejs"],
+                template: require("./../../templates/confirm-dialog-bootstrap.ejs"),
                 title: i18n('confirm-deletion'),
                 body: i18n('operator-will-be-permanently-deleted-are-you-sure'),
                 type: i18n("delete")
@@ -193,7 +194,7 @@
                     that.model.destroy({
                         success: function (model, res) {
                             $('.waiting-modal').modal('hide');
-                            modal.template = JST["views/templates/dialog-bootstrap.ejs"];
+                            modal.template = require("./../../templates/dialog-bootstrap.ejs");
                             modal.title = i18n('ok');
                             modal.body = i18n('operator-deleted');
                             that.$modal.append(modal.render().el);
@@ -224,7 +225,7 @@
             var username = this.model.get('login');
 
             var modal = new ModalDialog({
-                template: JST["views/templates/confirm-dialog-bootstrap.ejs"],
+                template: require("./../../templates/confirm-dialog-bootstrap.ejs"),
                 title: i18n('confirm-reset'),
                 body: i18n('are-you-sure-reset-password')
             });
@@ -257,7 +258,7 @@
                         },
                         success: function (model, res) {
                             $('.waiting-modal').modal('hide');
-                            modal.template = JST["views/templates/dialog-bootstrap.ejs"];
+                            modal.template = require("./../../templates/dialog-bootstrap.ejs");
                             modal.title = i18n('ok');
                             modal.body = i18n('password-reset') + model;
                             that.$modal.append(modal.render().el);
@@ -284,7 +285,7 @@
 
         initialize: function (options) {
             $('#main').html(this.el);
-            this.template = JST['views/templates/operator-list.ejs'];
+            this.template = require('./../../templates/operator-list.ejs');
             this.operators = options.operators;
             this.render();
         },
@@ -314,7 +315,7 @@
 
         initialize: function () {
             $('#main').html(this.el);
-            this.template = JST['views/templates/login.ejs'];
+            this.template = require('./../../templates/login.ejs');
             this.render();
         },
 
@@ -351,11 +352,11 @@
                             if ((xtens.session.get("isAdmin") && _.find(xtens.session.get('adminProjects'), function (p) { return p === idProject; }))) {
                                 that.landingUrl = 'dashboard/' + xtens.session.get('activeProject');
                             }
-                            router.navigate(that.landingUrl, { trigger: true });
+                            xtens.router.navigate(that.landingUrl, { trigger: true });
                         } else {
                             var modal = new ModalDialog({
                                 title: i18n('project-selection'),
-                                template: JST["views/templates/confirm-project-selection.ejs"]
+                                template: require("./../../templates/confirm-project-selection.ejs")
                             });
                             that.$modal.append(modal.render().el);
                             $('.selectpicker').selectpicker();
@@ -377,7 +378,7 @@
                                         if ((xtens.session.get("isAdmin") && _.find(xtens.session.get('adminProjects'), function (p) { return p === idProject; }))) {
                                             that.landingUrl = 'dashboard/' + xtens.session.get('activeProject');
                                         }
-                                        router.navigate(that.landingUrl, { trigger: true });
+                                        xtens.router.navigate(that.landingUrl, { trigger: true });
                                     });
                                 });
                             });
@@ -407,25 +408,11 @@
 
         initialize: function () {
             $('#main').html(this.el);
-            this.template = JST['views/templates/homepage.ejs'];
+            this.template = require('./../../templates/homepage.ejs');
             this.render();
         },
 
-        render: function (options) {
-            /*
-            var self = this;
-            var operators= new Operator.List();
-            operators.fetch({
-                success: function(operators) {
-                    self.$el.html(self.template({__: i18n, operators: operators.models}));
-                    return self;
-                },
-                error: function() {
-                    self.$el.html(self.template({__: i18n}));
-                    return self;
-                }
-            });
-            */
+        render: function () {
             this.$el.html(this.template({ __: i18n, login: xtens.session.get('login') }));
             return this;
         }
@@ -438,10 +425,10 @@
             'submit .edit-password-form': 'updatePassword'
         },
 
-        initialize: function (options) {
+        initialize: function () {
             _.bindAll(this, 'saveOnSuccess');
             $('#main').html(this.el);
-            this.template = JST['views/templates/update-password.ejs'];
+            this.template = require('./../../templates/update-password.ejs');
             this.pswdExpired = xtens.session.get("expiredPassword");
             this.render();
             this.$modal = $('.modal-cnt');
@@ -509,4 +496,4 @@
         }
 
     });
-}(xtens, xtens.module('operator')));
+}(xtens, require('./Operator.js')));

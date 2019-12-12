@@ -71,4 +71,4 @@
     };
 
     XtensConstants.useFormattedMetadataFieldNames = true;
-}(xtens, xtens.module("xtensconstants")));
+}(xtens, require('./XtensConstants.js')));

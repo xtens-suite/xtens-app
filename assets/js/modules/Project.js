@@ -1,17 +1,15 @@
-(function(xtens, Project) {
+(function (xtens, Project) {
+    Project.Views = {};
+    var i18n = require('./i18n.js').en;
 
-    var i18n = xtens.module("i18n").en;
-    // var router = xtens.router;
-    // var Datatype = xtens.module("datatype");
-    // var Operator = xtens.module("operator");
-    var ModalDialog = xtens.module("xtensbootstrap").Views.ModalDialog;
+    var ModalDialog = require('./XtensBootstrap.js').Views.ModalDialog;
 
     var parsleyOpts = {
         priorityEnabled: false,
-      // excluded: "select[name='fieldUnit']",
+        // excluded: "select[name='fieldUnit']",
         successClass: "has-success",
         errorClass: "has-error",
-        classHandler: function(el) {
+        classHandler: function (el) {
             return el.$element.parent();
         },
         errorsWrapper: "<span class='help-block'></span>",
@@ -32,18 +30,17 @@
         tagName: 'div',
         className: 'project',
 
-        initialize: function(options) {
+        initialize: function (options) {
             $("#main").html(this.el);
-            this.template = JST["views/templates/project-list.ejs"];
+            this.template = require("./../../templates/project-list.ejs");
             this.projects = options.projects;
             this.render();
         },
 
-        render: function() {
-
-            this.$el.html(this.template({__: i18n, projects: this.projects.models}));
+        render: function () {
+            this.$el.html(this.template({ __: i18n, projects: this.projects.models }));
             $('.table').DataTable({
-                scrollY:        '50vh',
+                scrollY: '50vh',
                 scrollCollapse: true,
                 "searching": true
             });
@@ -62,12 +59,10 @@
         tagName: 'div',
         className: 'project',
 
-        initialize: function(options) {
-
+        initialize: function (options) {
             if (options.project) {
                 this.model = new Project.Model(options.project);
-            }
-            else {
+            } else {
                 this.model = new Project.Model();
             }
             // this.noAssDt = options.dataTypes;
@@ -77,19 +72,18 @@
             this.biobanks = this.model.get('biobanks') ? options.biobanks.concat(this.model.get('biobanks')) : options.biobanks;
 
             $("#main").html(this.el);
-            this.template = JST["views/templates/project-edit.ejs"];
+            this.template = require("./../../templates/project-edit.ejs");
             this.render();
         },
 
         bindings: {
             '#name': 'name',
 
-            '#description': 'description'
-            ,
+            '#description': 'description',
             '#biobanks': {
                 observe: 'biobanks',
-                initialize: function($el) {
-                    $el.select2({placeholder: i18n("please-select") });
+                initialize: function ($el) {
+                    $el.select2({ placeholder: i18n("please-select") });
                 },
                 selectOptions: {
                     collection: 'this.biobanks',
@@ -100,23 +94,21 @@
                         value: null
                     }
                 },
-                getVal: function($el, ev, options) {
-                    return $el.val() && $el.val().map(function(value) {
+                getVal: function ($el) {
+                    return $el.val() && $el.val().map(function (value) {
                         return parseInt(value);
                     });
                 },
-                onGet: function(vals) {
-                    return (vals && vals.map(function(val) {return val.id; }));
+                onGet: function (vals) {
+                    return (vals && vals.map(function (val) { return val.id; }));
                 }
             }
 
         },
 
-
-
-        render: function()  {
+        render: function () {
             var that = this;
-            this.$el.html(this.template({__:i18n, project: this.model, assDt: this.assDt, noAssGr: this.noAssGr, assGr: this.assGr}));
+            this.$el.html(this.template({ __: i18n, project: this.model, assDt: this.assDt, noAssGr: this.noAssGr, assGr: this.assGr }));
             this.$modal = $(".modal-cnt");
             this.$form = this.$('form');
             this.$form.parsley(parsleyOpts);
@@ -134,31 +126,30 @@
                 animation: 300,
 
                 // Element is dropped into the list from another list
-                onAdd: function (/**Event*/evt) {
-                    var itemEl = evt.item;  // dragged HTMLElement
-                    evt.from;  // previous list
+                onAdd: function (/** Event */evt) {
+                    var itemEl = evt.item; // dragged HTMLElement
+                    evt.from; // previous list
                     // + indexes from onEnd
                     that.groupsToBeSaved.push(itemEl.value);
                 },
                 // Element is removed from the list into another list
-                onRemove: function (/**Event*/evt) {
-                  // same properties as onUpdate
+                onRemove: function (/** Event */evt) {
+                    // same properties as onUpdate
                     var itemEl = evt.item;
                     var index = _.indexOf(that.groupsToBeSaved, itemEl.value);
-                    that.groupsToBeSaved.splice(index,1);
+                    that.groupsToBeSaved.splice(index, 1);
                 }
             });
             this.stickit();
             return this;
         },
 
-
-        saveProject: function(ev) {
+        saveProject: function () {
             var that = this;
-            this.model.set('groups',this.groupsToBeSaved);
+            this.model.set('groups', this.groupsToBeSaved);
             this.model.unset('dataTypes');
             this.model.save(null, {
-                success: function(project) {
+                success: function () {
                     if (this.modal) {
                         this.modal.hide();
                     }
@@ -170,10 +161,10 @@
                     $('.modal-header').addClass('alert-success');
                     modal.show();
 
-                    setTimeout(function(){ modal.hide(); }, 1200);
-                    $('.modal-cnt').one('hidden.bs.modal', function (e) {
+                    setTimeout(function () { modal.hide(); }, 1200);
+                    $('.modal-cnt').one('hidden.bs.modal', function () {
                         modal.remove();
-                        xtens.router.navigate('projects', {trigger: true});
+                        xtens.router.navigate('projects', { trigger: true });
                     });
                 },
                 error: xtens.error
@@ -190,7 +181,7 @@
             }
 
             var modal = new ModalDialog({
-                template: JST["views/templates/confirm-dialog-bootstrap.ejs"],
+                template: require("./../../templates/confirm-dialog-bootstrap.ejs"),
                 title: i18n('confirm-deletion'),
                 body: i18n('project-will-be-permanently-deleted-are-you-sure'),
                 type: i18n("delete")
@@ -199,29 +190,29 @@
             this.$modal.append(modal.render().el);
             modal.show();
 
-            $('#confirm').click( function (e) {
+            $('#confirm').click(function () {
                 modal.hide();
                 $('.modal-backdrop').remove();
-                that.$modal.one('hidden.bs.modal', function (e) {
+                that.$modal.one('hidden.bs.modal', function () {
                     $('.waiting-modal').modal('show');
-                    var targetRoute = $(ev.currentTarget).data('targetRoute') || 'data';
+                    // var targetRoute = $(ev.currentTarget).data('targetRoute') || 'data';
 
                     that.model.destroy({
-                        success: function(model, res) {
+                        success: function () {
                             $('.waiting-modal').modal('hide');
-                            modal.template= JST["views/templates/dialog-bootstrap.ejs"];
-                            modal.title= i18n('ok');
-                            modal.body= i18n('project-deleted');
+                            modal.template = require("./../../templates/dialog-bootstrap.ejs");
+                            modal.title = i18n('ok');
+                            modal.body = i18n('project-deleted');
                             that.$modal.append(modal.render().el);
                             $('.modal-header').addClass('alert-success');
                             modal.show();
-                            setTimeout(function(){ modal.hide(); }, 1200);
-                            that.$modal.one('hidden.bs.modal', function (e) {
+                            setTimeout(function () { modal.hide(); }, 1200);
+                            that.$modal.one('hidden.bs.modal', function () {
                                 modal.remove();
-                                xtens.router.navigate('projects', {trigger: true});
+                                xtens.router.navigate('projects', { trigger: true });
                             });
                         },
-                        error: function(model, res) {
+                        error: function (model, res) {
                             xtens.error(res);
                         }
                     });
@@ -230,6 +221,4 @@
             });
         }
     });
-
-
-} (xtens, xtens.module("project")));
+}(xtens, require('./Project.js')));

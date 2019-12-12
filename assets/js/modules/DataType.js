@@ -5,13 +5,14 @@
  */
 (function (xtens, DataType) {
     // dependencies
-    var i18n = xtens.module("i18n").en;
-    var Constants = xtens.module("xtensconstants").Constants;
-    var DataTypeClasses = xtens.module("xtensconstants").DataTypeClasses;
-    var MetadataComponent = xtens.module("metadatacomponent");
-    var MetadataGroup = xtens.module("metadatagroup");
-    var ModalDialog = xtens.module("xtensbootstrap").Views.ModalDialog;
-    var SuperType = xtens.module("supertype");
+    DataType.Views = {};
+    var i18n = require('./i18n.js').en;
+    var Constants = require('./XtensConstants.js').Constants;
+    var DataTypeClasses = require('./XtensConstants.js').DataTypeClasses;
+    var MetadataComponent = require('./MetadataComponent.js');
+    var MetadataGroup = require('./MetadataGroup.js');
+    var ModalDialog = require('./XtensBootstrap.js').Views.ModalDialog;
+    var SuperType = require('./SuperType.js');
 
     // XTENS router alias
     var router = xtens.router;
@@ -68,7 +69,7 @@
         initialize: function (options) {
             // _.bindAll(this, 'fetchSuccess');
             $("#main").html(this.el);
-            this.template = JST["views/templates/datatype-edit.ejs"];
+            this.template = require("./../../templates/datatype-edit.ejs");
             this.nestedViews = [];
             this.idDataType = parseInt(options.params.id) ? parseInt(options.params.id) : parseInt(options.params.duplicate);
             this.duplicate = options.params.duplicate ? options.params.duplicate : false;
@@ -290,7 +291,7 @@
                                     that.modal.hide();
                                 }
                                 var modal = new ModalDialog({
-                                    template: JST["views/templates/confirm-dialog-bootstrap.ejs"],
+                                    template: require("./../../templates/confirm-dialog-bootstrap.ejs"),
                                     title: i18n('confirm-edit'),
                                     body: i18n('edit-data-type-schema-warning'),
                                     type: i18n("edit")
@@ -405,9 +406,9 @@
                         e.preventDefault();
                         modal.remove();
                         if (xtens.session.get("isWheel") || !that.isCreation) {
-                            router.navigate('datatypes', { trigger: true });
+                            xtens.router.navigate('datatypes', { trigger: true });
                         } else {
-                            router.navigate('datatypeprivileges/new/0?dataTypeId=' + dataType.get("id"), { trigger: true });
+                            xtens.router.navigate('datatypeprivileges/new/0?dataTypeId=' + dataType.get("id"), { trigger: true });
                         }
                     });
                 },
@@ -426,7 +427,7 @@
             }
 
             var modal = new ModalDialog({
-                template: JST["views/templates/confirm-dialog-bootstrap.ejs"],
+                template: require("./../../templates/confirm-dialog-bootstrap.ejs"),
                 title: i18n('confirm-deletion'),
                 body: i18n('datatype-will-be-permanently-deleted-are-you-sure'),
                 type: i18n("delete")
@@ -441,7 +442,7 @@
                 that.model.destroy({
                     success: function () {
                         that.$modal.one('hidden.bs.modal', function () {
-                            modal.template = JST["views/templates/dialog-bootstrap.ejs"];
+                            modal.template = require("./../../templates/dialog-bootstrap.ejs");
                             modal.title = i18n('ok');
                             modal.body = i18n('datatype-deleted');
                             that.$modal.append(modal.render().el);
@@ -493,7 +494,7 @@
             $("#main").html(this.el);
             this.dataTypes = options.dataTypes;
             this.projectSource = xtens.session.get('activeProject') != 'all' ? _.find(xtens.session.get('projects'), function (p) { return p.name === xtens.session.get('activeProject'); }).id : null;
-            this.template = JST["views/templates/datatype-list.ejs"];
+            this.template = require("./../../templates/datatype-list.ejs");
             this.render(options);
         },
 
@@ -540,7 +541,7 @@
             // create and render the modal
             var modal = new ModalDialog({
                 title: i18n('duplicate-data-type'),
-                template: JST["views/templates/datatype-duplicate.ejs"],
+                template: require("./../../templates/datatype-duplicate.ejs"),
                 data: { __: i18n, dataTypes: this.dataTypes.toJSON(), projectSource: this.projectSource }
             });
             this.$modal.append(modal.render().el);
@@ -592,7 +593,7 @@
                             modal.hide();
                             that.$modal.one('hidden.bs.modal', function (e) {
                                 modal.remove();
-                                router.navigate('#/datatypes/new?duplicate=' + dataTypeSelected + '&projectDest=' + projectDest, { trigger: true });
+                                xtens.router.navigate('#/datatypes/new?duplicate=' + dataTypeSelected + '&projectDest=' + projectDest, { trigger: true });
                             });
                         });
                     });
@@ -613,7 +614,7 @@
 
         initialize: function () {
             $('#main').html(this.el);
-            this.template = JST["views/templates/datatype-graph.ejs"];
+            this.template = require("./../../templates/datatype-graph.ejs");
             this.render();
         },
 
@@ -664,7 +665,7 @@
                     var data = graph.links;
 
                     var maxDepth;
-                    function findMaxDepth (arr) {
+                    function findMaxDepth(arr) {
                         var temp = 0;
                         for (var i = 0, len = arr.length; i < len; i++) {
                             if (arr[i].depth > temp) {
@@ -766,12 +767,12 @@
                             d.x = ((c[d.depth] / countDepth[d.depth]) * width - (1 / countDepth[d.depth]) * width / 2);
                         }
                     });
-                    function getRandomInt (min, max) {
+                    function getRandomInt(min, max) {
                         min = Math.ceil(min);
                         max = Math.floor(max);
                         return Math.floor(Math.random() * (max - min)) + min; // Il max è escluso e il min è incluso
                     }
-                    function getRandomColor () {
+                    function getRandomColor() {
                         var letters = 'ABCDEF'.split('');
                         var color = '#';
                         color += letters[Math.round(Math.random() * 5)];
@@ -878,7 +879,7 @@
                         });
 
                     $('.loader-gif').css("display", "none");
-                    function nodeByName (name) {
+                    function nodeByName(name) {
                         return nodesByName[name] || (nodesByName[name] = { name: name });
                     }
                 }, /* success */
@@ -888,4 +889,4 @@
             });
         }
     });
-}(xtens, xtens.module("datatype")));
+}(xtens, require('./DataType.js')));

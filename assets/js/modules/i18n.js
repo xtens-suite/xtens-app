@@ -434,4 +434,4 @@
     i18n.en = function (key) {
         return en[key];
     };
-}(xtens, xtens.module("i18n")));
+}(xtens, require('./i18n.js')));

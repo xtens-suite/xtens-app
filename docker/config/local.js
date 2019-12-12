@@ -1,86 +1,86 @@
 module.exports = {
-        hookTimeout: 30000,
-        
-        port: process.env.PORT || 1337,
+    hookTimeout: 30000,
 
-        environment: process.env.NODE_ENV || 'development',
+    port: process.env.PORT || 1337,
 
-        connections: {
+    environment: process.env.NODE_ENV || 'development',
 
-            'default': 'postgresql',            //your default database connection
+    connections: {
 
-            postgresql: {                       //your database connection
+        'default': 'postgresql', // your default database connection
 
-                adapter: 'sails-postgresql',    //sails adapter
-                host: 'postgres',              //ip host
-                port: '5432',                   //db port (postgresql default port 5432)
-                user: 'xtenspg',                   //db user
-                password: 'xtenspg',           //db user password
-                database: 'xtensdb',      //db name
-                schema: true
-            },
-            dblog: {
+        postgresql: { // your database connection
 
-                adapter: 'sails-postgresql',
-                host: 'postgres',
-                port: 5432,
-                user: 'xtenspg',
-                password: 'xtenspg',
-                database: 'xtens_log',
-                pool: true,
-                ssl: false,
-                schema: true,
-                timezone: 'CET',
-                tableName: 'winston_log'
-                // identity: 'pgigg'
-            }
+            adapter: 'sails-postgresql', // sails adapter
+            host: 'postgres', // ip host
+            port: '5432', // db port (postgresql default port 5432)
+            user: 'xtenspg', // db user
+            password: 'xtenspg', // db user password
+            database: 'xtensdb', // db name
+            schema: true
         },
+        dblog: {
 
-        fileSystemConnections: {
+            adapter: 'sails-postgresql',
+            host: 'postgres',
+            port: 5432,
+            user: 'xtenspg',
+            password: 'xtenspg',
+            database: 'xtens_log',
+            pool: true,
+            ssl: false,
+            schema: true,
+            timezone: 'CET',
+            tableName: 'winston_log'
+            // identity: 'pgigg'
+        }
+    },
 
-            'default': 'localConnection',
+    fileSystemConnections: {
 
-            localConnection: {
-                type: 'local',             
-                path: '/app/xtens-filesystem/',   // your fs home path
-                repoDirectory: 'xtens-repo',   // default Directory name
-                landingDirectory: 'landing',   // landing directory name
-            }
-        },
+        'default': 'localConnection',
 
-        defaultGroups: [                        //array of default groups
-            {
-                name: "admin",
-                privilegeLevel: "wheel",
-                canAccessPersonalData: true,
-                canAccessSensitiveData: true
-            }, {
-                name: "public",
-                privilegeLevel: "standard",
-                canAccessPersonalData: false,
-                canAccessSensitiveData: false
-            }
-        ],
+        localConnection: {
+            type: 'local',
+            path: '/assets/xtens-filesystem/', // your fs home path
+            repoDirectory: 'xtens-repo', // default Directory name
+            landingDirectory: 'landing' // landing directory name
+        }
+    },
 
-        defaultOperators: [                      //array of default users
-            {
-                firstName: 'default administrator',
-                lastName: 'sysadmin',
-                birthDate: '1970-01-01',
-                sex: 'N.A.',
-                email: 'admin@xtens.com',
-                login: 'defaultAdmin',
-                password: 'Admin1234!',
-                groups: [1]                      //operator "defaultAdmin" is associated with group "admin"
-            }, {
-                firstName: 'default user',
-                lastName: 'demo user',
-                birthDate: '1970-01-01',
-                sex: 'N.A.',
-                email: 'demouser@xtens.com',
-                login: 'demouser',
-                password: 'Demouser1234!',
-                groups: [2]                     //operator "demouser" is associated with group "public"
-            }
-        ]
+    defaultGroups: [ // array of default groups
+        {
+            name: "admin",
+            privilegeLevel: "wheel",
+            canAccessPersonalData: true,
+            canAccessSensitiveData: true
+        }, {
+            name: "public",
+            privilegeLevel: "standard",
+            canAccessPersonalData: false,
+            canAccessSensitiveData: false
+        }
+    ],
+
+    defaultOperators: [ // array of default users
+        {
+            firstName: 'default administrator',
+            lastName: 'sysadmin',
+            birthDate: '1970-01-01',
+            sex: 'N.A.',
+            email: 'admin@xtens.com',
+            login: 'defaultAdmin',
+            password: 'Admin1234!',
+            groups: [1] // operator "defaultAdmin" is associated with group "admin"
+        }, {
+            firstName: 'default user',
+            lastName: 'demo user',
+            birthDate: '1970-01-01',
+            sex: 'N.A.',
+            email: 'demouser@xtens.com',
+            login: 'demouser',
+            password: 'Demouser1234!',
+            groups: [2] // operator "demouser" is associated with group "public"
+        }
+    ]
 };

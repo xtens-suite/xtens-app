@@ -2,8 +2,36 @@
  *  Backbone module according to the pattern detailed here:
  *  http://bocoup.com/weblog/organizing-your-backbone-js-application-with-modules/
  */
+global.jQuery = require('jquery');
+global.$ = require('jquery');
+require('bootstrap');
+require('lodash');
+require('backbone');
+require('backbone.stickit');
+require('select2');
+require('parsleyjs');
+require('moment');
+require('pikaday');
+require('dropzone');
+require('datatables.net');
+require('datatables.net-plugins/integration/bootstrap/1/dataTables.bootstrap.js');
+require('datatables.net-buttons');
+// require('datatables.net-buttons');
+require('datatables.net-fixedcolumns');
+// require('datatables.net-buttons');
+// require('datatables.net-buttons/js/buttons.html5.js');
+require('jszip');
+global.d3 = require('d3');
+global.d3.tip = require('d3-tip').default;
+require('sortablejs');
+require('jsbarcode');
+require('bootstrap-select');
+require('bootstrap-notify');
+require('context-menu');
 
-var xtens = {
+// require('./js/modules/MetadataLoop.js');
+
+global.xtens = {
     // create this closure to contain the cached modules
     module: (function () {
         // Internal module cache.
@@ -18,7 +46,8 @@ var xtens = {
             }
 
             // Create a module and save it under this name
-            return modules[name] = { Views: {} };
+            modules[name] = { Views: {} };
+            return modules[name];
         };
     }()),
 
@@ -64,13 +93,45 @@ var xtens = {
 
 };
 
+// require('./js/modules/i18n.js');
+// require('./js/modules/XtensBootstrap.js');
+require('./js/application/utils.js');
+require('./js/application/Router.js');
+// require('./js/modules/XtensConstants.js');
+// require('./js/modules/Utils.js');
+// require('./js/modules/Session.js');
+// require('./js/modules/DataTypePrivileges.js');
+// require('./js/modules/AddressInformation.js');
+// require('./js/modules/Daemon.js');
+// require('./js/modules/MetadataComponent.js');
+// require('./js/modules/MetadataField.js');
+// require('./js/modules/MetadataLoop.js');
+// require('./js/modules/MetadataGroup.js');
+// require('./js/modules/DataType.js');
+// require('./js/modules/XtensTable.js');
+// require('./js/modules/Operator.js');
+// require('./js/modules/Group.js');
+// require('./js/modules/PersonalDetails.js');
+// require('./js/modules/FileManager.js');
+// require('./js/modules/ContactInformation.js');
+// require('./js/modules/Biobank.js');
+// require('./js/modules/Data.js');
+// require('./js/modules/DataFile.js');
+// require('./js/modules/Subject.js');
+// require('./js/modules/Project.js');
+// require('./js/modules/Sample.js');
+// require('./js/modules/AdminAssociation.js');
+// require('./js/modules/SuperType.js');
+// require('./js/modules/Query.js');
+// require('./js/modules/DashBoard.js');
+
 // Using the jQuery ready event is excellent for ensuring all
 // // code has been downloaded and evaluated and is ready to be
 // // initialized. Treat this as your single entry point into the
 // // application
 jQuery(function ($) {
     // create Session object
-    var Session = xtens.module("session"); var userSession;
+    var Session = require('./js/modules/Session.js'); var userSession;
     xtens.session = new Session.Model();
 
     // retrieve user session info from sessionStorage on page reload (if available)

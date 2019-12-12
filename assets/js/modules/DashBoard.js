@@ -7,12 +7,13 @@
  */
 (function (xtens, DashBoard) {
     // dependencies
-    var i18n = xtens.module("i18n").en;
-    // var Constants = xtens.module("xtensconstants").Constants;
-    // var DataTypeClasses = xtens.module("xtensconstants").DataTypeClasses;
-    // var MetadataComponent = xtens.module("metadatacomponent");
-    // var MetadataGroup = xtens.module("metadatagroup");
-    // var ModalDialog = xtens.module("xtensbootstrap").Views.ModalDialog;
+    DashBoard.Views = {};
+    var i18n = require('./i18n.js').en;
+    // var Constants = require('./XtensConstants.js').Constants;
+    // var DataTypeClasses = require('./XtensConstants.js').DataTypeClasses;
+    // var MetadataComponent = require('./MetadataComponent.js');
+    // var MetadataGroup = require('./MetadataGroup.js');
+    // var ModalDialog = require('./XtensBootstrap.js').Views.ModalDialog;
 
     // XTENS router alias
     // var router = xtens.router;
@@ -59,7 +60,7 @@
                 "Subject": "#0066AA", // green-yellow #baff29
                 "Sample": "#0F4C00" // "#1E3F20" //"#44633F"
             };
-            this.template = JST["views/templates/dashboard-home.ejs"];
+            this.template = require("./../../templates/dashboard-home.ejs");
             this.render();
         },
 
@@ -157,7 +158,7 @@
             this.model = options.model;
             this.colors = options.colors;
             // $('.dashboard-cnt').append(this.el);
-            this.template = JST["views/templates/dashboard-graph.ejs"];
+            this.template = require("./../../templates/dashboard-graph.ejs");
             // this.render();
         },
 
@@ -218,7 +219,7 @@
             svg.call(tip);
 
             var handlemouseover = function (path, d) {
-                tip.show(d);
+                tip.show(d, path);
                 d3.select(path).attr('d', function (es) {
                     return d3.arc()
                         .innerRadius(0)
@@ -339,7 +340,7 @@
             this.setDateFieldsCurrentDataType();
 
             this.selectedField = "created_at";
-            this.template = JST["views/templates/dashboard-bargraph.ejs"];
+            this.template = require("./../../templates/dashboard-bargraph.ejs");
         },
 
         setDateFieldsCurrentDataType: function () {
@@ -580,4 +581,4 @@
                 .on('mouseout', tipPoint.hide);
         }
     });
-}(xtens, xtens.module("dashboard")));
+}(xtens, require('./DashBoard.js')));

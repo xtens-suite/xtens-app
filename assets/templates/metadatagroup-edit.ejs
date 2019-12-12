@@ -1,0 +1,15 @@
+<h4><a class="remove-me"><span class="fa fa-times-circle"></span></a><%= __("group") %></br></h4>
+<div class="form-group row">
+    <label for="groupName" class="col-xs-3 control-label"><%= __("metadata-group-name") %></label>
+    <div class="col-xs-9">
+        <input text class="form-control" name="name" placeholder="Metadata Group Name" required
+            data-parsley-length="[2,50]">
+    </div>
+</div>
+<div class='metadataGroup-body'></div>
+<div class="row text-center">
+    <div class="btn-group btn-group-margin">
+        <input type="button" class="btn btn-default add-metadata-loop" value='<%= __("add-loop") %>'>
+        <input type="button" class="btn btn-info add-metadata-field" value='<%= __("add-attribute") %>'>
+    </div>
+</div>

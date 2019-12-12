@@ -1,21 +1,22 @@
 (function (xtens, Query) {
     // io.sails.autoConnect = false;
-    var i18n = xtens.module("i18n").en;
+    Query.Views = {};
+    var i18n = require('./i18n.js').en;
 
     // TODO: retrieve this info FROM DATABASE ideally or from the server-side anyway
-    var useFormattedNames = xtens.module("xtensconstants").useFormattedMetadataFieldNames;
-    var Constants = xtens.module("xtensconstants").Constants;
-    var FieldTypes = xtens.module("xtensconstants").FieldTypes;
-    var ModalDialog = xtens.module("xtensbootstrap").Views.ModalDialog;
-    // var QueryStrategy = xtens.module("querystrategy");
-    // var Data = xtens.module("data");
-    var DataType = xtens.module("datatype");
-    var SuperType = xtens.module("supertype");
-    var DataTypeClasses = xtens.module("xtensconstants").DataTypeClasses;
-    var sexOptions = xtens.module("xtensconstants").SexOptions;
-    var XtensTable = xtens.module("xtenstable");
-    // var replaceUnderscoreAndCapitalize = xtens.module("utils").replaceUnderscoreAndCapitalize;
-    var Privileges = xtens.module("xtensconstants").DataTypePrivilegeLevels;
+    var useFormattedNames = require('./XtensConstants.js').useFormattedMetadataFieldNames;
+    var Constants = require('./XtensConstants.js').Constants;
+    var FieldTypes = require('./XtensConstants.js').FieldTypes;
+    var ModalDialog = require('./XtensBootstrap.js').Views.ModalDialog;
+    // var QueryStrategy = require("./QueryStrategy.js");
+    // var Data = require('./Data.js');
+    var DataType = require('./DataType.js');
+    var SuperType = require('./SuperType.js');
+    var DataTypeClasses = require('./XtensConstants.js').DataTypeClasses;
+    var sexOptions = require('./XtensConstants.js').SexOptions;
+    var XtensTable = require('./XtensTable.js');
+    // var replaceUnderscoreAndCapitalize = require('./Utils.js').replaceUnderscoreAndCapitalize;
+    var Privileges = require('./XtensConstants.js').DataTypePrivilegeLevels;
     var VIEW_OVERVIEW = Privileges.VIEW_OVERVIEW;
     // constant to define the field-value HTML element
     var FIELD_VALUE = 'field-value';
@@ -283,8 +284,8 @@
         },
 
         initialize: function (options) {
-            this.template = JST['views/templates/query-generic-row.ejs'];
-            this.templateUnit = JST['views/templates/query-generic-row-unit.ejs'];
+            this.template = require('./../../templates/query-generic-row.ejs');
+            this.templateUnit = require('./../../templates/query-generic-row-unit.ejs');
             this.fieldList = options.fieldList;
             this.listenTo(this.model, 'change:fieldName', this.fieldNameOnChange);
         },
@@ -662,7 +663,7 @@
         },
 
         initialize: function (options) {
-            this.template = JST['views/templates/query-personalinfo-fields.ejs'];
+            this.template = require('./../../templates/query-personalinfo-fields.ejs');
         },
 
         render: function () {
@@ -735,7 +736,7 @@
         },
 
         initialize: function (options) {
-            this.template = JST['views/templates/query-subject-fields.ejs'];
+            this.template = require('./../../templates/query-subject-fields.ejs');
         },
 
         render: function () {
@@ -823,7 +824,7 @@
         },
 
         initialize: function (options) {
-            this.template = JST['views/templates/query-sample-fields.ejs'];
+            this.template = require('./../../templates/query-sample-fields.ejs');
             this.biobanks = options.biobanks;
         },
 
@@ -857,7 +858,7 @@
         className: 'query-loop',
 
         initialize: function(options) {
-            this.template = JST['views/templates/query-builder-loop.ejs'];
+            this.template = require('./../../templates/query-builder-loop.ejs');
             this.loopList = options.loopList;
             this.nestedViews = [];
             this.listenTo(this.model, 'change:loopName', this.loopNameOnChange);
@@ -955,7 +956,7 @@
         },
 
         initialize: function (options) {
-            this.template = JST["views/templates/query-composite.ejs"];
+            this.template = require("./../../templates/query-composite.ejs");
             this.nestedViews = [];
             this.biobanks = options.biobanks || [];
             this.dataTypes = options.dataTypes || [];
@@ -1423,7 +1424,7 @@
          */
         initialize: function (options) {
             _.bindAll(this, ['initializeDataTable', 'queryOnError']);
-            this.template = JST["views/templates/query-builder.ejs"];
+            this.template = require("./../../templates/query-builder.ejs");
             $('#main').html(this.el);
             this.biobanks = options.biobanks || [];
             options.dataTypes.comparator = 'id';
@@ -1552,7 +1553,7 @@
 
             this.modal = new ModalDialog({
                 title: i18n('please-wait-for-query-to-complete'),
-                body: JST["views/templates/progressbar.ejs"]({ valuemin: 0, valuemax: 100, valuenow: 100 })
+                body: require("./../../templates/progressbar.ejs")({ valuemin: 0, valuemax: 100, valuenow: 100 })
             });
             this.$queryModal.append(this.modal.render().el);
             $('.modal-cnt .modal').modal({ backdrop: 'static', keyboard: false });
@@ -1696,7 +1697,7 @@
         initialize: function (options) {
             this.operator = options.operator;
             this.queryBuilder = options.queryBuilder;
-            this.template = JST["views/templates/query-selector.ejs"];
+            this.template = require("./../../templates/query-selector.ejs");
             this.$querySelectorCnt = $(".query-selector-cnt");
             this.setElement(this.$querySelectorCnt);
             this.$queryModal = $(".modal-cnt");
@@ -1791,7 +1792,7 @@
 
             this.modal = new ModalDialog({
                 title: i18n('save-query'),
-                template: JST["views/templates/query-save-modal.ejs"],
+                template: require("./../../templates/query-save-modal.ejs"),
                 data: { __: i18n }
             });
             this.$queryModal.append(this.modal.render().el);
@@ -1874,7 +1875,7 @@
             var that = this;
 
             this.modal = new ModalDialog({
-                template: JST["views/templates/confirm-dialog-bootstrap.ejs"],
+                template: require("./../../templates/confirm-dialog-bootstrap.ejs"),
                 title: i18n('confirm-deletion'),
                 body: i18n('query-will-be-permanently-deleted-are-you-sure'),
                 type: i18n("delete")
@@ -1933,4 +1934,4 @@
         }
 
     });
-}(xtens, xtens.module("query")));
+}(xtens, require('./Query.js')));

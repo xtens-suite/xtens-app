@@ -3,16 +3,17 @@
  * @description This file conatins all the Backbone classes for handling Samples
  */
 (function (xtens, Sample) {
-    var useFormattedNames = xtens.module("xtensconstants").useFormattedMetadataFieldNames;
-    var Constants = xtens.module("xtensconstants").Constants;
-    var i18n = xtens.module("i18n").en;
-    // var DataType = xtens.module("datatype");
-    var SuperTypeModel = xtens.module("supertype").Model;
-    // var DataTypeModel = xtens.module("datatype").Model;
-    var Data = xtens.module("data");
-    var Subject = xtens.module("subject");
-    var Classes = xtens.module("xtensconstants").DataTypeClasses;
-    var ModalDialog = xtens.module("xtensbootstrap").Views.ModalDialog;
+    Sample.Views = {};
+    var useFormattedNames = require('./XtensConstants.js').useFormattedMetadataFieldNames;
+    var Constants = require('./XtensConstants.js').Constants;
+    var i18n = require('./i18n.js').en;
+    // var DataType = require('./DataType.js')
+    var SuperTypeModel = require('./SuperType.js').Model;
+    // var DataTypeModel = require('./DataType.js').Model;
+    var Data = require('./Data.js');
+    var Subject = require('./Subject.js');
+    var Classes = require('./XtensConstants.js').DataTypeClasses;
+    var ModalDialog = require('./XtensBootstrap.js').Views.ModalDialog;
 
     var MISSING_VALUE_ALERT = true;
 
@@ -200,7 +201,7 @@
         initialize: function (options) {
             _.bindAll(this, 'fetchDonorsOnSuccess');
             $('#main').html(this.el);
-            this.template = JST["views/templates/sample-edit.ejs"];
+            this.template = require("./../../templates/sample-edit.ejs");
             this.schemaView = null;
             this.dataTypes = options.dataTypes || [];
             this.biobanks = options.biobanks || [];
@@ -310,7 +311,7 @@
             }
 
             var modal = new ModalDialog({
-                template: JST["views/templates/confirm-dialog-bootstrap.ejs"],
+                template: require("./../../templates/confirm-dialog-bootstrap.ejs"),
                 title: i18n('confirm-deletion'),
                 body: i18n('sample-will-be-permanently-deleted-are-you-sure'),
                 type: i18n("delete")
@@ -330,7 +331,7 @@
                         success: function (model, res) {
                             $('.waiting-modal').modal('hide');
 
-                            modal.template = JST["views/templates/dialog-bootstrap.ejs"];
+                            modal.template = require("./../../templates/dialog-bootstrap.ejs");
                             modal.title = i18n('ok');
                             modal.body = i18n('sample-deleted');
                             that.$modal.append(modal.render().el);
@@ -517,7 +518,7 @@
          */
         initialize: function (options) {
             $("#main").html(this.el);
-            this.template = JST["views/templates/sample-details.ejs"];
+            this.template = require("./../../templates/sample-details.ejs");
             this.fields = options.fields;
             this.render();
         },
@@ -562,7 +563,7 @@
             this.listenTo(this.samples, 'reset', this.render);
             this.headers = options.paginationHeaders;
             this.dataTypePrivileges = options.dataTypePrivileges.models;
-            this.template = JST["views/templates/sample-list.ejs"];
+            this.template = require("./../../templates/sample-list.ejs");
 
             this.params = options.params;
             this.donor = options.params && options.params.donor;
@@ -622,11 +623,11 @@
 
             this.filterSamples(this.params);
 
-            $('#pagination').append(JST["views/templates/pagination-bar.ejs"]({
+            $('#pagination').append(require("./../../templates/pagination-bar.ejs")({
                 __: i18n,
                 headers: this.headers,
                 rowsLenght: this.samples.models.length,
-                DEFAULT_LIMIT: xtens.module("xtensconstants").DefaultLimit
+                DEFAULT_LIMIT: require('./XtensConstants.js').DefaultLimit
             }));
             this.setPaginationInfo();
             return this;
@@ -731,7 +732,7 @@
          */
         initialize: function (options) {
             $("#main").html(this.el);
-            this.template = JST["views/templates/sample-get-from-barcode.ejs"];
+            this.template = require("./../../templates/sample-get-from-barcode.ejs");
             this.idProject = xtens.session.get('activeProject') !== 'all' ? _.find(xtens.session.get('projects'), function (p) { return p.name === xtens.session.get('activeProject'); }).id : undefined;
             this.render();
         },
@@ -803,4 +804,4 @@
             });
         }
     });
-}(xtens, xtens.module("sample")));
+}(xtens, require('./Sample.js')));

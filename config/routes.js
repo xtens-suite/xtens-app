@@ -22,17 +22,15 @@
 
 module.exports.routes = {
 
-
     // Make the view located at `views/homepage.ejs` (or `views/homepage.jade`, etc. depending on your
     // default view engine) your home page.
     //
     // (Alternatively, remove this and add an `index.html` file in your `assets` directory)
 
-
-    'GET /': {view: 'home'},
+    // 'GET /': { view: 'home' },
     // Auth Controller
-    'POST /login': {controller: 'auth', action: 'login'},
-    'POST /logout' : {controller:'auth',action:'logout'},
+    'POST /login': { controller: 'auth', action: 'login' },
+    'POST /logout': { controller: 'auth', action: 'logout' },
 
     // Biobank Controller
 
@@ -41,8 +39,8 @@ module.exports.routes = {
     // Daemon Controller
 
     // Data Controller
-    'GET /data/edit': {controller: 'data', action: 'edit'},
-    'GET /data/getInfoForBarChart': {controller: 'data', action: 'getInfoForBarChart'},
+    'GET /data/edit': { controller: 'data', action: 'edit' },
+    'GET /data/getInfoForBarChart': { controller: 'data', action: 'getInfoForBarChart' },
 
     /*
     'GET /data': {controller: 'data', action: 'find'},
@@ -55,13 +53,13 @@ module.exports.routes = {
     // 'POST /download-file':{controller:'dataFile',action:'download'},
 
     // DataType Controller
-    'GET /dataType/edit': {controller: 'dataType', action: 'edit'},
-    'POST /graph': {controller:'dataType',action:'buildGraph'},
-    'GET /dataType/getDataForDashboard': {controller:'dataType',action:'getDataForDashboard'},
+    'GET /dataType/edit': { controller: 'dataType', action: 'edit' },
+    'POST /graph': { controller: 'dataType', action: 'buildGraph' },
+    'GET /dataType/getDataForDashboard': { controller: 'dataType', action: 'getDataForDashboard' },
     // 'GET /graph/buildHierarchy':{controller:'dataType',action:'buildHierarchy'},
 
     // DataTypePrivileges Controller
-    'GET /dataTypePrivileges/edit': {controller: 'dataTypePrivileges', action: 'edit'},
+    'GET /dataTypePrivileges/edit': { controller: 'dataTypePrivileges', action: 'edit' },
 
     // Group Controller
     // '/groupOperator/associate':{controller:'group', action:'addOperator'},
@@ -70,11 +68,10 @@ module.exports.routes = {
     // '/groupDatatype/dissociate':{controller:'group',action:'removeDatatype'},
 
     // Main Controller
-    'POST /customisedData': {controller: 'main', action: 'executeCustomDataManagement'},
-    'GET /fileManager': {controller: 'main', action: 'getFileSystemStrategy'},
+    'POST /customisedData': { controller: 'main', action: 'executeCustomDataManagement' },
+    'GET /fileManager': { controller: 'main', action: 'getFileSystemStrategy' },
     // 'GET /fileContent': {controller: 'main', action: 'downloadFileContent'},
     // 'POST /fileContent': {controller: 'main', action: 'uploadFileContent'},
-
 
     // 'POST /populateDB': {controller: 'main', action: 'populateDB'},
     // 'POST /migrate': {controller: 'main', action: 'migrate'},
@@ -82,38 +79,38 @@ module.exports.routes = {
     // 'GET /populateEAV': {controller: 'main', action: 'populateEAV'},
 
     // Operator Controller
-    'PATCH /operator': {controller:'operator',action:'patchPassword'},
-    'PATCH /operator/resetPassword': {controller:'operator',action:'resetPassword'},
-    'PATCH /operator/patchQueries': {controller:'operator',action:'patchQueries'},
+    'PATCH /operator': { controller: 'operator', action: 'patchPassword' },
+    'PATCH /operator/resetPassword': { controller: 'operator', action: 'resetPassword' },
+    'PATCH /operator/patchQueries': { controller: 'operator', action: 'patchQueries' },
 
     // PersonalDetails Controller
 
     // Project Controller
-    'GET /project/edit': {controller: 'project', action: 'edit'},
+    'GET /project/edit': { controller: 'project', action: 'edit' },
 
     // Query Controller
     // Advanced Search API
-    'POST /query/dataSearch': {controller: 'query', action: 'dataSearch'},
+    'POST /query/dataSearch': { controller: 'query', action: 'dataSearch' },
 
     // Sample Controller
-    'GET /sample/edit': {controller: 'sample', action: 'edit'},
-    'GET /sample/getNextBiobankCode': {controller: 'sample', action: 'getNextBiobankCode'},
-    'GET /sample/findByBiobankCode': {controller: 'sample', action: 'findByBiobankCode'},
-    'GET /sample/getInfoForBarChart': {controller: 'sample', action: 'getInfoForBarChart'},
+    'GET /sample/edit': { controller: 'sample', action: 'edit' },
+    'GET /sample/getNextBiobankCode': { controller: 'sample', action: 'getNextBiobankCode' },
+    'GET /sample/findByBiobankCode': { controller: 'sample', action: 'findByBiobankCode' },
+    'GET /sample/getInfoForBarChart': { controller: 'sample', action: 'getInfoForBarChart' },
 
     // Subject Controller
-    'GET /subject/edit': {controller: 'subject', action: 'edit'},
-    'POST /subjectGraph': {controller:'subject',action:'createGraph'},
-    'POST /subjectGraphSimple': {controller:'subject',action:'createGraphSimple'},
-    'GET /subject/getNextSubjectCode': {controller: 'subject', action: 'getNextSubjectCode'},
-    'GET /subject/getInfoForBarChart': {controller: 'subject', action: 'getInfoForBarChart'},
+    'GET /subject/edit': { controller: 'subject', action: 'edit' },
+    'POST /subjectGraph': { controller: 'subject', action: 'createGraph' },
+    'POST /subjectGraphSimple': { controller: 'subject', action: 'createGraphSimple' },
+    'GET /subject/getNextSubjectCode': { controller: 'subject', action: 'getNextSubjectCode' },
+    'GET /subject/getInfoForBarChart': { controller: 'subject', action: 'getInfoForBarChart' },
 
     'GET /app': {
         controller: 'main',
         action: 'getAppUI'
     },
 
-    'GET /superType/meta/:id': {controller: 'superType', action: 'getMeta'}
+    'GET /superType/meta/:id': { controller: 'superType', action: 'getMeta' }
 
     // REST API for subject (with personal info)
     // 'GET /subjectWithPersonalDetails': {controller: 'subject', action: 'findWithPersonalDetails'},
@@ -124,8 +121,6 @@ module.exports.routes = {
 
     /*,
     'GET /dataType': {controller: 'DataType', action: 'find'}
-
-
 
    '/dataTypes/new': {
         controller: 'dataType',

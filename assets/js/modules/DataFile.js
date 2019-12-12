@@ -3,10 +3,10 @@
  * @description This file contains the Backbone classes for handling DataType
  *              models, collections and views
  */
-(function(xtens, DataFile) {
-
-    var i18n = xtens.module("i18n").en;
-    var ModalDialog = xtens.module("xtensbootstrap").Views.ModalDialog;
+(function (xtens, DataFile) {
+    DataFile.Views = {};
+    var i18n = require('./i18n.js').en;
+    var ModalDialog = require('./XtensBootstrap.js').Views.ModalDialog;
     /**
      * @class
      * @name DataFile.Model
@@ -43,14 +43,14 @@
             'click span.delete-file-content': 'deleteFileContentOnClick'
         },
 
-        initialize: function(options) {
-            this.template = JST["views/templates/datafile-list.ejs"];
+        initialize: function (options) {
+            this.template = require("./../../templates/datafile-list.ejs");
             this.collection = options.collection;
             this.datum = options.datum;
         },
 
-        render: function() {
-            this.$el.html(this.template({__:i18n, dataFiles: this.collection.models}));
+        render: function () {
+            this.$el.html(this.template({ __: i18n, dataFiles: this.collection.models }));
             this.$queryModal = $(".modal-cnt");
             return this;
         },
@@ -64,13 +64,12 @@
         //     this.trigger("closeMe", this);
         // },
 
-
         /**
          * @method
          * @name downloadFileContentOnClick
          * @param{} ev
          */
-        downloadFileContentOnClick: function(ev) {
+        downloadFileContentOnClick: function (ev) {
             ev.preventDefault();
             var idFile = $(ev.target).data('id');
             console.log("FileManager.Views.Download.downloadFileContent: " + idFile);
@@ -78,7 +77,7 @@
             return false;
         },
 
-        deleteFileContentOnClick: function(ev) {
+        deleteFileContentOnClick: function (ev) {
             ev.preventDefault();
             var idFile = $(ev.target).data('id');
             console.log("FileManager.Views.Download.downloadFileContent: " + idFile);
@@ -93,16 +92,15 @@
          * @description download a file from the remote file storage given its XTENS ID
          * @link http://stackoverflow.com/questions/16086162/handle-file-download-from-ajax-post
          */
-        downloadFileContent: function(idFile) {
-
+        downloadFileContent: function (idFile) {
             var that = this;
             var xhr = new XMLHttpRequest();
             var url = 'fileContent?id=' + idFile;
             xhr.open('GET', url, true);
             xhr.responseType = 'arraybuffer';
 
-            xhr.onload = function() {
-                var fileName = "", disposition, fileNameRegex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/, matches, type, blob, windowURL, downloadURL, a;
+            xhr.onload = function () {
+                var fileName = ""; var disposition; var fileNameRegex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/; var matches; var type; var blob; var windowURL; var downloadURL; var a;
                 // response is OK
                 if (this.status === 200) {
                     fileName = "";
@@ -114,14 +112,13 @@
                         }
                     }
                     type = xhr.getResponseHeader('Content-Type');
-                    blob = new Blob([this.response], {type: type});
+                    blob = new Blob([this.response], { type: type });
 
                     if (typeof window.navigator.msSaveBlob !== 'undefined') {
                         // IE workaround for "HTML7007: One or more blob URLs were revoked by closing the blob for which they were created.
                         // These URLs will no longer resolve as the data backing the URL has been freed."
                         window.navigator.msSaveBlob(blob, fileName);
-                    }
-                    else {
+                    } else {
                         windowURL = window.URL || window.webkitURL;
                         downloadURL = windowURL.createObjectURL(blob);
 
@@ -130,16 +127,13 @@
                             a = document.createElement("a");
                             if (typeof a.download === 'undefined') {
                                 window.location = downloadURL;
-                            }
-                            else {
+                            } else {
                                 a.href = downloadURL;
                                 a.download = fileName;
                                 document.body.appendChild(a);
                                 a.click();
                             }
-                        }
-
-                        else {
+                        } else {
                             window.location = downloadURL;
                         }
                         setTimeout(function () { windowURL.revokeObjectURL(downloadURL); }, 100); // cleanup
@@ -170,34 +164,29 @@
          * @description delete a file from the remote file storage given its XTENS ID
          * @link http://stackoverflow.com/questions/16086162/handle-file-delete-from-ajax-post
          */
-        deleteFileContent: function(idFile) {
-
+        deleteFileContent: function (idFile) {
             var that = this;
             var url = 'fileContent?id=' + idFile;
             $.ajax({
-                url: 'fileContent?file=' + idFile +'&id='+ this.datum,
+                url: 'fileContent?file=' + idFile + '&id=' + this.datum,
                 type: 'DELETE',
                 headers: {
                     'Authorization': 'Bearer ' + xtens.session.get("accessToken")
                 },
                 contentType: 'application/json',
-                success: function() {
-                    that.trigger("fileDeleted", {dataId: this.datum});
+                success: function () {
+                    that.trigger("fileDeleted", { dataId: this.datum });
                     $('body').notify({
                         message: i18n('file-correctly-deleted')
-                    },{
+                    }, {
                         type: 'success'
                     });
                 },
-                error: function(err) {
+                error: function (err) {
                     xtens.error(err);
                 }
             });
-
         }
 
-
-
     });
-
-} (xtens, xtens.module("datafile")));
+}(xtens, require('./DataFile.js')));

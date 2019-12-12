@@ -1,3 +1,10 @@
+/* eslint-disable no-console */
+/* eslint-disable no-unused-vars */
+/* eslint-disable space-before-function-paren */
+/* eslint-disable no-useless-escape */
+/* eslint-disable no-unused-expressions */
+/* eslint-disable brace-style */
+/* eslint-disable eqeqeq */
 /**
  * @author  Massimiliano Izzo
  * @description This file conatins all the Backbone classes for handling Data and
@@ -6,23 +13,24 @@
 
 (function (xtens, Data) {
     // TODO: retrieve this info FROM DATABASE ideally or from the server-side anyway
-    var useFormattedNames = xtens.module("xtensconstants").useFormattedMetadataFieldNames;
+    Data.Views = {};
+    var useFormattedNames = require('./XtensConstants.js').useFormattedMetadataFieldNames;
 
-    var i18n = xtens.module("i18n").en;
-    var Constants = xtens.module("xtensconstants").Constants;
-    var FieldTypes = xtens.module("xtensconstants").FieldTypes;
-    var Classes = xtens.module("xtensconstants").DataTypeClasses;
-    // var MetadataComponent = xtens.module("metadatacomponent");
-    // var DataTypeModel = xtens.module("datatype").Model;
-    // var SuperTypeModel = xtens.module("supertype").Model;
-    // var DataTypeCollection = xtens.module("datatype").List;
-    var FileManager = xtens.module("filemanager");
-    var Daemon = xtens.module("daemon");
-    var Group = xtens.module("group");
-    var replaceUnderscoreAndCapitalize = xtens.module("utils").replaceUnderscoreAndCapitalize;
-    // var dateUtil = xtens.module("utils").date;
-    var ModalDialog = xtens.module("xtensbootstrap").Views.ModalDialog;
-    var procedures = xtens.module("xtensconstants").Procedures;
+    var i18n = require('./i18n.js').en;
+    var Constants = require('./XtensConstants.js').Constants;
+    var FieldTypes = require('./XtensConstants.js').FieldTypes;
+    var Classes = require('./XtensConstants.js').DataTypeClasses;
+    // var MetadataComponent = require('./MetadataComponent.js');
+    // var DataTypeModel = require('./DataType.js').Model;
+    // var SuperTypeModel = require('./SuperType.js').Model;
+    // var DataTypeCollection = require('./DataType.js').List;
+    var FileManager = require('./FileManager.js');
+    var Daemon = require('./Daemon.js');
+    var Group = require('./Group.js');
+    var replaceUnderscoreAndCapitalize = require('./Utils.js').replaceUnderscoreAndCapitalize;
+    // var dateUtil = require('./Utils.js').date;
+    var ModalDialog = require('./XtensBootstrap.js').Views.ModalDialog;
+    var procedures = require('./XtensConstants.js').Procedures;
 
     var MISSING_VALUE_ALERT = true;
 
@@ -318,7 +326,7 @@
         className: 'metadataschema',
 
         initialize: function (options) {
-            this.template = JST["views/templates/data-edit-partial.ejs"];
+            this.template = require("./../../templates/data-edit-partial.ejs");
             this.component = options.component;
             this.nestedViews = [];
         },
@@ -378,7 +386,7 @@
         className: 'metadatagroup',
 
         initialize: function (options) {
-            this.template = JST["views/templates/metadatagroup-form.ejs"];
+            this.template = require("./../../templates/metadatagroup-form.ejs");
             this.component = options.component;
             this.nestedViews = [];
         }
@@ -388,7 +396,7 @@
         className: 'metadataloop',
 
         initialize: function (options) {
-            this.template = JST["views/templates/metadataloop-form.ejs"];
+            this.template = require("./../../templates/metadataloop-form.ejs");
             this.component = options.component;
             this.nestedViews = [];
             if (this.model.metadata) {
@@ -497,7 +505,7 @@
                 this.setValidationOptions();
             }
             if (this.component.description) {
-                var btnDescription = JST["views/templates/field-description-button.ejs"]({ __: i18n, component: this.component });
+                var btnDescription = require("./../../templates/field-description-button.ejs")({ __: i18n, component: this.component });
                 $(this.el.children).append(btnDescription);
 
                 this.$el.hover(
@@ -539,7 +547,7 @@
         },
 
         initialize: function (options) {
-            this.template = JST["views/templates/metadatafieldinput-form.ejs"];
+            this.template = require("./../../templates/metadatafieldinput-form.ejs");
             this.component = options.component;
         },
 
@@ -597,7 +605,7 @@
         },
 
         initialize: function (options) {
-            this.template = JST["views/templates/metadatafieldcheckbox-form.ejs"];
+            this.template = require("./../../templates/metadatafieldcheckbox-form.ejs");
             this.component = options.component;
         }
 
@@ -638,7 +646,7 @@
         },
 
         initialize: function (options) {
-            this.template = JST["views/templates/metadatafieldselect-form.ejs"];
+            this.template = require("./../../templates/metadatafieldselect-form.ejs");
             this.component = options.component;
         },
 
@@ -658,7 +666,7 @@
         },
 
         initialize: function (options) {
-            this.template = JST["views/templates/metadatafieldrange-form.ejs"];
+            this.template = require("./../../templates/metadatafieldrange-form.ejs");
             this.component = options.component;
         }
 
@@ -697,7 +705,7 @@
         initialize: function (options) {
             // _.bindAll(this, 'fetchSuccess');
             $('#main').html(this.el);
-            this.template = JST["views/templates/data-edit.ejs"];
+            this.template = require("./../../templates/data-edit.ejs");
             this.schemaView = null;
             this.dataTypes = options.dataTypes || [];
             this.operators = options.operators ? options.operators : [];
@@ -950,7 +958,7 @@
             }
 
             var modal = new ModalDialog({
-                template: JST["views/templates/confirm-dialog-bootstrap.ejs"],
+                template: require("./../../templates/confirm-dialog-bootstrap.ejs"),
                 title: i18n('confirm-deletion'),
                 body: i18n('data-will-be-permanently-deleted-are-you-sure'),
                 type: i18n("delete")
@@ -968,7 +976,7 @@
                     that.model.destroy({
                         success: function (model, res) {
                             $('.waiting-modal').modal('hide');
-                            modal.template = JST["views/templates/dialog-bootstrap.ejs"];
+                            modal.template = require("./../../templates/dialog-bootstrap.ejs");
                             modal.title = i18n('ok');
                             modal.body = i18n('data-deleted');
                             that.$modal.append(modal.render().el);
@@ -1134,7 +1142,7 @@
          */
         initialize: function (options) {
             $("#main").html(this.el);
-            this.template = JST["views/templates/data-details.ejs"];
+            this.template = require("./../../templates/data-details.ejs");
             this.fields = options.fields; //  this.model.set("filename", filename);
             this.render();
         },
@@ -1232,11 +1240,12 @@
             this.listenTo(this.data, 'reset', this.render);
             this.headers = options.paginationHeaders;
             this.dataTypePrivileges = options.dataTypePrivileges.models;
-            this.template = JST["views/templates/data-list.ejs"];
+            this.template = require("./../../templates/data-list.ejs");
             this.params = options.params;
             this.parentDataType = options.params && options.params.parentDataType;
+            this.parentDataType = options.params && options.params.parentDataType;
             this.parentSubject = options.params && options.params.parentSubject;
-            this.parentSubjectCode = options.params && options.params.parentSubjectCode;
+            this.parentSubjectCode = options.params && (options.params.parentSubjectCode || options.params.donorCode);
             this.parentSample = options.params && options.params.parentSample;
             this.parentData = options.params && options.params.parentData;
             this.render();
@@ -1271,11 +1280,11 @@
 
             // this.filterData(this.params);
 
-            $('#pagination').append(JST["views/templates/pagination-bar.ejs"]({
+            $('#pagination').append(require("./../../templates/pagination-bar.ejs")({
                 __: i18n,
                 headers: this.headers,
                 rowsLenght: this.data.models.length,
-                DEFAULT_LIMIT: xtens.module("xtensconstants").DefaultLimit
+                DEFAULT_LIMIT: require('./XtensConstants.js').DefaultLimit
             }));
             this.setPaginationInfo();
             return this;
@@ -1355,6 +1364,7 @@
             ev.preventDefault();
             var parentSubjectQuery = this.parentSubject ? 'parentSubject=' + this.parentSubject : '';
             var parentSubjectCodeQuery = this.parentSubjectCode ? 'parentSubjectCode=' + this.parentSubjectCode : '';
+            var donorCodeQuery = this.parentData ? 'parentData=' + this.parentData : '';
             var parentSampleQuery = this.parentSample ? 'parentSample=' + this.parentSample : '';
             var parentDataQuery = this.parentData ? 'parentData=' + this.parentData : '';
             var parentDataTypeQuery = this.parentDataType ? 'parentDataType=' + this.parentDataType : '';
@@ -1392,7 +1402,7 @@
         initialize: function (options) {
             _.bindAll(this, 'saveOnSuccess');
             $("#main").html(this.el);
-            this.template = JST["views/templates/dedicated-data-edit.ejs"];
+            this.template = require("./../../templates/dedicated-data-edit.ejs");
             this.dataTypes = options.dataTypes && options.dataTypes.toJSON();
             this.privileges = options.dataTypePrivileges && options.dataTypePrivileges.toJSON();
             this.tableView = null;
@@ -1438,7 +1448,7 @@
                 formData.append("fileName", file.name);
             });
 
-            this.dropzone.on("success", function (file, xhr, formData) {
+            this.dropzone.on("success", function () {
                 that.$("#save").prop("disabled", false);
 
                 console.log("Data.Views.DedicatedUpload -  file uploaded successfully");
@@ -1449,13 +1459,13 @@
                 $(".new-import-btn-cnt").css('display', 'none ');
             });
 
-            xtens.router.on("route", function (route, params) {
+            xtens.router.on("route", function () {
                 clearInterval(that.interval);
             });
 
             return this;
         },
-        showByPatient: function (params) {
+        showByPatient: function () {
             $('#subject-selector').prop('required', true);
             $('#sample-selector').prop('required', true);
             $('#sample-type-selector').prop('required', true);
@@ -1528,7 +1538,7 @@
                     sort: 'created_at ASC'
                 },
                 contentType: 'application/json',
-                success: function (subjects, options, res) {
+                success: function (subjects) {
                     _.forEach(subjects, function (subject) {
                         textHtml = textHtml + '<option value=\"' + subject.id + '#' + subject.code + '\">' + subject.code + '</option>';
                     });
@@ -1664,7 +1674,7 @@
             // this.$modal.one('hidden.bs.modal', function (e) {
             this.modal = new ModalDialog({
                 title: i18n('data-correctly-loaded-on-server'),
-                body: JST["views/templates/dedicated-data-dialog-bootstrap.ejs"]({ __: i18n })
+                body: require("./../../templates/dedicated-data-dialog-bootstrap.ejs")({ __: i18n })
             });
 
             this.$modal.append(this.modal.render().el);
@@ -1682,4 +1692,4 @@
         }
 
     });
-}(xtens, xtens.module("data")));
+}(xtens, require('./Data.js')));

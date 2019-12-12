@@ -1,13 +1,13 @@
-(function(xtens, PersonalDetails) {
-
-    var i18n = xtens.module("i18n").en;
+(function (xtens, PersonalDetails) {
+    PersonalDetails.Views = {};
+    var i18n = require('./i18n.js').en;
 
     var parsleyOpts = {
         priorityEnabled: false,
         // excluded: "select[name='fieldUnit']",
         successClass: "has-success",
         errorClass: "has-error",
-        classHandler: function(el) {
+        classHandler: function (el) {
             return el.$element.parent();
         },
         errorsWrapper: "<span class='help-block'></span>",
@@ -28,8 +28,8 @@
         tagName: 'div',
         className: 'personalDetails',
 
-        initialize: function(options) {
-            this.template = JST["views/templates/personaldetails-edit.ejs"];
+        initialize: function (options) {
+            this.template = require("./../../templates/personaldetails-edit.ejs");
         },
 
         bindings: {
@@ -40,20 +40,20 @@
                 observe: 'birthDate',
 
                 // format date on model as ISO (YYYY-MM-DD)
-                onSet: function(val, options) {
+                onSet: function (val, options) {
                     var momentDate = moment(val, 'L', 'it');
                     return momentDate.format('YYYY-MM-DD');
                 },
 
                 // store data in view (from model) as DD/MM/YYYY (European format)
-                onGet: function(value, options) {
+                onGet: function (value, options) {
                     if (value) {
                         return moment(value).lang("it").format('L');
                     }
                 },
 
                 // initialize Pikaday + Moment.js
-                initialize: function($el, model, options) {
+                initialize: function ($el, model, options) {
                     var picker = new Pikaday({
                         field: $el[0],
                         // lang: 'it',
@@ -68,26 +68,25 @@
         },
 
         setParsleyRequired: function () {
-            var name=$('#givenName').val();
-            var surname=$('#surname').val();
-            var birthDate=$('#birthDate').val();
+            var name = $('#givenName').val();
+            var surname = $('#surname').val();
+            var birthDate = $('#birthDate').val();
 
-            if ((name == null || name == "") && (surname == null || surname =="") && (birthDate == null || birthDate == "")) {
+            if ((name == null || name == "") && (surname == null || surname == "") && (birthDate == null || birthDate == "")) {
                 $('form').removeData('Parsley');
-                //set required attribute on input to false
+                // set required attribute on input to false
                 $('.personaldetails-input').attr('data-parsley-required', 'false');
-                //reinitialize parsley
+                // reinitialize parsley
                 $('form').parsley(parsleyOpts).reset();
-            }
-            else {
+            } else {
                 $('form').removeData('Parsley');
                 $('.personaldetails-input').attr('data-parsley-required', 'true');
                 $('form').parsley(parsleyOpts);
             }
         },
 
-        render: function() {
-            this.$el.html(this.template({__:i18n, data: this.model}));
+        render: function () {
+            this.$el.html(this.template({ __: i18n, data: this.model }));
             this.stickit();
             return this;
         }
@@ -101,16 +100,14 @@
         /**
          * @extends Backbone.View.initialize
          */
-        initialize: function(options) {
-
-            this.template = JST["views/templates/personaldetails-details.ejs"];
-          // var filename= this.getFileName(this.model);
-          //  this.model.set("filename", filename);
-
+        initialize: function (options) {
+            this.template = require("./../../templates/personaldetails-details.ejs");
+            // var filename= this.getFileName(this.model);
+            //  this.model.set("filename", filename);
         },
 
-        render: function() {
-            this.$el.html(this.template({__:i18n}));
+        render: function () {
+            this.$el.html(this.template({ __: i18n }));
             this.stickit();
             return this;
         },
@@ -123,7 +120,7 @@
                 observe: 'birthDate',
 
                 // store data in view (from model) as DD/MM/YYYY (European format)
-                onGet: function(value, options) {
+                onGet: function (value, options) {
                     if (value) {
                         /*
                         var dateArray = value instanceof Date ? value.toISOString().split('-') : moment(value).format('L');
@@ -136,6 +133,4 @@
             }
         }
     });
-
-
-} (xtens, xtens.module("personaldetails")));
+}(xtens, require('./PersonalDetails.js')));

@@ -1,9 +1,10 @@
-(function(xtens, MetadataField) {
+(function (xtens, MetadataField) {
     // Dependencies
-    var constants = xtens.module("xtensconstants").Constants;
-    var fieldTypes = xtens.module("xtensconstants").FieldTypes;
-    var MetadataComponent = xtens.module("metadatacomponent");
-    var i18n = xtens.module("i18n").en;
+    MetadataField.Views = {};
+    var constants = require('./XtensConstants.js').Constants;
+    var fieldTypes = require('./XtensConstants.js').FieldTypes;
+    var MetadataComponent = require('./MetadataComponent.js');
+    var i18n = require('./i18n.js').en;
 
     // var metadataFieldNameNotAllowedCharset = /[^A-Za-z_][^A-Za-z_0-9]*/g;
     var metadataFieldNameNotAllowedCharset = /[^A-Za-z_0-9:]/g;
@@ -19,20 +20,20 @@
      * @method
      * @name initializeSelect2Field
      */
-    function initializeSelect2Field($el, model, option) {
-        var property =  $el.attr('name');
+    function initializeSelect2Field ($el, model, option) {
+        var property = $el.attr('name');
         if (_.isArray(model.get(property))) {
-            var data =[];
+            var data = [];
             var list = model.get(property);
-            for (i=0, len=list.length; i<len; i++) {
-                data.push({id: list[i], text: list[i], locked: false}); // set locked to false to edit values/unit list options
+            for (i = 0, len = list.length; i < len; i++) {
+                data.push({ id: list[i], text: list[i], locked: false }); // set locked to false to edit values/unit list options
             }
             $el.select2({
                 multiple: true,
                 data: data,
-                createSearchChoice: function(term, data) {
-                    if ($(data).filter(function() { return this.text.localeCompare(term)===0; }).length===0) {
-                        return {id:term, text:term};
+                createSearchChoice: function (term, data) {
+                    if ($(data).filter(function () { return this.text.localeCompare(term) === 0; }).length === 0) {
+                        return { id: term, text: term };
                     }
                 },
                 tokenSeparators: [','],
@@ -41,19 +42,19 @@
         }
     }
 
-    function initializeCaseInsensitive($el, model, option) {
+    function initializeCaseInsensitive ($el, model, option) {
         if (model.get("fieldType") !== fieldTypes.TEXT || model.get("isList")) {
             $el.parent().hide();
         }
     }
 
-    function initializeRange($el, model, option) {
+    function initializeRange ($el, model, option) {
         if (!model.isNumeric()) {
             $el.parent().hide();
         }
     }
 
-    function initializeRangeInput($el, model, option) {
+    function initializeRangeInput ($el, model, option) {
         if (model.hasRange) {
             $el.parent().show();
         }
@@ -79,11 +80,11 @@
             description: null
         },
 
-        initialize: function() {
+        initialize: function () {
 
         },
 
-        isNumeric: function() {
+        isNumeric: function () {
             var type = this.get("fieldType");
             return (type === fieldTypes.INTEGER || type === fieldTypes.FLOAT);
         },
@@ -94,7 +95,7 @@
          * @description format the metadata field name in order to make it a valid JavaScript property name
          *              for dot notation
          */
-        formatName: function() {
+        formatName: function () {
             var name = this.get("name");
 
             // if name starts with digit add a dollar char ($) at the beginning
@@ -127,10 +128,10 @@
             'select[name=fieldType]': {
                 observe: 'fieldType',
                 selectOptions: {
-                    collection: function() {
+                    collection: function () {
                         var coll = [];
-                        _.each(fieldTypes, function(value){
-                            coll.push({label: value.toUpperCase(), value: value});
+                        _.each(fieldTypes, function (value) {
+                            coll.push({ label: value.toUpperCase(), value: value });
                         });
                         return coll;
                     }
@@ -140,32 +141,32 @@
             '[name=custom-value]': 'customValue',
             '[name=visible]': {
                 observe: 'visible',
-                getVal: function($el, ev, options) {
+                getVal: function ($el, ev, options) {
                     return $el.prop('checked');
                 }
             },
             '[name=caseInsensitive]': {
                 observe: 'caseInsensitive',
-                getVal: function($el, ev, options) {
+                getVal: function ($el, ev, options) {
                     return $el.prop('checked');
                 },
                 initialize: initializeCaseInsensitive
             },
             '[name=required]': {
                 observe: 'required',
-                getVal: function($el, ev, options) {
+                getVal: function ($el, ev, options) {
                     return $el.prop('checked');
                 }
             },
             '[name=sensitive]': {
                 observe: 'sensitive',
-                getVal: function($el, ev, option) {
+                getVal: function ($el, ev, option) {
                     return $el.prop('checked');
                 }
             },
             '[name=hasRange]': {
                 observe: 'hasRange',
-                getVal: function($el, ev, option) {
+                getVal: function ($el, ev, option) {
                     return $el.prop('checked');
                 },
                 initialize: initializeRange
@@ -184,46 +185,46 @@
             },
             '[name=isList]': {
                 observe: 'isList',
-                getVal: function($el, ev, option) {
+                getVal: function ($el, ev, option) {
                     return $el.prop('checked');
                 }
             },
             '[name=hasUnit]': {
                 observe: 'hasUnit',
-                getVal: function($el, ev, option) {
+                getVal: function ($el, ev, option) {
                     return $el.prop('checked');
                 }
             },
             '[name=fromDatabaseCollection]': {
                 observe: 'fromDatabaseCollection',
-                getVal: function($el, ev, option) {
+                getVal: function ($el, ev, option) {
                     return $el.prop('checked');
                 }
             },
             '[name=possibleValues]': {
                 observe: 'possibleValues',
                 initialize: initializeSelect2Field,
-                getVal: function($el, ev, option) {
+                getVal: function ($el, ev, option) {
                     return $el.val().split(",");
                 }
             },
             '[name=possibleUnits]': {
                 observe: 'possibleUnits',
                 initialize: initializeSelect2Field,
-                getVal: function($el, ev, option) {
+                getVal: function ($el, ev, option) {
                     return $el.val().split(",");
                 }
             },
             'select[name=dbCollection]': {
                 observe: 'dbCollection',
                 collection: [],
-                initialize: function($el, model, option) {
+                initialize: function ($el, model, option) {
                     if (!model.get("fromDatabaseCollection")) {
                         $el.parent().hide();
                     }
                 },
                 selectOptions: {
-                    collection: function() {
+                    collection: function () {
                         return ["SNOMED CT"];
                     }
                 },
@@ -235,13 +236,13 @@
             '[name=description]': 'description'
         },
 
-        initialize: function(attrs) {
-            this.template = JST['views/templates/metadatafield-edit.ejs'];
+        initialize: function (attrs) {
+            this.template = require('./../../templates/metadatafield-edit.ejs');
         },
 
-        render: function() {
+        render: function () {
             var field = _.clone(this.model.attributes);
-            this.$el.html(this.template({__: i18n, fieldTypes: fieldTypes, component: field}));
+            this.$el.html(this.template({ __: i18n, fieldTypes: fieldTypes, component: field }));
             if (field.name) {
                 // this.$('.no-edit').prop('disabled', true); /* disables all the fields I don't want to be edited (for consistency) */
             }
@@ -254,7 +255,7 @@
             return this;
         },
 
-        add: function(child) {
+        add: function (child) {
             return null;
         },
 
@@ -263,7 +264,7 @@
          * @name serialize
          * @extends MetadataComponent.Views.Edit.serialize
          */
-        serialize: function() {
+        serialize: function () {
             // store the formatted name
             this.model.formatName();
             return _.clone(this.model.attributes);
@@ -273,7 +274,7 @@
             'click .remove-me': 'closeMe'
         },
 
-        isListOnChange: function() {
+        isListOnChange: function () {
             var $customValue = this.$('input[name=customValue]');
             if (this.model.get("isList")) {
                 $customValue.prop('disabled', true);
@@ -283,8 +284,7 @@
                     tags: [],
                     width: 'resolve'
                 });
-            }
-            else {
+            } else {
                 $customValue.prop('disabled', false);
                 $customValue.parent().show();
                 this.$('.value-list').select2('destroy');
@@ -293,25 +293,23 @@
             this.toggleCaseInsensitiveCheckbox();
         },
 
-        hasUnitOnChange: function() {
+        hasUnitOnChange: function () {
             if (this.model.get("hasUnit")) {
                 this.$('.unit-list').select2({
                     multiple: 'true',
                     tags: [],
                     width: 'resolve'
                 });
-            }
-            else {
+            } else {
                 this.$('.unit-list').select2('destroy');
                 this.$(".unit-list").val("");
             }
         },
 
-        fromDatabaseCollectionOnChange: function() {
+        fromDatabaseCollectionOnChange: function () {
             if (this.model.get("fromDatabaseCollection")) {
                 this.$('select[name=dbCollection]').parent().show();
-            }
-            else {
+            } else {
                 this.$('select[name=dbCollection]').parent().hide();
             }
         },
@@ -321,30 +319,27 @@
          * @name fieldTypeOnChange
          * @description toggle additional HTML elements in view if field Type is changing
          */
-        fieldTypeOnChange: function() {
+        fieldTypeOnChange: function () {
             if (this.model.isNumeric()) {
                 this.$('input[name=hasRange]').parent().show();
-            }
-            else {
+            } else {
                 this.$('input[name=hasRange]').parent().hide();
             }
             this.toggleCaseInsensitiveCheckbox();
         },
 
-        toggleCaseInsensitiveCheckbox: function() {
+        toggleCaseInsensitiveCheckbox: function () {
             if (this.model.get('fieldType') === fieldTypes.TEXT && !this.model.get("isList")) {
                 this.$('input[name=caseInsensitive]').parent().show();
-            }
-            else {
+            } else {
                 this.$('input[name=caseInsensitive]').parent().hide();
             }
         },
 
-        toggleRangeInputs: function() {
+        toggleRangeInputs: function () {
             if (this.model.get('hasRange')) {
                 this.$('div.metadataField-range').show();
-            }
-            else {
+            } else {
                 var $range = this.$('.metadataField-range');
                 $range.children('input').val('');
                 $range.hide();
@@ -355,5 +350,4 @@
     MetadataField.List = Backbone.Collection.extend({
         model: MetadataField.Model
     });
-
-} (xtens, xtens.module("metadatafield")));
+}(xtens, require('./MetadataField.js')));

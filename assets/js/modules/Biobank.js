@@ -3,11 +3,12 @@
  * @description This file contains the Backbone classes for handling Biobank
  *              models, collections and views according to the MIABIS standard
  */
-(function(xtens, Biobank) {
+(function (xtens, Biobank) {
     // dependencies
-    var i18n = xtens.module("i18n").en;
-    var ContactInformation = xtens.module("contactinformation");
-    var ModalDialog = xtens.module("xtensbootstrap").Views.ModalDialog;
+    Biobank.Views = {};
+    var i18n = require('./i18n.js').en;
+    var ContactInformation = require('./ContactInformation.js');
+    var ModalDialog = require('./XtensBootstrap.js').Views.ModalDialog;
 
     // XTENS router alias
     var router = xtens.router;
@@ -17,7 +18,7 @@
         // excluded: "select[name='fieldUnit']",
         successClass: "has-success",
         errorClass: "has-error",
-        classHandler: function(el) {
+        classHandler: function (el) {
             return el.$element.parent();
         },
         errorsWrapper: "<span class='help-block'></span>",
@@ -43,9 +44,9 @@
             'click button.delete': 'deleteBiobank'
         },
 
-        initialize: function(options) {
+        initialize: function (options) {
             $("#main").html(this.el);
-            this.template = JST["views/templates/biobank-edit.ejs"];
+            this.template = require("./../../templates/biobank-edit.ejs");
             this.render();
             this.personalContactView = new ContactInformation.Views.Edit({
                 model: new ContactInformation.Model(this.model.get("contactInformation"))
@@ -59,26 +60,26 @@
             '#acronym': 'acronym',
             '#name': 'name',
             '#url': 'url',
-            '#juristicPerson':'juristicPerson',
+            '#juristicPerson': 'juristicPerson',
             '#country': 'country',
             '#description': 'description'
         },
 
-        render: function() {
-            this.$el.html(this.template({__: i18n, biobank: this.model}));
+        render: function () {
+            this.$el.html(this.template({ __: i18n, biobank: this.model }));
             this.$modal = $(".modal-cnt");
             this.stickit();
             return this;
         },
 
-        saveBiobank: function() {
+        saveBiobank: function () {
             var contactInformation = _.clone(this.personalContactView.model.attributes);
             var that = this;
 
-            this.personalContactView.model.save(null,{
-                success: function(contactInformation) {
-                    that.model.save({contactInformation:contactInformation.id}, {
-                        success:function (biobank) {
+            this.personalContactView.model.save(null, {
+                success: function (contactInformation) {
+                    that.model.save({ contactInformation: contactInformation.id }, {
+                        success: function (biobank) {
                             if (that.modal) {
                                 that.modal.hide();
                             }
@@ -90,19 +91,19 @@
                             $('.modal-header').addClass('alert-success');
                             modal.show();
 
-                            setTimeout(function(){ modal.hide(); }, 1200);
+                            setTimeout(function () { modal.hide(); }, 1200);
                             $('.modal-cnt').one('hidden.bs.modal', function (e) {
                                 e.preventDefault();
                                 modal.remove();
-                                xtens.router.navigate('biobanks', {trigger: true});
+                                xtens.router.navigate('biobanks', { trigger: true });
                             });
                         },
-                        error:function (model, res) {
+                        error: function (model, res) {
                             xtens.error(res);
-                        }});
-
+                        }
+                    });
                 },
-                error: function(model, res) {
+                error: function (model, res) {
                     xtens.error(res);
                 }
             });
@@ -114,7 +115,7 @@
          * @name deleteDate
          * TODO - not implemented yet
          */
-        deleteBiobank: function(ev) {
+        deleteBiobank: function (ev) {
             ev.preventDefault();
             var that = this;
             if (this.modal) {
@@ -122,43 +123,42 @@
             }
 
             var modal = new ModalDialog({
-                template: JST["views/templates/confirm-dialog-bootstrap.ejs"],
-                title: i18n('confirm-deletion'),
-                body: i18n('biobank-will-be-permanently-deleted-are-you-sure'),
-                type: i18n("delete")
+                template: require("./../../templates/confirm-dialog-bootstrap.ejs"),
+                    title: i18n('confirm-deletion'),
+                    body: i18n('biobank-will-be-permanently-deleted-are-you-sure'),
+                    type: i18n("delete")
             });
 
             this.$modal.append(modal.render().el);
             modal.show();
 
-            $('#confirm').click( function (e) {
+            $('#confirm').click(function (e) {
                 modal.hide();
                 that.$modal.one('hidden.bs.modal', function (e) {
                     $('.waiting-modal').modal('show');
 
                     that.model.destroy({
-                        success: function(model, res) {
+                        success: function (model, res) {
                             $('.waiting-modal').modal('hide');
-                            modal.template= JST["views/templates/dialog-bootstrap.ejs"];
-                            modal.title= i18n('ok');
-                            modal.body= i18n('biobank-deleted');
+                            modal.template = require("./../../templates/dialog-bootstrap.ejs");
+                            modal.title = i18n('ok');
+                            modal.body = i18n('biobank-deleted');
                             that.$modal.append(modal.render().el);
                             $('.modal-header').addClass('alert-success');
                             modal.show();
-                            setTimeout(function(){ modal.hide(); }, 1200);
+                            setTimeout(function () { modal.hide(); }, 1200);
                             that.$modal.one('hidden.bs.modal', function (e) {
                                 modal.remove();
-                                xtens.router.navigate('biobanks', {trigger: true});
+                                xtens.router.navigate('biobanks', { trigger: true });
                             });
                         },
-                        error: function(model, res) {
+                        error: function (model, res) {
                             xtens.error(res);
                         }
                     });
                 });
                 return false;
             });
-
         }
 
     });
@@ -167,20 +167,19 @@
         tagName: 'div',
         className: 'biobanks',
 
-        initialize: function(options) {
+        initialize: function (options) {
             $("#main").html(this.el);
-            this.template = JST["views/templates/biobank-list.ejs"];
+            this.template = require("./../../templates/biobank-list.ejs");
             this.biobanks = options.biobanks;
 
             this.render();
         },
 
-        render: function(options) {
-
-            this.$el.html(this.template({__: i18n, biobanks: this.biobanks.models}));
+        render: function (options) {
+            this.$el.html(this.template({ __: i18n, biobanks: this.biobanks.models }));
 
             $('.table').DataTable({
-                scrollY:        '50vh',
+                scrollY: '50vh',
                 scrollCollapse: true,
                 "searching": true
             });
@@ -188,5 +187,4 @@
             return this;
         }
     });
-
-} (xtens, xtens.module("biobank")));
+}(xtens, require('./Biobank.js')));

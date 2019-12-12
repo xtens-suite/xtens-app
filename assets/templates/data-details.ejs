@@ -118,14 +118,14 @@
         if (loopsGroups['true'] && loopsGroups['true'].length > 0) {
             var maxLoopNumber = _.max(_.map(_.filter(metadata, function(m) {return m.group == groupName && m.loop; }), function (a) {return a.values ? a.values.length : 0})) 
             maxLoopNumber = maxLoopNumber > 0 ? maxLoopNumber : 1;
-            for (let index = 1; index <= maxLoopNumber; index++) {%>
+            for (var index = 1; index <= maxLoopNumber; index++) {%>
 
             <div class="metadatagroup span7 center">
                 <%var loopGroupName = _.filter(metadata, function(m) {return m.group == groupName && m.loop; })
                         if(loopGroupName.length > 0) {%>
                 <h4 class="metadatagroup-header text-uppercase">
                     <%= _.filter(metadata, function(m) {return m.group == groupName && m.loop; })[0].loop %>
-                    #<%=index %>
+                    #<%= index %>
                 </h4>
                 <div class="metadatacomponent-body">
                     <%}%>

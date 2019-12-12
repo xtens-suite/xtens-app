@@ -1,47 +1,97 @@
-<h1><%= __("subject-details") %></h1>
+<h1>
+    <%= __("data-details") %>
+</h1>
 
 <div id="content">
     <div class="container data-header-cnt">
         <div id="data-header-row" class="row data-header-row">
             <div id="data-header" class="col-md-offset-2 col-md-6">
+                <div class="row margin-row">
+                    <label for="biobank" class="data-label">
+                        <%= __("biobank") %>: </label>
+                    <span class="data-span">
+                        <%= data.get("biobank").acronym %>
+                    </span>
+                </div>
 
-                <div id="personal-details">
-                    <!--
-                  <button id="add-personal-details" class="btn btn-info"><%= __('add-personal-details') %></button>
-                  -->
+                <div class="row margin-row">
+                    <label for="biobank-code" class="data-label">
+                        <%= __("biobank-code") %>: </label>
+                    <span class="data-span">
+                        <%= data.get("biobankCode") %>
+                    </span>
+                </div>
+
+                <div class="row margin-row">
+
+                    <% if (data.get("donor") && data.get("donor").length > 0) {%>
+                    <label for="donor" class="data-label">
+                        <%=  data.get("donor").length === 1 ? __("donor") : __("donors") %>: </label>
+                    <span class="data-span">
+                        <%=_.map(data.get("donor"), "code").join(",") %>
+                    </span>
+                    <%} %>
+
+                    <% if (data.get("parentSample") && data.get("parentSample").length > 0) {%>
+                    <label for="parentSample" class="data-label">
+                        <%= data.get("parentSample").length === 1 ?  __("sample") :  __("samples") %>: </label>
+                    <span class="data-span">
+                        <%= _.map(data.get("parentSample"), "biobankCode").join(",") %>
+                    </span>
+                    <%} %>
+
                 </div>
                 <div class="row margin-row">
-                    <label for="code" class="data-label"><%= __("code") %></label>
+                    <label for="dataType" class="data-label">
+                        <%= __("data-type") %>
+                    </label>
                     <div class="data-input-div">
-                        <span id="code" class="data-span"><%= data.get("code") %></span>
-                    </div>
-                </div>
-                <div class="row margin-row">
-                    <label for="sex" class="data-label"><%= __("sex") %></label>
-                    <div class="data-input-div">
-                        <div id="sex" name="sex" class="data-span"><%= data.get("sex") %></div>
-                    </div>
-                </div>
-                <div class="row margin-row">
-                    <label for="dataType" class="data-label"><%= __("data-type") %></label>
-                    <div class="data-input-div">
-                        <div id="dataType" name="dataType" class="data-span"><%= data.get("type").name %></div>
-                    </div>
-                </div>
-                <div class="row margin-row">
-                    <label for="tags" class="data-label"><%= __('tags') %></label>
-                    <div class="data-input-div">
-                        <div type="hidden" class="data-span" id="tags" name="tags">
-                            <%= _.isEmpty(data.get('tags')) ? '' : data.get('tags').join(', ') %>
+                        <div class="" id="dataType" name="dataType">
+                            <%= data.get("type").name %>
                         </div>
                     </div>
                 </div>
                 <div class="row margin-row">
-                    <label for="notes" class="data-label"><%= __('notes') %></label>
+                    <label for="date" class="data-label">
+                        <%= __('date') %>
+                    </label>
                     <div class="data-input-div">
-                        <div class="data-span" id="notes" name="notes" rows="4"><%= data.get('notes') || "" %></div>
+                        <div text class="" id="date" name="date"></div>
                     </div>
                 </div>
+                <div class="row margin-row">
+                    <label for="tags" class="data-label">
+                        <%= __('tags') %>
+                    </label>
+                    <div class="data-input-div">
+                        <div type="hidden" class="" id="tags" name="tags"></div>
+                    </div>
+                </div>
+                <div class="row margin-row">
+                    <label for="notes" class="data-label">
+                        <%= __('notes') %>
+                    </label>
+                    <div class="data-input-div">
+                        <div class="" id="notes" name="notes" rows="4"></div>
+                    </div>
+                </div>
+            </div>
+            <div id="file-header" class="col-md-4">
+                <% var files = data.get("files"); %>
+                <% if (files.length) { %>
+                <h4>
+                    <%=__("file-list")%>
+                </h4>
+                <% _.each(files, function(file) {%>
+                <div class="input-group margin-bottom-sm">
+                    <span class="input-group-addon"><i class="fa fa-file"></i></span>
+                    <div class="form-control" type="text">
+                        <% var fileFragments = file.uri.split(PATH_SEPARATOR); %>
+                        <%= fileFragments[fileFragments.length - 1 ] %>
+                    </div>
+                </div>
+                <%});
+                }%>
             </div>
         </div>
     </div>
@@ -59,6 +109,9 @@
                         var loopsGroups = _.groupBy(fields, '_loop');
                         if (loopsGroups['undefined'] && loopsGroups['undefined'].length > 0) { 
                         _.each(loopsGroups['undefined'], function(field,index) {%>
+                    <!--
+          <% var groupname = field._group %>
+            -->
 
                     <% if (!field.sensitive || xtens.session.get('canAccessSensitiveData') ) {%>
                     <div class="row margin-row">
@@ -84,20 +137,23 @@
             if (loopsGroups['true'] && loopsGroups['true'].length > 0) {
                 var maxLoopNumber = _.max(_.map(_.filter(metadata, function(m) {return m.group == groupName && m.loop; }), function (a) {return a.values ? a.values.length : 0})) 
                 maxLoopNumber = maxLoopNumber > 0 ? maxLoopNumber : 1;
-                for (let index = 1; index <= maxLoopNumber; index++) {%>
+                for (var index = 1; index <= maxLoopNumber; index++) {%>
 
             <div class="metadatagroup span7 center">
                 <%var loopGroupName = _.filter(metadata, function(m) {return m.group == groupName && m.loop; })
                             if(loopGroupName.length > 0) {%>
                 <h4 class="metadatagroup-header text-uppercase">
                     <%= _.filter(metadata, function(m) {return m.group == groupName && m.loop; })[0].loop %>
-                    #<%=index %>
+                    #<%= index; %>
                 </h4>
                 <div class="metadatacomponent-body">
-                    <%}%>
-    
-                    <%_.each(loopsGroups['true'], function(field) {
-                     if (!field.sensitive || xtens.session.get('canAccessSensitiveData') ) {%>
+                    <%}
+                    _.each(loopsGroups['true'], function(field) {%>
+                    <!--
+                      <% var groupname = field._group %>
+                        -->
+
+                    <% if (!field.sensitive || xtens.session.get('canAccessSensitiveData') ) {%>
                     <div class="row margin-row">
                         <span name="metadata-name" class="col-md-4 text-right" style="padding-left:29px">
                             <%=field.name%>
@@ -111,8 +167,8 @@
                         </div>
                     </div>
                     <%}
-                });
-                if(loopGroupName.length > 0) {%>
+                                });
+                                if(loopGroupName.length > 0) {%>
                 </div>
                 <%}%>
                         </div>
