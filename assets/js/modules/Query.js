@@ -35,7 +35,7 @@
     // var checkboxTemplate = _.template("<div class='checkbox'><input type='checkbox'></div>");
 
     // Factory method class to create specialized query views
-    function QueryViewFactory() {
+    function QueryViewFactory () {
         this.createModelQueryView = function (dataTypeModel, specializedFieldsObj) {
             switch (dataTypeModel) {
                 case DataTypeClasses.SUBJECT:
@@ -432,14 +432,14 @@
                 }
             } else if (fieldType === FieldTypes.INTEGER || fieldType === FieldTypes.FLOAT || fieldType === FieldTypes.DATE) {
                 data = [{ id: '=', text: '=' }, { id: '<=', text: '≤' },
-                { id: '>=', text: '≥' }, { id: '<', text: '<' },
-                { id: '>', text: '>' }, { id: '<>', text: '≠' }];
+                    { id: '>=', text: '≥' }, { id: '<', text: '<' },
+                    { id: '>', text: '>' }, { id: '<>', text: '≠' }];
             } else if (fieldType === FieldTypes.TEXT) {
                 data = [{ id: '=', text: '=' }, { id: '<>', text: '≠' },
-                { id: 'LIKE', text: 'CONTAINS' }, { id: 'NOT LIKE', text: 'NOT CONTAINS' },
-                { id: 'LIKES', text: 'STARTS WITH' }, { id: 'LIKEE', text: 'ENDS WITH' },
-                { id: 'ILIKE', text: 'ICONTAINS' }, { id: 'NOT ILIKE', text: 'INOT CONTAINS' }, { id: 'ILIKES', text: 'ISTARTS WITH' },
-                { id: 'ILIKEE', text: 'IENDS WITH' }];
+                    { id: 'LIKE', text: 'CONTAINS' }, { id: 'NOT LIKE', text: 'NOT CONTAINS' },
+                    { id: 'LIKES', text: 'STARTS WITH' }, { id: 'LIKEE', text: 'ENDS WITH' },
+                    { id: 'ILIKE', text: 'ICONTAINS' }, { id: 'NOT ILIKE', text: 'INOT CONTAINS' }, { id: 'ILIKES', text: 'ISTARTS WITH' },
+                    { id: 'ILIKEE', text: 'IENDS WITH' }];
             } else {
                 data = [{ id: '=', text: '=' }, { id: '<>', text: '≠' }];
             }
@@ -585,7 +585,7 @@
                 observe: 'surnameComparator',
                 initialize: function ($el) {
                     var data = [{ id: '=', text: '=' }, { id: '<>', text: '≠' },
-                    { id: 'LIKE', text: 'LIKE' }, { id: 'NOT LIKE', text: 'NOT LIKE' }];
+                        { id: 'LIKE', text: 'LIKE' }, { id: 'NOT LIKE', text: 'NOT LIKE' }];
                     $el.select2({
                         data: data
                     });
@@ -601,7 +601,7 @@
                 observe: 'givenNameComparator',
                 initialize: function ($el) {
                     var data = [{ id: '=', text: '=' }, { id: '<>', text: '≠' },
-                    { id: 'LIKE', text: 'LIKE' }, { id: 'NOT LIKE', text: 'NOT LIKE' }];
+                        { id: 'LIKE', text: 'LIKE' }, { id: 'NOT LIKE', text: 'NOT LIKE' }];
                     $el.select2({
                         data: data
                     });
@@ -617,8 +617,8 @@
                 observe: 'birthDateComparator',
                 initialize: function ($el) {
                     var data = [{ id: '=', text: '=' }, { id: '<>', text: '≠' },
-                    { id: '<=', text: '≤' }, { id: '>=', text: '≥' },
-                    { id: '<', text: '<' }, { id: '>', text: '>' }];
+                        { id: '<=', text: '≤' }, { id: '>=', text: '≥' },
+                        { id: '<', text: '<' }, { id: '>', text: '>' }];
                     $el.select2({
                         data: data
                     });
@@ -1579,7 +1579,7 @@
                     }
                     that.buffer = [];
                     if (that.tableView) {
-                        that.$queryNoResultCnt.hide();
+                        that.$(".query-hidden").hide();
                     }
                     that.hideProgressbar();
                     return reader.cancel();
