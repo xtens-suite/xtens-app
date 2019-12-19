@@ -6,8 +6,7 @@
   "keywords": [],
   "dependencies": {
     "JSONStream": "^1.2.1",
-    "bcrypt-nodejs": "0.0.3",
-    "bcryptjs": "^2.1.0",
+    "bcryptjs": "^2.4.3",
     "bluebird": "^3.3.0",
     "connect-livereload": "^0.4.1",
     "deep-diff": "^0.3.8",

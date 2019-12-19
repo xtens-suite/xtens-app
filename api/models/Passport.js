@@ -1,4 +1,5 @@
-var bcrypt = require('bcrypt-nodejs');
+/* eslint-disable handle-callback-err */
+var bcrypt = require('bcryptjs');
 
 /**
  * Hash a passport password.
@@ -8,7 +9,7 @@ var bcrypt = require('bcrypt-nodejs');
  */
 function hashPassword (passport, next) {
     if (passport.password) {
-        bcrypt.hash(passport.password, bcrypt.genSaltSync(10), null, function (err, hash) {
+        bcrypt.hash(passport.password, bcrypt.genSaltSync(10), function (err, hash) {
             passport.password = hash;
             next(err, passport);
         });
