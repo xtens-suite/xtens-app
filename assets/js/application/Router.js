@@ -254,9 +254,11 @@
             var group = new Group.Model({ id: id });
             var members = new Operator.List();
             var groupDeferred = group.fetch({
-                data: $.param({ populate: ['members'] })
+                data: $.param({ populate: ['members'], limit: 1000 })
             });
-            $.when(members.fetch(), groupDeferred).then(function (membersRes, groupRes) {
+            $.when(members.fetch({
+                data: $.param({ limit: 1000 })
+            }), groupDeferred).then(function (membersRes, groupRes) {
                 that.loadView(new AdminAssociation.Views.Edit({
                     dominant: new Group.Model(groupRes && groupRes[0]),
                     nondominant: membersRes && membersRes[0],
