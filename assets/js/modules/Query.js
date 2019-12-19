@@ -1578,6 +1578,9 @@
                         that.tableView.addRowsDataTable(that.buffer);
                     }
                     that.buffer = [];
+                    if (that.tableView) {
+                        that.$queryNoResultCnt.hide();
+                    }
                     that.hideProgressbar();
                     return reader.cancel();
                 }
@@ -1642,6 +1645,7 @@
             if (!result) this.queryOnError(null, null, "Missing result object");
 
             if (_.isEmpty(result.data)) {
+                this.tableView = null;
                 this.$queryNoResultCnt.show();
                 return;
             }
@@ -1672,7 +1676,6 @@
          * @description
          */
         hideProgressbar: function () {
-            this.$(".query-hidden").hide();
             this.modal && this.modal.hide();
         }
 
