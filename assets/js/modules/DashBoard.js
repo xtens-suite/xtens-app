@@ -170,7 +170,12 @@
             return this;
         },
 
+        resetTips: function () {
+            $('.d3-tip').css('opacity', 0).css('pointer-events', 'none');
+        },
+
         createGraph: function () {
+            this.resetTips();
             var that = this;
             var data = this.data;
             var totalData = this.data.reduce(function (s, f) {
@@ -204,7 +209,7 @@
                 .style("margin-top", '5vh')
                 .append("g")
                 .attr("transform", "translate(" + svgTraslationX + "," + svgTraslationY + ")");
-
+            this.svg = svg;
             // tooltip and mouseevent initialization
             var tip = d3.tip()
                 .attr('class', 'd3-tip')
@@ -246,15 +251,19 @@
                 .enter().append("g")
                 .attr("class", "arc");
 
+            this.chart = g;
+
             g.append("path")
                 .style("fill", function (d) {
                     return color(d.data.label);
                 }) // set the color for each slice to be chosen from the color function defined above
                 .attr("d", arc)
                 .on('mouseover', function (d) {
+                    that.resetTips();
                     handlemouseover(this, d);
                 })
                 .on('mouseout', function (d) {
+                    that.resetTips();
                     handlemouseout(this, d);
                 })
                 .on('mousemove', function (d) {
@@ -274,7 +283,15 @@
                 .attr("x", $('.' + that.title).width() - 18)
                 .attr("width", 18)
                 .attr("height", 18)
-                .style("fill", color);
+                .style("fill", color)
+                .on('mouseover', function (d) {
+                    that.resetTips();
+                    handlemouseover(this, d);
+                })
+                .on('mouseout', function (d) {
+                    that.resetTips();
+                    handlemouseout(this, d);
+                });
 
             legend.append("text")
                 .attr("x", $('.' + that.title).width() - 24)
@@ -283,6 +300,14 @@
                 .style("text-anchor", "end")
                 .text(function (label) {
                     return label;
+                })
+                .on('mouseover', function (d) {
+                    that.resetTips();
+                    handlemouseover(this, d);
+                })
+                .on('mouseout', function (d) {
+                    that.resetTips();
+                    handlemouseout(this, d);
                 });
         }
     });
@@ -423,7 +448,12 @@
             return this;
         },
 
+        resetTips: function () {
+            $('.d3-tip').css('opacity', 0).css('pointer-events', 'none');
+        },
+
         createGraph: function () {
+            this.resetTips();
             $("svg", this.$el).remove();
             var that = this;
             var margin = {
@@ -546,8 +576,15 @@
                 .attr("height", function (d) {
                     return height - yBar(d.value);
                 })
-                .on('mouseover', tipBar.show)
-                .on('mouseout', tipBar.hide);
+                .on('mouseover',
+                    function (d) {
+                        that.resetTips();
+                        tipBar.show(d);
+                    })
+                .on('mouseout', function (d) {
+                    that.resetTips();
+                    tipBar.hide(d);
+                });
 
             svg.append("path")
                 .data([this.data])
@@ -576,8 +613,14 @@
                 .attr("r", function () {
                     return 5;
                 })
-                .on('mouseover', tipPoint.show)
-                .on('mouseout', tipPoint.hide);
+                .on('mouseover', function (d) {
+                    that.resetTips();
+                    tipPoint.show(d);
+                })
+                .on('mouseout', function (d) {
+                    that.resetTips();
+                    tipPoint.hide(d);
+                });
         }
     });
 }(xtens, xtens.module("dashboard")));
