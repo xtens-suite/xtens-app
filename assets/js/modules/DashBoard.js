@@ -209,7 +209,7 @@
                 .style("margin-top", '5vh')
                 .append("g")
                 .attr("transform", "translate(" + svgTraslationX + "," + svgTraslationY + ")");
-            this.svg = svg;
+
             // tooltip and mouseevent initialization
             var tip = d3.tip()
                 .attr('class', 'd3-tip')
@@ -251,8 +251,6 @@
                 .enter().append("g")
                 .attr("class", "arc");
 
-            this.chart = g;
-
             g.append("path")
                 .style("fill", function (d) {
                     return color(d.data.label);
@@ -283,15 +281,7 @@
                 .attr("x", $('.' + that.title).width() - 18)
                 .attr("width", 18)
                 .attr("height", 18)
-                .style("fill", color)
-                .on('mouseover', function (d) {
-                    that.resetTips();
-                    handlemouseover(this, d);
-                })
-                .on('mouseout', function (d) {
-                    that.resetTips();
-                    handlemouseout(this, d);
-                });
+                .style("fill", color);
 
             legend.append("text")
                 .attr("x", $('.' + that.title).width() - 24)
@@ -300,14 +290,6 @@
                 .style("text-anchor", "end")
                 .text(function (label) {
                     return label;
-                })
-                .on('mouseover', function (d) {
-                    that.resetTips();
-                    handlemouseover(this, d);
-                })
-                .on('mouseout', function (d) {
-                    that.resetTips();
-                    handlemouseout(this, d);
                 });
         }
     });
