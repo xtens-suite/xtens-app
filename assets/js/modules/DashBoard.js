@@ -318,23 +318,28 @@
         initialize: function (options) {
             this.periods = [{
                 name: "Last Year",
-                value: "year"
+                value: "year",
+                graphFormat: "%Y-%m"
             },
             {
                 name: "All time",
-                value: "allyear"
+                value: "allyear",
+                graphFormat: "%Y"
             },
             {
                 name: "Current Year - " + new Date().getFullYear(),
-                value: "year-" + new Date().getFullYear()
+                value: "year-" + new Date().getFullYear(),
+                graphFormat: "%Y-%m"
             },
             {
                 name: "Last Month",
-                value: "month"
+                value: "month",
+                graphFormat: "%m-%d"
             },
             {
                 name: "Last Week",
-                value: "week"
+                value: "week",
+                graphFormat: "%m-%d"
             }
             ];
 
@@ -342,7 +347,8 @@
             this.title = options.title;
             this.DataTypes = options.DataTypes;
             this.selectedDataType = this.DataTypes[0];
-            this.selectedPeriod = "year";
+            this.selectedPeriod = this.periods[0].value;
+            this.selectedFormat = this.periods[0].graphFormat;
             this.setDateFieldsCurrentDataType();
 
             this.selectedField = "created_at";
@@ -385,6 +391,7 @@
         onChangePeriod: function (ev) {
             ev.preventDefault();
             this.selectedPeriod = this.$('#period-sel').val();
+            this.selectedFormat = _.findWhere(this.periods, { value: this.selectedPeriod });
             this.fetchData();
         },
 
@@ -452,9 +459,16 @@
                 return s + parseInt(f.value); // return the sum of the accumulator and the current time, as the the new accumulator
             }, 0);
 
+            // var parseTime = d3.timeParse(this.selectedFormat);
+            // var labels = _.map(this.data, 'date');
+
+            // var xTime = d3.scaleTime().domain([
+            //     d3.min(labels, function (d) { return parseTime(d); }),
+            //     d3.max(labels, function (d) { return parseTime(d); })]).range([0, width - xAxisTraslation]);// .paddingInner(0.2).paddingOuter(0.25);
+
             var xBar = d3.scaleBand().range([0, width - xAxisTraslation]).paddingInner(0.2).paddingOuter(0.25);
             var yBar = d3.scaleLinear().range([height, 0]);
-            var xLine = d3.scalePoint().range([0, width - xAxisTraslation]).padding(0.5);
+            var xLine = d3.scalePoint().range([0, width - xAxisTraslation]).padding(0.62);
             var yLine = d3.scaleLinear().range([height, 0]);
 
             var valueline = d3.line()
@@ -510,6 +524,7 @@
             xBar.domain(this.data.map(function (d) {
                 return d.date;
             }));
+
             xLine.domain(this.data.map(function (d) {
                 return d.date;
             }));
@@ -595,13 +610,13 @@
                 .attr("r", function () {
                     return 5;
                 })
-                .on('mouseover', function (d) {
+                .on('mouseover', function (d, i) {
                     that.resetTips();
-                    tipPoint.show(d);
+                    tipPoint.show(d, i);
                 })
-                .on('mouseout', function (d) {
+                .on('mouseout', function (d, i) {
                     that.resetTips();
-                    tipPoint.hide(d);
+                    tipPoint.hide(d, i);
                 });
         }
     });
