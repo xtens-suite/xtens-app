@@ -1236,7 +1236,7 @@
             this.params = options.params;
             this.parentDataType = options.params && options.params.parentDataType;
             this.parentSubject = options.params && options.params.parentSubject;
-            this.parentSubjectCode = options.params && options.params.parentSubjectCode;
+            this.parentSubjectCode = options.params && options.params.parentSubjectCode ? options.params.parentSubjectCode : options.params.donorCode ? options.params.donorCode : null;
             this.parentSample = options.params && options.params.parentSample;
             this.parentData = options.params && options.params.parentData;
             this.render();
