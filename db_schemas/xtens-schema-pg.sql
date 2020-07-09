@@ -1716,6 +1716,7 @@ CREATE TABLE project (
     id integer NOT NULL,
     name text NOT NULL,
     description text,
+    owner integer,
     created_at timestamp with time zone NOT NULL,
     updated_at timestamp with time zone NOT NULL
 );
@@ -2980,6 +2981,14 @@ ALTER TABLE ONLY daemon
 
 ALTER TABLE ONLY sample
     ADD CONSTRAINT sample_pkey PRIMARY KEY (id);
+
+--
+-- Name: owner_fkey; Type: CONSTRAINT; Schema: public; Owner: xtenspg; Tablespace:
+--
+
+
+ALTER TABLE ONLY project
+    ADD CONSTRAINT owner_fkey FOREIGN KEY (owner) REFERENCES operator(id) MATCH FULL;
 
 
 --

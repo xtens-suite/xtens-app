@@ -35,7 +35,7 @@
     "pg": "^6.1.0",
     "randexp": "^0.5.3",
     "rc": "~0.3.3",
-    "sails": "0.12.13",
+    "sails": "^0.12.8",
     "sails-disk": "~0.10.7",
     "sails-postgresql": "git+https://github.com/xtens-suite/sails-postgresql.git",
     "skipper": "^0.5.3",

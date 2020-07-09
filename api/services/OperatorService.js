@@ -6,14 +6,13 @@
 
 /* jshint esnext: true */
 /* jshint node: true */
-/* globals _, sails , GroupService, DataType */
+/* globals _, sails ,Group, GroupService, DataType */
 
 const BluebirdPromise = require('bluebird');
 
 const coroutines = {
 
-    getOwners: BluebirdPromise.coroutine(function *(datum) {
-
+    getOwners: BluebirdPromise.coroutine(function* (datum) {
         if (!datum || !datum.type) {
             return [];
         }
@@ -22,20 +21,34 @@ const coroutines = {
         if (!_.isObject(datum.type)) {
             let dataType = yield DataType.findOne(datum.type);
             idProject = dataType.project;
-        }
-        else {
+        } else {
             idProject = _.isObject(datum.type.project) ? datum.type.project.id : datum.type.project;
         }
 
         let groups = yield GroupService.getGroupsByProject(idProject);
 
-        let operators = _.uniq(_.flatten(_.map(groups,'members')));
+        let operators = _.uniq(_.flatten(_.map(groups, 'members')));
         return operators;
+    }),
 
+    getOperatorsAdminByProject: BluebirdPromise.coroutine(function* (projectId) {
+        if (_.isObject(projectId)) {
+            projectId = projectId.id;
+        }
+
+        let groups;
+        if (!projectId) {
+            groups = yield Group.find().populate('members');
+        } else {
+            groups = yield GroupService.getGroupsByProject(projectId);
+        }
+
+        groups = groups.filter(gr => { return gr.privilegeLevel !== "standard"; });
+
+        let operators = _.uniq(_.flatten(_.map(groups, 'members')));
+        return operators;
     })
 };
-
-
 
 var OperatorService = BluebirdPromise.promisifyAll({
 
@@ -46,12 +59,20 @@ var OperatorService = BluebirdPromise.promisifyAll({
      * @description find a list of Operators
      * @return {Array} - list of elegible Operators to owner a specific datum
      */
-    getOwners: function(datum) {
+    getOwners: function (datum) {
         return coroutines.getOwners(datum)
-        .catch(/* istanbul ignore next */ function(err) {
-            sails.log.error(err);
-            return err;
-        });
+            .catch(/* istanbul ignore next */ function (err) {
+                sails.log.error(err);
+                return err;
+            });
+    },
+
+    getOperatorsAdminByProject: function (datum) {
+        return coroutines.getOperatorsAdminByProject(datum)
+            .catch(/* istanbul ignore next */ function (err) {
+                sails.log.error(err);
+                return err;
+            });
     }
 });
 

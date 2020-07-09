@@ -36,18 +36,13 @@
                 aria-expanded="false"><%= __("administration")%>
                 &nbsp;&nbsp;&nbsp;&nbsp;</a>
               <ul class="dropdown-menu">
-                <% if (session.get("isWheel")) {%>
+                <% if (session.get("isWheel") || session.get("isAdmin")) {%>
                 <!-- <p id="title"><%= __("super-user")%></p> -->
                 <li> <a href="#/projects"> <%= __("projects") %></a> </li>
                 <li> <a href="#/groups"> <%= __("groups") %></a> </li>
                 <li> <a href="#/operators"> <%= __("operators") %></a> </li>
                 <li> <a href="#/biobanks"> <%= __("biobanks") %></a> </li>
                 <li> <a href="#/datatypes"> <%= __("data-types") %></a> </li>
-                <%}
-                else if (session.get("isAdmin")) {%>
-                <!-- <p id="title"><%= __("manager")%></p> -->
-                <li><a href="#/biobanks"> <%= __("biobanks") %></a> </li>
-                <li><a href="#/datatypes"> <%= __("data-types") %></a> </li>
                 <%}
                 else {%>
                 <!-- <p id="title"><%= __("standard")%></p> -->

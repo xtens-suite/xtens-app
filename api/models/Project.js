@@ -23,14 +23,19 @@ module.exports = {
             via: 'project'
         },
 
-        groups:{
-            collection:'group',
-            via:'projects'
+        groups: {
+            collection: 'group',
+            via: 'projects'
         },
 
-        biobanks:{
-            collection:'biobank',
-            via:'projects'
+        biobanks: {
+            collection: 'biobank',
+            via: 'projects'
+        },
+
+        owner: {
+            model: 'operator',
+            columnName: 'owner'
         },
 
         createdAt: {
