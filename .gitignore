@@ -159,3 +159,4 @@ assets/js/jst.js
 #################################################
 logs/*
 !logs/.gitkeep
+package-lock.json

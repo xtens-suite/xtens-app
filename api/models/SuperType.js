@@ -19,6 +19,10 @@ var SuperType = {
             required: true,
             columnName: 'schema'
         },
+        skipPaging: {
+            type: 'boolean',
+            columnName: 'skip_paging'
+        },
         createdAt: {
             type: 'datetime',
             columnName: 'created_at'
