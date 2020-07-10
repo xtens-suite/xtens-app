@@ -1943,6 +1943,7 @@ CREATE TABLE super_type (
     name text NOT NULL,
     uri text NOT NULL,
     schema jsonb NOT NULL,
+    skip_paging boolean DEFAULT FALSE NOT NULL,
     created_at timestamp with time zone NOT NULL,
     updated_at timestamp with time zone NOT NULL
 );
