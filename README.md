@@ -33,8 +33,6 @@ It is designed with the following features:
 
 ## Using Docker [<img src="https://live.staticflickr.com/1580/24174642365_68f0c433e2.jpg" target="_blank" alt="drawing" width="60"/>](https://www.docker.com/) <a name="using-docker" />
 
-A dockerized version of Galaxy containing PIPE-T, based on [bgruening galaxy-stable](https://github.com/bgruening/docker-galaxy-stable) is also available.
-
 At first you need to install Docker. Please follow the instructions to install docker based on your machine OS:
 - [<img target="_blank" src="https://upload.wikimedia.org/wikipedia/commons/e/e0/Windows_logo.png" alt="drawing" width="150"/>](https://hub.docker.com/editions/community/docker-ce-desktop-windows)
 - [<img target="_blank" src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/fa/Apple_logo_black.svg/1024px-Apple_logo_black.svg.png" alt="drawing" width="40"/> <img target="_blank" src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/00/MacOS_wordmark.svg/216px-MacOS_wordmark.svg.png" alt="drawing" width="120"/>](https://hub.docker.com/editions/community/docker-ce-desktop-mac  )
