@@ -1,8 +1,9 @@
 <h1><%= __("subject-manager") %></h1>
 <h2><%= data.id ? __("update-subject") : __("create-subject") %></h2>
 <div id="content">
-    <form class="form-horizontal edit-subject-form" role="form" data-parsley-focus="first" data-parsley-trigger="focusout" data-parsley-validate>
-        <!--
+  <form class="form-horizontal edit-subject-form" role="form" data-parsley-focus="first" data-parsley-trigger="focusout"
+    data-parsley-validate>
+    <!--
         <div class="form-group">
             <label for="dataType" class="data-label"><%= __("select-a-data-type") %></label>
             <div class="data-input-div">
@@ -11,56 +12,63 @@
             </div>
         </div>
         -->
-        <div class="row bg-diff" id="personal-details">
-            <!--
+    <div class="row bg-diff" id="personal-details">
+      <!--
             <button id="add-personal-details" class="btn btn-info"><%= __('add-personal-details') %></button>
             -->
-        </div>
-        <div id="metadataform-group-cnt" class="row" style="margin-top:2em;">
-
-        <div class="form-group metadataform-group">
-            <label for="code" class="data-label"><%= __('code') %></label>
-            <div class="data-input-div">
-              <div class="input-group">
-                  <input text class="form-control" id="code" name="code"></input>
-                  <span id="get-next-code" class="input-group-addon ">Example: PREFIX-NUMBER (AA-1)</span>
-              </div>
-            </div>
-        </div>
-        <div class="form-group metadataform-group">
-            <label for="sex" class="data-label"><%= __('sex') %></label>
-            <div class="data-input-div">
-                <input type="hidden" class="form-control" id="sex" name="sex"></select>
-            </div>
-        </div>
-        <div class="form-group metadataform-group">
-            <label for="owner" class="data-label"><%= __("owner") %></label>
-            <div class="data-input-div">
-                <select disabled class="form-control" id="owner" name="owner" required></select>
-            </div>
-        </div>
-        <div class="form-group metadataform-group">
-            <label for="tags" class="data-label"><%= __('tags') %></label>
-            <div class="data-input-div">
-                <input type="hidden" class="form-control" id="tags" name="tags"></input>
-            </div>
-        </div>
-        <div class="form-group metadataform-group">
-            <label for="notes" class="data-label"><%= __('notes') %></label>
-            <div class="data-input-div">
-                <textarea class="form-control" id="notes" name="notes" rows="4"></textarea>
-            </div>
-        </div>
-        <div id="buttonbardiv" class="row text-center">
-            <div class="btn-group btn-group-margin">
-                <input type="submit" id="save" class="btn btn-primary" value="<%=__('save') %>" >
-                <% if (data.id) { %>
-                    <input type="hidden" id="id" name="id" value="<%= data.id %>" />
-                    <button data-data-id="<%= data.id %>" data-target-route="subjects" class="btn btn-danger delete"><%= __("delete") %></button>
-                <%} %>
-            </div>
+    </div>
+    <div id="metadataform-group-cnt" class="row" style="margin-top:2em;">
+      <div class="form-group metadataform-group">
+        <% if (data.get("parentSubject") && data.get("parentSubject").length > 0) {%>
+        <label for="parentSubject"
+          class="data-label"><%= data.get("parentSubject").length === 1 ? __("parent-subject") : __("parent-subjects")  %>: </label>
+        <span class="data-span"><%= _.map(data.get("parentSubject"), "code").join(",") %></span>
+        <%} %>
+      </div>
+      <div class="form-group metadataform-group">
+        <label for="code" class="data-label"><%= __('code') %></label>
+        <div class="data-input-div">
+          <div class="input-group">
+            <input text class="form-control" id="code" name="code"></input>
+            <span id="get-next-code" class="input-group-addon ">Example: PREFIX-NUMBER (AA-1)</span>
+          </div>
         </div>
       </div>
-    </form>
+      <div class="form-group metadataform-group">
+        <label for="sex" class="data-label"><%= __('sex') %></label>
+        <div class="data-input-div">
+          <input type="hidden" class="form-control" id="sex" name="sex"></select>
+        </div>
+      </div>
+      <div class="form-group metadataform-group">
+        <label for="owner" class="data-label"><%= __("owner") %></label>
+        <div class="data-input-div">
+          <select disabled class="form-control" id="owner" name="owner" required></select>
+        </div>
+      </div>
+      <div class="form-group metadataform-group">
+        <label for="tags" class="data-label"><%= __('tags') %></label>
+        <div class="data-input-div">
+          <input type="hidden" class="form-control" id="tags" name="tags"></input>
+        </div>
+      </div>
+      <div class="form-group metadataform-group">
+        <label for="notes" class="data-label"><%= __('notes') %></label>
+        <div class="data-input-div">
+          <textarea class="form-control" id="notes" name="notes" rows="4"></textarea>
+        </div>
+      </div>
+      <div id="buttonbardiv" class="row text-center">
+        <div class="btn-group btn-group-margin">
+          <input type="submit" id="save" class="btn btn-primary" value="<%=__('save') %>">
+          <% if (data.id) { %>
+          <input type="hidden" id="id" name="id" value="<%= data.id %>" />
+          <button data-data-id="<%= data.id %>" data-target-route="subjects"
+            class="btn btn-danger delete"><%= __("delete") %></button>
+          <%} %>
+        </div>
+      </div>
+    </div>
+  </form>
 </div>
 <div class="subject-modal"></div>

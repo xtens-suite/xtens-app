@@ -50,6 +50,7 @@ function renderDatatablesDate(data, type) {
             "click .xtenstable-details": "showDetailsView",
             "click .xtenstable-edit": "showEditView",
             "mouseover .xtenstable-files": "showFileList",
+            "click .xtenstable-derivedsubjects": "showDerivedSubjectsList",
             "click .xtenstable-derivedsamples": "showDerivedSampleList",
             "click .xtenstable-deriveddata": "showDerivedDataList",
             "click .xtenstable-subjectgraph": "showSubjectGraph",
@@ -874,6 +875,33 @@ function renderDatatablesDate(data, type) {
             var data = currRow.data();
             var dataId = data.id;
             var path = "subjects/dashboard?idPatient=" + dataId;
+
+            xtens.router.navigate(path, { trigger: true });
+            return false;
+        },
+
+        /**
+         * @method
+         * @name showDerivedSubjectsList
+         * @param{Object} ev - the current event
+         * @description returns a list of the samples stored as children of the given data instance
+         *
+         */
+        showDerivedSubjectsList: function (ev) {
+            var currRow = this.table.row($(ev.currentTarget).parents('tr'));
+            var data = currRow.data();
+            var dataType = this.multiProject || this.isLeafSearch ? _.find(this.dataTypes.models, { 'id': data.type }) : this.dataTypes;
+            var model = dataType && dataType.get("model");
+            // DATA cannot have sample child
+            if (model === Classes.DATA) { return false; }
+
+            var parentProperty = 'parentSubject';
+            var dataId = data.id;
+            var path = "subjects?" + parentProperty + "=" + dataId;
+
+            // TODO change "code" to "subjectCode" for sake of clarity
+            path += data.code ? "&parentSubjectCode=" + data.code : '';
+            path += "&parentDataType=" + dataType.id;
 
             xtens.router.navigate(path, { trigger: true });
             return false;

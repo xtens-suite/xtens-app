@@ -193,6 +193,7 @@ let DataTypeService = {
             name: Joi.string().trim(),
             uri: Joi.string().trim(),
             schema: Joi.object().required(),
+            skipPaging: Joi.boolean(),
             createdAt: Joi.date(),
             updatedAt: Joi.date()
         };
@@ -205,7 +206,7 @@ let DataTypeService = {
             getParentCode: Joi.boolean().default(false),
             ifParentNoPrefix: Joi.boolean().default(false),
             project: Joi.number().integer().required(),
-            superType: Joi.object().required().keys(superTypeValidationSchema),
+            superType: Joi.number().integer().required(),
             parents: Joi.array().allow(null),
             children: Joi.array().allow(null),
             data: Joi.array().allow(null),
@@ -213,7 +214,7 @@ let DataTypeService = {
             updatedAt: Joi.date()
         };
 
-        if (performSchemaValidation) {
+        if (performSchemaValidation && isNaN(dataType.superType)) {
 
             let metadataFieldValidationSchema = Joi.object().keys({
                 name: Joi.string().required(),

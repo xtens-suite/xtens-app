@@ -38,6 +38,8 @@
 
     Subject.Views.Edit = Data.Views.Edit.fullExtend({
 
+
+
         bindings: {
 
             '#owner': {
@@ -113,6 +115,12 @@
             } else {
                 this.model = new Subject.Model();
             }
+            _.each(["parentSubject"], function (parent) {
+                if (options[parent]) {
+                    this.model.set(parent, _.isArray() ? options[parent] : [options[parent]]);
+                }
+            }, this);
+
             this.render();
             if (!options.subject) {
                 if (this.dataType) {
@@ -225,6 +233,7 @@
             }
             // this.model.get("notes") === "" ? this.model.set("notes", null) : null;
             // this.model.get("owner").id ? this.model.set("owner", this.model.get("owner").id) : null;
+            this.model.get("parentSubject") && this.model.get("parentSubject").length > 0 ? this.model.set("parentSubject", _.map(this.model.get("parentSubject"), "id")) : null;
 
             this.model.save(null, {
                 success: function (subject) {
@@ -403,7 +412,8 @@
 
         events: {
             'click .pagin': 'changePage',
-            'click #moreData': 'loadResults'
+            'click #moreData': 'loadResults',
+            'click #newSubject': 'openNewSubjectView'
         },
 
         tagName: 'div',
@@ -417,8 +427,22 @@
             this.headers = options.paginationHeaders;
             this.dataTypePrivileges = options.dataTypePrivileges.models;
             this.params = options.params;
+            this.parentSubject = options.params && options.params.parentSubject;
+            this.parentSubjectCode = options.params && options.params.parentSubjectCode ? options.params.parentSubjectCode : options.params.donorCode ? options.params.donorCode : null;
+            this.parentDataType = options.params && options.params.parentDataType;
             this.template = JST["views/templates/subject-list.ejs"];
             this.render();
+        },
+
+        openNewSubjectView: function (ev) {
+            ev.preventDefault();
+            var parentSubjectQuery = this.parentSubject ? 'parentSubject=' + this.parentSubject : '';
+            var parentSubjectCodeQuery = this.parentSubjectCode ? 'parentSubjectCode=' + this.parentSubjectCode : '';
+            var parentDataTypeQuery = this.parentDataType ? 'parentDataType=' + this.parentDataType : '';
+            var queryString = _.compact([parentSubjectQuery, parentSubjectCodeQuery, parentDataTypeQuery]).join('&');
+            var route = _.trim(['/subjects/new', queryString].join('/0?'));
+            xtens.router.navigate(route, { trigger: true });
+            return false;
         },
 
         addLinksToModels: function (subjects) {
@@ -432,6 +456,11 @@
                 }
                 var type = this.dataTypes.get(subject.get("type"));
                 if (type && type.get("children") && type.get("children").length > 0) {
+                    var subjectTypeChildren = _.where(type.get("children"), { "model": Classes.SUBJECT });
+                    if (subjectTypeChildren.length) {
+                        var sbids = _.map(subjectTypeChildren, 'id').join();
+                        subject.set("newSubjectLink", "#/samples/new/0?idDataTypes=" + sbids + "&parentSubject=" + subject.id);
+                    }
                     var sampleTypeChildren = _.where(type.get("children"), { "model": Classes.SAMPLE });
                     if (sampleTypeChildren.length) {
                         var sids = _.map(sampleTypeChildren, 'id').join();
@@ -855,6 +884,10 @@
                                 var model = splitted[0];
                                 var id = splitted[1];
                                 switch (model) {
+                                    case "sb":
+                                        $('.d3-tip').remove();
+                                        xtens.router.navigate('subjects/dashboard?idPatient=' + id, { trigger: true });
+                                        break;
                                     case "s":
                                         $('.d3-tip').remove();
                                         xtens.router.navigate('samples/details/' + id, { trigger: true });
@@ -931,6 +964,13 @@
                             return that.itemsVisibility[key];
                         }
                     },
+                    "new_subject": {
+                        name: "NewDerivativeSubject",
+                        icon: "fa-plus-square-o",
+                        visible: function (key, opt) {
+                            return that.itemsVisibility[key];
+                        }
+                    },
                     "new_sample": {
                         name: "NewDerivativeSample",
                         icon: "fa-plus-square-o",
@@ -959,6 +999,8 @@
 
             this.itemsVisibility['details'] = !!datum["details"];
 
+            this.itemsVisibility['new_subject'] = !!datum["new_subject"];
+
             this.itemsVisibility['new_sample'] = !!datum["new_sample"];
 
             this.itemsVisibility['new_data'] = !!datum["new_data"];
@@ -973,7 +1015,7 @@
                     var updated = manageDatum(datum);
                     datum = updated;
                 });
-                if (this.data[0].source.name !== this.data[0].type) {
+                if ((this.data[0].source.name !== this.data[0].type) || (this.data[0].source.name === this.data[0].type && this.data[0].type === 'Patient')) {
                     var newSource = manageDatum(this.data[0].source);
                     this.data.push(newSource);
                 }
@@ -996,7 +1038,7 @@
                 // rightClick Links
                 var dataType;
                 var id;
-                if (datum.type && datum.type !== 'Patient') {
+                if ((datum.type && datum.type !== 'Patient') || (datum.name && datum.name.indexOf("sb_") > -1)) {
                     dataType = _.find(that.dataTypes, function (dt) {
                         return datum.type.toLowerCase() === dt.name.toLowerCase();
                     });
@@ -1018,6 +1060,15 @@
                 }
 
                 if (dataType && dataType.children && dataType.children.length > 0) {
+                    var subjectTypeChildren = _.where(dataType.children, { "model": Classes.SUBJECT });
+                    if (subjectTypeChildren.length) {
+                        var sbids = _.map(subjectTypeChildren, 'id').join();
+                        datum["new_subject"] = "/subjects/new/0?idDataTypes=" + sbids + "&parentSubject=" + that.idPatient;
+                        if (dataType.model === 'subject') {
+                            datum["new_subject"] += "&parentSubject=" + id;
+                        }
+                    }
+
                     var sampleTypeChildren = _.where(dataType.children, { "model": Classes.SAMPLE });
                     if (sampleTypeChildren.length) {
                         var sids = _.map(sampleTypeChildren, 'id').join();

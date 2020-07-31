@@ -99,8 +99,8 @@
                 $('#st-name').attr("disabled", true);
                 $('#uri').attr("disabled", true);
                 $('#model').attr("disabled", true);
-                $('#biobankPrefix').prop("disabled", true);
-                $('#getParentCode').prop("disabled", true);
+                // $('#biobankPrefix').prop("disabled", true);
+                // $('#getParentCode').prop("disabled", true);
                 if (this.model.get('model') === "Sample") {
                     $('.biobankPrefix-container').removeAttr("hidden");
                 }
@@ -375,7 +375,9 @@
                 name: header.name
             };
             this.model.set("parents", _.map(this.model.get("parents"), 'id'));
-            this.model.get("project").id ? this.model.set("project", this.model.get("project").id) : null;
+            if (this.model.get("project").id) {
+                this.model.set("project", this.model.get("project").id);
+            }
 
             // if (this.superTypeView && this.superTypeView.model) {
             var body = this.serialize();
@@ -586,7 +588,7 @@
                         // $('#confirm-duplication').text( i18n('confirm') + " " + e.target.value);
                         $('#confirm-duplication').prop('disabled', false);
                         $('#confirm-duplication').addClass('btn-success');
-                        that.$('#confirm-duplication').on('click.bs.button', function (e) {
+                        $('#confirm-duplication').on('click.bs.button', function (e) {
                             e.preventDefault();
 
                             modal.hide();

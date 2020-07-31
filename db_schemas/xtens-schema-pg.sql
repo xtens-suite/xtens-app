@@ -656,6 +656,41 @@ ALTER TABLE data_parentsample__sample_childrendata_id_seq OWNER TO xtenspg;
 
 ALTER SEQUENCE data_parentsample__sample_childrendata_id_seq OWNED BY data_parentsample__sample_childrendata.id;
 
+
+--
+-- MANY SUBJECT - MANY SUBJECT
+-- Name: subject_parentsubject__subject_childrensubject; Type: TABLE; Schema: public; Owner: xtenspg; Tablespace:
+--
+
+CREATE TABLE subject_parentsubject__subject_childrensubject (
+    id integer NOT NULL,
+    "subject_parentSubject" integer NOT NULL,
+    "subject_childrenSubject" integer NOT NULL
+);
+
+
+ALTER TABLE subject_parentsubject__subject_childrensubject OWNER TO xtenspg;
+
+--
+-- Name: subject_parentsubject__subject_childrensubject_id_seq; Type: SEQUENCE; Schema: public; Owner: xtenspg
+--
+
+CREATE SEQUENCE subject_parentsubject__subject_childrensubject_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE subject_parentsubject__subject_childrensubject_id_seq OWNER TO xtenspg;
+
+--
+-- Name: subject_parentsubject__subject_childrensubject_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: xtenspg
+--
+
+ALTER SEQUENCE subject_parentsubject__subject_childrensubject_id_seq OWNED BY subject_parentsubject__subject_childrensubject.id;
+
 --
 -- MANY SUBJECT - MANY DATA
 -- Name: data_parentsubject__subject_childrendata; Type: TABLE; Schema: public; Owner: xtenspg; Tablespace:
@@ -2372,6 +2407,12 @@ ALTER TABLE ONLY biobank_projects__project_biobanks ALTER COLUMN id SET DEFAULT 
 -- Name: id; Type: DEFAULT; Schema: public; Owner: xtenspg
 --
 
+ALTER TABLE ONLY subject_parentsubject__subject_childrensubject ALTER COLUMN id SET DEFAULT nextval('subject_parentsubject__subject_childrensubject_id_seq'::regclass);
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: xtenspg
+--
+
 ALTER TABLE ONLY data_parentsubject__subject_childrendata ALTER COLUMN id SET DEFAULT nextval('data_parentsubject__subject_childrendata_id_seq'::regclass);
 
 --
@@ -2539,6 +2580,35 @@ ALTER TABLE ONLY datatype_privileges
 
 ALTER TABLE ONLY datatype_privileges
     ADD CONSTRAINT datatype_xtensgroup_key UNIQUE (data_type, xtens_group);
+
+--
+-- Name: subject_parentsubject__subject_childrensubject_key; Type: CONSTRAINT; Schema: public; Owner: xtenspg; Tablespace:
+--
+
+ALTER TABLE ONLY subject_parentsubject__subject_childrensubject
+    ADD CONSTRAINT subject_parentsubject__subject_childrensubject_key UNIQUE ("subject_parentSubject", "subject_childrenSubject");
+
+
+--
+-- Name: subject_parentsubject__subject_childrensubject_pkey; Type: CONSTRAINT; Schema: public; Owner: xtenspg; Tablespace:
+--
+
+ALTER TABLE ONLY subject_parentsubject__subject_childrensubject
+    ADD CONSTRAINT subject_parentsubject__subject_childrensubject_pkey PRIMARY KEY (id);
+
+--
+-- Name: subject_parentsubject__subject_childrensubject; Type: CONSTRAINT; Schema: public; Owner: xtenspg; Tablespace:
+--
+
+ALTER TABLE ONLY subject_parentsubject__subject_childrensubject
+    ADD CONSTRAINT subject_children_fkey FOREIGN KEY ("subject_childrenSubject") REFERENCES subject(id) MATCH FULL ON DELETE CASCADE;
+
+--
+-- Name: subject_parentsubject__subject_childrensubject; Type: CONSTRAINT; Schema: public; Owner: xtenspg; Tablespace:
+--
+   
+ALTER TABLE ONLY subject_parentsubject__subject_childrensubject
+    ADD CONSTRAINT subject_parent_fkey FOREIGN KEY ("subject_parentSubject") REFERENCES subject(id) MATCH FULL ON DELETE CASCADE;
 
 --
 -- Name: data_parentsubject__subject_childrendata_key; Type: CONSTRAINT; Schema: public; Owner: xtenspg; Tablespace:
@@ -3118,6 +3188,12 @@ CREATE INDEX join_data_sample_index ON data_parentsample__sample_childrendata ("
 --
 
 CREATE INDEX join_data_subject_index ON data_parentsubject__subject_childrendata ("data_parentSubject", "subject_childrenData");
+
+--
+-- Name: join_data_subject_index; Type: INDEX; Schema: public; Owner: xtenspg; Tablespace:
+--
+
+CREATE INDEX join_subject_subject_index ON subject_parentsubject__subject_childrensubject ("subject_parentSubject", "subject_childrenSubject");
 
 --
 -- Name: join_sample_sample_index; Type: INDEX; Schema: public; Owner: xtenspg; Tablespace:
@@ -4255,6 +4331,23 @@ GRANT ALL ON TABLE data_parentsample__sample_childrendata TO xtenspg;
 REVOKE ALL ON SEQUENCE data_parentsample__sample_childrendata_id_seq FROM PUBLIC;
 REVOKE ALL ON SEQUENCE data_parentsample__sample_childrendata_id_seq FROM xtenspg;
 GRANT ALL ON SEQUENCE data_parentsample__sample_childrendata_id_seq TO xtenspg;
+
+
+--
+-- Name: subject_parentsubject__subject_childrensubject; Type: ACL; Schema: public; Owner: xtenspg
+--
+
+REVOKE ALL ON TABLE subject_parentsubject__subject_childrensubject FROM PUBLIC;
+REVOKE ALL ON TABLE subject_parentsubject__subject_childrensubject FROM xtenspg;
+GRANT ALL ON TABLE subject_parentsubject__subject_childrensubject TO xtenspg;
+
+--
+-- Name: subject_parentsubject__subject_childrensubject_id_seq; Type: ACL; Schema: public; Owner: xtenspg
+--
+
+REVOKE ALL ON SEQUENCE subject_parentsubject__subject_childrensubject_id_seq FROM PUBLIC;
+REVOKE ALL ON SEQUENCE subject_parentsubject__subject_childrensubject_id_seq FROM xtenspg;
+GRANT ALL ON SEQUENCE subject_parentsubject__subject_childrensubject_id_seq TO xtenspg;
 
 --
 -- Name: data_parentsubject__subject_childrendata; Type: ACL; Schema: public; Owner: xtenspg

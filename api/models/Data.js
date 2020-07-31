@@ -41,7 +41,7 @@ var Data = {
         },
         // if the parent is a patient
         parentSubject: {
-            collection:'subject',
+            collection: 'subject',
             via: 'childrenData'
         },
         // if the "parent" is a sample
