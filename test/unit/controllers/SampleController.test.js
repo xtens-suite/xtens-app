@@ -7,6 +7,7 @@ const expect = require("chai").expect;
 const request = require('supertest');
 const sinon = require('sinon');
 const loginHelper = require('./loginHelper');
+const BluebirdPromise = require("bluebird");
 
 
 describe('SampleController', function() {
@@ -49,9 +50,10 @@ describe('SampleController', function() {
             .set('Authorization', `Bearer ${tokenDataSens}`)
             .send({
                 type: 2,
+                owner:1,
                 biobank:2,
                 biobankCode: "081852",
-                donor: 11,
+                donor: [1],
                 metadata: metadata
             })
             .expect(201)
@@ -79,8 +81,9 @@ describe('SampleController', function() {
             .send({
                 type: 2,
                 biobank:2,
+                owner:1,
                 biobankCode: "081852",
-                donor: 11,
+                donor: [1],
                 metadata: metadata
             })
             .expect(400);
@@ -88,13 +91,14 @@ describe('SampleController', function() {
             return;
         });
 
-        it('Should return 403 Forbidden - Authenticated user does not have edit privileges on the sample type 2', function (done) {
-            let expectedError = `Authenticated user does not have edit privileges on the sample type 2`;
+        it('Should return 403 Forbidden - Authenticated user has not edit privileges on the sample type 2', function (done) {
+            let expectedError = `Authenticated user has not edit privileges on the sample type 2`;
             request(sails.hooks.http.app)
             .post('/sample')
             .set('Authorization', `Bearer ${tokenNoPriv}`)
             .send({
                 type:2,
+                owner:1,
                 metadata:metadata,
                 date:"2015-12-06",
                 tags:[],
@@ -116,6 +120,7 @@ describe('SampleController', function() {
             .set('Authorization', `Bearer ${tokenDataSens}`)
             .send({
                 type:2,
+                owner:1,
                 metadata:metadata,
                 date:"wrongFormat",
                 tags:[],
@@ -142,9 +147,10 @@ describe('SampleController', function() {
             .set('Authorization', `Bearer ${tokenDataSens}`)
             .send({
                 type: 2,
+                owner:1,
                 biobank: biobank,
                 biobankCode: "081852",
-                donor: 11,
+                donor: [1],
                 metadata: metadata
             }).expect(200)
             .end(function(err, res) {
@@ -167,9 +173,10 @@ describe('SampleController', function() {
             .set('Authorization', `Bearer ${tokenDataSens}`)
             .send({
                 type: 1,
+                owner:1,
                 biobank:14,
                 biobankCode: "081852",
-                donor: 11,
+                donor: [1],
                 metadata: metadata
             })
             .expect(400);
@@ -182,7 +189,7 @@ describe('SampleController', function() {
             request(sails.hooks.http.app)
             .put('/sample/3')
             .set('Authorization', `Bearer ${tokenDataSens}`)
-            .send({id:2, type:2, metadata: metadata, date:"wrongFormat",tags:[],notes:"New data"})
+            .send({id:2, type:2, owner:1, metadata: metadata, date:"wrongFormat",tags:[],notes:"New data"})
             .expect(400)
             .end(function(err, res) {
                 expect(res.body.error.message.name).to.eql("ValidationError");
@@ -204,6 +211,7 @@ describe('SampleController', function() {
                 .send({
                     id: 3,
                     type: 2,
+                    owner:1,
                     metadata: metadata,
                     notes: "New Data Updated"
                 })
@@ -221,14 +229,15 @@ describe('SampleController', function() {
                 });
         });
 
-        it('Should return 403 FORBIDDEN - Authenticated user does not have edit privileges on the sample type', function (done) {
-            let expectedError = "Authenticated user does not have edit privileges on the sample type 2";
+        it('Should return 403 FORBIDDEN - Authenticated user has not edit privileges on the sample type', function (done) {
+            let expectedError = "Authenticated user has not edit privileges on the sample type 2";
             request(sails.hooks.http.app)
                 .put('/sample/3')
                 .set('Authorization', `Bearer ${tokenNoPriv}`)
                 .send({
                     id: 3,
                     type: 2,
+                    owner:1,
                     metadata: metadata,
                     notes: "New Data Updated"
                 })
@@ -417,8 +426,8 @@ describe('SampleController', function() {
             });
         });
 
-        it('Should return 403 Forbidden - Authenticated user does not have edit privileges on the sample type', function (done) {
-            let expectedError = 'Authenticated user does not have edit privileges on the sample type 2';
+        it('Should return 403 Forbidden - Authenticated user has not edit privileges on the sample type', function (done) {
+            let expectedError = 'Authenticated user has not edit privileges on the sample type 2';
             request(sails.hooks.http.app)
             .delete('/sample/1')
             .set('Authorization', `Bearer ${tokenNoPriv}`)
@@ -501,8 +510,8 @@ describe('SampleController', function() {
                 });
         });
 
-        it('Should return 403 FORBIDDEN - Authenticated user does not have edit privileges on any sample type', function (done) {
-            let expectedError = 'Authenticated user does not have edit privileges on any sample type';
+        it('Should return 403 FORBIDDEN - Authenticated user has not edit privileges on any sample type', function (done) {
+            let expectedError = 'Authenticated user has not edit privileges on any sample type';
 
             let stub = sinon.stub(sails.hooks.persistence.crudManager, "getDataTypesByRolePrivileges",function () {
                 return [];
@@ -526,8 +535,8 @@ describe('SampleController', function() {
                 });
         });
 
-        it('Should return 403 FORBIDDEN - Authenticated user does not have edit privileges on the sample type', function (done) {
-            let expectedError = 'Authenticated user does not have edit privileges on the sample type';
+        it('Should return 403 FORBIDDEN - Authenticated user has not edit privileges on the sample type', function (done) {
+            let expectedError = 'Authenticated user has not edit privileges on the sample type';
 
             let prova = sinon.stub(sails.hooks.persistence.crudManager, "getDataTypesByRolePrivileges",function () {
                 return [2];
@@ -546,6 +555,86 @@ describe('SampleController', function() {
                         return;
                     }
                     sails.hooks.persistence.crudManager.getDataTypesByRolePrivileges.restore();
+                    done();
+                    return;
+                });
+        });
+    });
+
+    describe('GET /sample/getNextBiobankCode', function() {
+        let getNextBiobankCodeAsyncStub;
+        beforeEach(function() {
+            let crudManager = BluebirdPromise.promisifyAll(sails.hooks['persistence'].getDatabaseManager().crudManager);
+            // getNextBiobankCodeAsyncStub = sinon.stub(crudManager, "getNextBiobankCode", function(uri, next) {
+            //     return BluebirdPromise.resolve("NEXT-1000000");
+            // });
+        });
+
+        afterEach(function() {
+            // sails.hooks['persistence'].getDatabaseManager().crudManager.getNextBiobankCode.restore();
+        });
+        it('Should return 200 OK the correct biobankcode provided into sample object', function (done) {
+            request(sails.hooks.http.app)
+            .get('/sample/getNextBiobankCode')
+            .set('Authorization', `Bearer ${tokenDataSens}`)
+            .query({sample: {biobankCode: 12}, project: 1})
+            .expect(200)
+            .end(function(err, res) {
+                if (err) {
+                    sails.log.error(err);
+                    done(err);
+                    return;
+                }
+
+                expect(_.parseInt(res.body)).to.eql(12);
+
+                done();
+                return;
+            });
+        });
+
+        it('Should return 200 OK with the next biobankCode', function (done) {
+            let sample = _.cloneDeep(fixtures.sample[1]);
+            let expectedBiobankCode = _.parseInt(sample.biobankCode) + 1;
+            sample.id = null; //new sample
+            sample.biobankCode = null;
+            request(sails.hooks.http.app)
+                .get('/sample/getNextBiobankCode')
+                .set('Authorization', `Bearer ${tokenDataSens}`)
+                .query({sample: sample, project: 1})
+                .expect(200)
+                .end(function(err, res) {
+                    if (err) {
+                        sails.log.error(err);
+                        done(err);
+                        return;
+                    }
+
+                    expect(_.parseInt(res.body)).to.eql(expectedBiobankCode);
+
+                    done();
+                    return;
+                });
+        });
+
+        it('Should return Error - Error getting last biobank code', function (done) {
+            let sample = _.cloneDeep(fixtures.sample[1]);
+            let expectedError = new Error(`Error getting last biobank code for type ${sample.type} and project `);
+            sample.id = null; //new sample
+            sample.biobankCode = null;
+            request(sails.hooks.http.app)
+                .get('/sample/getNextBiobankCode')
+                .set('Authorization', `Bearer ${tokenDataSens}`)
+                .query({sample: sample, project: null})
+                .expect(500)
+                .end(function(err, res) {
+                    if (err) {
+                        sails.log.error(err);
+                        expect(err).to.eql(expectedError);
+                        done(err);
+                        return;
+                    }
+
                     done();
                     return;
                 });

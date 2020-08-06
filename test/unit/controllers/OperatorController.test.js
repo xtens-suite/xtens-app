@@ -5,11 +5,15 @@
 "use strict";
 
 const expect = require("chai").expect;
+const sinon = require("sinon");
 const request = require('supertest');
 const loginHelper = require('./loginHelper');
+const BluebirdPromise = require("bluebird");
+const PrivilegesError = require('xtens-utils').Errors.PrivilegesError;
+const ValidationError = require('xtens-utils').Errors.ValidationError;
 
 describe('OperatorController', function() {
-    let tokenS, tokenSA;
+    let tokenS, tokenSA, tokenRP ;
 
     before(function(done) {
         loginHelper.loginSuperAdmin(request, function (bearerToken) {
@@ -20,8 +24,13 @@ describe('OperatorController', function() {
             loginHelper.loginStandardUser(request, function (bearerToken) {
                 tokenS = bearerToken;
                 sails.log.debug(`Got token: ${tokenS}`);
-                done();
-                return;
+
+                loginHelper.loginResetPswdUser(request, function (bearerToken) {
+                    tokenS = bearerToken;
+                    sails.log.debug(`Got token: ${tokenRP}`);
+                    done();
+                    return;
+                });
             });
         });
     });
@@ -45,7 +54,7 @@ describe('OperatorController', function() {
                 sex: 'M',
                 email: 'operator@domain.com',
                 login: 'newoperator',
-                password: 'pswdoperator'
+                password: 'Pswdoperator1234!'
             })
             .expect(201)
             .end(function(err, res) {
@@ -99,11 +108,12 @@ describe('OperatorController', function() {
 
             request(sails.hooks.http.app)
             .patch('/operator')
-            .set('Authorization', `Bearer ${tokenS}`)
+            // .set('Authorization', `Bearer ${tokenS}`)
             .send({
+                username: demouser.login,
                 oldPass: passport.password,
-                newPass: "NewPassword",
-                cnewPass: "NewPassword"
+                newPass: "NewPassword1234!",
+                cnewPass: "NewPassword1234!"
             })
             .expect(204)
             .end(function(err, res) {
@@ -123,28 +133,29 @@ describe('OperatorController', function() {
             const passport = _.find(fixtures.passport, {
                 'user': demouser.id,
                 'protocol': 'local'});
-
+            console.log(passport);
             request(sails.hooks.http.app)
-          .patch('/operator')
-          .set('Authorization', `Bearer ${tokenS}`)
-          .send({
-              oldPass: passport.password,
-              newPass: passport.password,
-              cnewPass: passport.password
-          })
-          .expect(400)
-          .end(function(err, res) {
-              expect(res).to.be.error;
-              expect(res.body.error.message).to.eql(expectedMessage);
+            .patch('/operator')
+            // .set('Authorization', `Bearer ${tokenS}`)
+            .send({
+                username: demouser.login,
+                oldPass: passport.password,
+                newPass: passport.password,
+                cnewPass: passport.password
+            })
+            .expect(400)
+            .end(function(err, res) {
+                expect(res).to.be.error;
+                expect(res.body.error.message).to.eql(expectedMessage);
 
-              if (err) {
-                  sails.log.error(err);
-                  done(err);
-                  return;
-              }
-              done();
-              return;
-          });
+                if (err) {
+                    sails.log.error(err);
+                    done(err);
+                    return;
+                }
+                done();
+                return;
+            });
         });
 
         it('Should return 400 bad Request, Old Password  Wrong', function(done) {
@@ -153,27 +164,28 @@ describe('OperatorController', function() {
             const demouser = fixtures.operator[2];
 
             request(sails.hooks.http.app)
-          .patch('/operator')
-          .set('Authorization', `Bearer ${tokenS}`)
-          .send({
-              oldPass: "WrongOldPass",
-              newPass: "NewPassword",
-              cnewPass: "NewPassword"
-          })
-          .expect(400)
-          .end(function(err, res) {
-              // console.log(res.body);
-              expect(res).to.be.error;
-              expect(res.body.error.message).to.eql(expectedMessage);
+            .patch('/operator')
+            // .set('Authorization', `Bearer ${tokenS}`)
+            .send({
+                username: demouser.login,
+                oldPass: "WrongOldPass",
+                newPass: "NewPassword1!",
+                cnewPass: "NewPassword1!"
+            })
+            .expect(400)
+            .end(function(err, res) {
+                // console.log(res.body);
+                expect(res).to.be.error;
+                expect(res.body.error.message).to.eql(expectedMessage);
 
-              if (err) {
-                  sails.log.error(err);
-                  done(err);
-                  return;
-              }
-              done();
-              return;
-          });
+                if (err) {
+                    sails.log.error(err);
+                    done(err);
+                    return;
+                }
+                done();
+                return;
+            });
         });
 
         it('Should return 400 bad Request, New Password and Confirm Confirm New Password do not match', function(done) {
@@ -185,26 +197,160 @@ describe('OperatorController', function() {
                 'protocol': 'local'});
 
             request(sails.hooks.http.app)
-        .patch('/operator')
-        .set('Authorization', `Bearer ${tokenS}`)
-        .send({
-            oldPass: passport.password,
-            newPass: "NewPassword",
-            cnewPass: "OtherNewPassword"
-        })
-        .expect(400).end(function(err, res) {
-            // console.log(res.body);
-            expect(res).to.be.error;
-            expect(res.body.error.message).to.eql(expectedMessage);
+            .patch('/operator')
+            // .set('Authorization', `Bearer ${tokenS}`)
+            .send({
+                username: demouser.login,
+                oldPass: passport.password,
+                newPass: "NewPassword1!",
+                cnewPass: "OtherNewPassword1!"
+            })
+            .expect(400).end(function(err, res) {
+                // console.log(res.body);
+                expect(res).to.be.error;
+                expect(res.body.error.message).to.eql(expectedMessage);
 
-            if (err) {
-                sails.log.error(err);
-                done(err);
+                if (err) {
+                    sails.log.error(err);
+                    done(err);
+                    return;
+                }
+                done();
                 return;
-            }
-            done();
-            return;
-        });
+            });
         });
     });
+
+    describe('PATCH /operator/resetPassword', function() {
+
+        // let spyResetPswd;
+        //
+        // beforeEach(function(done) {
+        //     let resetPassword = BluebirdPromise.promisify(global.sails.services.passportservice.protocols.local.resetPassword);
+        //     spyResetPswd = sinon.spy(resetPassword);
+        //
+        //     done();
+        // });
+        //
+        // afterEach(function(done) {
+        //     // spyResetPswd.reset();
+        //     done();
+        // });
+
+
+        it('Should return OK 200, call resetPassword function with right arguments, and return a new password', function(done) {
+            const demouser = fixtures.operator[8];
+
+            request(sails.hooks.http.app)
+            .patch('/operator/resetPassword')
+            .set('Authorization', `Bearer ${tokenSA}`)
+            .send({
+                username: demouser.login
+            })
+            .expect(201)
+            .end(function(err, res) {
+                if (err) {
+                    sails.log.error(err);
+                    done(err);
+                    return;
+                }
+                console.log(err,res.body);
+                // expect(spyResetPswd.called).to.be.true;
+                expect(res.body).to.have.lengthOf(8);
+
+                done();
+                return;
+            });
+
+        });
+    });
+
+    describe('PATCH /operator/patchQueries', function() {
+
+        // let spyPatchQueries;
+
+        // beforeEach(function(done) {
+        //     // let PatchQueries = BluebirdPromise.promisify(global.sails.services.passportservice.protocols.local.patchQueries);
+        //     spyPatchQueries = sinon.spy(PatchQueries);
+        //
+        //     done();
+        // });
+        //
+        // afterEach(function(done) {
+        //     // spyPatchQueries.reset();
+        //     done();
+        // });
+
+
+        it('Should return OK 200 and the operator with the expected queries array', function(done) {
+            let user = fixtures.operator[8];
+            let expectedQueries = "[{name:'QUERY TEST',project:1,query:'select * from data where type = 1'}]";
+            user.queries = expectedQueries;
+            request(sails.hooks.http.app)
+            .patch('/operator/patchQueries')
+            .set('Authorization', `Bearer ${tokenSA}`)
+            .send(user)
+            .expect(200)
+            .end(function(err, res) {
+                if (err) {
+                    sails.log.error(err);
+                    done(err);
+                    return;
+                }
+
+                expect(res.body.queries).to.eql(expectedQueries);
+
+                done();
+                return;
+            });
+
+        });
+
+        it('Should return ERROR 403, Authenticated user is not allowed to modify operator', function(done) {
+            let user = fixtures.operator[0];
+            let expectedError = new PrivilegesError("Authenticated user is not allowed to modify operator");
+
+            request(sails.hooks.http.app)
+            .patch('/operator/patchQueries')
+            .set('Authorization', `Bearer ${tokenS}`)
+            .send(user)
+            .expect(403)
+            .end(function(err, res) {
+                if (err) {
+
+                    expect(err).to.eql(expectedError);
+                    done();
+                    return;
+                }
+
+                done();
+                return;
+            });
+
+        });
+
+        it('Should return ERROR, Queries array object not found', function(done) {
+            let user = fixtures.operator[2];
+            let expectedError = new ValidationError("Queries array object not found");
+
+            request(sails.hooks.http.app)
+            .patch('/operator/patchQueries')
+            .set('Authorization', `Bearer ${tokenSA}`)
+            .send(user)
+            .end(function(err, res) {
+                if (err) {
+                    expect(err).to.eql(expectedError);
+                    done();
+                    return;
+                }
+
+                done();
+                return;
+            });
+
+        });
+    });
+
+
+
 });

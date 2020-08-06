@@ -40,10 +40,16 @@
 ################################################
 
 config/local.js
+config/models.js
 coverage/*
-logs
 assets/dataFiles
-
+assets/bundles
+assets.json
+config/autoreload.js
+config/ssl/
+.vscode/
+.bowerrc
+.sailsrc
 
 ################################################
 # Dependencies
@@ -97,6 +103,8 @@ lib-cov
 *.out
 *.pid
 npm-debug.log
+npm-debug.log.*
+
 
 
 
@@ -149,4 +157,6 @@ assets/js/jst.js
 # LOGS
 #
 #################################################
-logs
+logs/*
+!logs/.gitkeep
+package-lock.json

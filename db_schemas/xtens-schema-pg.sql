@@ -15,7 +15,10 @@ SET client_min_messages = warning;
 
 CREATE EXTENSION IF NOT EXISTS plpgsql WITH SCHEMA pg_catalog;
 
+CREATE USER xtenspg WITH PASSWORD 'xtenspg';
 
+CREATE DATABASE xtensdb OWNER xtenspg;
+\c xtensdb
 --
 -- Name: EXTENSION plpgsql; Type: COMMENT; Schema: -; Owner:
 --
@@ -36,48 +39,57 @@ CREATE TYPE datatype_privilege_level AS ENUM (
     'edit'
 );
 
+CREATE TYPE daemon_status AS ENUM (
+    'initializing',
+    'error',
+    'running',
+    'success'
+);
+
 
 ALTER TYPE datatype_privilege_level OWNER TO xtenspg;
 
+ALTER TYPE daemon_status OWNER TO xtenspg;
+
 --
--- Name: dom_basicdatatype; Type: DOMAIN; Schema: public; Owner: massipg
+-- Name: dom_basicdatatype; Type: DOMAIN; Schema: public; Owner: xtenspg
 --
 
 CREATE DOMAIN dom_basicdatatype AS text COLLATE pg_catalog."C.UTF-8"
 	CONSTRAINT dom_basicdatatype_check CHECK (((length(VALUE) > 3) AND (length(VALUE) < 32)));
 
 
-ALTER DOMAIN dom_basicdatatype OWNER TO massipg;
+ALTER DOMAIN dom_basicdatatype OWNER TO xtenspg;
 
 --
--- Name: dom_componentdatatypename; Type: DOMAIN; Schema: public; Owner: massipg
+-- Name: dom_componentdatatypename; Type: DOMAIN; Schema: public; Owner: xtenspg
 --
 
 CREATE DOMAIN dom_componentdatatypename AS text
 	CONSTRAINT dom_componentdatatypename_check CHECK ((((length(VALUE) > 2) AND (length(VALUE) < 100)) AND (VALUE ~ '^[A-Za-z][A-Za-z0-9]+$'::text)));
 
 
-ALTER DOMAIN dom_componentdatatypename OWNER TO massipg;
+ALTER DOMAIN dom_componentdatatypename OWNER TO xtenspg;
 
 --
--- Name: dom_leaftype; Type: DOMAIN; Schema: public; Owner: massipg
+-- Name: dom_leaftype; Type: DOMAIN; Schema: public; Owner: xtenspg
 --
 
 CREATE DOMAIN dom_leaftype AS text NOT NULL
 	CONSTRAINT dom_leaftype_check CHECK (((length(VALUE) > 3) AND (length(VALUE) <= 50)));
 
 
-ALTER DOMAIN dom_leaftype OWNER TO massipg;
+ALTER DOMAIN dom_leaftype OWNER TO xtenspg;
 
 --
--- Name: dom_nodename; Type: DOMAIN; Schema: public; Owner: massipg
+-- Name: dom_nodename; Type: DOMAIN; Schema: public; Owner: xtenspg
 --
 
 CREATE DOMAIN dom_nodename AS text COLLATE pg_catalog."C.UTF-8"
 	CONSTRAINT dom_nodename_check CHECK (((length(VALUE) > 2) AND (length(VALUE) < 100)));
 
 
-ALTER DOMAIN dom_nodename OWNER TO massipg;
+ALTER DOMAIN dom_nodename OWNER TO xtenspg;
 
 --
 -- Name: xtens_group_privileges; Type: TYPE; Schema: public; Owner: xtenspg
@@ -95,6 +107,41 @@ ALTER TYPE xtens_group_privileges OWNER TO xtenspg;
 SET default_tablespace = '';
 
 SET default_with_oids = false;
+
+CREATE TABLE address_information (
+    id integer NOT NULL,
+    office text NOT NULL,
+    phone text NOT NULL,
+    address text NOT NULL,
+    zip text NOT NULL,
+    city text NOT NULL,
+    country text NOT NULL,
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL
+);
+
+
+ALTER TABLE address_information OWNER TO xtenspg;
+
+--
+-- Name: address_information_id_seq; Type: SEQUENCE; Schema: public; Owner: xtenspg
+--
+
+CREATE SEQUENCE address_information_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE address_information_id_seq OWNER TO xtenspg;
+
+--
+-- Name: address_information_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: xtenspg
+--
+
+ALTER SEQUENCE address_information_id_seq OWNED BY address_information.id;
 
 --
 -- Name: biobank; Type: TABLE; Schema: public; Owner: xtenspg; Tablespace:
@@ -191,6 +238,7 @@ CREATE TABLE data (
     parent_sample integer,
     parent_data integer,
     acquisition_date date,
+    owner integer NOT NULL,
     metadata jsonb NOT NULL,
     tags jsonb,
     notes text,
@@ -300,7 +348,12 @@ CREATE TABLE data_type (
     id integer NOT NULL,
     name text NOT NULL,
     model text NOT NULL,
-    schema jsonb NOT NULL,
+    biobank_code text,
+    biobank_prefix text,
+    parent_code boolean NOT NULL DEFAULT FALSE,
+    parent_no_prefix boolean NOT NULL DEFAULT FALSE,
+    super_type integer NOT NULL,
+    project integer NOT NULL,
     created_at timestamp with time zone NOT NULL,
     updated_at timestamp with time zone NOT NULL
 );
@@ -466,6 +519,176 @@ ALTER TABLE datatype_privileges_id_seq OWNER TO xtenspg;
 --
 
 ALTER SEQUENCE datatype_privileges_id_seq OWNED BY datatype_privileges.id;
+
+--
+-- MANY DATA - MANY DATA
+-- Name: data_childrendata__data_parentdata; Type: TABLE; Schema: public; Owner: xtenspg; Tablespace:
+--
+
+CREATE TABLE data_childrendata__data_parentdata (
+    id integer NOT NULL,
+    "data_parentData" integer NOT NULL,
+    "data_childrenData" integer NOT NULL
+);
+
+
+ALTER TABLE data_childrendata__data_parentdata OWNER TO xtenspg;
+
+--
+-- Name: data_childrendata__data_parentdata_id_seq; Type: SEQUENCE; Schema: public; Owner: xtenspg
+--
+
+CREATE SEQUENCE data_childrendata__data_parentdata_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE data_childrendata__data_parentdata_id_seq OWNER TO xtenspg;
+
+--
+-- Name: data_childrendata__data_parentdata_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: xtenspg
+--
+
+ALTER SEQUENCE data_childrendata__data_parentdata_id_seq OWNED BY data_childrendata__data_parentdata.id;
+
+--
+-- MANY SAMPLE - MANY SAMPLE
+-- Name: sample_parentsample__sample_childrensample; Type: TABLE; Schema: public; Owner: xtenspg; Tablespace:
+--
+
+CREATE TABLE sample_parentsample__sample_childrensample (
+    id integer NOT NULL,
+    "sample_parentSample" integer NOT NULL,
+    "sample_childrenSample" integer NOT NULL
+);
+
+
+ALTER TABLE sample_parentsample__sample_childrensample OWNER TO xtenspg;
+
+--
+-- Name: sample_parentsample__sample_childrensample; Type: SEQUENCE; Schema: public; Owner: xtenspg
+--
+
+CREATE SEQUENCE sample_parentsample__sample_childrensample_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE sample_parentsample__sample_childrensample_id_seq OWNER TO xtenspg;
+
+--
+-- Name: sample_parentsample__sample_childrensample; Type: SEQUENCE OWNED BY; Schema: public; Owner: xtenspg
+--
+
+ALTER SEQUENCE sample_parentsample__sample_childrensample_id_seq OWNED BY sample_parentsample__sample_childrensample.id;
+
+--
+-- MANY SUBJECT - MANY SAMPLE
+-- Name: sample_donor__subject_childrensample; Type: TABLE; Schema: public; Owner: xtenspg; Tablespace:
+--
+
+CREATE TABLE sample_donor__subject_childrensample (
+    id integer NOT NULL,
+    sample_donor integer NOT NULL,
+    "subject_childrenSample" integer NOT NULL
+);
+
+
+ALTER TABLE sample_donor__subject_childrensample OWNER TO xtenspg;
+
+--
+-- Name: sample_donor__subject_childrensample_id_seq; Type: SEQUENCE; Schema: public; Owner: xtenspg
+--
+
+CREATE SEQUENCE sample_donor__subject_childrensample_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE sample_donor__subject_childrensample_id_seq OWNER TO xtenspg;
+
+--
+-- Name: sample_donor__subject_childrensample_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: xtenspg
+--
+
+ALTER SEQUENCE sample_donor__subject_childrensample_id_seq OWNED BY sample_donor__subject_childrensample.id;
+
+--
+-- MANY SAMPLE - MANY DATA
+-- Name: data_parentsample__sample_childrendata; Type: TABLE; Schema: public; Owner: xtenspg; Tablespace:
+--
+
+CREATE TABLE data_parentsample__sample_childrendata (
+    id integer NOT NULL,
+    "data_parentSample" integer NOT NULL,
+    "sample_childrenData" integer NOT NULL
+);
+
+
+ALTER TABLE data_parentsample__sample_childrendata OWNER TO xtenspg;
+
+--
+-- Name: data_parentsample__sample_childrendata_id_seq; Type: SEQUENCE; Schema: public; Owner: xtenspg
+--
+
+CREATE SEQUENCE data_parentsample__sample_childrendata_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE data_parentsample__sample_childrendata_id_seq OWNER TO xtenspg;
+
+--
+-- Name: data_parentsample__sample_childrendata_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: xtenspg
+--
+
+ALTER SEQUENCE data_parentsample__sample_childrendata_id_seq OWNED BY data_parentsample__sample_childrendata.id;
+
+--
+-- MANY SUBJECT - MANY DATA
+-- Name: data_parentsubject__subject_childrendata; Type: TABLE; Schema: public; Owner: xtenspg; Tablespace:
+--
+
+CREATE TABLE data_parentsubject__subject_childrendata (
+    id integer NOT NULL,
+    "data_parentSubject" integer NOT NULL,
+    "subject_childrenData" integer NOT NULL
+);
+
+
+ALTER TABLE data_parentsubject__subject_childrendata OWNER TO xtenspg;
+
+--
+-- Name: data_parentsubject__subject_childrendata_id_seq; Type: SEQUENCE; Schema: public; Owner: xtenspg
+--
+
+CREATE SEQUENCE data_parentsubject__subject_childrendata_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE data_parentsubject__subject_childrendata_id_seq OWNER TO xtenspg;
+
+--
+-- Name: data_parentsubject__subject_childrendata_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: xtenspg
+--
+
+ALTER SEQUENCE data_parentsubject__subject_childrendata_id_seq OWNED BY data_parentsubject__subject_childrendata.id;
 
 
 --
@@ -1374,6 +1597,10 @@ CREATE TABLE operator (
     birth_date timestamp with time zone NOT NULL,
     sex text NOT NULL,
     email text NOT NULL,
+    address_information integer,
+    last_pswd_update timestamp with time zone NOT NULL DEFAULT now(),
+    reset_pswd boolean NOT NULL DEFAULT FALSE,
+    queries text NOT NULL DEFAULT '[]',
     created_at timestamp with time zone NOT NULL,
     updated_at timestamp with time zone NOT NULL
 );
@@ -1518,23 +1745,23 @@ ALTER SEQUENCE project_id_seq OWNED BY project.id;
 
 
 --
--- Name: project_subjects__subject_projects; Type: TABLE; Schema: public; Owner: xtenspg; Tablespace:
+-- Name: group_projects__project_groups; Type: TABLE; Schema: public; Owner: xtenspg; Tablespace:
 --
 
-CREATE TABLE project_subjects__subject_projects (
+CREATE TABLE group_projects__project_groups (
     id integer NOT NULL,
-    project_subjects integer NOT NULL,
-    subject_projects integer NOT NULL
+    project_groups integer NOT NULL,
+    group_projects integer NOT NULL
 );
 
 
-ALTER TABLE project_subjects__subject_projects OWNER TO xtenspg;
+ALTER TABLE group_projects__project_groups OWNER TO xtenspg;
 
 --
--- Name: project_subjects__subject_projects_id_seq; Type: SEQUENCE; Schema: public; Owner: xtenspg
+-- Name: group_projects__project_groups_id_seq; Type: SEQUENCE; Schema: public; Owner: xtenspg
 --
 
-CREATE SEQUENCE project_subjects__subject_projects_id_seq
+CREATE SEQUENCE group_projects__project_groups_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -1542,26 +1769,65 @@ CREATE SEQUENCE project_subjects__subject_projects_id_seq
     CACHE 1;
 
 
-ALTER TABLE project_subjects__subject_projects_id_seq OWNER TO xtenspg;
+ALTER TABLE group_projects__project_groups_id_seq OWNER TO xtenspg;
 
 --
--- Name: project_subjects__subject_projects_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: xtenspg
+-- Name: group_projects__project_groups_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: xtenspg
 --
 
-ALTER SEQUENCE project_subjects__subject_projects_id_seq OWNED BY project_subjects__subject_projects.id;
+ALTER SEQUENCE group_projects__project_groups_id_seq OWNED BY group_projects__project_groups.id;
 
+
+--
+-- Name: daemon; Type: TABLE; Schema: public; Owner: xtenspg; Tablespace:
+--
+
+CREATE TABLE daemon (
+    id integer NOT NULL,
+    pid integer NOT NULL,
+    source text NOT NULL,
+    operator integer NOT NULL,
+    status daemon_status DEFAULT 'initializing'::daemon_status NOT NULL,
+    info jsonb,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    updated_at timestamp with time zone DEFAULT now() NOT NULL
+);
+
+
+ALTER TABLE daemon OWNER TO xtenspg;
+
+--
+-- Name: daemon_id_seq; Type: SEQUENCE; Schema: public; Owner: xtenspg
+--
+
+CREATE SEQUENCE daemon_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE daemon_id_seq OWNER TO xtenspg;
+
+--
+-- Name: daemon_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: xtenspg
+--
+
+ALTER SEQUENCE daemon_id_seq OWNED BY daemon.id;
 
 --
 -- Name: sample; Type: TABLE; Schema: public; Owner: xtenspg; Tablespace:
 --
 
 CREATE TABLE sample (
-    id integer NOT NULL,
+    id integer UNIQUE NOT NULL,
     type integer NOT NULL,
     parent_subject integer NOT NULL,
     parent_sample integer,
     biobank integer NOT NULL,
     biobank_code text NOT NULL,
+    owner integer NOT NULL,
     metadata jsonb NOT NULL,
     tags jsonb,
     notes text,
@@ -1631,11 +1897,12 @@ ALTER SEQUENCE somatic_variant_id_seq OWNED BY somatic_variant.id;
 --
 
 CREATE TABLE subject (
-    id integer NOT NULL,
+    id integer UNIQUE NOT NULL,
     type integer NOT NULL,
     personal_info integer,
     code text NOT NULL,
     sex text NOT NULL,
+    owner integer NOT NULL,
     metadata jsonb NOT NULL,
     tags jsonb,
     notes text,
@@ -1665,6 +1932,43 @@ ALTER TABLE subject_id_seq OWNER TO xtenspg;
 --
 
 ALTER SEQUENCE subject_id_seq OWNED BY subject.id;
+
+
+--
+-- Name: super_type; Type: TABLE; Schema: public; Owner: xtenspg; Tablespace:
+--
+
+CREATE TABLE super_type (
+    id integer NOT NULL,
+    name text NOT NULL,
+    uri text NOT NULL,
+    schema jsonb NOT NULL,
+    skip_paging boolean DEFAULT FALSE NOT NULL,
+    created_at timestamp with time zone NOT NULL,
+    updated_at timestamp with time zone NOT NULL
+);
+
+
+ALTER TABLE super_type OWNER TO xtenspg;
+
+-- Name: super_type_id_seq; Type: SEQUENCE; Schema: public; Owner: xtenspg
+--
+
+CREATE SEQUENCE super_type_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE super_type_id_seq OWNER TO xtenspg;
+
+--
+-- Name: super_type_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: xtenspg
+--
+
+ALTER SEQUENCE super_type_id_seq OWNED BY super_type.id;
 
 
 --
@@ -1704,6 +2008,47 @@ ALTER TABLE xtens_group_id_seq OWNER TO xtenspg;
 
 ALTER SEQUENCE xtens_group_id_seq OWNED BY xtens_group.id;
 
+
+
+--
+-- Name: biobank_projects__project_biobanks; Type: TABLE; Schema: public; Owner: xtenspg; Tablespace:
+--
+
+CREATE TABLE biobank_projects__project_biobanks (
+    id integer NOT NULL,
+    project_biobanks integer NOT NULL,
+    biobank_projects integer NOT NULL
+);
+
+
+ALTER TABLE biobank_projects__project_biobanks OWNER TO xtenspg;
+
+--
+-- Name: biobank_projects__project_biobanks_id_seq; Type: SEQUENCE; Schema: public; Owner: xtenspg
+--
+
+CREATE SEQUENCE biobank_projects__project_biobanks_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER TABLE biobank_projects__project_biobanks_id_seq OWNER TO xtenspg;
+
+--
+-- Name: biobank_projects__project_biobanks_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: xtenspg
+--
+
+ALTER SEQUENCE biobank_projects__project_biobanks_id_seq OWNED BY biobank_projects__project_biobanks.id;
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: xtenspg
+--
+
+ALTER TABLE ONLY address_information ALTER COLUMN id SET DEFAULT nextval('address_information_id_seq'::regclass);
 
 --
 -- Name: id; Type: DEFAULT; Schema: public; Owner: xtenspg
@@ -1975,7 +2320,7 @@ ALTER TABLE ONLY project ALTER COLUMN id SET DEFAULT nextval('project_id_seq'::r
 -- Name: id; Type: DEFAULT; Schema: public; Owner: xtenspg
 --
 
-ALTER TABLE ONLY project_subjects__subject_projects ALTER COLUMN id SET DEFAULT nextval('project_subjects__subject_projects_id_seq'::regclass);
+ALTER TABLE ONLY group_projects__project_groups ALTER COLUMN id SET DEFAULT nextval('group_projects__project_groups_id_seq'::regclass);
 
 
 --
@@ -1983,6 +2328,12 @@ ALTER TABLE ONLY project_subjects__subject_projects ALTER COLUMN id SET DEFAULT 
 --
 
 ALTER TABLE ONLY sample ALTER COLUMN id SET DEFAULT nextval('sample_id_seq'::regclass);
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: xtenspg
+--
+
+ALTER TABLE ONLY daemon ALTER COLUMN id SET DEFAULT nextval('daemon_id_seq'::regclass);
 
 
 --
@@ -1998,6 +2349,11 @@ ALTER TABLE ONLY somatic_variant ALTER COLUMN id SET DEFAULT nextval('somatic_va
 
 ALTER TABLE ONLY subject ALTER COLUMN id SET DEFAULT nextval('subject_id_seq'::regclass);
 
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: xtenspg
+--
+
+ALTER TABLE ONLY super_type ALTER COLUMN id SET DEFAULT nextval('super_type_id_seq'::regclass);
 
 --
 -- Name: id; Type: DEFAULT; Schema: public; Owner: xtenspg
@@ -2005,6 +2361,49 @@ ALTER TABLE ONLY subject ALTER COLUMN id SET DEFAULT nextval('subject_id_seq'::r
 
 ALTER TABLE ONLY xtens_group ALTER COLUMN id SET DEFAULT nextval('xtens_group_id_seq'::regclass);
 
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: xtenspg
+--
+
+ALTER TABLE ONLY biobank_projects__project_biobanks ALTER COLUMN id SET DEFAULT nextval('biobank_projects__project_biobanks_id_seq'::regclass);
+
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: xtenspg
+--
+
+ALTER TABLE ONLY data_parentsubject__subject_childrendata ALTER COLUMN id SET DEFAULT nextval('data_parentsubject__subject_childrendata_id_seq'::regclass);
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: xtenspg
+--
+
+ALTER TABLE ONLY sample_donor__subject_childrensample ALTER COLUMN id SET DEFAULT nextval('sample_donor__subject_childrensample_id_seq'::regclass);
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: xtenspg
+--
+
+ALTER TABLE ONLY sample_parentsample__sample_childrensample ALTER COLUMN id SET DEFAULT nextval('sample_parentsample__sample_childrensample_id_seq'::regclass);
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: xtenspg
+--
+
+ALTER TABLE ONLY data_childrendata__data_parentdata ALTER COLUMN id SET DEFAULT nextval('data_childrendata__data_parentdata_id_seq'::regclass);
+
+--
+-- Name: id; Type: DEFAULT; Schema: public; Owner: xtenspg
+--
+
+ALTER TABLE ONLY data_parentsample__sample_childrendata ALTER COLUMN id SET DEFAULT nextval('data_parentsample__sample_childrendata_id_seq'::regclass);
+
+--
+-- Name: address_information_pkey; Type: CONSTRAINT; Schema: public; Owner: xtenspg; Tablespace:
+--
+
+ALTER TABLE ONLY address_information
+    ADD CONSTRAINT address_information_pkey PRIMARY KEY (id);
 
 --
 -- Name: biobank_pkey; Type: CONSTRAINT; Schema: public; Owner: xtenspg; Tablespace:
@@ -2123,7 +2522,7 @@ ALTER TABLE ONLY datatype_groups__group_datatypes
 --
 
 ALTER TABLE ONLY data_type
-    ADD CONSTRAINT datatype_name_key UNIQUE (name);
+    ADD CONSTRAINT datatype_name_key UNIQUE (name,project);
 
 
 --
@@ -2141,6 +2540,147 @@ ALTER TABLE ONLY datatype_privileges
 ALTER TABLE ONLY datatype_privileges
     ADD CONSTRAINT datatype_xtensgroup_key UNIQUE (data_type, xtens_group);
 
+--
+-- Name: data_parentsubject__subject_childrendata_key; Type: CONSTRAINT; Schema: public; Owner: xtenspg; Tablespace:
+--
+
+ALTER TABLE ONLY data_parentsubject__subject_childrendata
+    ADD CONSTRAINT data_parentsubject__subject_childrendata_key UNIQUE ("data_parentSubject", "subject_childrenData");
+
+
+--
+-- Name: data_parentsubject__subject_childrendata_pkey; Type: CONSTRAINT; Schema: public; Owner: xtenspg; Tablespace:
+--
+
+ALTER TABLE ONLY data_parentsubject__subject_childrendata
+    ADD CONSTRAINT data_parentsubject__subject_childrendata_pkey PRIMARY KEY (id);
+
+--
+-- Name: data_parents_fkey; Type: FK CONSTRAINT; Schema: public; Owner: xtenspg
+--
+
+ALTER TABLE ONLY data_parentsubject__subject_childrendata
+    ADD CONSTRAINT data_parents_fkey FOREIGN KEY ("data_parentSubject") REFERENCES data(id) MATCH FULL ON DELETE CASCADE;
+
+--
+-- Name: subject_children_fkey; Type: FK CONSTRAINT; Schema: public; Owner: xtenspg
+--
+
+ALTER TABLE ONLY data_parentsubject__subject_childrendata
+    ADD CONSTRAINT subject_children_fkey FOREIGN KEY ("subject_childrenData") REFERENCES subject(id) MATCH FULL ON DELETE CASCADE;
+
+--
+-- Name: sample_donor__subject_childrensample_key; Type: CONSTRAINT; Schema: public; Owner: xtenspg; Tablespace:
+--
+
+ALTER TABLE ONLY sample_donor__subject_childrensample
+    ADD CONSTRAINT sample_donor__subject_childrensample_key UNIQUE (sample_donor, "subject_childrenSample");
+
+
+--
+-- Name: sample_donor__subject_childrensample_pkey; Type: CONSTRAINT; Schema: public; Owner: xtenspg; Tablespace:
+--
+
+ALTER TABLE ONLY sample_donor__subject_childrensample
+    ADD CONSTRAINT sample_donor__subject_childrensample_pkey PRIMARY KEY (id);
+
+--
+-- Name: sample_parents_fkey; Type: FK CONSTRAINT; Schema: public; Owner: xtenspg
+--
+
+ALTER TABLE ONLY sample_donor__subject_childrensample
+    ADD CONSTRAINT sample_parents_fkey FOREIGN KEY (sample_donor) REFERENCES sample(id) MATCH FULL ON DELETE CASCADE;
+
+--
+-- Name: subject_children_fkey; Type: FK CONSTRAINT; Schema: public; Owner: xtenspg
+--
+
+ALTER TABLE ONLY sample_donor__subject_childrensample
+    ADD CONSTRAINT subject_children_fkey FOREIGN KEY ("subject_childrenSample") REFERENCES subject(id) MATCH FULL ON DELETE CASCADE;
+
+--
+-- Name: sample_parentsample__sample_childrensample_key; Type: CONSTRAINT; Schema: public; Owner: xtenspg; Tablespace:
+--
+
+ALTER TABLE ONLY sample_parentsample__sample_childrensample
+    ADD CONSTRAINT sample_parentsample__sample_childrensample_key UNIQUE ("sample_parentSample", "sample_childrenSample");
+
+--
+-- Name: sample_parentsample__sample_childrensample_pkey; Type: CONSTRAINT; Schema: public; Owner: xtenspg; Tablespace:
+--
+
+ALTER TABLE ONLY sample_parentsample__sample_childrensample
+    ADD CONSTRAINT sample_parentsample__sample_childrensample_pkey PRIMARY KEY (id);
+
+--
+-- Name: sample_parents_fkey; Type: FK CONSTRAINT; Schema: public; Owner: xtenspg
+--
+
+ALTER TABLE ONLY sample_parentsample__sample_childrensample
+    ADD CONSTRAINT sample_parents_fkey FOREIGN KEY ("sample_parentSample") REFERENCES sample(id) MATCH FULL ON DELETE CASCADE;
+
+--
+-- Name: sample_children_fkey; Type: FK CONSTRAINT; Schema: public; Owner: xtenspg
+--
+
+ALTER TABLE ONLY sample_parentsample__sample_childrensample
+    ADD CONSTRAINT sample_children_fkey FOREIGN KEY ("sample_childrenSample") REFERENCES sample(id) MATCH FULL ON DELETE CASCADE;
+
+--
+-- Name: data_childrendata__data_parentdata_key; Type: CONSTRAINT; Schema: public; Owner: xtenspg; Tablespace:
+--
+
+ALTER TABLE ONLY data_childrendata__data_parentdata
+    ADD CONSTRAINT data_childrendata__data_parentdata_key UNIQUE ("data_parentData", "data_childrenData");
+
+--
+-- Name: data_childrendata__data_parentdata_pkey; Type: CONSTRAINT; Schema: public; Owner: xtenspg; Tablespace:
+--
+
+ALTER TABLE ONLY data_childrendata__data_parentdata
+    ADD CONSTRAINT data_childrendata__data_parentdata_pkey PRIMARY KEY (id);
+
+--
+-- Name: data_parentsData_fkey; Type: FK CONSTRAINT; Schema: public; Owner: xtenspg
+--
+
+ALTER TABLE ONLY data_childrendata__data_parentdata
+    ADD CONSTRAINT data_parentsData_fkey FOREIGN KEY ("data_parentData") REFERENCES data(id) MATCH FULL ON DELETE CASCADE;
+
+--
+-- Name: data_children_fkey; Type: FK CONSTRAINT; Schema: public; Owner: xtenspg
+--
+
+ALTER TABLE ONLY data_childrendata__data_parentdata
+    ADD CONSTRAINT data_children_fkey FOREIGN KEY ("data_childrenData") REFERENCES data(id) MATCH FULL ON DELETE CASCADE;
+
+--
+-- Name: data_parentsample__sample_childrendata_key; Type: CONSTRAINT; Schema: public; Owner: xtenspg; Tablespace:
+--
+
+ALTER TABLE ONLY data_parentsample__sample_childrendata
+    ADD CONSTRAINT data_parentsample__sample_childrendata_key UNIQUE ("data_parentSample", "sample_childrenData");
+
+--
+-- Name: data_parentsample__sample_childrendata_pkey; Type: CONSTRAINT; Schema: public; Owner: xtenspg; Tablespace:
+--
+
+ALTER TABLE ONLY data_parentsample__sample_childrendata
+    ADD CONSTRAINT data_parentsample__sample_childrendata_pkey PRIMARY KEY (id);
+
+--
+-- Name: data_parents_fkey; Type: FK CONSTRAINT; Schema: public; Owner: xtenspg
+--
+
+ALTER TABLE ONLY data_parentsample__sample_childrendata
+    ADD CONSTRAINT data_parents_fkey FOREIGN KEY ("data_parentSample") REFERENCES data(id) MATCH FULL ON DELETE CASCADE;
+
+--
+-- Name: sample_children_fkey; Type: FK CONSTRAINT; Schema: public; Owner: xtenspg
+--
+
+ALTER TABLE ONLY data_parentsample__sample_childrendata
+    ADD CONSTRAINT sample_children_fkey FOREIGN KEY ("sample_childrenData") REFERENCES sample(id) MATCH FULL ON DELETE CASCADE;
 
 --
 -- Name: eav_attribute_pkey; Type: CONSTRAINT; Schema: public; Owner: xtenspg; Tablespace:
@@ -2373,7 +2913,6 @@ ALTER TABLE ONLY operator
 ALTER TABLE ONLY operator
     ADD CONSTRAINT operator_pkey PRIMARY KEY (id);
 
-
 --
 -- Name: passport_pkey; Type: CONSTRAINT; Schema: public; Owner: xtenspg; Tablespace:
 --
@@ -2405,22 +2944,36 @@ ALTER TABLE ONLY project
 ALTER TABLE ONLY project
     ADD CONSTRAINT project_pkey PRIMARY KEY (id);
 
-
 --
--- Name: project_subjects__subject_projects_key; Type: CONSTRAINT; Schema: public; Owner: xtenspg; Tablespace:
---
-
-ALTER TABLE ONLY project_subjects__subject_projects
-    ADD CONSTRAINT project_subjects__subject_projects_key UNIQUE (project_subjects, subject_projects);
-
-
---
--- Name: project_subjects__subject_projects_pkey; Type: CONSTRAINT; Schema: public; Owner: xtenspg; Tablespace:
+-- Name: super_type_pkey; Type: CONSTRAINT; Schema: public; Owner: xtenspg; Tablespace:
 --
 
-ALTER TABLE ONLY project_subjects__subject_projects
-    ADD CONSTRAINT project_subjects__subject_projects_pkey PRIMARY KEY (id);
+ALTER TABLE ONLY super_type
+    ADD CONSTRAINT super_type_pkey PRIMARY KEY (id);
 
+
+--
+-- Name: group_projects__project_groups_key; Type: CONSTRAINT; Schema: public; Owner: xtenspg; Tablespace:
+--
+
+ALTER TABLE ONLY group_projects__project_groups
+    ADD CONSTRAINT group_projects__project_groups_key UNIQUE (project_groups, group_projects);
+
+
+--
+-- Name: group_projects__project_groups_pkey; Type: CONSTRAINT; Schema: public; Owner: xtenspg; Tablespace:
+--
+
+ALTER TABLE ONLY group_projects__project_groups
+    ADD CONSTRAINT group_projects__project_groups_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: daemon_pkey; Type: CONSTRAINT; Schema: public; Owner: xtenspg; Tablespace:
+--
+
+ALTER TABLE ONLY daemon
+    ADD CONSTRAINT daemon_pkey PRIMARY KEY (id);
 
 --
 -- Name: sample_pkey; Type: CONSTRAINT; Schema: public; Owner: xtenspg; Tablespace:
@@ -2501,11 +3054,118 @@ CREATE INDEX data_type_idx ON data USING btree (type);
 
 
 --
+-- Name: created_at_index; Type: INDEX; Schema: public; Owner: xtenspg; Tablespace:
+--
+
+CREATE INDEX created_at_data_index ON data (created_at DESC);
+
+
+--
+-- Name: created_at_index; Type: INDEX; Schema: public; Owner: xtenspg; Tablespace:
+--
+
+CREATE INDEX created_at_smpl_index ON sample (created_at DESC);
+
+
+--
+-- Name: created_at_index; Type: INDEX; Schema: public; Owner: xtenspg; Tablespace:
+--
+
+CREATE INDEX created_at_sbj_index ON subject (created_at DESC);
+
+
+--
+-- Name: gin_index_data; Type: INDEX; Schema: public; Owner: xtenspg; Tablespace:
+--
+
+CREATE INDEX gin_index_data ON data USING gin (metadata);
+
+
+--
+-- Name: gin_index_sample; Type: INDEX; Schema: public; Owner: xtenspg; Tablespace:
+--
+
+CREATE INDEX gin_index_sample ON sample USING gin (metadata);
+
+
+--
+-- Name: gin_index_subject; Type: INDEX; Schema: public; Owner: xtenspg; Tablespace:
+--
+
+CREATE INDEX gin_index_subject ON subject USING gin (metadata);
+
+
+--
+-- Name: privileges_index; Type: INDEX; Schema: public; Owner: xtenspg; Tablespace:
+--
+
+CREATE INDEX privileges_index ON datatype_privileges (data_type, xtens_group);
+
+--
+-- Name: join_data_data_index; Type: INDEX; Schema: public; Owner: xtenspg; Tablespace:
+--
+
+CREATE INDEX join_data_data_index ON data_childrendata__data_parentdata ("data_parentData", "data_childrenData");
+
+--
+-- Name: join_data_sample_index; Type: INDEX; Schema: public; Owner: xtenspg; Tablespace:
+--
+
+CREATE INDEX join_data_sample_index ON data_parentsample__sample_childrendata ("data_parentSample", "sample_childrenData");
+
+--
+-- Name: join_data_subject_index; Type: INDEX; Schema: public; Owner: xtenspg; Tablespace:
+--
+
+CREATE INDEX join_data_subject_index ON data_parentsubject__subject_childrendata ("data_parentSubject", "subject_childrenData");
+
+--
+-- Name: join_sample_sample_index; Type: INDEX; Schema: public; Owner: xtenspg; Tablespace:
+--
+
+CREATE INDEX join_sample_sample_index ON sample_parentsample__sample_childrensample ("sample_parentSample", "sample_childrenSample");
+
+--
+-- Name: join_sample_donor_index; Type: INDEX; Schema: public; Owner: xtenspg; Tablespace:
+--
+
+CREATE INDEX join_sample_donor_index ON sample_donor__subject_childrensample ("sample_donor", "subject_childrenSample");
+
+
+--
 -- Name: biobank_fkey; Type: FK CONSTRAINT; Schema: public; Owner: xtenspg
 --
 
 ALTER TABLE ONLY sample
     ADD CONSTRAINT biobank_fkey FOREIGN KEY (biobank) REFERENCES biobank(id) MATCH FULL ON DELETE CASCADE;
+
+--
+-- Name: owner_fkey; Type: FK CONSTRAINT; Schema: public; Owner: xtenspg
+--
+
+ALTER TABLE ONLY data
+    ADD CONSTRAINT owner_fkey FOREIGN KEY (owner) REFERENCES operator(id) MATCH FULL;
+
+--
+-- Name: owner_fkey; Type: FK CONSTRAINT; Schema: public; Owner: xtenspg
+--
+
+ALTER TABLE ONLY sample
+    ADD CONSTRAINT owner_fkey FOREIGN KEY (owner) REFERENCES operator(id) MATCH FULL;
+
+--
+-- Name: owner_fkey; Type: FK CONSTRAINT; Schema: public; Owner: xtenspg
+--
+
+ALTER TABLE ONLY subject
+    ADD CONSTRAINT owner_fkey FOREIGN KEY (owner) REFERENCES operator(id) MATCH FULL;
+
+--
+-- Name: address_information_fkey; Type: FK CONSTRAINT; Schema: public; Owner: xtenspg
+--
+
+ALTER TABLE ONLY operator
+    ADD CONSTRAINT address_information_fkey FOREIGN KEY (address_information) REFERENCES address_information(id) MATCH FULL ON DELETE CASCADE;
 
 
 --
@@ -2531,6 +3191,19 @@ ALTER TABLE ONLY data_files__datafile_data
 ALTER TABLE ONLY datatype_privileges
     ADD CONSTRAINT data_type_fkey FOREIGN KEY (data_type) REFERENCES data_type(id) MATCH FULL ON DELETE CASCADE;
 
+--
+-- Name: project_fkey; Type: CONSTRAINT; Schema: public; Owner: xtenspg; Tablespace:
+--
+
+ALTER TABLE ONLY data_type
+    ADD CONSTRAINT project_fkey FOREIGN KEY (project) REFERENCES project(id) MATCH FULL ON DELETE CASCADE;
+
+--
+-- Name: super_type_fkey; Type: FK CONSTRAINT; Schema: public; Owner: xtenspg
+--
+
+ALTER TABLE ONLY data_type
+    ADD CONSTRAINT super_type_fkey FOREIGN KEY (super_type) REFERENCES super_type(id) MATCH FULL ON DELETE RESTRICT;
 
 --
 -- Name: datafile_data_fkey; Type: FK CONSTRAINT; Schema: public; Owner: xtenspg
@@ -2611,6 +3284,13 @@ ALTER TABLE ONLY group_members__operator_groups
 ALTER TABLE ONLY data
     ADD CONSTRAINT parent_data_fkey FOREIGN KEY (parent_data) REFERENCES data(id) MATCH FULL ON DELETE CASCADE;
 
+--
+-- Name: operator_fkey; Type: FK CONSTRAINT; Schema: public; Owner: xtenspg
+--
+
+ALTER TABLE ONLY daemon
+    ADD CONSTRAINT operator_fkey FOREIGN KEY (operator) REFERENCES operator(id) MATCH FULL;
+
 
 --
 -- Name: parent_sample_fkey; Type: FK CONSTRAINT; Schema: public; Owner: xtenspg
@@ -2656,8 +3336,8 @@ ALTER TABLE ONLY subject
 -- Name: project_subjects_fkey; Type: FK CONSTRAINT; Schema: public; Owner: xtenspg
 --
 
-ALTER TABLE ONLY project_subjects__subject_projects
-    ADD CONSTRAINT project_subjects_fkey FOREIGN KEY (project_subjects) REFERENCES project(id) MATCH FULL ON DELETE CASCADE;
+ALTER TABLE ONLY group_projects__project_groups
+    ADD CONSTRAINT project_groups_fkey FOREIGN KEY (project_groups) REFERENCES project(id) MATCH FULL ON DELETE CASCADE;
 
 
 --
@@ -2672,8 +3352,8 @@ ALTER TABLE ONLY datafile_samples__sample_files
 -- Name: subject_projects_fkey; Type: FK CONSTRAINT; Schema: public; Owner: xtenspg
 --
 
-ALTER TABLE ONLY project_subjects__subject_projects
-    ADD CONSTRAINT subject_projects_fkey FOREIGN KEY (subject_projects) REFERENCES subject(id) MATCH FULL ON DELETE CASCADE;
+ALTER TABLE ONLY group_projects__project_groups
+    ADD CONSTRAINT group_projects_fkey FOREIGN KEY (group_projects) REFERENCES xtens_group(id) MATCH FULL ON DELETE CASCADE;
 
 
 --
@@ -2709,6 +3389,37 @@ ALTER TABLE ONLY datatype_privileges
 
 
 --
+-- Name: biobank_projects__project_biobanks_key; Type: CONSTRAINT; Schema: public; Owner: xtenspg; Tablespace:
+--
+
+ALTER TABLE ONLY biobank_projects__project_biobanks
+    ADD CONSTRAINT biobank_projects__project_biobanks_key UNIQUE (project_biobanks, biobank_projects);
+
+
+--
+-- Name: biobank_projects__project_biobanks_pkey; Type: CONSTRAINT; Schema: public; Owner: xtenspg; Tablespace:
+--
+
+ALTER TABLE ONLY biobank_projects__project_biobanks
+    ADD CONSTRAINT biobank_projects__project_biobanks_pkey PRIMARY KEY (id);
+
+--
+-- Name: project_subjects_fkey; Type: FK CONSTRAINT; Schema: public; Owner: xtenspg
+--
+
+ALTER TABLE ONLY biobank_projects__project_biobanks
+    ADD CONSTRAINT project_biobanks_fkey FOREIGN KEY (project_biobanks) REFERENCES project(id) MATCH FULL ON DELETE CASCADE;
+
+
+
+--
+-- Name: subject_projects_fkey; Type: FK CONSTRAINT; Schema: public; Owner: xtenspg
+--
+
+ALTER TABLE ONLY biobank_projects__project_biobanks
+    ADD CONSTRAINT biobank_projects_fkey FOREIGN KEY (biobank_projects) REFERENCES biobank(id) MATCH FULL ON DELETE CASCADE;
+
+--
 -- Name: public; Type: ACL; Schema: -; Owner: postgres
 --
 
@@ -2719,22 +3430,22 @@ GRANT ALL ON SCHEMA public TO PUBLIC;
 
 
 --
--- Name: dom_componentdatatypename; Type: ACL; Schema: public; Owner: massipg
+-- Name: dom_componentdatatypename; Type: ACL; Schema: public; Owner: xtenspg
 --
 
 REVOKE ALL ON TYPE dom_componentdatatypename FROM PUBLIC;
-REVOKE ALL ON TYPE dom_componentdatatypename FROM massipg;
-GRANT ALL ON TYPE dom_componentdatatypename TO massipg;
+REVOKE ALL ON TYPE dom_componentdatatypename FROM xtenspg;
+GRANT ALL ON TYPE dom_componentdatatypename TO xtenspg;
 GRANT ALL ON TYPE dom_componentdatatypename TO PUBLIC;
 
 
 --
--- Name: dom_leaftype; Type: ACL; Schema: public; Owner: massipg
+-- Name: dom_leaftype; Type: ACL; Schema: public; Owner: xtenspg
 --
 
 REVOKE ALL ON TYPE dom_leaftype FROM PUBLIC;
-REVOKE ALL ON TYPE dom_leaftype FROM massipg;
-GRANT ALL ON TYPE dom_leaftype TO massipg;
+REVOKE ALL ON TYPE dom_leaftype FROM xtenspg;
+GRANT ALL ON TYPE dom_leaftype TO xtenspg;
 GRANT ALL ON TYPE dom_leaftype TO PUBLIC;
 
 
@@ -3405,21 +4116,56 @@ GRANT ALL ON SEQUENCE project_id_seq TO xtenspg;
 
 
 --
--- Name: project_subjects__subject_projects; Type: ACL; Schema: public; Owner: xtenspg
+-- Name: group_projects__project_groups; Type: ACL; Schema: public; Owner: xtenspg
 --
 
-REVOKE ALL ON TABLE project_subjects__subject_projects FROM PUBLIC;
-REVOKE ALL ON TABLE project_subjects__subject_projects FROM xtenspg;
-GRANT ALL ON TABLE project_subjects__subject_projects TO xtenspg;
+REVOKE ALL ON TABLE group_projects__project_groups FROM PUBLIC;
+REVOKE ALL ON TABLE group_projects__project_groups FROM xtenspg;
+GRANT ALL ON TABLE group_projects__project_groups TO xtenspg;
 
 
 --
--- Name: project_subjects__subject_projects_id_seq; Type: ACL; Schema: public; Owner: xtenspg
+-- Name: group_projects__project_groups_id_seq; Type: ACL; Schema: public; Owner: xtenspg
 --
 
-REVOKE ALL ON SEQUENCE project_subjects__subject_projects_id_seq FROM PUBLIC;
-REVOKE ALL ON SEQUENCE project_subjects__subject_projects_id_seq FROM xtenspg;
-GRANT ALL ON SEQUENCE project_subjects__subject_projects_id_seq TO xtenspg;
+REVOKE ALL ON SEQUENCE group_projects__project_groups_id_seq FROM PUBLIC;
+REVOKE ALL ON SEQUENCE group_projects__project_groups_id_seq FROM xtenspg;
+GRANT ALL ON SEQUENCE group_projects__project_groups_id_seq TO xtenspg;
+
+--
+-- Name: biobank_projects__project_biobanks; Type: ACL; Schema: public; Owner: xtenspg
+--
+
+REVOKE ALL ON TABLE biobank_projects__project_biobanks FROM PUBLIC;
+REVOKE ALL ON TABLE biobank_projects__project_biobanks FROM xtenspg;
+GRANT ALL ON TABLE biobank_projects__project_biobanks TO xtenspg;
+
+
+--
+-- Name: biobank_projects__project_biobanks_id_seq; Type: ACL; Schema: public; Owner: xtenspg
+--
+
+REVOKE ALL ON SEQUENCE biobank_projects__project_biobanks_id_seq FROM PUBLIC;
+REVOKE ALL ON SEQUENCE biobank_projects__project_biobanks_id_seq FROM xtenspg;
+GRANT ALL ON SEQUENCE biobank_projects__project_biobanks_id_seq TO xtenspg;
+
+
+--
+-- Name: daemon; Type: ACL; Schema: public; Owner: xtenspg
+--
+
+REVOKE ALL ON TABLE daemon FROM PUBLIC;
+REVOKE ALL ON TABLE daemon FROM xtenspg;
+GRANT ALL ON TABLE daemon TO xtenspg;
+
+
+--
+-- Name: daemon_id_seq; Type: ACL; Schema: public; Owner: xtenspg
+--
+
+REVOKE ALL ON SEQUENCE daemon_id_seq FROM PUBLIC;
+REVOKE ALL ON SEQUENCE daemon_id_seq FROM xtenspg;
+GRANT ALL ON SEQUENCE daemon_id_seq TO xtenspg;
 
 
 --
@@ -3492,6 +4238,87 @@ GRANT ALL ON TABLE xtens_group TO xtenspg;
 REVOKE ALL ON SEQUENCE xtens_group_id_seq FROM PUBLIC;
 REVOKE ALL ON SEQUENCE xtens_group_id_seq FROM xtenspg;
 GRANT ALL ON SEQUENCE xtens_group_id_seq TO xtenspg;
+
+
+--
+-- Name: data_parentsample__sample_childrendata; Type: ACL; Schema: public; Owner: xtenspg
+--
+
+REVOKE ALL ON TABLE data_parentsample__sample_childrendata FROM PUBLIC;
+REVOKE ALL ON TABLE data_parentsample__sample_childrendata FROM xtenspg;
+GRANT ALL ON TABLE data_parentsample__sample_childrendata TO xtenspg;
+
+--
+-- Name: data_parentsample__sample_childrendata_id_seq; Type: ACL; Schema: public; Owner: xtenspg
+--
+
+REVOKE ALL ON SEQUENCE data_parentsample__sample_childrendata_id_seq FROM PUBLIC;
+REVOKE ALL ON SEQUENCE data_parentsample__sample_childrendata_id_seq FROM xtenspg;
+GRANT ALL ON SEQUENCE data_parentsample__sample_childrendata_id_seq TO xtenspg;
+
+--
+-- Name: data_parentsubject__subject_childrendata; Type: ACL; Schema: public; Owner: xtenspg
+--
+
+REVOKE ALL ON TABLE data_parentsubject__subject_childrendata FROM PUBLIC;
+REVOKE ALL ON TABLE data_parentsubject__subject_childrendata FROM xtenspg;
+GRANT ALL ON TABLE data_parentsubject__subject_childrendata TO xtenspg;
+
+--
+-- Name: data_parentsubject__subject_childrendata_id_seq; Type: ACL; Schema: public; Owner: xtenspg
+--
+
+REVOKE ALL ON SEQUENCE data_parentsubject__subject_childrendata_id_seq FROM PUBLIC;
+REVOKE ALL ON SEQUENCE data_parentsubject__subject_childrendata_id_seq FROM xtenspg;
+GRANT ALL ON SEQUENCE data_parentsubject__subject_childrendata_id_seq TO xtenspg;
+
+--
+-- Name: sample_donor__subject_childrensample; Type: ACL; Schema: public; Owner: xtenspg
+--
+
+REVOKE ALL ON TABLE sample_donor__subject_childrensample FROM PUBLIC;
+REVOKE ALL ON TABLE sample_donor__subject_childrensample FROM xtenspg;
+GRANT ALL ON TABLE sample_donor__subject_childrensample TO xtenspg;
+
+--
+-- Name: sample_donor__subject_childrensample_id_seq; Type: ACL; Schema: public; Owner: xtenspg
+--
+
+REVOKE ALL ON SEQUENCE sample_donor__subject_childrensample_id_seq FROM PUBLIC;
+REVOKE ALL ON SEQUENCE sample_donor__subject_childrensample_id_seq FROM xtenspg;
+GRANT ALL ON SEQUENCE sample_donor__subject_childrensample_id_seq TO xtenspg;
+
+--
+-- Name: sample_parentsample__sample_childrensample; Type: ACL; Schema: public; Owner: xtenspg
+--
+
+REVOKE ALL ON TABLE sample_parentsample__sample_childrensample FROM PUBLIC;
+REVOKE ALL ON TABLE sample_parentsample__sample_childrensample FROM xtenspg;
+GRANT ALL ON TABLE sample_parentsample__sample_childrensample TO xtenspg;
+
+--
+-- Name: sample_parentsample__sample_childrensample_id_seq; Type: ACL; Schema: public; Owner: xtenspg
+--
+
+REVOKE ALL ON SEQUENCE sample_parentsample__sample_childrensample_id_seq FROM PUBLIC;
+REVOKE ALL ON SEQUENCE sample_parentsample__sample_childrensample_id_seq FROM xtenspg;
+GRANT ALL ON SEQUENCE sample_parentsample__sample_childrensample_id_seq TO xtenspg;
+
+--
+-- Name: data_childrendata__data_parentdata; Type: ACL; Schema: public; Owner: xtenspg
+--
+
+REVOKE ALL ON TABLE data_childrendata__data_parentdata FROM PUBLIC;
+REVOKE ALL ON TABLE data_childrendata__data_parentdata FROM xtenspg;
+GRANT ALL ON TABLE data_childrendata__data_parentdata TO xtenspg;
+
+--
+-- Name: data_childrendata__data_parentdata_id_seq; Type: ACL; Schema: public; Owner: xtenspg
+--
+
+REVOKE ALL ON SEQUENCE data_childrendata__data_parentdata_id_seq FROM PUBLIC;
+REVOKE ALL ON SEQUENCE data_childrendata__data_parentdata_id_seq FROM xtenspg;
+GRANT ALL ON SEQUENCE data_childrendata__data_parentdata_id_seq TO xtenspg;
 
 
 --

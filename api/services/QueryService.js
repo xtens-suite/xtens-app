@@ -3,9 +3,10 @@
  */
 /* jshint node: true */
 /* jshint esnext: true */
-/* globals _, sails, */
+/* globals _, sails*/
 "use strict";
 
+const crudManager = sails.hooks.persistence.crudManager;
 const actionUtil = require('sails/lib/hooks/blueprints/actionUtil');
 const querystring = require('querystring');
 
@@ -19,13 +20,15 @@ const QueryService = {
         - contains the property 'blacklisted' {array} - optional list of blackListed fields
      * @return{Promise}
      */
-    composeFind: function(req, populateOpts) {
+    composeFind: function(req, populateOpts, privileges) {
+
         const Model = actionUtil.parseModel(req);
+        const whereParams = QueryService.parseParams(req,privileges);
         const queryFind = Model.find(QueryService.parseSelect(req))
-            .where(actionUtil.parseCriteria(req))
-            .limit(actionUtil.parseLimit(req))
-            .skip(actionUtil.parseSkip(req))
-            .sort(actionUtil.parseSort(req));
+          .where(whereParams)
+          .limit(actionUtil.parseLimit(req))
+          .skip(actionUtil.parseSkip(req))
+          .sort(actionUtil.parseSort(req));
 
         return actionUtil.populateRequest(queryFind, req, populateOpts);
     },
@@ -36,41 +39,44 @@ const QueryService = {
      * @param{Request} req
      * @return{Promise/Object} all the info to be shipped as response header
      */
-    composeHeaderInfo: function(req) {
+    composeHeaderInfo: function(req, params) {
         const Model = actionUtil.parseModel(req);
         // sails.log.verbose('QueryService.composeHeaderInfo - Model is:');
         // sails.log.verbose(Model);
-        return Model.count().where(actionUtil.parseCriteria(req))
 
-        .then(count => {
-            const pageSize = actionUtil.parseLimit(req), skip = actionUtil.parseSkip(req),
-                numPages = Math.ceil(count/pageSize),
-                currPage = Math.ceil(skip/pageSize), params = req.allParams();
-            let queryNext, queryPrevious, queryLast, queryFirst;
+        // const params = QueryService.parseParams(req,privileges);
+
+        return crudManager.countData(params)
+
+          .then(count => {
+              const pageSize = actionUtil.parseLimit(req), skip = actionUtil.parseSkip(req),
+                  numPages = Math.ceil(count/pageSize),
+                  currPage = Math.ceil(skip/pageSize), params = req.allParams();
+              let queryNext, queryPrevious, queryLast, queryFirst;
 
 
-            if (currPage < numPages - 1) {
-                queryNext = querystring.stringify(Object.assign(params, { limit: pageSize, skip: pageSize + skip }));
-                queryLast = querystring.stringify(Object.assign(params, { limit: pageSize, skip: (numPages-1)*pageSize }));
-            }
-            if (currPage > 0) {
-                queryPrevious = querystring.stringify(Object.assign(params, { limit: pageSize, skip: skip - pageSize }));
-                queryFirst = querystring.stringify(Object.assign(params, { limit: pageSize, skip: undefined }));
-            }
+              if (currPage < numPages - 1) {
+                  queryNext = querystring.stringify(Object.assign(params, { limit: pageSize, skip: pageSize + skip }));
+                  queryLast = querystring.stringify(Object.assign(params, { limit: pageSize, skip: (numPages-1)*pageSize }));
+              }
+              if (currPage > 0) {
+                  queryPrevious = querystring.stringify(Object.assign(params, { limit: pageSize, skip: skip - pageSize }));
+                  queryFirst = querystring.stringify(Object.assign(params, { limit: pageSize, skip: undefined }));
+              }
 
-            return {
-                count: count,
-                pageSize: pageSize,
-                numPages: numPages,
-                currPage: currPage,
-                links: [
+              return {
+                  count: count,
+                  pageSize: pageSize,
+                  numPages: numPages,
+                  currPage: currPage,
+                  links: [
                     { value: queryNext ? `${req.baseUrl}${req.path}?${queryNext}` : null, rel: 'next' },
                     { value: queryPrevious ? `${req.baseUrl}${req.path}?${queryPrevious}` : null, rel: 'previous'},
                     { value: queryFirst ? `${req.baseUrl}${req.path}?${queryFirst}` : null, rel: 'first' },
                     { value: queryLast ? `${req.baseUrl}${req.path}?${queryLast}` : null, rel: 'last'}
-                ]
-            };
-        });
+                  ]
+              };
+          });
     },
 
     /**
@@ -98,6 +104,25 @@ const QueryService = {
             sails.log.error(err);
             return null;
         }
+    },
+
+    /**
+     * @method
+     * @name
+     * @param {Request} req
+     */
+    parseParams: function(req,privileges) {
+        let params = actionUtil.parseCriteria(req);
+
+        if (!privileges || _.isEmpty(privileges)) {
+            return params;
+        }
+        if(!params.type){
+            const arrPrivileges = _.isArray(privileges) ? privileges : [privileges];
+            let arrDtPrivId = arrPrivileges.map(el => el.dataType);
+            params.type = arrDtPrivId;
+        }
+        return params;
     }
 
 };

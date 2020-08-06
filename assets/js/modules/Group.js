@@ -64,7 +64,15 @@
 
             '#privilege-level': {
                 observe: 'privilegeLevel',
+                initialize: function($el) {
+                    $el.select2({placeholder: i18n("please-select") });
+                },
+
                 selectOptions: {
+                    defaultOption: {
+                        label: "",
+                        value: null
+                    },
                     collection: function() {
                         var coll = [];
                         _.each(GroupPrivilegeLevels, function(value) {
@@ -98,7 +106,7 @@
 
         render: function()  {
             this.$el.html(this.template({__:i18n, group: this.model}));
-            this.$modal = this.$(".group-modal");
+            this.$modal = $(".modal-cnt");
             this.$form = this.$('form');
             this.$form.parsley(parsleyOpts);
             this.stickit();
@@ -122,7 +130,8 @@
                     modal.show();
 
                     setTimeout(function(){ modal.hide(); }, 1200);
-                    that.$('.group-modal').on('hidden.bs.modal', function (e) {
+                    $('.modal-cnt').one('hidden.bs.modal', function (e) {
+                        e.preventDefault();
                         modal.remove();
                         xtens.router.navigate('groups', {trigger: true});
                     });
@@ -143,33 +152,40 @@
             var modal = new ModalDialog({
                 template: JST["views/templates/confirm-dialog-bootstrap.ejs"],
                 title: i18n('confirm-deletion'),
-                body: i18n('group-will-be-permanently-deleted-are-you-sure')
+                body: i18n('group-will-be-permanently-deleted-are-you-sure'),
+                type: i18n("delete")
             });
 
             this.$modal.append(modal.render().el);
             modal.show();
 
-            this.$('#confirm-delete').click( function (e) {
+            $('#confirm').click( function (e) {
+                e.preventDefault();
                 modal.hide();
-                var targetRoute = $(ev.currentTarget).data('targetRoute') || 'data';
+                that.$modal.one('hidden.bs.modal', function (e) {
+                    e.preventDefault();
+                    $('.waiting-modal').modal('show');
+                    var targetRoute = $(ev.currentTarget).data('targetRoute') || 'data';
 
-                that.model.destroy({
-                    success: function(model, res) {
-                        modal.template= JST["views/templates/dialog-bootstrap.ejs"];
-                        modal.title= i18n('ok');
-                        modal.body= i18n('group-deleted');
-                        that.$modal.append(modal.render().el);
-                        $('.modal-header').addClass('alert-success');
-                        modal.show();
-                        setTimeout(function(){ modal.hide(); }, 1200);
-                        that.$modal.on('hidden.bs.modal', function (e) {
-                            modal.remove();
-                            xtens.router.navigate('groups', {trigger: true});
-                        });
-                    },
-                    error: function(model, res) {
-                        xtens.error(res);
-                    }
+                    that.model.destroy({
+                        success: function(model, res) {
+                            $('.waiting-modal').modal('hide');
+                            modal.template= JST["views/templates/dialog-bootstrap.ejs"];
+                            modal.title= i18n('ok');
+                            modal.body= i18n('group-deleted');
+                            that.$modal.append(modal.render().el);
+                            $('.modal-header').addClass('alert-success');
+                            modal.show();
+                            setTimeout(function(){ modal.hide(); }, 1200);
+                            that.$modal.one('hidden.bs.modal', function (e) {
+                                modal.remove();
+                                xtens.router.navigate('groups', {trigger: true});
+                            });
+                        },
+                        error: function(model, res) {
+                            xtens.error(res);
+                        }
+                    });
                 });
                 return false;
             });
@@ -181,24 +197,46 @@
         tagName: 'div',
         className: 'group',
 
-        initialize: function() {
+        initialize: function(options) {
             $("#main").html(this.el);
             this.template = JST["views/templates/group-list.ejs"];
-            this.render();
+            this.render(options);
         },
 
         render: function(options) {
+            var that = this;
+            this.$el.html(that.template({__: i18n, groups: options.groups}));
 
-            var _this = this;
-            var groups= new Group.List();
-            groups.fetch({
-                success: function(groups) {
-                    _this.$el.html(_this.template({__: i18n, groups: groups.models}));
-                    return _this;
-                },
-                error: 	xtens.error
+            // this.filterGroups(options.queryParams);
+            var table = $('.table').DataTable({
+                scrollY:        '50vh',
+                scrollCollapse: true,
+                "searching": true
+                // "columnDefs": [
+                //   { "visible": false, "targets": 1 }
+                // ]
             });
+            var filter = options.queryParams && options.queryParams.projects ? options.queryParams.projects : xtens.session.get('activeProject');
+            if(filter != 'all'){
+                filter += " ";
+                table.search( filter ).draw();
+            }
             return this;
+        },
+
+        filterGroups: function(opt){
+            var rex = opt && opt.projects ? new RegExp(opt.projects) : new RegExp(xtens.session.get('activeProject'));
+
+            if(rex =="/all/"){this.clearFilter();}else{
+                $('.group_val').hide();
+                $('.group_val').filter(function() {
+                    return rex.test($(this).text());
+                }).show();
+            }
+        },
+        clearFilter: function(){
+            // $('#project-selector').val('');
+            $('.group_val').show();
         }
 
     });

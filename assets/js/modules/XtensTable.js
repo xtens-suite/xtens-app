@@ -3,374 +3,807 @@
  * @author Massimiliano Izzo
  *
  */
-  function renderDatatablesBoolean( data ) {
-      if (data) {
-          return 'true';
-      }
-      return 'false';
-  }
+function renderDatatablesBoolean(data) {
+    if (data) {
+        return 'true';
+    }
+    return 'false';
+}
 
-  function renderDatatablesDate(data, type) {
+function renderDatatablesDate(data, type) {
+    function pad(s) { return (s < 10) ? '0' + s : s; }
 
-      function pad(s) { return (s < 10) ? '0' + s : s; }
+    if (!_.isEmpty(data)) {
+        var d = new Date(data);
+        if (type === 'display' || type === 'filter' || type === 'export') {
+            return pad(d.getDate()) + "/" + pad(d.getMonth() + 1) + "/" + d.getFullYear();
+        } else return new Date(data);
+    }
+    return "";
+}
 
-      if (!_.isEmpty(data)) {
-          var d = new Date(data);
-          if (type === 'display' || type === 'filter') {
-              return pad(d.getDate()) + "/" + pad(d.getMonth()+1) + "/" + d.getFullYear();
-          }
-          else return new Date(data);
-      }
-      return "";
-  }
+(function (xtens, XtensTable) {
+    var i18n = xtens.module("i18n").en;
+    var useFormattedNames = xtens.module("xtensconstants").useFormattedMetadataFieldNames;
+    var Classes = xtens.module("xtensconstants").DataTypeClasses;
+    var Privileges = xtens.module("xtensconstants").DataTypePrivilegeLevels;
+    var replaceUnderscoreAndCapitalize = xtens.module("utils").replaceUnderscoreAndCapitalize;
+    var DataType = xtens.module("datatype");
+    var Data = xtens.module("data");
+    var SuperType = xtens.module("supertype");
+    var Sample = xtens.module("sample");
+    var DataFile = xtens.module("datafile");
+    var Operator = xtens.module("operator");
+    var VIEW_OVERVIEW = Privileges.VIEW_OVERVIEW;
+    var VIEW_DETAILS = Privileges.VIEW_DETAILS;
+    var EDIT = Privileges.EDIT;
+    var DOWNLOAD = Privileges.DOWNLOAD;
+    var ModalDialog = xtens.module("xtensbootstrap").Views.ModalDialog;
 
-  (function(xtens, XtensTable) {
-
-      var i18n = xtens.module("i18n").en;
-      var useFormattedNames = xtens.module("xtensconstants").useFormattedMetadataFieldNames;
-      var Classes = xtens.module("xtensconstants").DataTypeClasses;
-      var Privileges = xtens.module("xtensconstants").DataTypePrivilegeLevels;
-      var replaceUnderscoreAndCapitalize = xtens.module("utils").replaceUnderscoreAndCapitalize;
-      var DataTypeModel = xtens.module("datatype").Model;
-      var Data = xtens.module("data");
-      var Sample = xtens.module("sample");
-      var DataFile = xtens.module("datafile");
-      var VIEW_OVERVIEW = Privileges.VIEW_OVERVIEW;
     /**
      * @class
      * @name Views.Datatable
      */
-      XtensTable.Views.DataTable = Backbone.View.extend({
 
-          events: {
-              "click .xtenstable-details": "showDetailsView",
-              "click .xtenstable-edit": "showEditView",
-              "click .xtenstable-files": "showFileList",
-              "click .xtenstable-derivedsamples": "showDerivedSampleList",
-              "click .xtenstable-deriveddata": "showDerivedDataList",
-              "click .xtenstable-parameters": "showVideoParameters"
-          },
+    XtensTable.Views.DataTable = Backbone.View.extend({
+        
+        events: {
+            "click .xtenstable-details": "showDetailsView",
+            "click .xtenstable-edit": "showEditView",
+            "mouseover .xtenstable-files": "showFileList",
+            "click .xtenstable-derivedsamples": "showDerivedSampleList",
+            "click .xtenstable-deriveddata": "showDerivedDataList",
+            "click .xtenstable-subjectgraph": "showSubjectGraph",
+            "mouseover td.project-owner": "showTooltipOwner",
+            "click td.project-owner": "showPopoverOwner",
+            "click .xtenstable-parameters": "showVideoParameters"
 
-          tagName: 'table',
-          className: 'query-table',
+        },
 
-          initialize: function(options) {
-              if (!options || !options.dataType) {
-                  throw new Error("Missing required options: dataType");
-              }
-              this.dataType = new DataTypeModel(options.dataType);
-            // console.log(options.data);
-              this.data = options.data;
-              this.dataTypePrivilege = options.dataTypePrivilege;
-              this.childrenViews = [];
-              this.prepareDataForRenderingJSON(this.dataTypePrivilege);
+        tagName: 'table',
+        className: 'query-table',
+
+        initialize: function (options) {
+            // var that = this;
+            if (!options || !options.result.dataTypes) {
+                throw new Error("Missing required options: dataTypes");
+            }
+            // this.multiProject = _.isArray(options.result.dataTypes) ? true : false;
+            this.multiProject = options.multiProject;
+            this.dataTypes = _.isArray(options.result.dataTypes) ? new DataType.List(options.result.dataTypes) : new DataType.Model(options.result.dataTypes);
+            this.dataTypePrivileges = options.result.dataTypePrivileges;
+            // console.log(options.result.data);
+            this.isLeafSearch = options.leafSearch.isLeafSearch;
+            this.leafInfo = options.leafSearch.info;
+            this.queryArgs = options.queryArgs;
+
+            var results = this.getCurrentTypeAndPrivileges(options.queryArgs.dataType);
+            this.rootDataType = results.dt;
+
+            this.data = options.result.data;
+            if (this.isLeafSearch) {
+                this.plainData = this.buildPlainData(this.data);
+            }
+            this.$modal = $(".modal-cnt");
+            this.prepareDataForRenderingJSON(results.dtps, results.dts, this.queryArgs);
             // this.render();
-          },
+        },
 
+        buildPlainData: function (data) {
+            var plainData = [];
+            for (var i = 0; i < data.length; i++) {
+                for (var j = 0; j < data[i].parents.length; j++) {
+                    var obj = _.omit(data[i], 'parents');
+                    if (j === 0) {
+                        obj.showRow = true;
+                    } else {
+                        obj.showRow = false;
+                    }
+                    plainData.push(_.merge(data[i].parents[j], obj));
+                }
+            }
+            return plainData;
+        },
 
+        getCurrentTypeAndPrivileges: function (dataType) {
+            var currentDT = this.isLeafSearch || this.multiProject ? _.find(this.dataTypes.models, function (dt) {
+                return dt.id === dataType;
+            }) : this.dataTypes;
+            var currentMDT = this.isLeafSearch || this.multiProject ? _.filter(this.dataTypes.models, function (dt) {
+                return dt.get('superType').id === currentDT.get('superType').id;
+            }) : this.dataTypes;
+            var idDts = _.map(currentMDT, 'id');
+            // var currentMDTP = [];
+            var currentMDTP = this.isLeafSearch || this.multiProject ? this.dataTypePrivileges.filter(function (dtp) {
+                return idDts.indexOf(dtp.dataType) != -1;
+            }) : this.dataTypePrivileges;
+            return { dt: currentDT, dts: currentMDT, dtps: currentMDTP };
+        },
 
         /**
          * @method
          * @name render
          */
-          render: function() {
-              return this;
-          },
+        render: function () {
+            return this;
+        },
 
         /**
          * @method
          * @name destroy
          */
-          destroy: function() {
-              if (this.table) {
-                  this.table.destroy(true);
-                  this.table = null;
-                  this.$el.empty();
-              }
-          // Remove view from DOM
-              this.remove();
-          },
+        destroy: function () {
+            if (this.table) {
+                this.table.destroy(true);
+                this.table = null;
+                this.$el.empty();
+            }
+            // Remove view from DOM
+            this.remove();
+        },
 
         /**
          * @method
-         * @name addRowDataTable
+         * @name addRowsDataTable
          */
-          addRowDataTable: function(data) {
-              if (data) {
-                  this.data = this.data.concat(data);
-                  this.addLinks(this.optLinks);
-                  this.table.rows.add(data);
-                  var currentPage = this.table.page();
-                  this.table.page(currentPage).draw(false);
-              }
-          },
+        addRowsDataTable: function (data) {
+            if (data) {
+                this.data = this.data.concat(data);
+                if (this.isLeafSearch) {
+                    var plainData = this.buildPlainData(data);
+                    this.plainData = this.plainData.concat(plainData);
+                }
+                this.addLinks(this.optLinks);
+                // TODO: disabilitare le actions per i multi projects
+                this.table.rows.add(plainData);
+                var currentPage = this.table.page();
+                this.table.page(currentPage).draw(false);
+            }
+        },
+
+        showTooltipOwner: function (ev) {
+            ev.stopPropagation();
+            $(ev.currentTarget).tooltip({
+                position: {
+                    my: 'right center',
+                    at: 'left-10 center'
+                },
+                container: 'body',
+                title: i18n("click-to-show-owner-contacts")
+            }).tooltip('show');
+        },
+
+        showPopoverOwner: function (ev) {
+            ev.stopPropagation();
+            var that = this;
+            var data = this.table.row($(ev.currentTarget).parents('tr')).data();
+            var projects = xtens.session.get("projects");
+            var project = _.find(projects, function (pr) {
+                var dt = that.multiProject ? _.find(that.dataTypes.models, { 'id': data.type }) : that.dataTypes;
+                return pr.id === dt.get('project');
+            });
+
+            var owner = new Operator.Model({ id: data.owner });
+            var ownerDeferred = owner.fetch({
+                data: $.param({ populate: ['addressInformation'] })
+            });
+
+            $.when(ownerDeferred).then(function (ownerRes) {
+                if (that.modal) {
+                    that.modal.hide();
+                }
+                var modal = new ModalDialog({
+                    template: JST["views/templates/address-modal.ejs"],
+                    data: { __: i18n, project: project, data: data, owner: ownerRes, address: ownerRes.addressInformation }
+                });
+
+                that.$modal.append(modal.render().el);
+                modal.show();
+
+                $('.modal-cnt').one('hidden.bs.modal', function (e) {
+                    e.preventDefault();
+                    modal.remove();
+                    $('.modal-backdrop').remove();
+                });
+            });
+        },
 
         /**
          * @method
          * @name displayDataTable
          * @description show the datatable given the option object
          */
-          displayDataTable: function() {
+        displayDataTable: function () {
+            var that = this;
 
-              if (this.tableOpts && !_.isEmpty(this.tableOpts.data)) {
-                  this.table = this.$el.DataTable(this.tableOpts);
+            this.tableOpts = {
+                data: !this.isLeafSearch ? this.data : this.plainData,
+                columns: this.columns,
+                info: true,
+                scrollX: true,
+                scrollY: "500px",
+                scrollCollapse: true,
+                paging: true,
+                autoWidth: false,
+                deferRender: true,
+                columnDefs: [
+                    { "className": "dt-center", "targets": "_all" }
+                ],
+                pagingType: "full_numbers" // DOES NOT WORK!!
+            };
 
-                  if (this.tableOpts.columns.length>9){
-                      new $.fn.dataTable.FixedColumns(this.table, {
-                          leftColumns:this.numLeft,
-                          rightColumns:1
-                      });
-                  }
-                  else{
-                      this.tableOpts.fixedColumns=false;
-                  }
+            if (this.tableOpts && !_.isEmpty(this.tableOpts.data)) {
+                $.fn.dataTable.ext.search.pop();
 
-                // display the buttons option
-                  new $.fn.dataTable.Buttons(this.table, {
-                      buttons: [
-                          'copy', 'excel'
-                      ]
-                  });
-                  this.table.buttons().container().appendTo($('.col-sm-6:eq(0)', this.table.table().container()));
+                this.table = this.$el.DataTable(this.tableOpts);
+                if (this.tableOpts.columns.length > 9) {
+                    new $.fn.dataTable.FixedColumns(this.table, {
+                        leftColumns: !this.isLeafSearch ? this.numLeft : 0,
+                        rightColumns: this.multiProject || this.isLeafSearch ? 0 : 1 // for multiProject search no available actions
+                    });
+                } else {
+                    this.tableOpts.fixedColumns = false;
+                }
+                var filterColumn = ':visible';
+                if (this.isLeafSearch) {
+                    this.childrenRowsHandler();
+                    $.fn.dataTable.ext.search.push(
+                        function (settings, searchData, index, rowData) {
+                            return rowData.showRow;
+                        }
+                    );
 
-              }
+                    this.table.on('column-visibility.dt', function (e, settings, column, state) {
+                        if (!that.childColumns.find(function (c) { return that.table.column(column).header().className.indexOf(c.className.replace(/ /g, "_").toLowerCase()) >= 0; })) {
+                            $(that.table.column(column).header()).toggleClass('notexport');
+                        }
+                    });
+
+                    filterColumn = ':not(.notexport)'; // not export actions column
+                }
+
+                var buttons = [
+                    {
+                        extend: 'colvis',
+                        postfixButtons: ['colvisRestore']
+                    },
+                    {
+                        extend: 'copyHtml5',
+                        exportOptions: {
+                            orthogonal: 'export', // to export source data and not rendered data
+                            columns: filterColumn + ':not(.actions):not(.details-control)' // not export actions and details column
+                        }
+                    },
+                    {
+                        extend: 'excelHtml5',
+                        title: null,
+                        filename: 'XTENS_' + moment().format("YYYY_MM_DD_hh_mm_ss"),
+                        exportOptions: {
+                            orthogonal: 'export', // to export source data and not rendered data
+                            columns: filterColumn + ':not(.actions):not(.details-control)' // not export actions and details column
+                        }
+                    }
+                ];
+
+                if (this.checkVCF()) {
+                    buttons.push({
+                        extend: 'csvHtml5',
+                        text: 'Export as VCF',
+                        exportOptions: {
+                            orthogonal: 'export', // to export source data and not rendered data
+                            columns: '.vcf', // export only vcf columns
+                            format: {
+                                header: function (data, column) {
+                                    return data === "CHR" ? "#CHROM" : data;
+                                }
+                            }
+                        },
+                        customize: function (csv) {
+                            return "##fileformat=VCFv4.1\n" + csv;
+                        },
+                        fieldSeparator: '\t',
+                        filename: 'VCF_' + moment().format("YYYY_MM_DD_hh_mm_ss"),
+                        extension: ".vcf"
+                        // title:'##fileformat=VCFv4.1'
+                    });
+                }
+
+                // buttons = buttons.concat(excelPlainData);
+                this.colvisButtons.push(buttons);
+                this.colvisButtons = _.flatten(this.colvisButtons);
+                new $.fn.dataTable.Buttons(this.table, {
+                    buttons: this.colvisButtons
+                });
+                this.table.buttons().container().appendTo($('.col-sm-6:eq(0)', this.table.table().container()));
+            }
 
             // the returned dataset is empty
-              else {
-                  this.remove();
-              }
-          },
+            else {
+                this.remove();
+            }
+        },
+
+        childrenRowsHandler: function (row) {
+            var that = this;
+            $(this.$el).on('click', 'td.details-control', function () {
+                var tr = $(this).closest('tr');
+                var row = that.table.row(tr);
+
+                if (row.child.isShown()) {
+                    // This row is already open - close it
+                    row.child.hide();
+                    tr.removeClass('shown');
+                } else {
+                    var cl = 'child-table-' + row.index();
+                    var leafKey = _.find(_.keys(that.data[0]), function (k) { return k.indexOf("_id") > 0; });
+                    var data = _.find(that.data, function (d) {
+                        return d[leafKey] == row.data()[leafKey];
+                    });
+                    var maxWidth = $('.query').width() + 'px';
+                    var html = '<div class="row" style="max-width:' + maxWidth + ';"><div class="col-sm-12"><table class="' + cl + ' query-table"></table></div></div>';
+                    var tableOptsChild = {
+                        data: data.parents,
+                        columns: that.childColumns,
+                        info: false,
+                        searching: false,
+                        scrollX: true,
+                        scrollY: "500px",
+                        scrollCollapse: true,
+                        paging: false,
+                        deferRender: true,
+                        columnDefs: [
+                            { "className": "dt-center", "targets": "_all" }
+                        ]
+                    };
+                    row.child(html).show();
+                    tr.addClass('shown');
+                    var tableSelector = '.' + cl;
+                    $(tableSelector).DataTable(tableOptsChild);
+
+                    if (tableOptsChild.columns.length > 9) {
+                        new $.fn.dataTable.FixedColumns($(tableSelector), {
+                            leftColumns: that.childNumLeft,
+                            rightColumns: 0
+                        });
+                    } else {
+                        tableOptsChild.fixedColumns = false;
+                    }
+                }
+            });
+        },
+
+        checkVCF: function () {
+            var fieldsVCF = ["chr", "pos", "id", "qual", "ref", "alt", "filter"];
+            var fieldsVCF2 = ["chrom", "pos", "id", "qual", "ref", "alt", "filter"];
+            var found = 0; var found2 = 0;
+            var fieldsNames = [];
+            var schemaBody;
+            if (this.dataTypes.models) {
+                schemaBody = _.flatten(_.map(this.dataTypes.models, 'attributes.superType.schema.body'));
+            } else {
+                schemaBody = this.dataTypes.get('superType').schema.body;
+            }
+            fieldsNames = _.map(_.flatten(_.map(schemaBody, 'content')), 'formattedName');
+            fieldsNames.forEach(function (name) {
+                if (fieldsVCF.find(function (n) { return n === name; })) {
+                    found = found + 1;
+                }
+                if (fieldsVCF2.find(function (n) { return n === name; })) {
+                    found2 = found2 + 1;
+                }
+            });
+
+            if (found == 7 || found2 == 7) {
+                return true;
+            } else {
+                return false;
+            }
+        },
 
         /**
          * @method
          * @name prepareDataForRenderingJSON
          * @description Format the data according to the dataType schema and prepare data for visualization through DataTables
          */
-          prepareDataForRenderingJSON: function(dataTypePrivilege) {
-            /*
-            if (!this.dataType) {
-                return; //TODO add alert box
-            } */
-              var fileUpload = this.dataType.get("schema").header.fileUpload;
-              var hasDataSensitive = false;
-              this.fieldsToShow = [];
-              var that = this;
-              var hasDataChildren = false, hasSampleChildren = false;
-              var dataTypeChildren = _.where(this.dataType.get("children"), {"model": Classes.DATA});
-              var sampleTypeChildren = _.where(this.dataType.get("children"), {"model": Classes.SAMPLE});
-              if (dataTypeChildren.length > 0) {
-                  hasDataChildren = true;
-              }
-              if (sampleTypeChildren.length > 0) {
-                  hasSampleChildren = true;
-              }
-              var flattenedFields = this.dataType.getFlattenedFields(); // get the names of all the madatafields but those within loops;
-              this.columns = this.insertModelSpecificColumns(this.dataType.get("model"), xtens.session.get('canAccessPersonalData'));  // TODO manage permission for personalDetails
-              this.numLeft=this.columns.length;
+        prepareDataForRenderingJSON: function (dataTypePrivileges, dataTypes, queryArgs) {
+            var that = this;
+            this.colvisButtons = [];
+            this.columns = [];
+            this.childColumns = [];
 
-              if(dataTypePrivilege && dataTypePrivilege.privilegeLevel !== VIEW_OVERVIEW){
-                  flattenedFields.forEach(function(field) {
-                      if (field.sensitive) { hasDataSensitive = true; }
-                      if ( !field.sensitive || xtens.session.get('canAccessSensitiveData') ) {
-                          that.fieldsToShow.push(field);
-                      }});
-              }
+            var model = this.multiProject || this.isLeafSearch ? dataTypes[0].get("model") : dataTypes.get("model");
 
-              this.optLinks = {dataTypePrivilege: dataTypePrivilege, hasDataSensitive : hasDataSensitive, fileUpload : fileUpload, hasDataChildren : hasDataChildren, hasSampleChildren : hasSampleChildren};
+            if (this.isLeafSearch) {
+                this.columns = [
+                    {
+                        "className": 'details-control',
+                        "orderable": false,
+                        "data": null,
+                        "defaultContent": '<i style="cursor:pointer; color:#337ab7;" class="fa fa-plus-circle"></i>'
+                    }
+                ];
+                this.childColumns.push(this.insertModelSpecificColumns(model, xtens.session.get('canAccessPersonalData'), this.isLeafSearch));
+                this.childColumns = _.flatten(this.childColumns);
+            }
+            // else {
+            this.columns.push(this.insertModelSpecificColumns(model, xtens.session.get('canAccessPersonalData'), this.isLeafSearch));
+            this.columns = _.flatten(this.columns);
+            // }
+            if (this.multiProject) {
+                this.columns.push({
+                    "title": i18n("project-owner"),
+                    "data": function (data) {
+                        var projects = xtens.session.get("projects");
+                        var project = _.filter(projects, function (pr) {
+                            var dt = that.multiProject || that.isLeafSearch ? _.find(that.dataTypes.models, { 'id': data.type }) : that.dataTypes;
+                            return pr.id === dt.get('project');
+                        });
+                        return project.length > 0 ? project[0].name : "No project";
+                    },
+                    "className": "project-owner"
+                });
+            }
 
-              _.each(this.fieldsToShow, function(field) {
-                  var colTitle = field.name;
+            this.childNumLeft = this.childColumns.length;
+            this.numLeft = this.columns.length;
 
-                  var fieldName = useFormattedNames ? field.formattedName : field.name;
+            var fileUpload = !this.multiProject ? this.isLeafSearch ? dataTypes[0].get("superType").schema.header.fileUpload : dataTypes.get("superType").schema.header.fileUpload : false;
+            var hasDataChildren = false; var hasSampleChildren = false;
+            var dataTypeChildren = !this.multiProject ? _.where(this.isLeafSearch ? dataTypes[0].get("children") : dataTypes.get("children"), { "model": Classes.DATA }) : [];
+            var sampleTypeChildren = !this.multiProject ? _.where(this.isLeafSearch ? dataTypes[0].get("children") : dataTypes.get("children"), { "model": Classes.SAMPLE }) : [];
+            if (dataTypeChildren.length > 0) {
+                hasDataChildren = true;
+            }
+            if (sampleTypeChildren.length > 0) {
+                hasSampleChildren = true;
+            }
+            this.optLinks = { dataTypes: dataTypes, dataTypePrivileges: dataTypePrivileges, hasDataSensitive: false, fileUpload: fileUpload, hasDataChildren: hasDataChildren, hasSampleChildren: hasSampleChildren };
 
-                  var columnOpts = {
-                      "title": colTitle,
-                      "data": "metadata." + fieldName + ".value",
-                      "visible": field.visible,
-                      "defaultContent": ""
-                  };
+            this.prepareDataForRenderingJSONLeaf(dataTypePrivileges, dataTypes, queryArgs, queryArgs.dataType, this.isLeafSearch);
 
-                        // if field is loop retrieve multiple values
-                  if (field._loop) {
-                      columnOpts.data = "metadata." + fieldName + ".values";
-                      var data = columnOpts.data;
-                      columnOpts.render = function ( data ) {
-                          return  data && data.length > 2 ? '<span>List on Details button</span>' : data.join();
-                      };
-
-                  }
-
-                  switch(field.fieldType) {
-                      case "Date":    // if the column has dates render them in the desired format
-                          columnOpts.render = renderDatatablesDate;
-                          break;
-                      case "Boolean":    // if the column has dates render them in the desired format
-                          columnOpts.render = function ( data ) {
-                              return  renderDatatablesBoolean(data);
-                          };
-                          break;
-                  }
-
-                  this.columns.push(columnOpts);
-
-                  if (field.hasUnit) {
-
-                      columnOpts = {
-                          "title": colTitle + " Unit",
-                          "data": "metadata." + fieldName + ".unit",
-                          "visible": field.visible,
-                          "defaultContent": ""
-                      };
-
-                            // if field is loop retrieve multiple units
-                      if (field._loop) {
-                          columnOpts.data = "metadata." + fieldName + ".units";
-                      }
-
-                      this.columns.push(columnOpts);
-                  }
-
-              }, this);
-
-            // add links
-              this.addLinks(this.optLinks);
-
-              this.tableOpts = {
-                // processing:     true,
-                  data:           this.data,
-                  columns:        this.columns,
-                  info:           true,
-                  scrollX:        true,
-                  scrollY:        "500px",
-                  scrollCollapse: true,
-                  paging:         true,
-                  autoWidth:      false,
-                  deferRender:    true,
-                  columnDefs: [
-                  {"className": "dt-center", "targets": "_all"}
-                  ],
-                  pagingType: "full_numbers" // DOES NOT WORK!!
-              };
-
-          },
+            if (!this.multiProject) {
+                this.addLinks(this.optLinks);
+            }
+        },
+        // _.has(that.data[0], content.label);
 
         /**
          * @method
-         * @name prepareDataForRenderingJSON
+         * @name prepareDataForRenderingJSONLeaf
          * @description Format the data according to the dataType schema and prepare data for visualization through DataTables
          */
-          prepareDataForRenderingHtml: function(data, dataType, headers) {
-              if (!dataType) {
-                  return;
-              }
-              dataType = new DataTypeModel(dataType);
-              var fields = dataType.getFlattenedFields(true);
-              var columns = this.insertModelSpecificColumns(dataType.get("model"), xtens.session.get('canAccessPersonalData'));
+        prepareDataForRenderingJSONLeaf: function (dataTypePrivileges, dataTypes, queryArgs, idDataType, nested) {
+            var that = this;
+            if (queryArgs.getMetadata || idDataType) {
+                var fieldsToShow = [];
 
-              var i, j, row = "<thead><tr>", value, unit;
+                var selectedSuperType = new SuperType.Model(this.multiProject || this.isLeafSearch ? dataTypes[0].get("superType") : dataTypes.get("superType"));
+                var flattenedFields = selectedSuperType.getFlattenedFields(); // get the names of all the madatafields but those within loops;
 
-              for (i=0; i<fields.length; i++) {
-                  if (fields[i].visible) {
-                      row += "<th>" + fields[i].name + "</th>";
+                var dtpOverview = this.multiProject || this.isLeafSearch ? _.filter(dataTypePrivileges, function (dtp) { return dtp.privilegeLevel === VIEW_OVERVIEW; }) : !!(dataTypePrivileges && dataTypePrivileges.privilegeLevel === VIEW_OVERVIEW);
+                if (!dtpOverview || !dtpOverview.length || (this.multiProject && dtpOverview.length !== dataTypePrivileges.length)) {
+                    flattenedFields.forEach(function (field) {
+                        if (field.sensitive && idDataType) { that.optLinks.hasDataSensitive = true; }
+                        if (!field.sensitive || xtens.session.get('canAccessSensitiveData')) {
+                            fieldsToShow.push(field);
+                        }
+                    });
+                }
+                var className = "deafult-label";
+                className = idDataType ? this.rootDataType.get('name').toLowerCase().replace(/[||\-*/,=<>~!^()\ ]/g, "_") : queryArgs.label;
 
-                      if (fields[i].hasUnit) {
-                          row += "<th>" + fields[i].name + " Unit</th>";
-                      }
-                  }
-              }
+                // set up colvis buttons for any leafs
+                if (this.isLeafSearch) {
+                    var colvisButton = {
+                        extend: 'colvisGroup',
+                        text: 'Show only '
+                    };
+                    colvisButton.text = +idDataType ? this.rootDataType.get('name') : queryArgs.title;
+                    colvisButton.show = '.' + className; // not(.actions)
+                    colvisButton.hide = ':not(.' + className + '):not(.header):not(.actions):not(.project-owner)';
+                    this.colvisButtons.push(colvisButton);
+                }
 
-              row += "</tr></thead>";
-              this.$el.append(row);
+                _.each(fieldsToShow, function (field) {
+                    var colTitle = field.name;
+                    var fieldName = useFormattedNames ? field.formattedName : field.name;
+                    var columnOpts = {
+                        "title": colTitle,
+                        "data": function (row, type, val, meta) {
+                            if (idDataType) {
+                                return row.metadata[fieldName] && row.metadata[fieldName].value ? row.metadata[fieldName].value : "";
+                            } else {
+                                return row[queryArgs.label][fieldName] && row[queryArgs.label][fieldName].value ? row[queryArgs.label][fieldName].value : "";
+                            }
+                        },
+                        "visible": field.visible,
+                        "defaultContent": "",
+                        "className": className
+                    };
 
-              for (i=0; i<data.length; i++) {
-                  row = "<tr>";
-                  for (j=0; j<fields.length; j++) {
+                    if (colTitle.toLowerCase() === "chr" || colTitle.toLowerCase() === "pos" || colTitle.toLowerCase() === "id" ||
+                        colTitle.toLowerCase() === "qual" || colTitle.toLowerCase() === "ref" || colTitle.toLowerCase() === "alt" || colTitle.toLowerCase() === "filter") {
+                        columnOpts.className = columnOpts.className + " vcf";
+                    }
+                    // if field is loop retrieve multiple values
+                    if (field._loop) {
+                        columnOpts.data = idDataType ? "metadata." + fieldName + ".values" : queryArgs.label + "." + fieldName + ".values";
+                        columnOpts.render = function (data, type, row) {
+                            var priv = this.multiProject || this.isLeafSearch ? _.findWhere(dataTypePrivileges, { 'dataType': row.type }) : dataTypePrivileges;
+                            if (priv && priv.privilegeLevel !== VIEW_OVERVIEW) {
+                                return data && type === 'export' ? data.join() : data ? data.length > 2 ? '<span>List on Details button</span>' : data.join() : null;
+                            } else {
+                                return null;
+                            }
+                        };
+                    } else {
+                        switch (field.fieldType) {
+                            case "Date": // if the column has dates render them in the desired format
+                                columnOpts.render = function (data, type, row) {
+                                    var priv = this.multiProject || this.isLeafSearch ? _.findWhere(dataTypePrivileges, { 'dataType': row.type }) : dataTypePrivileges;
+                                    if (priv && priv.privilegeLevel !== VIEW_OVERVIEW) {
+                                        return renderDatatablesDate(data, type);
+                                    } else {
+                                        return null;
+                                    }
+                                };
+                                break;
+                            case "Boolean": // if the column has booleans render them in the desired format
+                                columnOpts.render = function (data, type, row) {
+                                    var priv = this.multiProject || this.isLeafSearch ? _.findWhere(dataTypePrivileges, { 'dataType': row.type }) : dataTypePrivileges;
+                                    if (priv && priv.privilegeLevel !== VIEW_OVERVIEW) {
+                                        return renderDatatablesBoolean(data);
+                                    } else {
+                                        return null;
+                                    }
+                                };
+                                break;
+                            case "Link": // if the column has links render them in the desired format
+                                columnOpts.render = function (data, type, row) {
+                                    var priv = this.multiProject || this.isLeafSearch ? _.findWhere(dataTypePrivileges, { 'dataType': row.type }) : dataTypePrivileges;
+                                    if (priv && priv.privilegeLevel !== VIEW_OVERVIEW) {
+                                        return data = '<a href="' + data + '" target="_blank">' + data + '</a>';
+                                    } else {
+                                        return null;
+                                    }
+                                };
+                                break;
+                            default: // if the column has numbers, texts, floats render them in the default format
+                                columnOpts.render = function (data, type, row) {
+                                    var priv = this.multiProject || this.isLeafSearch ? _.findWhere(dataTypePrivileges, { 'dataType': row.type }) : dataTypePrivileges;
+                                    if (priv && priv.privilegeLevel !== VIEW_OVERVIEW) {
+                                        return data;
+                                    } else {
+                                        return null;
+                                    }
+                                };
+                                break;
+                        }
+                    }
 
-                      if (fields[j].visible) {
-                          value = data[i].metadata[fields[j].name] && data[i].metadata[fields[j].name].value;
-                          row += "<td>" + (value || "") + "</td>";
+                    var tempOptCol = Object.assign({}, columnOpts);
+                    if (nested) {
+                        this.childColumns.push(columnOpts);
+                        tempOptCol.visible = false;
+                    }
+                    this.columns.push(tempOptCol);
 
-                          if (fields[j].hasUnit) {
-                              unit = data[i].metadata[fields[j].name] && data[i].metadata[fields[j].name].unit;
-                              row += "<td>" + (unit || "") + "</td>";
-                          }
-                      }
+                    if (field.hasUnit) {
+                        columnOpts = {
+                            "title": colTitle + " Unit",
+                            "data": idDataType ? "metadata." + fieldName + ".unit" : queryArgs.label + "." + fieldName + ".unit",
+                            "visible": field.visible,
+                            "defaultContent": "",
+                            "className": className
+                        };
 
-                  }
-                  row += "</tr>";
-                  this.$el.append(row);
-              }
+                        // if field is loop retrieve multiple units
+                        if (field._loop) {
+                            columnOpts.data = idDataType ? "metadata." + fieldName + ".units" : queryArgs.label + "." + fieldName + ".units";
+                        }
 
-          },
+                        var tempOptColUn = Object.assign({}, columnOpts);
+                        if (nested) {
+                            this.childColumns.push(columnOpts);
+                            tempOptColUn.visible = false;
+                        }
+                        this.columns.push(tempOptColUn);
+                    }
+                }, this);
+            } else {
+                this.setLeafIdColumns(queryArgs, nested);
+            }
+            // handle leafs
+            if (this.isLeafSearch) {
+                var contents = queryArgs.content ? queryArgs.content : [];
+                _.forEach(contents, function (content) {
+                    if (content.dataType) {
+                        // get right dataTypes and privileges of nested content
+                        var results = that.getCurrentTypeAndPrivileges(content.dataType);
+                        var isLast = !_.find(content.content, function (c) { return c.dataType; });
+                        that.prepareDataForRenderingJSONLeaf(results.dtps, results.dts, content, undefined, !_.has(that.data[0], content.label) && !isLast);
+                    }
+                });
+            }
+        },
 
-          insertModelSpecificColumns: function(model, canViewPersonalInfo) {
-              var cols = [];
-              if (canViewPersonalInfo) { // if you are allowed to see the Personal Details
-                  cols = cols.concat(this.insertPersonalDetailsColumns());
-              }
-              switch(model) {
-                  case Classes.SUBJECT || Classes.DATA:
-                      cols = cols.concat(this.insertSubjectColumns());
-                      break;
-                  case Classes.DATA:
-                      cols = cols.concat(this.insertSubjectColumns());
-                      break;
-                  case Classes.SAMPLE:
-                      cols = cols.concat(this.insertSampleColumns());
-                      break;
-              }
-              return cols;
-          },
+        setLeafIdColumns: function (content, nested) {
+            var columnOpts = {
+                "title": content.title,
+                "data": content.label + "_id",
+                "visible": true,
+                "defaultContent": "",
+                "className": content.label
+            };
+            var tempOptCol = Object.assign({}, columnOpts);
+            if (nested) {
+                this.childColumns.push(columnOpts);
+                tempOptCol.visible = false;
+            }
+            this.columns.push(tempOptCol);
+        },
 
-          insertPersonalDetailsColumns: function() {
-              return [
-                {"title": i18n("surname"), "data": "surname"},
-                {"title": i18n("given-name"), "data": "given_name"},
-                {"title": i18n("birth-date"), "data": "birth_date", "render": renderDatatablesDate}
-              ];
-          },
+        /**
+         * @method
+         * @name prepareDataForRenderingHTML
+         * @description Format the data according to the dataType schema and prepare data for visualization through DataTables
+         */
 
-          insertSubjectColumns: function() {
-              return [
-                {"title": i18n("code"),"data": "code"},
-                {"title": i18n("sex"),"data": "sex"}
-              ];
-          },
+        // prepareDataForRenderingHtml: function(data, dataType, headers) {
+        //     if (!dataType) {
+        //         return;
+        //     }
+        //     dataType = new DataType.Model(dataType);
+        //     var fields = dataType.getFlattenedFields(true);
+        //     var columns = this.insertModelSpecificColumns(dataType.get("model"), xtens.session.get('canAccessPersonalData'));
+        //
+        //     var i, j, row = "<thead><tr>", value, unit;
+        //
+        //     for (i=0; i<fields.length; i++) {
+        //         if (fields[i].visible) {
+        //             row += "<th>" + fields[i].name + "</th>";
+        //
+        //             if (fields[i].hasUnit) {
+        //                 row += "<th>" + fields[i].name + " Unit</th>";
+        //             }
+        //         }
+        //     }
+        //
+        //     row += "</tr></thead>";
+        //     this.$el.append(row);
+        //
+        //     for (i=0; i<data.length; i++) {
+        //         row = "<tr>";
+        //         for (j=0; j<fields.length; j++) {
+        //
+        //             if (fields[j].visible) {
+        //                 value = data[i].metadata[fields[j].name] && data[i].metadata[fields[j].name].value;
+        //                 row += "<td>" + (value || "") + "</td>";
+        //
+        //                 if (fields[j].hasUnit) {
+        //                     unit = data[i].metadata[fields[j].name] && data[i].metadata[fields[j].name].unit;
+        //                     row += "<td>" + (unit || "") + "</td>";
+        //                 }
+        //             }
+        //
+        //         }
+        //         row += "</tr>";
+        //         this.$el.append(row);
+        //     }
+        //
+        // },
 
-          insertSampleColumns: function() {
-              return [
-                {"title": i18n("biobank"), "data": "biobank_acronym"},
-                {"title": i18n("biobank-code"), "data": "biobank_code"}
-              ];
-          },
+        insertModelSpecificColumns: function (model, canViewPersonalInfo, nested) {
+            var cols = [];
+            if (canViewPersonalInfo) { // if you are allowed to see the Personal Details
+                cols = cols.concat(this.insertPersonalDetailsColumns(nested));
+            }
+            switch (model) {
+                case Classes.SUBJECT || Classes.DATA:
+                    cols = cols.concat(this.insertSubjectColumns(nested));
+                    break;
+                case Classes.DATA:
+                    cols = cols.concat(this.insertSubjectColumns(nested));
+                    break;
+                case Classes.SAMPLE:
+                    cols = cols.concat(this.insertSampleColumns(nested));
+                    break;
+            }
+            return cols;
+        },
+
+        insertPersonalDetailsColumns: function (nested) {
+            return [
+                {
+                    "title": i18n("surname"),
+                    "data": function (data) {
+                        return data.surname ? data.surname : "";
+                    },
+                    "className": "header"
+                },
+                {
+                    "title": i18n("given-name"),
+                    "data": function (data) {
+                        return data.given_name ? data.given_name : "";
+                    },
+                    "className": "header"
+                },
+                {
+                    "title": i18n("birth-date"),
+                    "data": function (data) {
+                        return data.birth_date ? data.birth_date : "";
+                    },
+                    "render": renderDatatablesDate,
+                    "className": "header"
+                }
+            ];
+        },
+
+        insertSubjectColumns: function (nested) {
+            return [
+                {
+                    "title": i18n("code"),
+                    "data": function (data) {
+                        return data.code ? data.code : "";
+                    },
+                    "className": "header"
+                },
+                {
+                    "title": i18n("sex"),
+                    "data": function (data) {
+                        return data.sex ? data.sex : "";
+                    },
+                    "className": "header"
+                }
+            ];
+        },
+
+        insertSampleColumns: function (nested) {
+            return [
+                {
+                    "title": i18n("biobank"),
+                    "data": function (data) {
+                        return data.biobank_acronym ? data.biobank_acronym : "";
+                    },
+                    "className": "header"
+                },
+                {
+                    "title": i18n("biobank-code"),
+                    "data": function (data) {
+                        return data.biobank_code ? data.biobank_code : "";
+                    },
+                    "className": "header"
+                }
+            ];
+        },
 
         /**
          * @method
          * @name addLinks
          * @description add the proper links to each row in the table given the dataType Model
          */
-          addLinks: function(options) {
+        addLinks: function (options) {
+            var btnGroupTemplate = JST["views/templates/xtenstable-buttongroup.ejs"];
+            var that = this;
+            var privilege = this.multiProject || this.isLeafSearch ? _.find(options.dataTypePrivileges, { 'dataType': this.data[0].type }) : options.dataTypePrivileges;
+            _.each(!this.isLeafSearch ? this.data : this.plainData, function (datum) {
+                datum._links = btnGroupTemplate({
+                    __: i18n,
+                    dataTypeModel: that.multiProject || that.isLeafSearch ? options.dataTypes[0].get("model") : options.dataTypes.get("model"),
+                    privilegeLevel: privilege ? privilege.privilegeLevel : undefined,
+                    hasDataSensitive: options.hasDataSensitive,
+                    fileUpload: options.fileUpload,
+                    hasDataChildren: options.hasDataChildren,
+                    hasSampleChildren: options.hasSampleChildren
+                });
+            });
 
-              var btnGroupTemplate = JST["views/templates/xtenstable-buttongroup.ejs"];
-              var that = this;
-              _.each(this.data, function(datum) {
-                  datum._links = btnGroupTemplate({
-                      __:i18n,
-                      privilegeLevel : options.dataTypePrivilege.privilegeLevel,
-                      hasDataSensitive: options.hasDataSensitive,
-                      fileUpload: options.fileUpload,
-                      hasDataChildren: options.hasDataChildren,
-                      hasSampleChildren: options.hasSampleChildren,
-                      id: that.dataType.id
-                  });
-              });
-
-              this.columns.push({
-                  "data": "_links",
-                  "title": i18n("actions")
-              });
-
-          },
+            this.columns.push({
+                "data": "_links",
+                "title": i18n("actions"),
+                "className": "actions"
+            });
+        },
 
         /**
          * @method
@@ -378,17 +811,17 @@
          * @param{Object} ev - the current event
          * @description returns the details view associated to the current item
          */
-          showDetailsView: function(ev) {
-              var currRow = this.table.row($(ev.currentTarget).parents('tr'));
-              var data = currRow.data();
+        showDetailsView: function (ev) {
+            var currRow = this.table.row($(ev.currentTarget).parents('tr'));
+            var data = currRow.data();
 
-            // model here is the ENTITY model (a.k.a. the server-side resource)
-              var model = this.dataType.get("model");
-              var path = model === Classes.DATA ? model.toLowerCase() : model.toLowerCase() + 's';
-              path += "/details/" + data.id;
-              xtens.router.navigate(path, {trigger: true});
-              return false;
-          },
+            var dataType = this.multiProject || this.isLeafSearch ? _.find(this.dataTypes.models, { 'id': data.type }) : this.dataTypes;
+            var model = dataType.get("model");
+            var path = model === Classes.DATA ? model.toLowerCase() : model.toLowerCase() + 's';
+            path += "/details/" + data.id;
+            xtens.router.navigate(path, { trigger: true });
+            return false;
+        },
 
         /**
          * @method
@@ -396,18 +829,18 @@
          * @param{Object} ev - the current event
          * @description returns the details view associated to the current item
          */
-          showEditView: function(ev) {
-              var currRow = this.table.row($(ev.currentTarget).parents('tr'));
-              var data = currRow.data();
+        showEditView: function (ev) {
+            var currRow = this.table.row($(ev.currentTarget).parents('tr'));
+            var data = currRow.data();
 
             // model here is the ENTITY model (a.k.a. the server-side resource)
-              var model = this.dataType.get("model");
-              var path = model === Classes.DATA ? model.toLowerCase() : model.toLowerCase() + 's';
-              path += "/edit/" + data.id;
-              xtens.router.navigate(path, {trigger: true});
-              return false;
-          },
-
+            var dataType = this.multiProject || this.isLeafSearch ? _.find(this.dataTypes.models, { 'id': data.type }) : this.dataTypes;
+            var model = dataType.get("model");
+            var path = model === Classes.DATA ? model.toLowerCase() : model.toLowerCase() + 's';
+            path += "/edit/" + data.id;
+            xtens.router.navigate(path, { trigger: true });
+            return false;
+        },
 
         /**
          * @method
@@ -415,21 +848,38 @@
          * @param{Object} ev - the current event
          * @description returns a list of the data stored as children of the given data instance
          */
-          showDerivedDataList: function(ev) {
-              var currRow = this.table.row($(ev.currentTarget).parents('tr'));
-              var data = currRow.data();
-              var childrenData = new Data.List();
-              var model = this.dataType.get("model");
-              var parentProperty = model === Classes.SUBJECT ? 'parentSubject' : model === Classes.SAMPLE ? 'parentSample' : 'parentData';
-              var path = "data?" + parentProperty + "=" + data.id;
+        showDerivedDataList: function (ev) {
+            var currRow = this.table.row($(ev.currentTarget).parents('tr'));
+            var data = currRow.data();
+            var dataType = this.multiProject || this.isLeafSearch ? _.find(this.dataTypes.models, { 'id': data.type }) : this.dataTypes;
+            var model = dataType.get("model");
+            var parentProperty = model === Classes.SUBJECT ? 'parentSubject' : model === Classes.SAMPLE ? 'parentSample' : 'parentData';
+            var dataId = data.id;
+            var path = "data?" + parentProperty + "=" + dataId;
 
             // TODO change "code" to "subjectCode" for sake of clarity
-              path += data.code ? "&parentSubjectCode=" + data.code : '';
-              path += "&parentDataType=" + this.dataType.id;
+            path += data.code ? "&donorCode=" + data.code : '';
+            path += "&parentDataType=" + dataType.id;
 
-              xtens.router.navigate(path, {trigger: true});
-              return false;
-          },
+            xtens.router.navigate(path, { trigger: true });
+            return false;
+        },
+
+        /**
+         * @method
+         * @name showSubjectGraph
+         * @param{Object} ev - the current event
+         * @description returns a graph of the subject selected
+         */
+        showSubjectGraph: function (ev) {
+            var currRow = this.table.row($(ev.currentTarget).parents('tr'));
+            var data = currRow.data();
+            var dataId = data.id;
+            var path = "subjects/dashboard?idPatient=" + dataId;
+
+            xtens.router.navigate(path, { trigger: true });
+            return false;
+        },
 
         /**
          * @method
@@ -438,26 +888,25 @@
          * @description returns a list of the samples stored as children of the given data instance
          *
          */
-          showDerivedSampleList: function(ev) {
-              var currRow = this.table.row($(ev.currentTarget).parents('tr'));
-              var data = currRow.data();
-              var childrenSample = new Sample.List();
-              var model = this.dataType.get("model");
-
+        showDerivedSampleList: function (ev) {
+            var currRow = this.table.row($(ev.currentTarget).parents('tr'));
+            var data = currRow.data();
+            var dataType = this.multiProject || this.isLeafSearch ? _.find(this.dataTypes.models, { 'id': data.type }) : this.dataTypes;
+            var model = dataType && dataType.get("model");
             // DATA cannot have sample child
-              if (model === Classes.DATA)
-                  return false;
+            if (model === Classes.DATA) { return false; }
 
-              var parentProperty = model === Classes.SUBJECT ? 'donor' : 'parentSample';
-              var path = "samples?" + parentProperty + "=" + data.id;
+            var parentProperty = model === Classes.SUBJECT ? 'donor' : 'parentSample';
+            var dataId = data.id;
+            var path = "samples?" + parentProperty + "=" + dataId;
 
             // TODO change "code" to "subjectCode" for sake of clarity
-              path += data.code ? "&donorCode=" + data.code : '';
-              path += "&parentDataType=" + this.dataType.id;
+            path += data.code ? "&donorCode=" + data.code : '';
+            path += "&parentDataType=" + dataType.id;
 
-              xtens.router.navigate(path, {trigger: true});
-              return false;
-          },
+            xtens.router.navigate(path, { trigger: true });
+            return false;
+        },
 
         /**
          * @method
@@ -465,43 +914,66 @@
          * @param{Object} ev- the current event
          * @description returns the list of files associated to the current data instance
          */
-          showFileList: function(ev) {
-              var that = this;
-              var currRow = this.table.row($(ev.currentTarget).parents('tr'));
-              var id = currRow.data().id;
-              var model = this.dataType.get("model");
+        showFileList: function (ev) {
+            // if there is any open popover destroy it
+            var that = this;
+            var currRow = this.table.row($(ev.currentTarget).parents('tr'));
+            var id = currRow.data().id;
+            var dataType = this.multiProject || this.isLeafSearch ? _.find(this.dataTypes.models, { 'id': data.type }) : this.dataTypes;
+            var model = dataType.get("model");
+            if (!this[id]) {
+                if (model === Classes.SUBJECT) { return false; }
 
-            // subject has no associated files (at the moment)
-              if (model === Classes.SUBJECT)
-                  return false;
+                var data = model === Classes.SAMPLE ? new Sample.Model() : new Data.Model();
+                var dataId = currRow.data().id;
+                data.set("id", dataId);
+                data.fetch({
+                    data: $.param({ populate: ['files'] }),
+                    success: function (result) {
+                        var files = result.get("files");
+                        var dataFiles = new DataFile.List(files);
+                        var view = new DataFile.Views.List({ collection: dataFiles, datum: id });
+                        // that.listenTo(view, 'fileDeleted', that.showFileList);
+                        var timer;
+                        $(ev.currentTarget).popover({
+                            trigger: 'manual',
+                            container: '.query',
+                            html: true,
+                            content: view.render().el,
+                            placement: 'auto left'
+                        }).hover(function () {
+                            var _this = this;
+                            timer = setTimeout(function () {
+                                $(_this).popover("show");
+                            }, 300);
+                        }, function () {
+                            // if leaves early then clear the timer
+                            clearTimeout(timer);
+                        }).on("mouseleave", function () {
+                            if (!$(".popover:hover").length && !$(".xtenstable-files:hover").length) {
+                                $('.popover').popover('hide');
+                            }
+                        }).popover('show');
 
-              var data = model === Classes.SAMPLE ? new Sample.Model() : new Data.Model();
+                        $(".popover").on("mouseleave", function () {
+                            if (!$(".xtenstable-files:hover").length) {
+                                $('.popover').popover('hide');
+                            }
+                        });
 
-              data.set("id", currRow.data().id);
-              data.fetch({
-                  data: $.param({populate: ['files']}),
-                  success: function(result) {
-                      var files = result.get("files");
-                      var dataFiles = new DataFile.List(files);
-                      var view = new DataFile.Views.List({collection: dataFiles});
-                      console.log(dataFiles);
-
-                    // if there is any open popover destroy it
-                      $('[data-original-title]').popover('destroy');
-
-                      $(ev.currentTarget).popover({
-                          html: true,
-                          content: view.render().el,
-                          placement: 'auto right'
-                      }).popover('show');
-                      that.listenTo(view, 'closeMe', that.removeChild);
-                      that.childrenViews.push(view);
-                  },
-                  error: function(model, err) {
-                      console.log(err);
-                  }
-              });
-          },
+                        that.listenTo(view, 'closeMe', that.removeChild);
+                        // that.childrenViews.push(view);
+                    },
+                    error: function (model, err) {
+                        // console.log(err);
+                    }
+                });
+                this[id] = true;
+            }
+            // else {
+            //     $(this).popover("show");
+            // }
+        },
 
           showVideoParameters: function(ev) {
               var currRow = this.table.row($(ev.currentTarget).parents('tr'));
@@ -523,18 +995,17 @@
          * @param{Backbone.View} - the child view to be removed
          * @description safely remove a child view (such as a popover) from the table
          */
-          removeChild: function(child) {
-              for (var i=0, len = this.childrenViews.length; i<len; i++) {
-                  if (_.isEqual(this.childrenViews[i], child)) {
-                      this.stopListening(child);
-                      child.remove();
+        removeChild: function (child) {
+            for (var i = 0, len = this.childrenViews.length; i < len; i++) {
+                if (_.isEqual(this.childrenViews[i], child)) {
+                    this.stopListening(child);
+                    child.remove();
                     // if contained within a popover remove it
-                      $('[data-original-title]').popover('destroy');
-                      this.childrenViews.splice(i, 1);
-                  }
-              }
-          }
+                    $('[data-original-title]').popover('destroy');
+                    this.childrenViews.splice(i, 1);
+                }
+            }
+        }
 
-      });
-
-  } (xtens, xtens.module("xtenstable")));
+    });
+}(xtens, xtens.module("xtenstable")));

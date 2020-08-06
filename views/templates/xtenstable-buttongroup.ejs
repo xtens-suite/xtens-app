@@ -40,21 +40,24 @@
 
 
 <div class="btn-group" role="group" aria-label="...">
-  <% if(privilegeLevel !== "view_overview"){ %>
-      <button type="button" class="btn btn-xs btn-default xtenstable-details"><%= __('details') %></button>
+  <% if(privilegeLevel && privilegeLevel !== "view_overview"){ %>
+  <button type="button" class="btn btn-xs btn-default xtenstable-details"><%= __('details') %></button>
 
-      <% if((privilegeLevel === "download" || privilegeLevel === "edit") && fileUpload){ %>
-      <button type="button" class="btn btn-xs btn-default xtenstable-files"><%= __('files') %></button>
-      <%}%>
-      <% if(privilegeLevel === "edit" && (xtens.session.get("canAccessSensitiveData") || !hasDataSensitive)){ %>
-      <button type="button" class="btn btn-xs btn-default xtenstable-edit"><%= __('edit') %></button>
-      <%}%>
+  <% if(privilegeLevel === "edit" && (xtens.session.get("canAccessSensitiveData") || !hasDataSensitive)){ %>
+  <button type="button" class="btn btn-xs btn-default xtenstable-edit"><%= __('edit') %></button>
   <%}%>
-    <% if(hasSampleChildren){ %>
-    <button type="button" class="btn btn-xs btn-default xtenstable-derivedsamples"><%= __('derived-samples') %></button>
-    <%}%>
-    <% if(hasDataChildren){ %>
-    <button type="button" class="btn btn-xs btn-default xtenstable-deriveddata"><%= __('derived-data') %></button>
+  <%}%>
+  <% if(hasSampleChildren){ %>
+  <button type="button" class="btn btn-xs btn-default xtenstable-derivedsamples"><%= __('derived-samples') %></button>
+  <%}%>
+</div>
+<button type="button" class="btn btn-xs btn-default xtenstable-deriveddata"><%= __('derived-data') %></button>
+<%}%>
+<% if(dataTypeModel === "Subject"){ %>
+  <button type="button" class="btn btn-xs btn-default xtenstable-subjectgraph"><%= __('subject-dashboard') %></button>
+  <%}%>
+  <% if((privilegeLevel === "download" || privilegeLevel === "edit") && fileUpload){ %>
+    <button type="button" class="btn btn-xs btn-default xtenstable-files"><%= __('files') %></button>
     <%}%>
     <%if(id==8){%><button type="button" class="btn btn-xs btn-default xtenstable-parameters"><%= __('view-parameters') %></button><%}%>
 </div>

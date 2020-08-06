@@ -17,19 +17,24 @@
     .make-sm-column(3);
     .make-xs-column(4);
 }
+.query .query-field-div-small {
+    .make-md-column(1);
+    .make-sm-column(2);
+    .make-xs-column(3);
+}
 .query .query-comparator {
     .make-md-column(1.6);
     .make-xs-column(3);
 }
 .query .query-value-div {
-    .make-md-column(2);
-    .make-sm-column(3);
-    .make-xs-column(4);
-}
-.query .query-unit-div {
     .make-md-column(1);
     .make-sm-column(2);
-    .make-xs-column(2);
+    .make-xs-column(3);
+}
+.query .query-unit-div {
+    .make-md-column(2);
+    .make-sm-column(3);
+    .make-xs-column(3);
 }
 .query .query-junction {
     .make-md-column(1);
@@ -57,8 +62,31 @@
 .query .query-hidden {
     display: none;
 }
+
+.query .query-table tr td,th {
+  vertical-align: middle!important;
+  text-align: center!important;
+}
+
+tbody .project-owner {
+  cursor: pointer
+}
+
+tbody .tooltip{
+  position:fixed;
+  top: 0px;
+}
+
 .popover{
   position:fixed;
   top: 0px;
   max-width: 410px !important;
+}
+
+//bootstrap checkbox
+
+button[name="get-metadata"] .fa {
+    margin-right: 4%;
+    margin-left: -3%;
+    opacity:0.15
 }

@@ -13,26 +13,65 @@
  * For usage docs see:
  * 		https://github.com/gruntjs/grunt-contrib-copy
  */
-module.exports = function(grunt) {
+module.exports = function (grunt) {
+    grunt.config.set('copy', {
+        dev: {
+            files: [{
+                expand: true,
+                cwd: './assets',
+                src: ['**/*.!(coffee|less|sass|scss)'],
+                dest: '.tmp/public'
+            }, {
+                expand: true,
+                dot: true,
+                cwd: './assets/dependencies/bootstrap',
+                src: ['fonts/*.*'],
+                dest: '.tmp/public'
+            }, {
+                expand: true,
+                dot: true,
+                cwd: './assets/styles/fonts/files',
+                src: ['**'],
+                dest: '.tmp/public/fonts'
+            }]
+        },
+        build: {
+            files: [{
+                expand: true,
+                cwd: '.tmp/public',
+                src: ['**/*'],
+                dest: 'www'
+            }]
+        },
+        fonts: {
+            files: [{
+                expand: true,
+                dot: true,
+                cwd: '.tmp/public/dependencies/select2',
+                dest: '.tmp/public/version/min',
+                src: ['**/*.{ico,png,txt,gif}']
+            }, {
+                expand: true,
+                dot: true,
+                cwd: 'bower_components/font-awesome',
+                src: ['fonts/*.*'],
+                dest: '.tmp/public/version'
+            }, {
+                expand: true,
+                dot: true,
+                cwd: 'bower_components/bootstrap',
+                src: ['fonts/*.*'],
+                dest: '.tmp/public/version'
+            }, {
+                expand: true,
+                dot: true,
+                cwd: '.tmp/public/images',
+                src: ['*.{ico,png,txt,gif}'],
+                dest: '.tmp/public/version'
+            }]
+        }
 
-	grunt.config.set('copy', {
-		dev: {
-			files: [{
-				expand: true,
-				cwd: './assets',
-				src: ['**/*.!(coffee|less|sass|scss)'],
-				dest: '.tmp/public'
-			}]
-		},
-		build: {
-			files: [{
-				expand: true,
-				cwd: '.tmp/public',
-				src: ['**/*'],
-				dest: 'www'
-			}]
-		}
-	});
+    });
 
-	grunt.loadNpmTasks('grunt-contrib-copy');
+    grunt.loadNpmTasks('grunt-contrib-copy');
 };

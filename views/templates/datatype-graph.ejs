@@ -1,44 +1,49 @@
 <h2>DataType Graph</h2>
 <style>
-ellipse {
-    fill: #fff;
-    stroke-width: 3px;
-}
+    ellipse {
+        fill: #ececec;
+        stroke-width: 3px;
+    }
 
-#subject {
- stroke: steelblue;
-}
+    #subject {
+        stroke: steelblue;
+    }
 
-#sample {
- stroke: green;
-}
- #data {
- stroke: #FF3300;
-}
+    #sample {
+        stroke: green;
+    }
 
-.node text { font: 10px sans-serif; }
+    #data {
+        stroke: #FF3300;
+    }
 
-.link {
-    fill: none;
-    stroke: #ccc;
-    stroke-width: 3px;
-}
+    .node text {
+        font: 10px;
+    }
+
+    .link {
+        fill: none;
+        stroke-width: 2px;
+        stroke-linecap: round;
+        stroke-opacity: 1;
+        stroke-dasharray: 5, 5;
+
+    }
 </style>
 
 <div id="content">
     <p>Select a DataType:</p>
-        <div class = "row">
+    <div class="row">
         <div class="col-md-4">
-        <select class="form-control" id="select1">
-            <% _.each(dataTypes,function(dataType){ %>
-            <option id = "dataType"><%= dataType.get("name")%></option>
-            <%})%>
-        </select>
+            <select class="form-control" id="select1">
+                <% _.each(dataTypes,function(dataType){ %>
+                <option id="dataType" value="<%= dataType.get('id')%>-@#@-<%= dataType.get("name")%>">
+                    <%= dataType.get("name")%></option>
+                <%})%>
+            </select>
         </div>
         <div class="col-md-4">
-                  <a id="graph" class="btn btn-primary">Generate Graph</a>
-    </div>
+            <a id="graph" class="btn btn-primary">Generate Graph</a>
+        </div>
     </div>
 </div>
-
-

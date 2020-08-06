@@ -6,15 +6,71 @@
 */
 
 /* jshint node: true */
-/* globals _, sails, TokenService,  PassportService */
+/* globals _, sails, TokenService,  PassportService, Operator, Group  */
 'use strict';
 
 const ControllerOut = require('xtens-utils').ControllerOut;
-const crudManager = sails.hooks.persistence.crudManager;
+const PrivilegesError = require('xtens-utils').Errors.PrivilegesError;
+const ValidationError = require('xtens-utils').Errors.PrivilegesError;
 const BluebirdPromise = require('bluebird');
 const createUser = BluebirdPromise.promisify(PassportService.protocols.local.createUser);
 const updatePassword = BluebirdPromise.promisify(PassportService.protocols.local.updatePassword);
-const ValidationError = require('xtens-utils').Errors.ValidationError;
+const resetPassword = BluebirdPromise.promisify(PassportService.protocols.local.resetPassword);
+const actionUtil = require('sails/lib/hooks/blueprints/actionUtil');
+const DbLog = sails.hooks.dblog.log;
+const logMessages = sails.hooks.dblog.messages;
+
+const coroutines = {
+
+    update: BluebirdPromise.coroutine(function *(req, res) {
+        let params = req.allParams();
+        const operator = TokenService.getToken(req);
+
+        let groups = yield Group.find(operator.groups);
+        let privilegeLevelGroups = _.uniq(_.flatten(_.map(groups, 'privilegeLevel')));
+        if(_.indexOf(privilegeLevelGroups, 'wheel') < 0 && operator.id != params.id){
+            throw new PrivilegesError(`Authenticated user has not edit privileges on the operator ${params.id}`);
+        }
+        let query = Operator.findOne(params.id);
+        query = actionUtil.populateRequest(query, req);
+        let prevData = yield BluebirdPromise.resolve(query);
+
+        const updatedData = yield Operator.update({id: params.id}, params);
+
+        let qUpdate = Operator.findOne(params.id);
+        qUpdate = actionUtil.populateRequest(qUpdate, req);
+        let upData = yield BluebirdPromise.resolve(qUpdate);
+
+        DbLog(logMessages.UPDATE, 'Operator', updatedData.id, null, null, operator.id, {prevData: prevData, upData: upData});
+        return res.json(upData);
+    }),
+
+    patchQueries: BluebirdPromise.coroutine(function *(req, res) {
+        let params = req.allParams();
+        const operator = TokenService.getToken(req);
+
+        if (operator.id != params.id && !operator.isWheel) {
+            throw new PrivilegesError("Authenticated user is not allowed to modify operator");
+        }
+
+        if (!params.queries) {
+            throw new ValidationError("Queries array object not found");
+        }
+
+        // let query = Operator.findOne(params.id);
+        // query = actionUtil.populateRequest(query, req);
+        // let prevData = yield BluebirdPromise.resolve(query);
+
+        const updatedData = yield Operator.update({id: params.id}, {queries: params.queries});
+
+        let qUpdate = Operator.findOne(params.id);
+        qUpdate = actionUtil.populateRequest(qUpdate, req);
+        let upData = yield BluebirdPromise.resolve(qUpdate);
+
+        return res.json(upData);
+    })
+
+};
 
 var OperatorController = {
 
@@ -31,11 +87,27 @@ var OperatorController = {
             sails.log(operator);
             return res.json(201, operator);
 
-        }).catch(function(error) {
+        }).catch(/* istanbul ignore next */ function(error) {
             sails.log(error.message);
             return co.error(error);
         });
 
+    },
+
+    /**
+     *  PUT /operator/:id
+     *  @method
+     *  @name update
+     *  @description  -> update an existing Operator Instance; transaction-safe implementation
+     *
+     */
+    update: function(req, res) {
+        const co = new ControllerOut(res);
+        coroutines.update(req, res, co)
+          .catch(function(error) {
+              sails.log.error(error);
+              return co.error(error);
+          });
     },
 
     /**
@@ -46,77 +118,52 @@ var OperatorController = {
      */
     patchPassword: function(req, res) {
         const co = new ControllerOut(res);
-        const idOperator = TokenService.getToken(req).id;
-        if (idOperator) {
 
-            return updatePassword(req.allParams(), idOperator)
+        return updatePassword(req.allParams())
 
             .then(function() {
-
                 return res.json(204, null);
-
-            }).catch(function(error) {
+            }).catch(/* istanbul ignore next */ function(error) {
                 sails.log(error.message);
                 return co.error(error);
             });
-        } else {
-            return res.json(400, 'Operator not Found');
-        }
 
-    }
+    },
 
-    // addGroupToOperator: function(req, res, next) {
+    /**
+     * @method
+     * @name resetPassword
+     * @description given a correct old password and a new password (with confirmation)
+     *              updates the local stored password
+     */
+    resetPassword: function(req, res) {
+        const co = new ControllerOut(res);
+        return resetPassword(req.allParams())
+            .then(function(result) {
+                return res.json(201, result);
+            }).catch(/* istanbul ignore next */ function(error) {
+                sails.log(error.message);
+                return co.error(error);
+            });
 
-        /* Operator.findOne(req.param('operator_id')).populate('groups').exec(function(err,bean){
-        if(err) return next(err);
-        if(!bean) return next();
-        bean.groups.add(req.param('group_id'));
-        bean.save(function(err) {
-        if(err) return next(err);
-        res.redirect('/operator');
+    },
+
+    /**
+     * @method
+     * @name patchQueries
+     * @description given a correct old password and a new password (with confirmation)
+     *              updates the local stored password
+     */
+    patchQueries: function(req, res) {
+        const co = new ControllerOut(res);
+
+        return coroutines.patchQueries(req, res)
+        .catch(function(error) {
+            sails.log.error(error);
+            return co.error(error);
         });
-        });*/
-};
 
-
-    /*removeGroupFromOperator: function(req,res,next){
     }
-    /**
-    * `OperatorController.create()`
-
-    create: function (req, res) {
-    res.view();
-    },
-    */
-
-    /**
-    * `OperatorController.destroy()`
-
-    destroy: function (req, res) {
-    return res.json({
-    todo: 'destroy() is not implemented yet!'
-    });
-    },
-
-
-    /**
-    * `OperatorController.tag()`
-
-    tag: function (req, res) {
-    return res.json({
-    todo: 'tag() is not implemented yet!'
-    });
-    },
-
-
-    /**
-    * `OperatorController.like()`
-
-    like: function (req, res) {
-    return res.json({
-    todo: 'like() is not implemented yet!'
-    });
-    }*/
-// };
+};
 
 module.exports = OperatorController;

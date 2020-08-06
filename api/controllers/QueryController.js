@@ -4,34 +4,13 @@
  * @description :: Server-side logic for managing queries
  * @help        :: See http://links.sailsjs.org/docs/controllers
  */
- /* globals _, sails, Data, DataType, DataService, DataTypeService, SubjectService, SampleService, QueryService, TokenService */
+ /* globals _, sails,  DataService, TokenService */
  "use strict";
-
- let JSONStream = require('JSONStream');
- let crudManager = sails.hooks['persistence'].getDatabaseManager().crudManager;
- const xtensConf = global.sails.config.xtens;
- const VIEW_OVERVIEW = xtensConf.constants.DataTypePrivilegeLevels.VIEW_OVERVIEW;
+ const DbLog = sails.hooks.dblog.log;
+ const logMessages = sails.hooks.dblog.messages;
+ const JSONStream = require('JSONStream');
 
  module.exports = {
-    /*
-    dataSearch: function(req, res) {
-
-        let queryArgs = req.param('queryArgs');
-        async.waterfall([
-            function(callback) {
-                DataService.advancedQuery(queryArgs, callback);
-            },
-            function(results, callback) {
-                DataService.queryAndPopulateItemsById(results.rows, queryArgs.classTemplate, callback);
-            }
-        ], function(err, result) {
-            if (err) {
-                return res.serverError("error");
-            }
-            return res.json(result);
-        });
-
-    } */
 
     /**
      * @method
@@ -41,19 +20,25 @@
      */
      dataSearch: function(req, res) {
          let { body : { queryArgs, isStream }} = req;
-         const operator = TokenService.getToken(req), idOperator = operator.id;
+         const operator = TokenService.getToken(req);
          queryArgs = _.isString(queryArgs) ? JSON.parse(queryArgs) : queryArgs;
          isStream = _.isString(isStream) ? JSON.parse(isStream) : isStream;
          const idDataType = queryArgs.dataType;
 
-         return DataService.preprocessQueryParamsAsync(queryArgs, idOperator, idDataType)
+         return DataService.preprocessQueryParamsAsync(queryArgs, operator.groups, idDataType)
 
          .then(processedArgs => {
              sails.log(processedArgs);
+             let dataTypesId  =_.isArray(processedArgs.dataTypes) ? _.map(processedArgs.dataTypes, "id") :  processedArgs.dataTypes.id;
+             let projectsId  =_.isArray(processedArgs.dataTypes) ? _.map(processedArgs.dataTypes, "project") :  processedArgs.dataTypes.project;
+             let superTypesId  =_.isArray(processedArgs.dataTypes) ? _.uniq(_.map(_.map(processedArgs.dataTypes, "superType"),"id")) : processedArgs.dataTypes.superType.id;
+             DbLog(logMessages.QUERY, "Query", dataTypesId, projectsId, superTypesId, operator.id, {queryObj: JSON.stringify(processedArgs.queryObj)});
+
+
              if (isStream) {
                  return DataService.executeAdvancedStreamQuery(processedArgs, operator, (err, stream) => {
                      // initiate streaming into the sails:
-                     stream.pipe(JSONStream.stringify(false)).pipe(res); //TODO
+                     stream.pipe(JSONStream.stringify(false)).pipe(res);
                  });
              }
 
@@ -68,7 +53,7 @@
 
          })
 
-         .catch(error => {
+         .catch(/* istanbul ignore next */ function(error) {
              sails.log.error(error);
              res.serverError(error.message);
          });

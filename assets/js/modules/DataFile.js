@@ -1,33 +1,33 @@
 /**
  * @author  Massimiliano Izzo
  * @description This file contains the Backbone classes for handling DataType
- *              models, collections and views  
+ *              models, collections and views
  */
 (function(xtens, DataFile) {
 
     var i18n = xtens.module("i18n").en;
     var ModalDialog = xtens.module("xtensbootstrap").Views.ModalDialog;
     /**
-     * @class 
+     * @class
      * @name DataFile.Model
      *
      */
     DataFile.Model = Backbone.Model.extend({
-        
+
         urlRoot: '/dataFile'
 
     });
-    
+
     /**
      * @class
      * @name DataFile.List
      */
     DataFile.List = Backbone.Collection.extend({
-    
+
         url: '/dataFile'
 
     });
-    
+
     /**
      * @class
      * @name DataFile.Views.List
@@ -38,28 +38,31 @@
         className: 'dataFile',
 
         events: {
-            'click .remove-me': 'closeMe',
-            'click a.download-file-content': 'downloadFileContentOnClick'
+            // 'click .remove-me': 'closeMe',
+            'click span.download-file-content': 'downloadFileContentOnClick',
+            'click span.delete-file-content': 'deleteFileContentOnClick'
         },
-        
-        initialize: function() {
+
+        initialize: function(options) {
             this.template = JST["views/templates/datafile-list.ejs"];
+            this.collection = options.collection;
+            this.datum = options.datum;
         },
 
         render: function() {
             this.$el.html(this.template({__:i18n, dataFiles: this.collection.models}));
-            this.$queryModal = this.$(".query-modal");
+            this.$queryModal = $(".modal-cnt");
             return this;
         },
-        
+
         /**
          * @method
          * @name closeMe
          * @description trigger a 'closeMe' for the parent view to get it and close this child
          */
-        closeMe: function(ev) {
-            this.trigger("closeMe", this);
-        },
+        // closeMe: function(ev) {
+        //     this.trigger("closeMe", this);
+        // },
 
 
         /**
@@ -75,6 +78,14 @@
             return false;
         },
 
+        deleteFileContentOnClick: function(ev) {
+            ev.preventDefault();
+            var idFile = $(ev.target).data('id');
+            console.log("FileManager.Views.Download.downloadFileContent: " + idFile);
+            this.deleteFileContent(_.parseInt(idFile));
+            return false;
+        },
+
         /**
          * @method
          * @name downloadFileContent
@@ -83,7 +94,7 @@
          * @link http://stackoverflow.com/questions/16086162/handle-file-download-from-ajax-post
          */
         downloadFileContent: function(idFile) {
-            
+
             var that = this;
             var xhr = new XMLHttpRequest();
             var url = 'fileContent?id=' + idFile;
@@ -100,13 +111,13 @@
                         matches = fileNameRegex.exec(disposition);
                         if (matches != null && matches[1]) {
                             fileName = matches[1].replace(/['"]/g, '');
-                        }  
+                        }
                     }
                     type = xhr.getResponseHeader('Content-Type');
                     blob = new Blob([this.response], {type: type});
 
                     if (typeof window.navigator.msSaveBlob !== 'undefined') {
-                        // IE workaround for "HTML7007: One or more blob URLs were revoked by closing the blob for which they were created. 
+                        // IE workaround for "HTML7007: One or more blob URLs were revoked by closing the blob for which they were created.
                         // These URLs will no longer resolve as the data backing the URL has been freed."
                         window.navigator.msSaveBlob(blob, fileName);
                     }
@@ -139,7 +150,8 @@
                     console.log("DataFile.Views.List - downloadFileContent: could not download file");
                     that.modal = new ModalDialog({
                         title: i18n('could-not-download-file'),
-                        body: xhr.statusText
+                        body: xhr.statusText,
+                        type: "delete"
                     });
                     that.$queryModal.append(that.modal.render().el);
                     that.modal.show();
@@ -149,7 +161,41 @@
             xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
             xhr.setRequestHeader('Authorization', 'Bearer ' + xtens.session.get("accessToken"));
             xhr.send();
+        },
+
+        /**
+         * @method
+         * @name deleteFileContent
+         * @param{Integer} id - the ID of the dataFile on XTENS
+         * @description delete a file from the remote file storage given its XTENS ID
+         * @link http://stackoverflow.com/questions/16086162/handle-file-delete-from-ajax-post
+         */
+        deleteFileContent: function(idFile) {
+
+            var that = this;
+            var url = 'fileContent?id=' + idFile;
+            $.ajax({
+                url: 'fileContent?file=' + idFile +'&id='+ this.datum,
+                type: 'DELETE',
+                headers: {
+                    'Authorization': 'Bearer ' + xtens.session.get("accessToken")
+                },
+                contentType: 'application/json',
+                success: function() {
+                    that.trigger("fileDeleted", {dataId: this.datum});
+                    $('body').notify({
+                        message: i18n('file-correctly-deleted')
+                    },{
+                        type: 'success'
+                    });
+                },
+                error: function(err) {
+                    xtens.error(err);
+                }
+            });
+
         }
+
 
 
     });

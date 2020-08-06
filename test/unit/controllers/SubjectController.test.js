@@ -7,6 +7,7 @@ const expect = require("chai").expect;
 const request = require('supertest');
 const sinon = require('sinon');
 const loginHelper = require('./loginHelper');
+const BluebirdPromise = require("bluebird");
 
 
 describe('SubjectController', function() {
@@ -56,6 +57,7 @@ describe('SubjectController', function() {
                     birthDate: '2003-12-22'
                 },
                 type: 1,
+                owner:1,
                 code: '888',
                 sex: 'N.D.',
                 metadata: metadata,
@@ -84,6 +86,7 @@ describe('SubjectController', function() {
             .set('Authorization', `Bearer ${tokenDataSens}`)
             .send({
                 type: 3,
+                owner:1,
                 metadata: metadata,
                 date: "2015-12-06",
                 tags: [],
@@ -94,13 +97,14 @@ describe('SubjectController', function() {
             return;
         });
 
-        it('Should return 403 Forbidden - Authenticated user does not have edit privileges on the subject type 1', function (done) {
-            let expectedError = `Authenticated user does not have edit privileges on the subject type 1`;
+        it('Should return 403 Forbidden - Authenticated user has not edit privileges on the subject type 1', function (done) {
+            let expectedError = `Authenticated user has not edit privileges on the subject type 1`;
             request(sails.hooks.http.app)
             .post('/subject')
             .set('Authorization', `Bearer ${tokenNoPriv}`)
             .send({
                 type:1,
+                owner:1,
                 metadata:metadata,
                 date:"2015-12-06",
                 tags:[],
@@ -122,6 +126,7 @@ describe('SubjectController', function() {
             .set('Authorization', `Bearer ${tokenDataSens}`)
             .send({
                 type:1,
+                owner:1,
                 metadata:{},
                 date:"wrongFormat",
                 tags:[],
@@ -153,6 +158,7 @@ describe('SubjectController', function() {
                     birthDate: '2003-11-22'
                 },
                 type: 1,
+                owner:1,
                 code: '888',
                 sex: 'N.D.',
                 metadata: metadata,
@@ -178,6 +184,7 @@ describe('SubjectController', function() {
             .send({
                 id: 2,
                 type: 3,
+                owner:1,
                 metadata: metadata,
                 date: "2015-12-06",
                 tags: [],
@@ -193,7 +200,7 @@ describe('SubjectController', function() {
             request(sails.hooks.http.app)
             .put('/subject/3')
             .set('Authorization', `Bearer ${tokenDataSens}`)
-            .send({id:2, type:1, metadata:{}, date:"wrongFormat",tags:[],notes:"New subject"})
+            .send({id:2, type:1, owner:1, metadata:{}, date:"wrongFormat",tags:[],notes:"New subject"})
             .expect(400)
             .end(function(err, res) {
                 expect(res.body.error.message.name).to.eql("ValidationError");
@@ -215,6 +222,7 @@ describe('SubjectController', function() {
                 .send({
                     id: 3,
                     type: 3,
+                    owner:1,
                     metadata: metadata,
                     notes: "New subject Updated"
                 })
@@ -231,14 +239,15 @@ describe('SubjectController', function() {
                 });
         });
 
-        it('Should return 403 FORBIDDEN - Authenticated user does not have edit privileges on the subject type', function (done) {
-            let expectedError = "Authenticated user does not have edit privileges on the subject type 3";
+        it('Should return 403 FORBIDDEN - Authenticated user has not edit privileges on the subject type', function (done) {
+            let expectedError = "Authenticated user has not edit privileges on the subject type 3";
             request(sails.hooks.http.app)
                 .put('/subject/3')
                 .set('Authorization', `Bearer ${tokenNoPriv}`)
                 .send({
                     id: 3,
                     type: 3,
+                    owner:1,
                     metadata: metadata,
                     notes: "New subject Updated"
                 })
@@ -380,6 +389,7 @@ describe('SubjectController', function() {
             .set('Authorization', `Bearer ${tokenDataSens}`)
             .expect(200)
             .end(function(err, res) {
+                console.log(res.body);
                 expect(res.body).to.be.empty;
                 if (err) {
                     sails.log.error(err);
@@ -428,8 +438,8 @@ describe('SubjectController', function() {
                 return;
             });
         });
-        it('Should return 403 Forbidden - Authenticated user does not have edit privileges on the subject type', function (done) {
-            let expectedError = 'Authenticated user does not have edit privileges on the subject type 1';
+        it('Should return 403 Forbidden - Authenticated user has not edit privileges on the subject type', function (done) {
+            let expectedError = 'Authenticated user has not edit privileges on the subject type 1';
             request(sails.hooks.http.app)
             .delete('/subject/1')
             .set('Authorization', `Bearer ${tokenNoPriv}`)
@@ -481,8 +491,6 @@ describe('SubjectController', function() {
                     expect(res.body.subject).to.exist;
                     expect(res.body.subject).to.not.equal(null);
                     expect(res.body.dataTypes).to.exist;
-                    expect(res.body.projects).to.exist;
-                    expect(res.body.projects).to.eql([]);
                     if (err) {
                         sails.log.error(err);
                         done(err);
@@ -512,8 +520,8 @@ describe('SubjectController', function() {
                 });
         });
 
-        it('Should return 403 FORBIDDEN - Authenticated user does not have edit privileges on any subject type', function (done) {
-            let expectedError = 'Authenticated user does not have edit privileges on any subject type';
+        it('Should return 403 FORBIDDEN - Authenticated user has not edit privileges on any subject type', function (done) {
+            let expectedError = 'Authenticated user has not edit privileges on any subject type';
 
             let stub = sinon.stub(sails.hooks.persistence.crudManager, "getDataTypesByRolePrivileges",function () {
                 return [];
@@ -537,8 +545,8 @@ describe('SubjectController', function() {
                 });
         });
 
-        it('Should return 403 FORBIDDEN - Authenticated user does not have edit privileges on the subject type', function (done) {
-            let expectedError = 'Authenticated user does not have edit privileges on the subject type';
+        it('Should return 403 FORBIDDEN - Authenticated user has not edit privileges on the subject type', function (done) {
+            let expectedError = 'Authenticated user has not edit privileges on the subject type';
 
             let prova = sinon.stub(sails.hooks.persistence.crudManager, "getDataTypesByRolePrivileges",function () {
                 return [2];
@@ -609,11 +617,14 @@ describe('SubjectController', function() {
                 "metadata":{},
                 "parent_sample": null,
                 "parent_data": null } ];
+
+
         const expectedRes = {
             "links": [
                 {
                     "source": "d_1",
                     "target": "s_2",
+                    "privilege": "edit",
                     "name": "s_2",
                     "type": "Tissue",
                     "metadata": {}
@@ -621,6 +632,7 @@ describe('SubjectController', function() {
                 {
                     "source": "s_4",
                     "target": "s_5",
+                    "privilege": "edit",
                     "name": "s_5",
                     "type": "Tissue",
                     "metadata": {}
@@ -628,6 +640,7 @@ describe('SubjectController', function() {
                 {
                     "source": "d_1",
                     "target": "s_3",
+                    "privilege": "view_overview",
                     "name": "s_3",
                     "type": "Fluid",
                     "metadata": {}
@@ -635,6 +648,7 @@ describe('SubjectController', function() {
                 {
                     "source": "s_4",
                     "target": "s_6",
+                    "privilege": "view_overview",
                     "name": "s_6",
                     "type": "Fluid",
                     "metadata": {}
@@ -643,12 +657,14 @@ describe('SubjectController', function() {
                     "source": "Patient",
                     "target": "d_1",
                     "name": "d_1",
+                    "privilege": "edit",
                     "type": "Star",
                     "metadata": {}
                 },
                 {
                     "source": "Patient",
                     "target": "s_4",
+                    "privilege": "edit",
                     "name": "s_4",
                     "type": "Tissue",
                     "metadata": {}
@@ -688,8 +704,8 @@ describe('SubjectController', function() {
             return;
         });
 
-        it('Should return Forbidden 403 FORBIDDEN - Authenticated user does not have privileges', function (done) {
-            let expectedError = 'Authenticated user does not have privileges';
+        it('Should return Forbidden 403 FORBIDDEN - Authenticated user has not privileges', function (done) {
+            let expectedError = 'Authenticated user has not privileges';
 
             request(sails.hooks.http.app)
             .post('/subjectGraph')
@@ -756,8 +772,8 @@ describe('SubjectController', function() {
         });
     });
 
-    it('Should return Forbidden 403 FORBIDDEN - Authenticated user does not have privileges', function (done) {
-        let expectedError = 'Authenticated user does not have privileges';
+    it('Should return Forbidden 403 FORBIDDEN - Authenticated user has not privileges', function (done) {
+        let expectedError = 'Authenticated user has not privileges';
 
         request(sails.hooks.http.app)
         .post('/subjectGraphSimple')
@@ -775,6 +791,78 @@ describe('SubjectController', function() {
             }
             done();
             return;
+        });
+    });
+
+    describe('GET /sample/getNextSubjectCode', function() {
+        let getNextSubjectCodeAsyncStub;
+        beforeEach(function() {
+            let crudManager = BluebirdPromise.promisifyAll(sails.hooks['persistence'].getDatabaseManager().crudManager);
+            // getNextSubjectCodeAsyncStub = sinon.stub(crudManager, "getNextSubjectCode", function(uri, next) {
+            //     return BluebirdPromise.resolve("NEXT-1000000");
+            // });
+        });
+
+        afterEach(function() {
+            // sails.hooks['persistence'].getDatabaseManager().crudManager.getNextSubjectCode.restore();
+        });
+        it('Should return 200 OK the correct Subject Code provided into subject object', function (done) {
+            request(sails.hooks.http.app)
+            .get('/subject/getNextSubjectCode')
+            .set('Authorization', `Bearer ${tokenDataSens}`)
+            .query({type:1, code: "PAT-002"})
+            .expect(200)
+            .end(function(err, res) {
+                if (err) {
+                    sails.log.error(err);
+                    done(err);
+                    return;
+                }
+                expect(res.body).to.eql("PAT-002");
+
+                done();
+                return;
+            });
+        });
+
+        it('Should return 200 OK the next Subject Code', function (done) {
+            request(sails.hooks.http.app)
+            .get('/subject/getNextSubjectCode')
+            .set('Authorization', `Bearer ${tokenDataSens}`)
+            .query({type:1, code: null})
+            .expect(200)
+            .end(function(err, res) {
+                if (err) {
+                    sails.log.error(err);
+                    done(err);
+                    return;
+                }
+                expect(res.body).to.eql("PAT-68");
+
+                done();
+                return;
+            });
+        });
+
+        it('Should return Error - Error getting next Subject code', function (done) {
+            let expectedError = new Error(`Error getting last subject code - Please provide a data type`);
+
+            request(sails.hooks.http.app)
+                .get('/subject/getNextSubjectCode')
+                .set('Authorization', `Bearer ${tokenDataSens}`)
+                .query({type: null, code: null})
+                .expect(500)
+                .end(function(err, res) {
+                    if (err) {
+                        sails.log.error(err);
+                        expect(err).to.eql(expectedError);
+                        done(err);
+                        return;
+                    }
+
+                    done();
+                    return;
+                });
         });
     });
 });

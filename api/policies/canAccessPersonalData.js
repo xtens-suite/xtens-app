@@ -11,7 +11,7 @@
  */
 module.exports = function(req, res, next) {
 
-    var payload= TokenService.getToken(req);
+    var payload = TokenService.getToken(req);
 
     console.log("Called canAccessPersonalData Policy", payload);
     // User is allowed, proceed to the next policy,

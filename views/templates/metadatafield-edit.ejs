@@ -14,7 +14,7 @@
         </div>
         <div class="metadataField-third">
             <label class="control-label"><%= __('name') %></label>
-            <input text class="form-control input-sm no-edit" placeholder="Field Name" name="name" required data-parsley-length="[2, 64]">
+            <input text class="form-control input-sm no-edit" placeholder="Field Name" name="name" required data-parsley-length="[1, 64]">
         </div>
         <div class="metadataField-third">
             <label class="control-label"><%= __('custom-value') %></label>
@@ -35,6 +35,10 @@
                 <input type="checkbox" name="caseInsensitive" value="caseInsensitive" class="no-edit">
                 <%=__('case-insensitive') %>
             </label>
+        </div>
+        <div class="right metadataField-third">
+            <label class="control-label"><%= __('description') %></label>
+            <input text class="form-control input-sm no-edit" placeholder="Short Description" name="description" required>
         </div>
     </div>
 </div>
@@ -77,7 +81,7 @@
     <div class="metadataField-row">
         <div class="metadataField-third">
             <label class="checkbox-inline">
-                <input type="checkbox" name="isList" value="isList" class="no-edit"> 
+                <input type="checkbox" name="isList" value="isList" class="no-edit">
                 <%=__('is-list') %>
             </label>
         </div>

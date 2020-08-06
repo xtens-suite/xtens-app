@@ -11,10 +11,27 @@ var DataType = {
             required: true,
             columnName: 'name'
         },
-        schema: {
-            type: 'json',
-            required: true,
-            columnName: 'schema'
+
+        biobankPrefix: {
+            type: 'string',
+            columnName: 'biobank_prefix'
+        },
+
+        getParentCode: {
+            type: 'boolean',
+            defaultsTo: false,
+            columnName: 'parent_code'
+        },
+
+        ifParentNoPrefix: {
+            type: 'boolean',
+            defaultsTo: false,
+            columnName: 'parent_no_prefix'
+        },
+
+        superType: {
+            model:'superType',
+            columnName: 'super_type'
         },
         model: {
             type: 'string',
@@ -46,11 +63,17 @@ var DataType = {
             collection: 'dataType',
             via: 'parents'
         },
-        // many-to-may association with Group
+        // many-to-many association with Group
         groups: {
             collection: 'group',
             via: 'dataTypes',
             through:'datatypeprivileges'
+        },
+
+        project: {
+            model: 'project',
+            columnName: 'project'
+            // via:'dataTypes'
         }
     },
 
@@ -62,7 +85,7 @@ var DataType = {
          */
     getFlattenedFields: /*istanbul ignore next*/ function(skipFieldsWithinLoops) {
         var flattened = [];
-        var body = this.schema && this.schema.body;
+        var body = _.isObject(this.superType) && this.superType.schema && this.superType.schema.body;
 
             // if no body return an empty array
         if (!body) return flattened;

@@ -38,8 +38,12 @@ module.exports.routes = {
 
     // ContactInformation Controller
 
+    // Daemon Controller
+
     // Data Controller
     'GET /data/edit': {controller: 'data', action: 'edit'},
+    'GET /data/getInfoForBarChart': {controller: 'data', action: 'getInfoForBarChart'},
+
     /*
     'GET /data': {controller: 'data', action: 'find'},
     'POST /data': {controller: 'data', action: 'create'},
@@ -52,7 +56,8 @@ module.exports.routes = {
 
     // DataType Controller
     'GET /dataType/edit': {controller: 'dataType', action: 'edit'},
-    'POST /graph':{controller:'dataType',action:'buildGraph'},
+    'POST /graph': {controller:'dataType',action:'buildGraph'},
+    'GET /dataType/getDataForDashboard': {controller:'dataType',action:'getDataForDashboard'},
     // 'GET /graph/buildHierarchy':{controller:'dataType',action:'buildHierarchy'},
 
     // DataTypePrivileges Controller
@@ -77,11 +82,14 @@ module.exports.routes = {
     // 'GET /populateEAV': {controller: 'main', action: 'populateEAV'},
 
     // Operator Controller
-    'PATCH /operator':{controller:'operator',action:'patchPassword'},
+    'PATCH /operator': {controller:'operator',action:'patchPassword'},
+    'PATCH /operator/resetPassword': {controller:'operator',action:'resetPassword'},
+    'PATCH /operator/patchQueries': {controller:'operator',action:'patchQueries'},
 
     // PersonalDetails Controller
 
     // Project Controller
+    'GET /project/edit': {controller: 'project', action: 'edit'},
 
     // Query Controller
     // Advanced Search API
@@ -89,14 +97,23 @@ module.exports.routes = {
 
     // Sample Controller
     'GET /sample/edit': {controller: 'sample', action: 'edit'},
+    'GET /sample/getNextBiobankCode': {controller: 'sample', action: 'getNextBiobankCode'},
+    'GET /sample/findByBiobankCode': {controller: 'sample', action: 'findByBiobankCode'},
+    'GET /sample/getInfoForBarChart': {controller: 'sample', action: 'getInfoForBarChart'},
 
     // Subject Controller
     'GET /subject/edit': {controller: 'subject', action: 'edit'},
-    'POST /subjectGraph':{controller:'subject',action:'createGraph'},
-    'POST /subjectGraphSimple':{controller:'subject',action:'createGraphSimple'}
+    'POST /subjectGraph': {controller:'subject',action:'createGraph'},
+    'POST /subjectGraphSimple': {controller:'subject',action:'createGraphSimple'},
+    'GET /subject/getNextSubjectCode': {controller: 'subject', action: 'getNextSubjectCode'},
+    'GET /subject/getInfoForBarChart': {controller: 'subject', action: 'getInfoForBarChart'},
 
+    'GET /app': {
+        controller: 'main',
+        action: 'getAppUI'
+    },
 
-
+    'GET /superType/meta/:id': {controller: 'superType', action: 'getMeta'}
 
     // REST API for subject (with personal info)
     // 'GET /subjectWithPersonalDetails': {controller: 'subject', action: 'findWithPersonalDetails'},
@@ -104,9 +121,6 @@ module.exports.routes = {
     // 'PUT /subjectWithPersonalDetails': {controller: 'subject', action: 'updateWithPersonalDetails'},
     // 'POST /subjectWithPersonalDetails': {controller: 'subject', action: 'createWithPersonalDetails'},
     // 'DELETE /subjectWithPersonalDetails': {controller: 'subject', action: 'deleteWithPersonalDetails'},
-
-
-
 
     /*,
     'GET /dataType': {controller: 'DataType', action: 'find'}

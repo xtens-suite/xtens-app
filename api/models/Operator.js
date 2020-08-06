@@ -1,7 +1,7 @@
 /**
  * Operator.js
  */
-var bcrypt = require('bcrypt');
+
 var constants = sails.config.xtens.constants;
 
 var Operator = {
@@ -52,6 +52,11 @@ var Operator = {
             via: 'user'
         },
 
+        addressInformation: {
+            columnName: 'address_information',
+            model: 'addressInformation'
+        },
+
         createdAt: {
             type:'datetime',
             columnName: 'created_at'
@@ -61,6 +66,22 @@ var Operator = {
             type:'datetime',
             columnName: 'updated_at'
         },
+
+        lastPswdUpdate: {
+            type:'datetime',
+            columnName: 'last_pswd_update'
+        },
+
+        resetPswd: {
+            type:'boolean',
+            columnName: 'reset_pswd'
+        },
+
+        queries: {
+            type: "string",
+            columnName: "queries"
+        },
+
         groups: {
             collection:'group',
             via:'members'
@@ -89,13 +110,18 @@ var Operator = {
          *                      7) canAccessSensitiveData [boolean]
          */
         formatForTokenPayload: function() {
-            var operator = _.pick(this.toObject(), ['id', 'groups']);
-            var privilegesArray = _.pluck(operator.groups, 'privilegeLevel');
+            var operator = _.pick(this.toObject(), ['id', 'groups', 'lastPswdUpdate', 'resetPswd']);
+            var privilegesArray = _.map(operator.groups, 'privilegeLevel');
             operator.isWheel = privilegesArray.indexOf(constants.GroupPrivilegeLevels.WHEEL) > -1;
             operator.isAdmin = operator.isWheel || privilegesArray.indexOf(constants.GroupPrivilegeLevels.ADMIN) > -1;
-            operator.canAccessPersonalData = _.pluck(operator.groups, 'canAccessPersonalData').indexOf(true) > -1;
-            operator.canAccessSensitiveData = _.pluck(operator.groups, 'canAccessSensitiveData').indexOf(true) > -1;
-            operator.groups = _.pluck(operator.groups, 'id');
+            operator.adminGroups =  [];
+            if (operator.isAdmin) {
+                var adminGroups = _.where(operator.groups, {privilegeLevel: constants.GroupPrivilegeLevels.ADMIN});
+                operator.adminGroups = !_.isEmpty(adminGroups) ? _.isArray(adminGroups) ? _.map(adminGroups,'id') : [adminGroups.id] : [];
+            }
+            operator.canAccessPersonalData = _.map(operator.groups, 'canAccessPersonalData').indexOf(true) > -1;
+            operator.canAccessSensitiveData = _.map(operator.groups, 'canAccessSensitiveData').indexOf(true) > -1;
+            operator.groups = _.map(operator.groups, 'id');
             return operator;
         }
 

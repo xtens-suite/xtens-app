@@ -59,6 +59,7 @@ describe('DataController', function() {
             .set('Authorization', `Bearer ${tokenDataSens}`)
             .send({
                 "type": 3,
+                "owner": 3,
                 "metadata": metadata,
                 "date": "2015-12-06",
                 "notes": "New data"
@@ -85,6 +86,7 @@ describe('DataController', function() {
             .send({
                 type:3,
                 metadata:{},
+                owner: 3,
                 date:"2015-12-06",
                 tags:[],
                 notes:"New data"
@@ -94,14 +96,15 @@ describe('DataController', function() {
             return;
         });
 
-        it('Should return 403 Forbidden - Authenticated user does not have edit privileges on the data type 3', function (done) {
-            let expectedError = `Authenticated user does not have edit privileges on the data type 3`;
+        it('Should return 403 Forbidden - Authenticated user has not edit privileges on the data type 3', function (done) {
+            let expectedError = `Authenticated user has not edit privileges on the data type 3`;
             request(sails.hooks.http.app)
             .post('/data')
             .set('Authorization', `Bearer ${tokenNoPriv}`)
             .send({
                 type:3,
                 metadata:{},
+                owner: 3,
                 date:"2015-12-06",
                 tags:[],
                 notes:"New data"
@@ -123,6 +126,7 @@ describe('DataController', function() {
             .send({
                 type:3,
                 metadata:{},
+                owner: 3,
                 date:"wrongFormat",
                 tags:[],
                 notes:"New data"
@@ -148,13 +152,14 @@ describe('DataController', function() {
             .send({
                 id: 3,
                 type: 3,
+                owner: 3,
                 metadata: metadata,
                 notes: "New Data Updated"
             })
             .expect(200)
             .end(function(err, res) {
-                console.log(res.body[0].notes);
-                expect(res.body[0].notes).to.equals(note);
+                console.log(res.body.notes);
+                expect(res.body.notes).to.equals(note);
                 if (err) {
                     done(err);
                     return;
@@ -170,7 +175,7 @@ describe('DataController', function() {
             request(sails.hooks.http.app)
             .put('/data/3')
             .set('Authorization', `Bearer ${tokenDataSens}`)
-            .send({id:2, type:3, metadata:{}, date:"2015-12-06",tags:[],notes:"New data"})
+            .send({id:2, type:3, metadata:{}, owner: 3, date:"2015-12-06",tags:[],notes:"New data"})
             .expect(400);
             done();
             return;
@@ -181,7 +186,7 @@ describe('DataController', function() {
             request(sails.hooks.http.app)
             .put('/data/3')
             .set('Authorization', `Bearer ${tokenDataSens}`)
-            .send({id:2, type:3, metadata:{}, date:"wrongFormat",tags:[],notes:"New data"})
+            .send({id:2, type:3, metadata:{}, owner: 3, date:"wrongFormat",tags:[],notes:"New data"})
             .expect(400)
             .end(function(err, res) {
                 expect(res.body.error.message.name).to.eql("ValidationError");
@@ -203,6 +208,7 @@ describe('DataController', function() {
                 .send({
                     id: 3,
                     type: 3,
+                    owner: 3,
                     metadata: metadata,
                     notes: "New Data Updated"
                 })
@@ -219,14 +225,15 @@ describe('DataController', function() {
                 });
         });
 
-        it('Should return 403 FORBIDDEN - Authenticated user does not have edit privileges on the data type', function (done) {
-            let expectedError = "Authenticated user does not have edit privileges on the data type 3";
+        it('Should return 403 FORBIDDEN - Authenticated user has not edit privileges on the data type', function (done) {
+            let expectedError = "Authenticated user has not edit privileges on the data type 3";
             request(sails.hooks.http.app)
                 .put('/data/3')
                 .set('Authorization', `Bearer ${tokenNoPriv}`)
                 .send({
                     id: 3,
                     type: 3,
+                    owner: 3,
                     metadata: metadata,
                     notes: "New Data Updated"
                 })
@@ -414,8 +421,8 @@ describe('DataController', function() {
             });
         });
 
-        it('Should return 403 Forbidden - Authenticated user does not have edit privileges on the data type', function (done) {
-            let expectedError = 'Authenticated user does not have edit privileges on the data type 3';
+        it('Should return 403 Forbidden - Authenticated user has not edit privileges on the data type', function (done) {
+            let expectedError = 'Authenticated user has not edit privileges on the data type 3';
             request(sails.hooks.http.app)
             .delete('/data/1')
             .set('Authorization', `Bearer ${tokenNoPriv}`)
@@ -498,10 +505,10 @@ describe('DataController', function() {
                 });
         });
 
-        it('Should return 403 FORBIDDEN - Authenticated user does not have edit privileges on any data type', function (done) {
-            let expectedError = 'Authenticated user does not have edit privileges on any data type';
+        it('Should return 403 FORBIDDEN - Authenticated user has not edit privileges on any data type', function (done) {
+            let expectedError = 'Authenticated user has not edit privileges on any data type';
 
-            let stub = sinon.stub(sails.hooks.persistence.crudManager, "getDataTypesByRolePrivileges",function () {
+            sinon.stub(sails.hooks.persistence.crudManager, "getDataTypesByRolePrivileges",function () {
                 return [];
             });
 
@@ -524,10 +531,10 @@ describe('DataController', function() {
         });
     });
 
-    it('Should return 403 FORBIDDEN - Authenticated user does not have edit privileges on the data type', function (done) {
-        let expectedError = 'Authenticated user does not have edit privileges on the data type';
+    it('Should return 403 FORBIDDEN - Authenticated user has not edit privileges on the data type', function (done) {
+        let expectedError = 'Authenticated user has not edit privileges on the data type';
 
-        let prova = sinon.stub(sails.hooks.persistence.crudManager, "getDataTypesByRolePrivileges",function () {
+        sinon.stub(sails.hooks.persistence.crudManager, "getDataTypesByRolePrivileges",function () {
             return [2];
         });
 

@@ -66,7 +66,7 @@
 
         render: function() {
             this.$el.html(this.template({__: i18n, biobank: this.model}));
-            this.$modal = this.$(".biobank-modal");
+            this.$modal = $(".modal-cnt");
             this.stickit();
             return this;
         },
@@ -91,7 +91,8 @@
                             modal.show();
 
                             setTimeout(function(){ modal.hide(); }, 1200);
-                            that.$('.biobank-modal').on('hidden.bs.modal', function (e) {
+                            $('.modal-cnt').one('hidden.bs.modal', function (e) {
+                                e.preventDefault();
                                 modal.remove();
                                 xtens.router.navigate('biobanks', {trigger: true});
                             });
@@ -123,32 +124,37 @@
             var modal = new ModalDialog({
                 template: JST["views/templates/confirm-dialog-bootstrap.ejs"],
                 title: i18n('confirm-deletion'),
-                body: i18n('biobank-will-be-permanently-deleted-are-you-sure')
+                body: i18n('biobank-will-be-permanently-deleted-are-you-sure'),
+                type: i18n("delete")
             });
 
             this.$modal.append(modal.render().el);
             modal.show();
 
-            this.$('#confirm-delete').click( function (e) {
+            $('#confirm').click( function (e) {
                 modal.hide();
+                that.$modal.one('hidden.bs.modal', function (e) {
+                    $('.waiting-modal').modal('show');
 
-                that.model.destroy({
-                    success: function(model, res) {
-                        modal.template= JST["views/templates/dialog-bootstrap.ejs"];
-                        modal.title= i18n('ok');
-                        modal.body= i18n('biobank-deleted');
-                        that.$modal.append(modal.render().el);
-                        $('.modal-header').addClass('alert-success');
-                        modal.show();
-                        setTimeout(function(){ modal.hide(); }, 1200);
-                        that.$modal.on('hidden.bs.modal', function (e) {
-                            modal.remove();
-                            xtens.router.navigate('biobanks', {trigger: true});
-                        });
-                    },
-                    error: function(model, res) {
-                        xtens.error(res);
-                    }
+                    that.model.destroy({
+                        success: function(model, res) {
+                            $('.waiting-modal').modal('hide');
+                            modal.template= JST["views/templates/dialog-bootstrap.ejs"];
+                            modal.title= i18n('ok');
+                            modal.body= i18n('biobank-deleted');
+                            that.$modal.append(modal.render().el);
+                            $('.modal-header').addClass('alert-success');
+                            modal.show();
+                            setTimeout(function(){ modal.hide(); }, 1200);
+                            that.$modal.one('hidden.bs.modal', function (e) {
+                                modal.remove();
+                                xtens.router.navigate('biobanks', {trigger: true});
+                            });
+                        },
+                        error: function(model, res) {
+                            xtens.error(res);
+                        }
+                    });
                 });
                 return false;
             });
@@ -161,23 +167,24 @@
         tagName: 'div',
         className: 'biobanks',
 
-        initialize: function() {
+        initialize: function(options) {
             $("#main").html(this.el);
             this.template = JST["views/templates/biobank-list.ejs"];
+            this.biobanks = options.biobanks;
+
             this.render();
         },
 
         render: function(options) {
-            var that = this;
-            var biobanks = new Biobank.List();
-            biobanks.fetch({
-                success: function(biobanks) {
-                    that.$el.html(that.template({__: i18n, biobanks: biobanks.models}));
-                },
-                error: function() {
-                    that.$el.html(that.template({__: i18n}));
-                }
+
+            this.$el.html(this.template({__: i18n, biobanks: this.biobanks.models}));
+
+            $('.table').DataTable({
+                scrollY:        '50vh',
+                scrollCollapse: true,
+                "searching": true
             });
+
             return this;
         }
     });

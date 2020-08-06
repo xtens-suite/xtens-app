@@ -6,54 +6,64 @@
             <div class="table-responsive">
                 <table class="table">
                     <thead>
-                        <tr>
+                        <tr class="text-center">
                             <th><%= __("code") %></th>
+                            <% if (xtens.session.get("canAccessPersonalData")) {%>
                             <th><%= __("given-name") %></th>
                             <th><%= __("surname") %></th>
                             <th><%= __("birth-date") %></th>
+                            <%} %>
                             <th><%= __("sex") %></th>
-                            <th><%= __("project") %></th>
+                            <th style="display:none;"><%= __("project") %></th>
                             <th></th>
                         </tr>
                     </thead>
                     <tbody>
-                    <% var date; %>
-                    <% _.each(subjects, function(subject) { %>
-                    <tr>
-                        <td><%= subject.get("code") %></td>
-                        <td><%= subject.get("personalInfo") && subject.get("personalInfo").givenName %></td>
-                        <td><%= subject.get("personalInfo") && subject.get("personalInfo").surname %></td>
-                        <td>
-                            <% date = subject.get("personalInfo") && subject.get("personalInfo").birthDate; %>
-                            <%= date ? moment(date).lang("it").format('L') : ' ' %>
-                        </td>
-                        <td><%= subject.get("sex") %></td>
-                        <td><%= subject.get("projects").map(function(project) {return (" " + project.name); }).toString().trim() %></td>
-                        <td>
-                          <% var privilege = dataTypePrivileges.find(function(model) {
-                            return model.get('dataType') === subject.get("type").id; });
-                           if(privilege.get("privilegeLevel") === "edit" ){ %>
-                            <a class="btn" href="<%= subject.get("editLink") %>" ><%=__("edit") %></a>
+                        <% var date; %>
+                        <% _.each(subjects, function(subject) {
+                      var dataType = _.find(dataTypes, {id : subject.get('type')});
+                      var subjProject = _.find(xtens.session.get("projects"), {id : dataType.get('project')}); %>
+                        <tr class="content">
+                            <td><%= subject.get("code") %></td>
+                            <% if (xtens.session.get("canAccessPersonalData")) {%>
+                            <td><%= subject.get("givenName") && subject.get("givenName") %></td>
+                            <td><%= subject.get("surname") && subject.get("surname") %></td>
+                            <td>
+                                <% date = subject.get("birthDate") && subject.get("birthDate"); %>
+                                <%= date ? moment(date).lang("it").format('L') : ' ' %>
+                            </td>
                             <%} %>
-                            <% if (subject.get("newSampleLink") && subject.get("newSampleLink").length) {%>
-                                <a class="btn" href="<%= subject.get("newSampleLink") %>"><%=__("new-sample") %></a>
-                            <%} %>
-                            <% if (subject.get("newDataLink") && subject.get("newDataLink").length) {%>
-                                <a class="btn" href="<%= subject.get("newDataLink") %>"><%=__("new-data") %></a>
-                            <%} %>
-                        </td>
-                    </tr>
-                    <% }) %>
+                            <td><%= subject.get("sex") %></td>
+                            <td style="display:none;"><%= subjProject ? subjProject.name : null %></td>
+                            <td class="text-right">
+                                <div class="btn-group btn-group-sm" role="group" style="margin-top:0.5vh;">
+                                    <% var privilege = dataTypePrivileges.find(function(model) {
+                            return model.get('dataType') === subject.get("type"); });
+                           if(privilege && privilege.get("privilegeLevel") === "edit" ){ %>
+                                    <a type="button" class="btn btn-primary"
+                                        href="<%= subject.get("editLink") %>"><%=__("edit") %></a>
+                                    <%} %>
+                                    <% if (subject.get("newSampleLink") && subject.get("newSampleLink").length) {%>
+                                    <a type="button" class="btn btn-default"
+                                        href="<%= subject.get("newSampleLink") %>"><%=__("new-derivative-sample") %></a>
+                                    <%} %>
+                                    <% if (subject.get("newDataLink") && subject.get("newDataLink").length) {%>
+                                    <a type="button" class="btn btn-default"
+                                        href="<%= subject.get("newDataLink") %>"><%=__("new-data") %></a>
+                                    <%} %>
+                                </div>
+                            </td>
+                        </tr>
+                        <% }) %>
                     </tbody>
                 </table>
             </div>
             <div id="pagination" class="row"></div>
             <div id="buttonbardiv" class="row text-center">
-              <div class="btn-group btn-group-margin">
-                <a href="#/subjects/graph" class="btn btn-default moreData"><%= __("subject-graph")%></a>
-                <a href="#/subjects/new" class="btn btn-primary"><%= __("new-subject")%></a>
-                <a href="" id="moreData" class="btn btn-default moreData"><%= __("more-data") %></a>
-              </div>
+                <div class="btn-group btn-group-margin">
+                    <a href="#/subjects/dashboard" class="btn btn-default moreData"><%= __("subject-dashboard")%></a>
+                    <a href="#/subjects/new" class="btn btn-primary"><%= __("new-subject")%></a>
+                </div>
             </div>
         </div>
     </div>

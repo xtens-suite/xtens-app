@@ -8,24 +8,23 @@
  * for matching multiple files.)
  */
 
-
-
 // CSS files to inject in order
 //
 // (if you're using LESS with the built-in default config, you'll want
 //  to change `assets/styles/importer.less` instead.)
 var cssFilesToInject = [
     'styles/importer.css',
+    'styles/fonts/**/*.css',
+    'dependencies/bootstrap-select/css/bootstrap-select.css',
     'dependencies/font-awesome/styles/font-awesome.css',
     'dependencies/select2/select2.css',
-    'dependencies/datatables/styles/jquery.dataTables.css',
+    // 'dependencies/datatables/styles/jquery.dataTables.css',
     'dependencies/datatables-plugins/integration-bootstrap/styles/dataTables.bootstrap.css',
     'dependencies/datatables-plugins/integration-fontAwesome/styles/dataTables.fontAwesome.css',
     'dependencies/datatables-buttons/styles/buttons.bootstrap.css',
     'dependencies/**/*.css',
     'styles/xtens.css'
 ];
-
 
 // Client-side javascript files to inject in order
 // (uses Grunt-style wildcard/glob/splat expressions)
@@ -39,9 +38,8 @@ var jsFilesToInject = [
     'dependencies/**/fetch.js',
     'dependencies/http/http.js',
     // 'dependencies/**/underscore.js',
-    'dependencies/bootstrap/**/modal.js',
-    'dependencies/bootstrap/**/tooltip.js',
-    'dependencies/bootstrap/**/popover.js',
+    'dependencies/bootstrap/js/tooltip.js',
+    'dependencies/bootstrap/js/*.js',
     'dependencies/**/lodash.js',
     'dependencies/**/backbone.js',
     'dependencies/**/backbone.stickit.js',
@@ -57,12 +55,17 @@ var jsFilesToInject = [
     'dependencies/**/buttons.bootstrap.js',
     'dependencies/**/buttons.html5.js',
     'dependencies/**/jszip.js',
-    'dependencies/**/buttons.colvis.js',
+    'dependencies/**/buttons.colVis.js',
     'dependencies/**/async.js',
     'dependencies/**/d3.js',
     'dependencies/Chart.js/Chart.js',
     'dependencies/mathjs/math.min.js',
-
+    'dependencies/**/d3-tip.js',
+    'dependencies/**/Sortable.js',
+    'dependencies/**/JsBarcode.all.js',
+    '/dependencies/**/bootstrap-select.js',
+    '/dependencies/**/bootstrap-notify.js',
+    '/dependencies/**/jquery.contextMenu.js',
     // Customised client-side js files
 
     'js/application/xtens.js',
@@ -74,6 +77,8 @@ var jsFilesToInject = [
     'js/modules/Utils.js',
     'js/modules/Session.js',
     'js/modules/DataTypePrivileges.js',
+    'js/modules/AddressInformation.js',
+    'js/modules/Daemon.js',
     'js/modules/MetadataComponent.js',
     'js/modules/MetadataField.js',
     'js/modules/MetadataLoop.js',
@@ -94,13 +99,13 @@ var jsFilesToInject = [
     'js/modules/Project.js',
     'js/modules/Sample.js',
     'js/modules/AdminAssociation.js',
-    // 'js/modules/QueryStrategy.js',
-    'js/modules/Query.js'
+    'js/modules/SuperType.js',
+    'js/modules/Query.js',
+    'js/modules/DashBoard.js'
 
     // All of the rest of your client-side js files
     // will be injected here in no particular order.
 ];
-
 
 // Client-side HTML templates are injected using the sources below
 // The ordering of these templates shouldn't matter.
@@ -116,17 +121,15 @@ var templateFilesToInject = [
     'templates/**/*.ejs'
 ];
 
-
-
 // Prefix relative paths to source files so they point to the proper locations
 // (i.e. where the other Grunt tasks spit them out, or in some cases, where
 // they reside in the first place)
-module.exports.cssFilesToInject = cssFilesToInject.map(function(path) {
+module.exports.cssFilesToInject = cssFilesToInject.map(function (path) {
     return '.tmp/public/' + path;
 });
-module.exports.jsFilesToInject = jsFilesToInject.map(function(path) {
+module.exports.jsFilesToInject = jsFilesToInject.map(function (path) {
     return '.tmp/public/' + path;
 });
-module.exports.templateFilesToInject = templateFilesToInject.map(function(path) {
+module.exports.templateFilesToInject = templateFilesToInject.map(function (path) {
     return 'views/' + path;
 });

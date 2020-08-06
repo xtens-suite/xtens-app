@@ -3,11 +3,73 @@
  */
 /* jshint esnext: true */
 /* jshint node: true */
-/* globals _, sails, Sample, DataType, DataTypeService, DataService, SubjectService, QueryService, TokenService */
+/* globals _, sails, Sample, DataTypeService, DataService, BiobankService */
 "use strict";
 let BluebirdPromise = require('bluebird');
 let Joi = require("joi");
 let SAMPLE = sails.config.xtens.constants.DataTypeClasses.SAMPLE;
+const coroutines = {
+    validate: BluebirdPromise.coroutine(function *(sample, performMetadataValidation, dataType) {
+
+        if (dataType.model !== SAMPLE) {
+            return {
+                error: "This data type is for another model: " + dataType.model
+            };
+        }
+
+        let validationSchema = {
+            id: Joi.number().integer().positive(),
+            type: Joi.number().integer().positive().required(),
+            owner: Joi.number().integer().positive().required(),
+            biobank: Joi.number().integer().positive().required(),
+            biobankCode: Joi.string().allow("").allow(null), // TODO change this one
+            donor: Joi.array().allow(null),
+            parentSample: Joi.array().allow(null),
+            childrenData: Joi.array().allow(null),
+            childrenSample: Joi.array().allow(null),
+            tags: Joi.array().allow(null),
+            notes: Joi.string().allow(null),
+            metadata: Joi.object().required(),
+            files: Joi.array().items(Joi.object().keys({
+                uri: Joi.string(),
+                name: Joi.string(),
+                details: Joi.object().allow(null),
+                id: Joi.number().integer().positive(),
+                createdAt: Joi.date(),
+                updatedAt: Joi.date()
+            })),
+            createdAt: Joi.date(),
+            updatedAt: Joi.date()
+        };
+
+        if (performMetadataValidation) {
+            let metadataValidationSchema = {};
+            let flattenedFields = yield DataTypeService.getFlattenedFields(dataType);
+            _.each(flattenedFields, field => {
+                metadataValidationSchema[field.formattedName] = DataService.buildMetadataFieldValidationSchema(field);
+            });
+            validationSchema.metadata = Joi.object().required().keys(metadataValidationSchema);
+        }
+
+        validationSchema = Joi.object().keys(validationSchema);
+        return Joi.validate(sample, validationSchema);
+    }),
+
+    validateBiobank: BluebirdPromise.coroutine(function* (sample, dataType) {
+        if (!sample || ! dataType) {
+            throw new Error('SampleService: validateBiobank - Missing function arguments');
+        }
+
+        let biobanksProjects = yield BiobankService.getBiobanksByProject(dataType.project);
+
+        if (_.find(biobanksProjects, function (b) { return b.id == sample.biobank; })) {
+            return true;
+        }
+        return false;
+    })
+};
+
+
 let SampleService = BluebirdPromise.promisifyAll({
 
     /**
@@ -35,46 +97,29 @@ let SampleService = BluebirdPromise.promisifyAll({
      *                      - value: the validated data object if no error is returned
      */
     validate: function(sample, performMetadataValidation, dataType) {
+        return coroutines.validate(sample, performMetadataValidation, dataType)
+        .catch(/* istanbul ignore next */ function(err) {
+            sails.log(err);
+            return err;
+        });
+    },
 
-        if (dataType.model !== SAMPLE) {
-            return {
-                error: "This data type is for another model: " + dataType.model
-            };
-        }
-
-        let validationSchema = {
-            id: Joi.number().integer().positive(),
-            type: Joi.number().integer().positive().required(),
-            biobank: Joi.number().integer().positive().required(),
-            biobankCode: Joi.string().allow("").allow(null), // TODO change this one
-            donor: Joi.number().integer().positive(),
-            parentSample: Joi.number().integer().positive(),
-            tags: Joi.array().allow(null),
-            notes: Joi.string().allow(null),
-            metadata: Joi.object().required(),
-            files: Joi.array().items(Joi.object().keys({
-                uri: Joi.string(),
-                name: Joi.string(),
-                details: Joi.object().allow(null),
-                id: Joi.number().integer().positive(),
-                createdAt: Joi.date(),
-                updatedAt: Joi.date()
-            })),
-            createdAt: Joi.date(),
-            updatedAt: Joi.date()
-        };
-
-        if (performMetadataValidation) {
-            let metadataValidationSchema = {};
-            let flattenedFields = DataTypeService.getFlattenedFields(dataType);
-            _.each(flattenedFields, field => {
-                metadataValidationSchema[field.formattedName] = DataService.buildMetadataFieldValidationSchema(field);
-            });
-            validationSchema.metadata = Joi.object().required().keys(metadataValidationSchema);
-        }
-
-        validationSchema = Joi.object().keys(validationSchema);
-        return Joi.validate(sample, validationSchema);
+    /**
+     * @method
+     * @name validateBiobank
+     * @description validata a sample instance against the given schema
+     * @param{Object} sample - the sample to be validated
+     * @param{Object} dataType - the dataType containing the project
+     * @return {Object} - the result object contains two properties:
+     *                      - error: null if the Data is validated, an Error object otherwise
+     *                      - value: the validated data object if no error is returned
+     */
+    validateBiobank: function(sample, performMetadataValidation, dataType) {
+        return coroutines.validateBiobank(sample, performMetadataValidation, dataType)
+        .catch(/* istanbul ignore next */ function(err) {
+            sails.log(err);
+            return err;
+        });
     },
 
     /**

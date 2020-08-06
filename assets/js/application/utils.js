@@ -12,10 +12,10 @@
      * @name handleError
      *
      */
-    function handleError(res){
+    function handleError(res, type){
         var modal, body;
 
-        var error = res.responseJSON.error._internal;
+        var error = _.isObject(res) ? res.responseJSON.error._internal ? res.responseJSON.error._internal : res.responseJSON.error : res;
 
         if (_.isObject(error)){
           //error is an object
@@ -23,7 +23,12 @@
             if (_.isArray(details)){
               //error.message is object and has details
                 var path = details[0].path.split(".");
-                body = path[0] + " " + path[1].toUpperCase() + " " + details[0].message;
+                if (path[1]){
+                    body = path[0] + " " + path[1].toUpperCase() + " " + details[0].message;
+                }else {
+                    body = details[0].message;
+                }
+
             }
             else{
               //error.message is a string
@@ -32,9 +37,10 @@
         }
         else {
           //error is a string
-            var splitted = error && error.split(":");
-            body = splitted && splitted[1];
-            if(res.responseJSON.error.raw){
+            var spl = error && error.split(/\r?\n/);
+            var splitted = spl && spl[0].split(":");
+            body = splitted && _.isArray(splitted) ? splitted.length > 1 ? splitted[1] : splitted[0] : splitted;
+            if(_.isObject(res) && res.responseJSON.error.raw){
                 var err = res.responseJSON.error.raw;
                 body = "Error on column <b>" + err.column + "</b> in  <b>" + err.table + "</b>";
             }
@@ -44,18 +50,22 @@
         !body ? body = 'Error - Generic' : null;
         modal = new ModalDialog({
             title: title,
-            body: body
+            body: body,
+            type: type ? type : "delete"
         });
 
-        $("#main").append(modal.render().el);
+        $(".modal-cnt").append(modal.render().el);
         $('.modal-header').addClass('alert-danger');
         modal.show();
 
-        $('#main .xtens-modal').on('hidden.bs.modal', function (e) {
-
+        $('.modal-cnt').one('hidden.bs.modal', function (e) {
+            e.preventDefault();
             modal.remove();
-            if (res.status === (403 || 401)) {
-                window.location.replace('/#homepage');
+            if (res.status === (403 || 401) && Backbone.history.getFragment() !== "login" && body != "Expired Password") {
+                window.location.replace('/#/homepage');
+            } else if (res.status === 401 && body == "Expired Password") {
+                xtens.session.set("expiredPassword", true);
+                window.location.replace('/#/operators/updatePassword');
             }
         });
 

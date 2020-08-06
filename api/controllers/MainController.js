@@ -6,58 +6,97 @@
  */
 /* jshint esnext: true */
 /* jshint node: true */
-/* globals _, sails */
+/* globals _, sails, DataType, TokenService */
 "use strict";
 
-let ControllerOut = require("xtens-utils").ControllerOut;
-let DEFAULT_LOCAL_STORAGE = sails.config.xtens.constants.DEFAULT_LOCAL_STORAGE;
+const path = require('path');
+const ControllerOut = require("xtens-utils").ControllerOut;
+const DEFAULT_LOCAL_STORAGE = sails.config.xtens.constants.DEFAULT_LOCAL_STORAGE;
 
-let MainController = {
+const MainController = {
 
     /**
      * @method
      * @name getFileSystemManager
      * @description retrieve the FileSystem coordinates for the client
      */
-    getFileSystemStrategy: function(req, res) {
+    getFileSystemStrategy: function (req, res) {
         let conn = sails.hooks['persistence'].getFileSystem().defaultConnection;
         return res.json(conn);
     },
 
     /**
      * @method
+     * @name getAppUI
+     * @description ships the index.html file
+     */
+    getAppUI: function (req, res) {
+        return res.sendfile(path.resolve(__dirname, '..', '..', 'assets', 'bundles', 'index.html'));
+    },
+
+    /**
+     * @method
      * @name excuteCustomDataMangement
      */
-    executeCustomDataManagement: function(req, res) {
-        let error="";
+    executeCustomDataManagement: function (req, res) {
+        let error = "";
         let co = new ControllerOut(res);
         let key = req.param('dataType');
-        console.log("MainController.executeCustomDataManagement - executing customised function");
-        const ps = require("child_process").spawn(sails.config.xtens.customisedDataMap.get(key), {});
-        ps.stdout.on('data', (data) => {
-            console.log(`stdout: ${data}`);
-        });
+        let superType = req.param('superType');
+        let idProject = req.param('idProject');
+        let folder = req.param('folder');
+        let vcfData = req.param('vcfData');
+        let deafultOwner = req.param('owner');
+        const operator = TokenService.getToken(req);
+        let obj = { bearerToken: req.headers.authorization.split(' ')[1], idProject: idProject };
+        // let summary = {};
 
-        ps.stderr.on('data', (data) => {
-            console.log(`stderr: ${data}`);
-            error += data.toString();
-        });
+        return DataType.findOne({ superType: superType, project: idProject }).populate('parents').then((dataType) => {
+            if (dataType) {
+                let parentSubjectDt = _.find(dataType.parents, { model: 'Subject' });
+                obj.dataTypeId = dataType.id;
+                obj.parentSubjectDtId = parentSubjectDt ? parentSubjectDt.id : null;
+            }
+            folder = obj.folder = folder && folder != null && folder != "undefined" ? folder : undefined;
+            obj.owner = deafultOwner || operator.id;
+            obj.executor = operator.id;
+            obj.vcfData = vcfData;
+            sails.log("MainController.executeCustomDataManagement - executing customised function");
+            const ps = require("child_process").spawn(sails.config.xtens.customisedDataMap.get(key), [JSON.stringify(obj)], { stdio: ['ipc'] });
 
-        ps.on('close', (code) => {
-            console.log(`child process exited with code ${code}`);
+            // ps.stdout.on('data', (data) => {
+            //     console.log(data.toString());
+            //     sails.log(`stdout: ${data}`);
+            // });
 
-            let cmd = 'rm ' + DEFAULT_LOCAL_STORAGE + '/tmp/*';
-            require("child_process").exec(cmd, function(err, stdout, stderr) {
-                console.log('stdout: ' + stdout);
-                console.log('stderr: ' + stderr);
-                if ((code !== 0 && error)) {
-                    return co.error(error);
-                }
-                console.log("MainController.executeCustomDataManagement - all went fine!");
-                return res.ok();
+            ps.stderr.on('data', (data) => {
+                sails.log(`stderr: ${data}`);
+                console.log(data.toString());
+                error += data.toString();
             });
-        });
 
+            ps.on('message', (results) => {
+                sails.log(`results: ${results}`);
+                results.error && !error ? error = results.error : results;
+            });
+
+            ps.on('close', (code) => {
+                sails.log(`child process exited with code ${code}`);
+                let lastFolder = folder ? folder + '/' : '*';
+                let command = folder ? 'rm -r ' : 'rm ';
+                let cmd = command + DEFAULT_LOCAL_STORAGE + '/tmp/' + lastFolder;
+                require("child_process").exec(cmd, function (err, stdout, stderr) {
+                    if ((code !== 0 && error)) {
+                        sails.log('stderr: ' + stderr);
+                        // return co.error(error);
+                    }
+                    sails.log('stdout: ' + stdout);
+                    sails.log("MainController.executeCustomDataManagement - all went fine!");
+                    // return res.json(summary);
+                });
+            });
+            return res.json(obj);
+        });
     }
 
 };

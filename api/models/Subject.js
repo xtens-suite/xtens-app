@@ -26,19 +26,14 @@ var Subject= {
         personalInfo: {
             model: 'personalDetails',
             columnName: 'personal_info'
-        }, 
+        },
 
         // one-way association to DataType model
         type: {
             model: 'dataType'
         },
 
-        projects: {
-            collection: 'project',
-            via: 'subjects'
-        },
-
-        samples: {
+        childrenSample: {
             collection: 'sample',
             via: 'donor'
         },
@@ -62,6 +57,11 @@ var Subject= {
         metadata: {
             type: 'json',
             required: false
+        },
+
+        owner: {
+            model: 'operator',
+            columnName: 'owner'
         },
 
         createdAt: {

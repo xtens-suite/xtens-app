@@ -16,7 +16,7 @@ module.exports = {
         acronym: {
             columnName: 'acronym',
             type: 'string',
-            required: true,
+            required: true
         },
         // MIABIS-03
         name: {
@@ -49,6 +49,12 @@ module.exports = {
             columnName: 'contact_information',
             model: 'contactInformation'
         },
+
+        projects:{
+            collection:'project',
+            via:'biobanks'
+        },
+        
         // MIABIS-08
         description: {
             type: 'text'
@@ -65,4 +71,3 @@ module.exports = {
 
     }
 };
-

@@ -24,38 +24,59 @@
     "backbone": "~1.1.2",
     "backbone.stickit": "~0.9.2",
     "bootstrap": "~3.3.5",
-    "d3": "~3.4.13",
+    "bootstrap-select": "^1.12.2",
+    "d3": "~5.9.1",
+    "d3-tip": "https://github.com/VACLab/d3-tip.git",
     "datatables": "https://github.com/gicaz/DataTables.git#1.10.14-dev",
-    "datatables.net":"https://github.com/gicaz/Dist-DataTables.git#1.10.13",
-    "datatables-buttons": "~1.0.3",
+    "datatables.net": "https://github.com/gicaz/Dist-DataTables.git#1.10.13",
+    "context-menu": "https://github.com/swisnl/jQuery-contextMenu.git",
+    "datatables-buttons": "~1.4.2",
     "datatables-plugins": "~1.10.7",
     "datatables.net-fixedcolumns": "^3.2.2",
     "dropzone": "~4.0.1",
     "font-awesome": "~4.2.0",
-    "jquery": "~1.11.3",
+    "jquery": "~3.1.0",
     "jszip": "Stuk/jszip#~2.5.0",
     "lodash": "~3.10.0",
     "moment": "~2.8.3",
     "parsleyjs": "~2.0.5",
     "pikaday": "https://github.com/dbushell/Pikaday.git#~1.2.0",
     "select2": "https://github.com/ivaynberg/select2.git#~3.5.3",
-    "select2-bootstrap-css": "https://github.com/t0m/select2-bootstrap-css.git#~1.4.1",
     "Chart.js": "^1.0.2",
-    "mathjs": "^2.7.0"
+    "mathjs": "^2.7.0",
+    "select2-bootstrap-css": "https://github.com/t0m/select2-bootstrap-css.git",
+    "Sortable": "sortablejs#^1.5.1",
+    "remarkable-bootstrap-notify": "^3.1.3",
+    "JsBarcode": "jsbarcode#^3.11.0"
   },
   "exportsOverride": {
     "jquery": {
       "js": "dist/jquery.js"
     },
     "bootstrap": {
+      "fonts": "fonts/*",
       "less": "less",
-      "js": "js/**/*.js"
+      "js": "dist/js/bootstrap.js"
+    },
+    "bootstrap-select": {
+      "css": "dist/css/bootstrap-select.css",
+      "js": "dist/js/bootstrap-select.js"
+    },
+    "remarkable-bootstrap-notify": {
+      "js": "dist/bootstrap-notify.js"
+    },
+    "JsBarcode": {
+      "js": "dist/JsBarcode.all.js"
     },
     "underscore": {
       "js": "**/underscore.js"
     },
     "lodash": {
       "js": "lodash.js"
+    },
+    "context-menu": {
+      "js": "dist/jquery.contextMenu.js",
+      "css": "dist/jquery.contextMenu.css"
     },
     "backbone": {
       "js": "**/backbone.js"
@@ -81,6 +102,9 @@
     },
     "Chart.js": {
       "": "Chart.js"
+    },
+    "d3-tip": {
+      "": "d3-tip.js"
     },
     "sinon": {
       "js": "index.js"
@@ -120,5 +144,8 @@
     "chai-jquery": "~1.2.2",
     "lodash": "~2.4.1",
     "sinon": "http://sinonjs.org/releases/sinon-1.12.1.js"
+  },
+  "resolutions": {
+    "datatables": ">=1.10.15"
   }
 }

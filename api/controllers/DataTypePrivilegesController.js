@@ -6,14 +6,13 @@
  */
 /* jshint esnext: true */
 /* jshint node: true */
-/* globals _, Group, DataTypePrivileges, DataTypeService, QueryService */
+/* globals , _, DataTypePrivileges, DataTypeService, GroupService, TokenService */
 "use strict";
 const ControllerOut = require("xtens-utils").ControllerOut;
 const BluebirdPromise = require("bluebird");
 const Joi = BluebirdPromise.promisifyAll(require('joi'));
 const DataTypePrivilegeLevels = global.sails.config.xtens.constants.DataTypePrivilegeLevels;
 const actionUtil = require('sails/lib/hooks/blueprints/actionUtil');
-
 
 let DataTypePrivilegesController = {
 
@@ -22,7 +21,7 @@ let DataTypePrivilegesController = {
      * @method
      * @name create
      */
-    create: function(req, res) {
+    create: function (req, res) {
         let co = new ControllerOut(res);
         let validationSchema = {
             group: Joi.number().integer().positive().required(),
@@ -31,20 +30,19 @@ let DataTypePrivilegesController = {
         };
         Joi.validateAsync(req.body, validationSchema)
 
-        .then(function(validatedBody) {
-            return DataTypePrivileges.create(validatedBody);
-        })
+            .then(function (validatedBody) {
+                return DataTypePrivileges.create(validatedBody);
+            })
 
-        .then(function(result) {
-            res.set('Location', req.baseUrl + req.url + '/'  + result.id);
-            return res.json(201, result);
-        })
+            .then(function (result) {
+                res.set('Location', req.baseUrl + req.url + '/' + result.id);
+                return res.json(201, result);
+            })
 
-        .catch(function(err) {
-            sails.log.error("DataTypePrivilegesController.create - got some error while creating new data type privileges");
-            return co.error(err);
-        });
-
+            .catch(/* istanbul ignore next */ function (err) {
+                sails.log.error("DataTypePrivilegesController.create - got some error while creating new data type privileges");
+                return co.error(err);
+            });
     },
 
     /**
@@ -53,7 +51,7 @@ let DataTypePrivilegesController = {
      * @name findOne
      * @description - retrieve an existing dataTypePrivilege
      */
-    findOne: function(req, res) {
+    findOne: function (req, res) {
         let co = new ControllerOut(res);
         let id = req.param('id');
 
@@ -61,39 +59,38 @@ let DataTypePrivilegesController = {
 
         query = actionUtil.populateRequest(query, req);
 
-        query.then(function(result) {
+        query.then(function (result) {
             return res.json(result);
         })
 
-        .catch(function(error) {
-            return co.error(error);
-        });
-
+            .catch(/* istanbul ignore next */ function (err) {
+                sails.log.error(err);
+                return co.error(err);
+            });
     },
-
 
     /**
      * GET /dataTypePrivileges
      * @method
      * @name find
      */
-    find: function(req, res) {
+    find: function (req, res) {
         const co = new ControllerOut(res);
-        const query = QueryService.composeFind(req);
-        /*
+
         let query = DataTypePrivileges.find()
-        .where(QueryService.parseCriteria(req))
-        .limit(QueryService.parseLimit(req))
-        .skip(QueryService.parseSkip(req))
-        .sort(QueryService.parseSort(req));
-        query = QueryService.populateRequest(query, req);
-        */
-        query.then(function(data) {
+            .where(actionUtil.parseCriteria(req))
+            .limit(actionUtil.parseLimit(req))
+            .skip(actionUtil.parseSkip(req))
+            .sort(actionUtil.parseSort(req));
+
+        query = actionUtil.populateRequest(query, req);
+
+        query.then(function (data) {
             res.json(data);
         })
-        .catch(function(err) {
-            return co.error(err);
-        });
+            .catch(function (err) {
+                return co.error(err);
+            });
     },
 
     /**
@@ -101,7 +98,7 @@ let DataTypePrivilegesController = {
      * @method
      * @name update
      */
-    update: function(req, res) {
+    update: function (req, res) {
         let co = new ControllerOut(res);
         let validationSchema = {
             id: Joi.number().integer().positive().required(),
@@ -112,21 +109,20 @@ let DataTypePrivilegesController = {
             updatedAt: Joi.date()
         };
         let payload = req.body;
-        Joi.validateAsync(req.body, validationSchema)
+        Joi.validateAsync(payload, validationSchema)
 
-        .then(function(validatedBody) {
-            return DataTypePrivileges.update({id: validatedBody.id}, validatedBody);
-        })
+            .then(function (validatedBody) {
+                return DataTypePrivileges.update({ id: validatedBody.id }, validatedBody);
+            })
 
-        .then(function(result) {
-            return res.json(result);
-        })
+            .then(function (result) {
+                return res.json(result);
+            })
 
-        .catch(function(err) {
-            sails.log("DataTypePrivilegesController.update - got some error while updating existing data type privileges");
-            return co.error(err);
-        });
-
+            .catch(function (err) {
+                sails.log("DataTypePrivilegesController.update - got some error while updating existing data type privileges");
+                return co.error(err);
+            });
     },
 
     /**
@@ -135,19 +131,19 @@ let DataTypePrivilegesController = {
      * @name destroy
      * @description
      */
-    destroy: function(req, res) {
+    destroy: function (req, res) {
         let co = new ControllerOut(res);
         let id = req.param('id');
         DataTypePrivileges.destroy(id)
 
-        .then(function(results) {
-            return res.json({deleted: results && results.length});
-        })
+            .then(function (results) {
+                return res.json({ deleted: results && results.length });
+            })
 
-        .catch(function(err) {
-            return co.error(err);
-        });
-
+            .catch(/* istanbul ignore next */ function (err) {
+                sails.log.error(err);
+                return co.error(err);
+            });
     },
 
     /**
@@ -155,30 +151,31 @@ let DataTypePrivilegesController = {
      * @name edit
      * @description return all the info required for a privileges edit
      */
-    edit: function(req, res) {
+    edit: function (req, res) {
         let co = new ControllerOut(res);
+        const operator = TokenService.getToken(req);
+
         let params = req.allParams();
-        let getDataTypePrivileges = BluebirdPromise.promisify(DataTypeService.getDataTypePrivileges);
+        let getDataTypePrivilege = BluebirdPromise.promisify(DataTypeService.getDataTypePrivilege);
 
         return BluebirdPromise.props({
-            group: Group.findOne({id: params.groupId}),
+            // group: Group.findOne({id: params.groupId}),
+            groups: GroupService.getAsync(!operator.isWheel ? operator.adminGroups : null),
             // retrieve all dataTypes not yet authorized for this group
             dataTypes: DataTypeService.getDataTypesToCreateNewPrivileges(params.groupId),
-            dataType: DataTypeService.getDataTypeToEditPrivileges(params.id),
-            dataTypePrivileges: getDataTypePrivileges(params.id)
+            // dataType: DataTypeService.getDataTypeToEditPrivileges(params.id),
+            dataTypePrivilege: getDataTypePrivilege(params.id)
         })
 
+            .then(function (result) {
+                sails.log(result);
+                return res.json(result);
+            })
 
-        .then(function(result) {
-            sails.log(result);
-            return res.json(result);
-        })
-
-        .catch(function(err) {
-            sails.log(err);
-            return co.error(err);
-        });
-
+            .catch(/* istanbul ignore next */ function (err) {
+                sails.log.error(err);
+                return co.error(err);
+            });
     }
 
 };

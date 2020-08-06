@@ -1,10 +1,11 @@
 /* jshint node: true */
-/* globals _, __filename__, sails, Project, Subject, Data, isEmail, Operator,Passport, DataType, SubjectService, TokenService, QueryService, DataService */
+/* globals _, sails, Group, Operator, Passport, PassportService, TokenService */
 'use strict';
-var validator = require('validator');
-var crypto = require('crypto');
-var ValidationError = require('xtens-utils').Errors.ValidationError;
+let validator = require('validator');
+let crypto = require('crypto');
+const ValidationError = require('xtens-utils').Errors.ValidationError;
 let BluebirdPromise = require('bluebird');
+const RandExp = require('randexp');
 /**
  * Local Authentication Protocol
  *
@@ -33,7 +34,7 @@ exports.register = function(user, next) {
  */
 exports.createUser = function(_user, next) {
 
-    var password = _user.password;
+    let password = _user.password;
     delete _user.password;
   /*
      if (!email) {
@@ -51,6 +52,10 @@ exports.createUser = function(_user, next) {
      return next(new Error('No password was entered.'));
      } */
 
+    if (!PassportService.isStrongPassword(password)) {
+        return next(new ValidationError('The password does not meet the minimum security requirements. It must contain at least one lower case character, an uppercase character, a number, a special character (!@#$%^&*) and be at least 8 characters long'));
+    }
+
     Operator.create(_user, function(err, operator) {
         if (err) {
             if (err.code === 'E_VALIDATION') {
@@ -66,9 +71,9 @@ exports.createUser = function(_user, next) {
         }
 
     // Generating accessToken for API authentication
-    // var token = crypto.randomBytes(48).toString('base64');
-        var payload = operator.formatForTokenPayload(operator);
-        var token = TokenService.issue(_.isObject(payload) ? JSON.stringify(payload) : payload); // modified by Massi
+    // let token = crypto.randomBytes(48).toString('base64');
+        let payload = operator.formatForTokenPayload(operator);
+        let token = TokenService.issue(_.isObject(payload) ? JSON.stringify(payload) : payload); // modified by Massi
 
         Passport.create({
             protocol: 'local',
@@ -105,7 +110,7 @@ exports.createUser = function(_user, next) {
  * @param {Function} next
  */
 exports.connect = function(req, res, next) {
-    var user = req.user,
+    let user = req.user,
         password = req.param('password');
 
     Passport.findOne({
@@ -143,7 +148,7 @@ exports.connect = function(req, res, next) {
  * @param {Function} next
  */
 exports.login = function(req, identifier, password, next) {
-    var isEmail = validator.isEmail(identifier),
+    let isEmail = validator.isEmail(identifier),
         query = {};
 
     if (isEmail) {
@@ -154,17 +159,18 @@ exports.login = function(req, identifier, password, next) {
 
     Operator.findOne(query).populate('groups').exec(function(err, user) {
         if (err) {
-            return next({error:err,code:500});
+            err.code = 500;
+            return next(err,false);
         }
 
         if (!user) {
             if (isEmail) {
-                err = new Error('Error.Passport.Email.NotFound');
+                err = new ValidationError('Error.Passport.Email.NotFound');
             } else {
-                err = new Error('Error.Passport.Username.NotFound');
+                err = new ValidationError('Error.Passport.Username.NotFound');
             }
-
-            return next({error:err,code:401}, false);
+            err.code = 401;
+            return next(err, false);
         }
 
         Passport.findOne({
@@ -173,20 +179,27 @@ exports.login = function(req, identifier, password, next) {
         }, function(err, passport) {
             if (passport) {
                 passport.validatePassword(password, function(err, res) {
+                    let idGroups = _.map(user.groups, 'id');
                     if (err) {
                         return next(err);
                     }
 
                     if (!res) {
-                        err = new Error('Error.Passport.Password.Wrong');
-                        return next({error:err,code:401}, false);
+                        err = new ValidationError('User Authentication Failed');
+                        err.code = 401;
+                        return next(err, false);
                     } else {
-                        return next(null, user);
+                        Group.find(idGroups).populate('projects').exec(function(err, groups) {
+                            _.forEach(groups,function (gr,key) {
+                                groups[key] = gr.toJSON();
+                            });
+                            return next(null, {user: user, groups: groups});
+                        });
                     }
                 });
             } else {
-        // next line commented out by Massi
-        // req.flash('error', 'Error.Passport.Password.NotSet');
+                  // next line commented out by Massi
+                  // req.flash('error', 'Error.Passport.Password.NotSet');
                 return next({err:err,code:500}, false);
             }
         });
@@ -202,49 +215,149 @@ exports.login = function(req, identifier, password, next) {
  * matching then update passport with the new password.
  *
  * @param {Object}   param
- * @param {integer}  idOperator
  * @param {Function} next
  */
 /*eslint no-unreachable: 0*/
-exports.updatePassword = function(param, idOperator, next) {
+exports.updatePassword = function(param, next) {
 
-    var password = param.oldPass;
-    var newPass = param.newPass;
-    var cnewPass = param.cnewPass;
+    let identifier = param.username,
+        password = param.oldPass,
+        newPass = param.newPass,
+        cnewPass = param.cnewPass;
 
     if (password === newPass) {
-        var err = new ValidationError('New Password and Old Password cannot be the same');
+        let err = new ValidationError('New Password and Old Password cannot be the same');
         return next(err, false);
     }
     // control if newPass and confirmNewPass match
     if (newPass !== cnewPass) {
-        var errn = new ValidationError('New Passwords do not match');
+        let errn = new ValidationError('New Passwords do not match');
         return next(errn, false);
     }
 
-    Passport.findOne({
-        protocol: 'local',
-        user: idOperator
-    })
-    .then(function(passport) {
+    if (!PassportService.isStrongPassword(newPass)) {
+        return next(new ValidationError('The password does not meet the minimum security requirements. It must contain at least one lower case character, an uppercase character, a number, a special character (!@#$%^&*) and be at least 8 characters long'));
+    }
+
+
+    let isEmail = validator.isEmail(identifier),
+        query = {};
+
+    if (isEmail) {
+        query.email = identifier;
+    } else {
+        query.login = identifier;
+    }
+
+    Operator.findOne(query).populate('groups').exec(function(err, user) {
+        if (err) {
+            err.code = 500;
+            return next(err,false);
+        }
+
+        if (!user) {
+            if (isEmail) {
+                err = new ValidationError('Error.Passport.Email.NotFound');
+            } else {
+                err = new ValidationError('Error.Passport.Username.NotFound');
+            }
+            err.code = 401;
+            return next(err, false);
+        }
+
+        Passport.findOne({
+            protocol: 'local',
+            user: user.id
+        })
+        .then(function(passport) {
 
       //Validate the old password inserted by user
-        var passValidatePassword = BluebirdPromise.promisify(passport.validatePassword);
 
-        return passValidatePassword.call(passport, password, function(err,res){
-            if (!res) {
-                err = new ValidationError('Old Password does not match');
-                return next(err, false);
-            }
+
+            let passValidatePassword = BluebirdPromise.promisify(passport.validatePassword);
+
+            return passValidatePassword.call(passport, password, function(err,res){
+                if (!res) {
+                    err = new ValidationError('Old Password does not match');
+                    return next(err, false);
+                }
           //If New Passwords match, update passport with the new password
+                passport.password = newPass;
+
+                return Passport.update({id: passport.id}, passport)
+                .then(function() {
+                    return Operator.update({id: user.id}, {lastPswdUpdate: Date(), resetPswd: false})
+                    .then(function() {
+                        return next(null, true);
+                    });
+                });
+            });
+
+        }).catch(/* istanbul ignore next */ function(err) {
+            sails.log.error(err);
+            return next(err, false);
+        });
+    });
+};
+
+/**
+ * reset user Password
+ *
+ * Attempts to find a local Passport associated with the user. If a Passport is
+ * found, its password isupdated with a random string based on reg expression.
+ *
+ * @param {Object}   param
+ * @param {Function} next
+ */
+/*eslint no-unreachable: 0*/
+exports.resetPassword = function(param, next) {
+
+    let identifier = param.username;
+
+    let isEmail = validator.isEmail(identifier),
+        query = {};
+
+    if (isEmail) {
+        query.email = identifier;
+    } else {
+        query.login = identifier;
+    }
+
+    Operator.findOne(query).populate('groups').exec(function(err, user) {
+        if (err) {
+            err.code = 500;
+            return next(err,false);
+        }
+
+        if (!user) {
+            if (isEmail) {
+                err = new ValidationError('Error.Passport.Email.NotFound');
+            } else {
+                err = new ValidationError('Error.Passport.Username.NotFound');
+            }
+            err.code = 401;
+            return next(err, false);
+        }
+
+        Passport.findOne({
+            protocol: 'local',
+            user: user.id
+        })
+        .then(function(passport) {
+            var newPass = new RandExp(/([a-z][A-Z][^\W0-9:_]{4})[!@#\$%\^&\*][0-9]/).gen();
             passport.password = newPass;
 
             return Passport.update({id: passport.id}, passport)
-            .then(function(res) {
-                return next(null, true);
+            .then(function() {
+                return Operator.update({id: user.id}, {lastPswdUpdate: Date(), resetPswd: true})
+                .then(function() {
+                    return next(null, newPass);
+                });
             });
+
+        }).catch(/* istanbul ignore next */ function(err) {
+            sails.log.error(err);
+            return next(err, false);
         });
-    }).catch(function(err) {
-        return next(err, false);
     });
 };

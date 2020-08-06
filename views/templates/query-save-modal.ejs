@@ -1,0 +1,27 @@
+<div class="modal fade">
+  <div class="modal-dialog">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h4 class="modal-title"><%=__('default-title') %></h4>
+      </div>
+
+      <div class="modal-body">
+
+        <div class="row text-center">
+          <div class="col-md-offset-2 col-md-8">
+            <div class="form-inline" style="margin-bottom: 5px;">
+              <label for=""><%= __('query-name')%> </label>
+              <input type="text" class="form-control query-name">
+            </div>
+            <small id="inputHelpBlock" class="form-text text-muted text-warning" hidden><%= __('name-yet-present')%> </small>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button disabled type="button" class="btn btn-success query-confirm-save"><%= __('save') %></button>
+        </div>
+
+      </div>
+    </div>
+  </div>

@@ -1,25 +1,28 @@
 <h1><%= __("data-manager") %></h1>
 <h2><%= data.id ? __("update-data") : __("create-data") %></h2>
 <div id="content">
-    <form class="form-horizontal edit-data-form" role="form" data-parsley-trigger="focusout" data-parsley-validate>
+    <form class="form-horizontal edit-data-form" role="form" data-parsley-focus="first" data-parsley-trigger="focusout" data-parsley-validate>
         <div class="container data-header-cnt">
             <div id="data-header-row" class="row data-header-row">
                 <div id="data-header" class="data-header-col">
                     <div class="form-group">
-                        <% if (data.get("parentSubject")) {%>
-                        <label for="parentSubject" class="data-label"><%= __("subject") %>: </label>
-                        <span class="data-span"><%= data.get("parentSubject").code %></span>
+                        <% if (data.get("parentSubject") && data.get("parentSubject").length > 0) {%>
+                        <label for="parentSubject" class="data-label"><%= data.get("parentSubject").length === 1 ? __("subject") : __("subjects")  %>: </label>
+                        <span class="data-span"><%= _.map(data.get("parentSubject"), "code").join(",") %></span>
                         <%} %>
-                        <% if (data.get("parentSample")) {%>
-                        <label for="parentSample" class="data-label"><%= __("sample") %>: </label>
-                        <span class="data-span"><%= data.get("parentSample").biobankCode %></span>
+                        <% if (data.get("parentSample") && data.get("parentSample").length > 0) {%>
+                        <label for="parentSample" class="data-label"><%= data.get("parentSample").length === 1 ?  __("sample") :  __("samples") %>: </label>
+                        <span class="data-span"><%= _.map(data.get("parentSample"), "biobankCode").join(",") %></span>
                         <%} %>
                     </div>
                     <div class="form-group">
-                        <label for="dataType" class="data-label"><%= __("select-a-data-type") %></label>
+                        <label for="data-type" class="data-label"><%= __("select-a-data-type") %></label>
                         <div class="data-input-div">
-                            <select class="form-control" id="dataType" name="dataType" required>
-                            </select>
+                            <select class="form-control" id="data-type" name="data-type" required></select>
+                        </div>
+                        <label for="owner" class="col-md-2 data-label"><%= __("owner") %></label>
+                        <div class="data-input-div">
+                            <select disabled class="form-control" id="owner" name="owner" required></select>
                         </div>
                     </div>
                     <div class="form-group metadataform-group">

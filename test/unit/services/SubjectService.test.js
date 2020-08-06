@@ -52,13 +52,13 @@ describe('SubjectService', function() {
                 schema: {"header": {}, "body": []},
                 classTemplate: "SUBJECT"
             },
-            projects: [{
-                name: "MIMAS",
-                description: "MIMAS",
-                id: 1,
-                createdAt: "2015-09-08T10:13:32.000Z",
-                updatedAt: "2015-09-08T10:13:32.000Z"
-            }],
+            // projects: [{
+            //     name: "MIMAS",
+            //     description: "MIMAS",
+            //     id: 1,
+            //     createdAt: "2015-09-08T10:13:32.000Z",
+            //     updatedAt: "2015-09-08T10:13:32.000Z"
+            // }],
             createdAt: new Date(),
             updatedAt: new Date()
         };
@@ -69,27 +69,35 @@ describe('SubjectService', function() {
             console.log("Simplified Subject: ");
             console.log(populatedSubject);
             expect(populatedSubject.type).to.equals(testId);
-            expect(populatedSubject.projects).to.eql([1]);
+            // expect(populatedSubject.projects).to.eql([1]);
         });
 
     });
 
     describe("#validate", function() {
 
-        it("should correctly validate a valid subject using its schema", function() {
+        it("should correctly validate a valid subject using its schema", function(done) {
             var subject = _.cloneDeep(fixtures.subject[0]);
             var dataType = _.cloneDeep(_.findWhere(fixtures.datatype, {id: subject.type}));
-            var res = SubjectService.validate(subject, true, dataType);
-            expect(res.error).to.be.null;
-            expect(_.omit(res.value, 'personalInfo')).to.eql(_.omit(subject, 'personalInfo'));
+            return SubjectService.validate(subject, true, dataType).then(function (res) {
+
+                expect(res.error).to.be.null;
+                expect(_.omit(res.value, 'personalInfo')).to.eql(_.omit(subject, 'personalInfo'));
+                done();
+                return;
+            });
         });
 
-        it("should correctly validate a valid subject with complete metadata using its schema", function() {
+        it("should correctly validate a valid subject with complete metadata using its schema", function(done) {
             var subject = _.cloneDeep(fixtures.subject[1]);
             var dataType = _.cloneDeep(_.findWhere(fixtures.datatype, {id: subject.type}));
-            var res = SubjectService.validate(subject, true, dataType);
-            expect(res.error).to.be.null;
-            expect(_.omit(res.value, 'personalInfo')).to.eql(_.omit(subject, 'personalInfo'));
+            return SubjectService.validate(subject, true, dataType).then(function (res) {
+
+                expect(res.error).to.be.null;
+                expect(_.omit(res.value, 'personalInfo')).to.eql(_.omit(subject, 'personalInfo'));
+                done();
+                return;
+            });
         });
 
     });

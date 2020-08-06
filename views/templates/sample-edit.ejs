@@ -1,7 +1,8 @@
 <h1><%= __("sample-manager") %></h1>
-<h2><%= data.id ? __("create-sample") : __("create-sample") %></h2>
+<h2><%= data.id ? __("edit-sample") : __("create-sample") %></h2>
 <div id="content">
-    <form class="form-horizontal edit-sample-form" role="form" data-parsley-trigger="focusout" data-parsley-validate>
+    <form class="form-horizontal edit-sample-form" role="form" data-parsley-focus="first"
+        data-parsley-trigger="focusout" data-parsley-validate>
         <div class="container data-header-cnt">
             <div id="data-header-row" class="row data-header-row">
                 <div id="data-header" class="data-header-col">
@@ -14,28 +15,40 @@
                         </div>
                     </div>
                     <div class="form-group metadataform-group">
-                        <label for="biobank-code" class="data-label"><%= __('biobank-code') %></label>
+                        <label for="type" class="data-label"><%= __('data-type') %></label>
                         <div class="data-input-div">
+                            <select class="form-control" id="data-type" name="data-type" required></select>
+                        </div>
+                    </div>
+                    <div class="form-group metadataform-group">
+                        <label for="biobank-code" class="data-label"><%= __('biobank-code') %></label>
+                        <div class="data-input-div" style="width:auto;">
                             <input text class="form-control" id="biobank-code" name="biobank-code"></input>
                         </div>
-                    </div>
-                    <div class="form-group metadataform-group">
-                        <label for="type" class="data-label"><%= __('type') %></label>
-                        <div class="data-input-div">
-                            <select class="form-control" id="type" name="type"></select>
+                        <div class="input-group-append">
+                            <span class="input-group-text barcode-cnt" data-toggle="tooltip" title="Print Barcode"
+                                id="basic-addon2"><img style="height: 6vh; cursor:pointer;" id="barcode"></span>
                         </div>
                     </div>
-                    <% if (data.get("donor")) {%>
                     <div class="form-group metadataform-group">
-                        <label for="donor" class="data-label"><%= __('donor') %></label>
-                        <span class="data-span"><%= data.get("donor").code %></span>
-                        <button id="editDonor" class="btn btn-danger"><%= __("edit-donor") %></button>
+                        <label for="owner" class="col-md-2 data-label"><%= __("owner") %></label>
+                        <div class="data-input-div">
+                            <select disabled class="form-control" id="owner" name="owner" required></select>
+                        </div>
                     </div>
-                    <%} %>
-                    <% if (data.get("parentSample")) {%>
                     <div class="form-group metadataform-group">
-                        <label for="parent-sample" class="data-label"><%= __('parent-sample') %></label>
-                        <span class="data-span"><%= data.get("parentSample").biobankCode %></span>
+                        <label for="donor"
+                            class="data-label"><%= data.get("donor") && data.get("donor").length > 0 ? __('donor') : __('donors') %></label>
+                        <span
+                            class="data-span"><%= data.get("donor") && data.get("donor").length > 0 ? _.map(data.get("donor"), "code").join(",") : __("select-a-type") %></span>
+                        <button disabled id="editDonor" class="btn btn-danger"><%= __("edit-donor") %></button>
+                    </div>
+                    <% if (data.get("parentSample") && data.get("parentSample").length > 0) {%>
+                    <div class="form-group metadataform-group">
+                        <label for="parent-sample"
+                            class="data-label"><%= data.get("parentSample").length === 1 ?  __("parent-sample") :  __("parent-samples") %>
+                        </label>
+                        <span class="data-span"><%= _.map(data.get("parentSample"), "biobankCode").join(",") %></span>
                     </div>
                     <%} %>
                     <div class="form-group metadataform-group">
@@ -56,10 +69,12 @@
 
         <div id="buttonbardiv" class="row text-center">
             <div class="btn-group btn-group-margin">
-                <input type="submit" id="save" class="btn btn-primary" data-target-route="samples" value="<%=__('save') %>" >
+                <input type="submit" id="save" class="btn btn-primary" data-target-route="samples"
+                    value="<%=__('save') %>">
                 <% if (data.id) { %>
-                    <input type="hidden" id="id" name="id" value="<%= data.id %>" />
-                    <button data-data-id="<%= data.id %>" data-target-route="samples" class="btn btn-danger delete"><%= __("delete") %></button>
+                <input type="hidden" id="id" name="id" value="<%= data.id %>" />
+                <button data-data-id="<%= data.id %>" data-target-route="samples"
+                    class="btn btn-danger delete"><%= __("delete") %></button>
                 <%} %>
             </div>
         </div>
