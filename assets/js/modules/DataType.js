@@ -110,7 +110,7 @@
             }
             $('#parents').on('change', function () {
                 if (that.model.get('model') === "Sample") {
-                    // var selectedParents = _.filter(that.existingDataTypes, (d) => _.indexOf($('#parents').val().map(Number), d.id) >= 0);
+                    // var selectedParents = _.filter(that.existingDataTypes, function (d) { return _.indexOf($('#parents').val().map(Number), d.id) >= 0; });
                     if (_.indexOf($('#parents').val().map(Number), that.idDataType) >= 0) {
                         $('.noparent-container').css("display", "");
                     } else {

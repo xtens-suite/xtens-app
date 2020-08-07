@@ -689,7 +689,7 @@
 
                             // return "<strong>Value:</strong> <span style='color:#4476b5'>" + d.data.value + "</span> - " + Math.floor(d.data.value / totalData * 100) + "%";
                             if (d.data.metadata !== undefined) {
-                                var fields = new SuperType.Model(that.dataTypes.filter(d=>d.name.toLowerCase() === "clinical information")[0].superType).getFlattenedFields();
+                                var fields = new SuperType.Model(that.dataTypes.filter(function (d) { return d.name.toLowerCase() === "clinical information"; })[0].superType).getFlattenedFields();
                                 var id = d.data.name.split("_")[1];
                                 content = "<b id='tip-subj-title' style='color:" + color(d.data.type) + ";'>&nbsp;" + d.data.type + '&nbsp;</b> <br /><br />';
                                 if (d.data.biobankCode) {
