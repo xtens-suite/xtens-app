@@ -579,22 +579,26 @@
                     $('#project-dest').selectpicker('show');
                     if (xtens.session.get("activeProject") != "all") {
                         $('#project-dest').selectpicker('val', _.find(xtens.session.get('projects'), function (p) { return p.name === xtens.session.get('activeProject'); }).id);
+                        $('#confirm-duplication').prop('disabled', false);
+                        $('#confirm-duplication').addClass('btn-success');
                     }
-                    $('#project-dest').on('change.bs.select', function () {
-                        var projectDest = $('#project-dest').val();
+                    $('#project-dest').selectpicker('refresh');
 
+                    // var projectDest = $('#project-dest').val();
+                    $('#confirm-duplication').on('click.bs.button', function (e) {
+                        e.preventDefault();
+
+                        modal.hide();
+                        that.$modal.one('hidden.bs.modal', function (e) {
+                            modal.remove();
+                            router.navigate('#/datatypes/new?duplicate=' + dataTypeSelected + '&projectDest=' + $('#project-dest').val(), { trigger: true });
+                        });
+                    });
+
+                    $('#project-dest').on('change.bs.select', function () {
                         // $('#confirm-duplication').text( i18n('confirm') + " " + e.target.value);
                         $('#confirm-duplication').prop('disabled', false);
                         $('#confirm-duplication').addClass('btn-success');
-                        that.$('#confirm-duplication').on('click.bs.button', function (e) {
-                            e.preventDefault();
-
-                            modal.hide();
-                            that.$modal.one('hidden.bs.modal', function (e) {
-                                modal.remove();
-                                router.navigate('#/datatypes/new?duplicate=' + dataTypeSelected + '&projectDest=' + projectDest, { trigger: true });
-                            });
-                        });
                     });
                 });
             });

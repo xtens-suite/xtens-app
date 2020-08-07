@@ -14,6 +14,7 @@
     var PersonalDetails = xtens.module("personaldetails");
     var Classes = xtens.module("xtensconstants").DataTypeClasses;
     var sexOptions = xtens.module("xtensconstants").SexOptions;
+    var SuperType = xtens.module("supertype");
 
     var MISSING_VALUE_ALERT = true;
 
@@ -688,6 +689,7 @@
 
                             // return "<strong>Value:</strong> <span style='color:#4476b5'>" + d.data.value + "</span> - " + Math.floor(d.data.value / totalData * 100) + "%";
                             if (d.data.metadata !== undefined) {
+                                var fields = new SuperType.Model(that.dataTypes.filter(d=>d.name.toLowerCase() === "clinical information")[0].superType).getFlattenedFields();
                                 var id = d.data.name.split("_")[1];
                                 content = "<b id='tip-subj-title' style='color:" + color(d.data.type) + ";'>&nbsp;" + d.data.type + '&nbsp;</b> <br /><br />';
                                 if (d.data.biobankCode) {
@@ -707,10 +709,12 @@
 
                                     _.mapValues(orderedMetadataByKey, function (m, key) {
                                         if (index < 9) {
-                                            dato += key.replace("_", " ").toUpperCase() + ": ";
-                                            m.values ? dato += m.values.length + " Values" : dato += m.value;
-                                            m.unit ? dato += " " + m.unit + "<br />" : dato += "<br />";
-                                            added++;
+                                            if (fields.findIndex(function (f) { return f.formattedName === key; }) > -1) {
+                                                dato += key.replace("_", " ").toUpperCase() + ": ";
+                                                m.values ? dato += m.values.length + " Values" : dato += m.value;
+                                                m.unit ? dato += " " + m.unit + "<br />" : dato += "<br />";
+                                                added++;
+                                            }
                                         }
                                         index++;
                                     });
