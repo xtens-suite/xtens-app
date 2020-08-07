@@ -2,10 +2,10 @@
   <div class="input-group-addon">
     <%= __("query-selector") %>
   </div>
-  <select class="form-control query-selector selectpicker" data-live-search="true" title="<%=__('select-a-query')%>">
+  <select class="form-control query-selector selectpicker" title="<%=__('select-a-query')%>">
     <%_.each(queries, function(obj) {
       if(obj.name && obj.query){%>
-      <option value='<%= obj.query  %>'><%= obj.name %></option>
+      <option data-tokens='<%= obj.name  %>' value='<%= obj.query  %>'><%= obj.name %></option>
       <%}%>
     <%}) %>
   </select>

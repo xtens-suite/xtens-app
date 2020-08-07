@@ -98,7 +98,8 @@
     FileManager.Views.Dropzone = Backbone.View.extend({
 
         events: {
-            "click #delete-file": "openDialogDeleteFile"
+            "click #delete-file": "openDialogDeleteFile",
+            "click #download-file": "downloadFileContent"
         },
 
         tagName: 'div',
@@ -217,6 +218,85 @@
                 }
             });
 
+        },
+
+                /**
+         * @method
+         * @name downloadFileContent
+         * @param{Integer} id - the ID of the dataFile on XTENS
+         * @description download a file from the remote file storage given its XTENS ID
+         * @link http://stackoverflow.com/questions/16086162/handle-file-download-from-ajax-post
+         */
+        downloadFileContent: function(ev) {
+            ev.preventDefault();
+
+            var that = this;
+            var xhr = new XMLHttpRequest();
+            var idFile = ev.currentTarget.getAttribute('value');
+            var url = 'fileContent?id=' + idFile;
+            xhr.open('GET', url, true);
+            xhr.responseType = 'arraybuffer';
+
+            xhr.onload = function() {
+                var fileName = "", disposition, fileNameRegex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/, matches, type, blob, windowURL, downloadURL, a;
+                // response is OK
+                if (this.status === 200) {
+                    fileName = "";
+                    disposition = xhr.getResponseHeader('Content-Disposition');
+                    if (disposition && disposition.indexOf('attachment') !== -1) {
+                        matches = fileNameRegex.exec(disposition);
+                        if (matches != null && matches[1]) {
+                            fileName = matches[1].replace(/['"]/g, '');
+                        }
+                    }
+                    type = xhr.getResponseHeader('Content-Type');
+                    blob = new Blob([this.response], {type: type});
+
+                    if (typeof window.navigator.msSaveBlob !== 'undefined') {
+                        // IE workaround for "HTML7007: One or more blob URLs were revoked by closing the blob for which they were created.
+                        // These URLs will no longer resolve as the data backing the URL has been freed."
+                        window.navigator.msSaveBlob(blob, fileName);
+                    }
+                    else {
+                        windowURL = window.URL || window.webkitURL;
+                        downloadURL = windowURL.createObjectURL(blob);
+
+                        if (fileName) {
+                            // use HTML5 a[download] attribute to specify filename
+                            a = document.createElement("a");
+                            if (typeof a.download === 'undefined') {
+                                window.location = downloadURL;
+                            }
+                            else {
+                                a.href = downloadURL;
+                                a.download = fileName;
+                                document.body.appendChild(a);
+                                a.click();
+                            }
+                        }
+
+                        else {
+                            window.location = downloadURL;
+                        }
+                        setTimeout(function () { windowURL.revokeObjectURL(downloadURL); }, 100); // cleanup
+                    }
+                }
+                // response is serverError
+                else {
+                    console.log("DataFile.Views.List - downloadFileContent: could not download file");
+                    that.modal = new ModalDialog({
+                        title: i18n('could-not-download-file'),
+                        body: xhr.statusText,
+                        type: "delete"
+                    });
+                    that.$fileModal.append(that.modal.render().el);
+                    that.modal.show();
+                }
+            };
+
+            xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+            xhr.setRequestHeader('Authorization', 'Bearer ' + xtens.session.get("accessToken"));
+            xhr.send();
         },
 
         /**
