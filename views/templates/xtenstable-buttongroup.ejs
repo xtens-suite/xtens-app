@@ -51,6 +51,7 @@
   <button type="button" class="btn btn-xs btn-default xtenstable-derivedsamples"><%= __('derived-samples') %></button>
   <%}%>
 </div>
+<% if(hasDataChildren){ %>
 <button type="button" class="btn btn-xs btn-default xtenstable-deriveddata"><%= __('derived-data') %></button>
 <%}%>
 <% if(dataTypeModel === "Subject"){ %>
