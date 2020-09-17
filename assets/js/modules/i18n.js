@@ -61,6 +61,8 @@
         "data-type": "Data Type",
         "name": "Name",
         "file-upload": "File Upload",
+        "skip-paging": "Skip Paging",
+        "skip-paging-tooltip": "If selected data will be skipped in 'Data Management section'",
         "yes": "YES",
         "no": "NO",
         "biobank-prefix": "Biobank Prefix",

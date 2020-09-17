@@ -125,7 +125,8 @@
 
         bindings: {
             '#st-name': 'name',
-            '#uri': 'uri'
+            '#uri': 'uri',
+            '#skipPaging': 'skipPaging'
         },
 
         render: function () {

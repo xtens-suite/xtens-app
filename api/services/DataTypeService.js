@@ -193,6 +193,7 @@ let DataTypeService = {
             name: Joi.string().trim(),
             uri: Joi.string().trim(),
             schema: Joi.object().required(),
+            skipPaging: Joi.boolean().default(false),
             createdAt: Joi.date(),
             updatedAt: Joi.date()
         };
