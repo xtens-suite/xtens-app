@@ -179,17 +179,23 @@ const coroutines = {
 
     edit: BluebirdPromise.coroutine(function * (req, res) {
         const operator = TokenService.getToken(req);
-        const id = req.param("id"); const code = req.param("code"); const project = req.param("project");
+        const params = req.allParams();
+        const id = req.param("id");
+        const code = req.param("code");
+        const project = req.param("project");
         sails.log.info("SubjectController.edit - Decoded ID is: " + operator.id);
 
         const payload = yield BluebirdPromise.props({
             subject: SubjectService.getOneAsync(id, code),
             dataTypes: crudManager.getDataTypesByRolePrivileges({
                 idOperator: operator.id,
+                idDataTypes: params.idDataTypes,
+                parentDataType: params.parentDataType,
                 model: SUBJECT,
                 project: project,
                 privilegeLevel: EDIT
-            })
+            }),
+            parentSubject: SubjectService.getOneAsync(params.parentSubject, params.parentSubjectCode)
         });
 
         if (_.isEmpty(payload.dataTypes)) { throw new PrivilegesError(`Authenticated user has not edit privileges on any subject type`); }
@@ -400,11 +406,13 @@ module.exports = {
                     })) {
                         if (privilege.privilegeLevel === VIEW_OVERVIEW) { row.metadata = {}; }
                         if (row.parent_data !== null && _.find(idRows, function (i) { return i === row.parent_data; })) {
-                            return { 'source': row.parent_data, 'target': row.id, 'name': row.id, 'type': row.type, 'biobankCode': row.biobankcode, 'metadata': row.metadata, privilege: privilege.privilegeLevel };
+                            return { 'source': row.parent_data, 'target': row.id, 'name': row.id, 'type': row.type, 'typeId': row.typeId, 'biobankCode': row.biobankcode, 'metadata': row.metadata, privilege: privilege.privilegeLevel };
                         } else if (row.parent_sample !== null && _.find(idRows, function (i) { return i === row.parent_sample; })) {
-                            return { 'source': row.parent_sample, 'target': row.id, 'name': row.id, 'type': row.type, 'biobankCode': row.biobankcode, 'metadata': row.metadata, privilege: privilege.privilegeLevel };
+                            return { 'source': row.parent_sample, 'target': row.id, 'name': row.id, 'type': row.type, 'typeId': row.typeId, 'biobankCode': row.biobankcode, 'metadata': row.metadata, privilege: privilege.privilegeLevel };
+                        } else if (row.parent_subject !== null && _.find(idRows, function (i) { return i === row.parent_subject; })) {
+                            return { 'source': row.parent_subject, 'target': row.id, 'name': row.id, 'type': row.type, 'typeId': row.typeId, 'biobankCode': row.biobankcode, 'metadata': row.metadata, privilege: privilege.privilegeLevel };
                         } else {
-                            return { 'source': 'Patient', 'target': row.id, 'name': row.id, 'type': row.type, 'biobankCode': row.biobankcode, 'metadata': row.metadata, privilege: privilege.privilegeLevel };
+                            return { 'source': 'Patient', 'target': row.id, 'name': row.id, 'type': row.type, 'typeId': row.typeId, 'biobankCode': row.biobankcode, 'metadata': row.metadata, privilege: privilege.privilegeLevel };
                             // console.log(privilege);
                         }
                     }

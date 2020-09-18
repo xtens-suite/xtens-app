@@ -64,6 +64,16 @@ var Subject= {
             columnName: 'owner'
         },
 
+        parentSubject: {
+            collection:'subject',
+            via: 'childrenSubject'
+        },
+
+        childrenSubject: {
+            collection:'subject',
+            via: 'parentSubject'
+        },
+
         createdAt: {
             type: 'datetime',
             columnName: 'created_at'

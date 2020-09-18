@@ -60,6 +60,7 @@
         "update-data-type": "Update data type",
         "data-type": "Data Type",
         "name": "Name",
+        "skip-paging": "Skip Paging",
         "file-upload": "File Upload",
         "skip-paging": "Skip Paging",
         "skip-paging-tooltip": "If selected data will be skipped in 'Data Management section'",
@@ -258,10 +259,13 @@
         "subject-graph": "Subject Graph",
         "select-a-patient": "Select a Patient",
         "search-patient": "Search Patient",
+        "new-derivative-subject": "New Derivative Subject",
         /* views/templates/subject-edit.ejs */
         "subject-manager": "Subject Manager",
         "create-subject": "Create Subject",
         "update-subject": "Update Subject",
+        "parent-subject": "Parent Subject",
+        "parent-subjects": "Parent Subject",
         "add-personal-details": "Add Personal Details",
         "subject-deleted": "Subject Deleted",
         "subject-will-be-permanently-deleted-are-you-sure": "Subject will be permanently deleted. Are you sure?",
@@ -366,6 +370,7 @@
         "please-check-it-and-submit-it-again": "Please check it and submit it again.",
         /* views/templates/xtenstable-buttongroup.ejs  */
         "files": "Files",
+        "derived-subjects": "Derived Subjects",
         "derived-samples": "Derived Samples",
         "derived-data": "Derived Data",
         /* views/templates/xtenstable-buttongroup.ejs  */

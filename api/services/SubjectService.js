@@ -42,6 +42,8 @@ const coroutines = {
             // projects: Joi.array().allow(null),
             samples: Joi.array().allow(null),
             childrenData: Joi.array().allow(null),
+            childrenSubject: Joi.array().allow(null),
+            parentSubject: Joi.array().allow(null),
             tags: Joi.array().allow(null),
             notes: Joi.string().allow(null),
             metadata: Joi.object().required(),

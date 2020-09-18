@@ -26,22 +26,22 @@ const coroutines = {
      * @param{Integer - Array} dataTypesId
      * @description coroutine for get DataTypes' privileges
      */
-    getDataTypePrivilegeLevel: BluebirdPromise.coroutine(function *(groupsId, dataTypesId) {
-        if ( typeof dataTypesId === 'undefined' || dataTypesId === null  ) { return BluebirdPromise.resolve(undefined);}
-        if ( typeof groupsId === 'undefined' || groupsId === null  ) { return BluebirdPromise.resolve(undefined);}
+    getDataTypePrivilegeLevel: BluebirdPromise.coroutine(function * (groupsId, dataTypesId) {
+        if (typeof dataTypesId === 'undefined' || dataTypesId === null) { return BluebirdPromise.resolve(undefined); }
+        if (typeof groupsId === 'undefined' || groupsId === null) { return BluebirdPromise.resolve(undefined); }
         sails.log("getDataTypePrivilegeLevel on Datatype: ", dataTypesId, ". Groups: ", groupsId);
 
-        const groups = yield Group.find( {id : groupsId} ).populate('projects');
-        let projectsGroups = _.map(groups, function (g) { return _.map(g.projects,'id'); });
+        const groups = yield Group.find({ id: groupsId }).populate('projects');
+        let projectsGroups = _.map(groups, function (g) { return _.map(g.projects, 'id'); });
         projectsGroups = _.uniq(_.flatten(projectsGroups));
 
-        const projects = yield Project.find( {id : projectsGroups} ).populate('dataTypes');
-        let dataTypesProjects = _.map(projects, function (p) { return _.map(p.dataTypes,'id'); });
+        const projects = yield Project.find({ id: projectsGroups }).populate('dataTypes');
+        let dataTypesProjects = _.map(projects, function (p) { return _.map(p.dataTypes, 'id'); });
         dataTypesProjects = _.uniq(_.flatten(dataTypesProjects));
 
-        const dataTypePrivileges = yield DataTypePrivileges.find({ where: {group: groupsId, dataType: dataTypesId} });
-        let results = _.map(dataTypePrivileges,function (dtp) {
-            if( _.findWhere(dataTypesProjects, dtp.dataType)){
+        const dataTypePrivileges = yield DataTypePrivileges.find({ where: { group: groupsId, dataType: dataTypesId } });
+        let results = _.map(dataTypePrivileges, function (dtp) {
+            if (_.findWhere(dataTypesProjects, dtp.dataType)) {
                 return dtp;
             }
         });
@@ -49,60 +49,61 @@ const coroutines = {
         return results.length === 1 ? results[0] : results;
     }),
 
-    filterDataTypes: BluebirdPromise.coroutine(function *(groupsId, dataTypes) {
-        if ( typeof dataTypes === 'undefined' || dataTypes === null  ) { return BluebirdPromise.resolve(undefined);}
-        if ( typeof groupsId === 'undefined' || groupsId === null  ) { return BluebirdPromise.resolve(undefined);}
+    filterDataTypes: BluebirdPromise.coroutine(function * (groupsId, dataTypes) {
+        if (typeof dataTypes === 'undefined' || dataTypes === null) { return BluebirdPromise.resolve(undefined); }
+        if (typeof groupsId === 'undefined' || groupsId === null) { return BluebirdPromise.resolve(undefined); }
 
-
-        const groups = yield Group.find( {id : groupsId} ).populate('projects');
-        let projectsGroups = _.map(groups, function (g) { return _.map(g.projects,'id'); });
+        const groups = yield Group.find({ id: groupsId }).populate('projects');
+        let projectsGroups = _.map(groups, function (g) { return _.map(g.projects, 'id'); });
         projectsGroups = _.uniq(_.flatten(projectsGroups));
 
-        const projects = yield Project.find( {id : projectsGroups} ).populate('dataTypes');
-        let dataTypesProjects = _.map(projects, function (p) { return _.map(p.dataTypes,'id'); });
+        const projects = yield Project.find({ id: projectsGroups }).populate('dataTypes');
+        let dataTypesProjects = _.map(projects, function (p) { return _.map(p.dataTypes, 'id'); });
         dataTypesProjects = _.uniq(_.flatten(dataTypesProjects));
 
-        let dataTypesFilteredByProjects = _.map(dataTypes, function (d) { if( _.findWhere(dataTypesProjects, d.id)){
-            return d;
-        } });
-        let id = _.map(projects, function (p) { return _.map(p.dataTypes,'id'); });
+        let dataTypesFilteredByProjects = _.map(dataTypes, function (d) {
+            if (_.findWhere(dataTypesProjects, d.id)) {
+                return d;
+            }
+        });
+        let id = _.map(projects, function (p) { return _.map(p.dataTypes, 'id'); });
         id = _.uniq(_.flatten(id));
-        const dataTypePrivileges = yield DataTypePrivileges.find({ where: {group: groupsId, dataType:id} });
-        let results =_.compact(_.uniq( _.map(dataTypePrivileges,function (dtp) {
-            return _.findWhere(dataTypesFilteredByProjects, {id: dtp.dataType} );
+        const dataTypePrivileges = yield DataTypePrivileges.find({ where: { group: groupsId, dataType: id } });
+        let results = _.compact(_.uniq(_.map(dataTypePrivileges, function (dtp) {
+            return _.findWhere(dataTypesFilteredByProjects, { id: dtp.dataType });
         })));
         return results;
     }),
 
-    getDataTypesToCreateNewPrivileges: BluebirdPromise.coroutine(function *(groupId) {
-        let criteriaPriv = {}, criteriaGroup = {};
+    getDataTypesToCreateNewPrivileges: BluebirdPromise.coroutine(function * (groupId) {
+        let criteriaPriv = {}; let criteriaGroup = {};
 
-        if ( typeof groupId !== 'undefined' && groupId !== null  ) { criteriaPriv.group = groupId; criteriaGroup.id = groupId;}
+        if (typeof groupId !== 'undefined' && groupId !== null) { criteriaPriv.group = groupId; criteriaGroup.id = groupId; }
 
-        const groups = yield Group.find( criteriaGroup ).populate('projects');
-        let projectsGroups = _.map(groups, function (g) { return _.map(g.projects,'id'); });
+        const groups = yield Group.find(criteriaGroup).populate('projects');
+        let projectsGroups = _.map(groups, function (g) { return _.map(g.projects, 'id'); });
         projectsGroups = _.uniq(_.flatten(projectsGroups));
 
         const privileges = yield DataTypePrivileges.find(criteriaPriv);
 
-        let whereObj = _.isEmpty(privileges) ? {project: projectsGroups} : {
-            id: {'!': _.map(privileges, 'dataType')},
+        let whereObj = _.isEmpty(privileges) ? { project: projectsGroups } : {
+            id: { '!': _.map(privileges, 'dataType') },
             project: projectsGroups
         };
 
         return DataType.find({ where: whereObj });
     }),
 
-    getDataTypeToEditPrivileges: BluebirdPromise.coroutine(function *(privilegeId, groupId) {
-        if ( typeof privilegeId === 'undefined' || privilegeId === null  ) { return BluebirdPromise.resolve(undefined);}
-        if ( typeof groupId === 'undefined' || groupId === null  ) { return BluebirdPromise.resolve(undefined);}
+    getDataTypeToEditPrivileges: BluebirdPromise.coroutine(function * (privilegeId, groupId) {
+        if (typeof privilegeId === 'undefined' || privilegeId === null) { return BluebirdPromise.resolve(undefined); }
+        if (typeof groupId === 'undefined' || groupId === null) { return BluebirdPromise.resolve(undefined); }
 
         const privilege = yield DataTypePrivileges.findOne({ id: privilegeId, group: groupId }).populate('dataType');
 
         return privilege.dataType;
     }),
 
-    getFlattenedFields: BluebirdPromise.coroutine(function *(dataType, skipFieldsWithinLoops) {
+    getFlattenedFields: BluebirdPromise.coroutine(function * (dataType, skipFieldsWithinLoops) {
         let flattened = [];
         let body = _.isObject(dataType.superType) ? dataType.superType.schema.body : undefined;
 
@@ -110,30 +111,26 @@ const coroutines = {
             let superType = yield SuperType.findOne(dataType.superType);
             body = superType.schema.body;
         }
-      // if no body return an empty array
+        // if no body return an empty array
         if (!body) return flattened;
 
-      // iterate through all groups within the body
-        for (let i=0, len=body.length; i<len; i++) {
+        // iterate through all groups within the body
+        for (let i = 0, len = body.length; i < len; i++) {
             let groupContent = body[i] && body[i].content;
 
-          // iterate through all the fields/loops
-            for (let j=0, l=groupContent.length; j<l; j++) {
+            // iterate through all the fields/loops
+            for (let j = 0, l = groupContent.length; j < l; j++) {
                 if (groupContent[j].label === constants.METADATA_FIELD) {
                     flattened.push(groupContent[j]);
-                }
-                else if (groupContent[j].label === constants.METADATA_LOOP && !skipFieldsWithinLoops) {
+                } else if (groupContent[j].label === constants.METADATA_LOOP && !skipFieldsWithinLoops) {
                     let loopContent = groupContent[j] && groupContent[j].content;
-                    for (let k=0; k<loopContent.length; k++) {
+                    for (let k = 0; k < loopContent.length; k++) {
                         if (loopContent[k].label === constants.METADATA_FIELD) {
-
-                          // add to the field a private flag that specifies its belonging to a loop
-                            flattened.push(_.extend(loopContent[k], {_loop: true}));
-
+                            // add to the field a private flag that specifies its belonging to a loop
+                            flattened.push(_.extend(loopContent[k], { _loop: true }));
                         }
                     }
                 }
-
             }
         }
         return flattened;
@@ -142,12 +139,11 @@ const coroutines = {
 
 let DataTypeService = {
 
-
     /**
      * @method
      * @name validateMetadataField
      */
-    validateMetadataField: function(field) {
+    validateMetadataField: function (field) {
         let metadataFieldValidationSchema = Joi.object().keys({
             name: Joi.string().required(),
             formattedName: Joi.string().required(),
@@ -162,16 +158,16 @@ let DataTypeService = {
             visible: Joi.boolean().default(true),
             description: Joi.string().required(),
             caseInsensitive: Joi.boolean().invalid(true)
-            .when('fieldType', {is: constants.FieldTypes.TEXT, then: Joi.boolean().default(false)})
-            .concat(Joi.boolean().when('isList', {is: true, then: Joi.boolean().invalid(true).default(false)})),
+                .when('fieldType', { is: constants.FieldTypes.TEXT, then: Joi.boolean().default(false) })
+                .concat(Joi.boolean().when('isList', { is: true, then: Joi.boolean().invalid(true).default(false) })),
             hasRange: Joi.boolean().required(),
             min: Joi.number().allow(null),
             max: Joi.number().allow(null),
             step: Joi.number().allow(null),
             customValue: Joi.any().allow(null),
             ontologyUri: Joi.string().allow(null),
-            _loop: Joi.boolean(),       // optional private boolean field that specifies whether the current field belongs to a metadata loop
-            _group: Joi.string()        // optional private string field that specifies the group name
+            _loop: Joi.boolean(), // optional private boolean field that specifies whether the current field belongs to a metadata loop
+            _group: Joi.string() // optional private string field that specifies the group name
         });
         return Joi.validate(field, metadataFieldValidationSchema);
     },
@@ -186,8 +182,7 @@ let DataTypeService = {
      *                      - error: null if the DataType is validated, an Error object otherwise
      *                      - value: the validated DataType object if no error is returned
      */
-    validate: function(dataType, performSchemaValidation) {
-
+    validate: function (dataType, performSchemaValidation) {
         let superTypeValidationSchema = {
             id: Joi.number().integer().positive(),
             name: Joi.string().trim(),
@@ -206,7 +201,7 @@ let DataTypeService = {
             getParentCode: Joi.boolean().default(false),
             ifParentNoPrefix: Joi.boolean().default(false),
             project: Joi.number().integer().required(),
-            superType: Joi.object().required().keys(superTypeValidationSchema),
+            superType: Joi.number().integer().required(),
             parents: Joi.array().allow(null),
             children: Joi.array().allow(null),
             data: Joi.array().allow(null),
@@ -214,8 +209,7 @@ let DataTypeService = {
             updatedAt: Joi.date()
         };
 
-        if (performSchemaValidation) {
-
+        if (performSchemaValidation && isNaN(dataType.superType)) {
             let metadataFieldValidationSchema = Joi.object().keys({
                 name: Joi.string().required(),
                 formattedName: Joi.string().required(),
@@ -229,8 +223,8 @@ let DataTypeService = {
                 sensitive: Joi.boolean().default(false),
                 visible: Joi.boolean().default(true),
                 caseInsensitive: Joi.boolean().invalid(true)
-                .when('fieldType', {is: constants.FieldTypes.TEXT, then: Joi.boolean()})
-                .concat(Joi.boolean().when('isList', {is: true, then: Joi.boolean().invalid(true).default(false)})),
+                    .when('fieldType', { is: constants.FieldTypes.TEXT, then: Joi.boolean() })
+                    .concat(Joi.boolean().when('isList', { is: true, then: Joi.boolean().invalid(true).default(false) })),
                 description: Joi.string().required(),
                 hasRange: Joi.boolean().required(),
                 min: Joi.number().allow(null),
@@ -238,8 +232,8 @@ let DataTypeService = {
                 step: Joi.number().allow(null),
                 customValue: Joi.any().allow(null),
                 ontologyUri: Joi.string().allow(null),
-                _loop: Joi.boolean(),       // optional private boolean field that specifies whether the current field belongs to a metadata loop
-                _group: Joi.string()        // optional private string field that specifies the group name
+                _loop: Joi.boolean(), // optional private boolean field that specifies whether the current field belongs to a metadata loop
+                _group: Joi.string() // optional private string field that specifies the group name
             });
 
             let metadataLoopValidationSchema = Joi.object().keys({
@@ -274,7 +268,6 @@ let DataTypeService = {
 
         validationSchema = Joi.object().keys(validationSchema);
         return Joi.validate(dataType, validationSchema);
-
     },
 
     /**
@@ -283,7 +276,7 @@ let DataTypeService = {
      * @return {Array} - list of found DataType entities
      */
 
-    get: /*istanbul ignore next*/ function(params, next) {
+    get: /* istanbul ignore next */ function (params, next) {
         let criteriaObj = { model: params.model };
         if (params) {
             let ids = params.idDataTypes.split(",");
@@ -301,12 +294,11 @@ let DataTypeService = {
      */
 
     getFlattenedFields: function (dataType, skipFieldsWithinLoops) {
-
         return coroutines.getFlattenedFields(dataType, skipFieldsWithinLoops)
-        .catch(/* istanbul ignore next */ function(err) {
-            sails.log(err);
-            return err;
-        });
+            .catch(/* istanbul ignore next */ function (err) {
+                sails.log(err);
+                return err;
+            });
     },
 
     /**
@@ -316,30 +308,28 @@ let DataTypeService = {
      *              ATTRIBUTE table, for use in an EAV catalogue
      * @param {Integer} dataType - the id of the DataType
      */
-    putMetadataFieldsIntoEAV: function(dataType) {
+    putMetadataFieldsIntoEAV: function (dataType) {
         let foundType;
         // check whether the dataType effectively exists
         return DataType.findOne(dataType).populate('superType')
 
         // extract and store all metadata fields
-        .then(function(result) {
-            foundType = result;
-            sails.log("DataTypeService.putMetadataFieldsIntoEAV - found type" + foundType);
-            return DataTypeService.getFlattenedFields(foundType, false);
-
-        })
-        .then(function (fields) {
-            return crudManager.putMetadataFieldsIntoEAV(foundType.id, fields, true);
-        })
-        .then(function(inserted) {
-            sails.log("new EavAttributes inserted: ", inserted);
-        })
-        .catch(
-          /* istanbul ignore next */
-          function(err) {
-              sails.log("DataTypeService.putMetadataFieldsIntoEAV - error caught: ", err);
-          });
-
+            .then(function (result) {
+                foundType = result;
+                sails.log("DataTypeService.putMetadataFieldsIntoEAV - found type" + foundType);
+                return DataTypeService.getFlattenedFields(foundType, false);
+            })
+            .then(function (fields) {
+                return crudManager.putMetadataFieldsIntoEAV(foundType.id, fields, true);
+            })
+            .then(function (inserted) {
+                sails.log("new EavAttributes inserted: ", inserted);
+            })
+            .catch(
+                /* istanbul ignore next */
+                function (err) {
+                    sails.log("DataTypeService.putMetadataFieldsIntoEAV - error caught: ", err);
+                });
     },
 
     /**
@@ -348,13 +338,12 @@ let DataTypeService = {
      * @param{integer} privilegesId - primary key
      * @param{function} next
      */
-    getDataTypePrivilege: function(privilegeId, next) {
+    getDataTypePrivilege: function (privilegeId, next) {
         sails.log("DataTypeService.getDataTypePrivilege - privilegesId: " + privilegeId);
         if (!privilegeId) {
             return next();
-        }
-        else {
-            return DataTypePrivileges.findOne({id: privilegeId}).populate('dataType').exec(next);
+        } else {
+            return DataTypePrivileges.findOne({ id: privilegeId }).populate('dataType').exec(next);
         }
     },
 
@@ -366,14 +355,14 @@ let DataTypeService = {
      * @description service function to retrieve the right dataType when editing
      *              an existing DataTypePrivileges entity
      */
-     // TODO: populate dataType Privilege? - filter by project
-    getDataTypeToEditPrivileges: function(privilegeId, groupId) {
+    // TODO: populate dataType Privilege? - filter by project
+    getDataTypeToEditPrivileges: function (privilegeId, groupId) {
         sails.log("getDataTypeToEditPrivileges on privilege: ", privilegeId, " on group:", groupId);
         return coroutines.getDataTypeToEditPrivileges(privilegeId, groupId)
-        .catch(/* istanbul ignore next */ function(err) {
-            sails.log(err);
-            return err;
-        });
+            .catch(/* istanbul ignore next */ function (err) {
+                sails.log(err);
+                return err;
+            });
     },
 
     /**
@@ -385,14 +374,14 @@ let DataTypeService = {
      * @description service function to retrieve the right set of dataType(s) when creating
      *              a new DataTypePrivileges entity
      */
-     //TODO: - filter by project
-    getDataTypesToCreateNewPrivileges: function(groupId) {
+    // TODO: - filter by project
+    getDataTypesToCreateNewPrivileges: function (groupId) {
         sails.log("getDataTypesToCreateNewPrivileges on groupId: " + groupId);
         return coroutines.getDataTypesToCreateNewPrivileges(groupId)
-        .catch(/* istanbul ignore next */ function(err) {
-            sails.log(err);
-            return err;
-        });
+            .catch(/* istanbul ignore next */ function (err) {
+                sails.log(err);
+                return err;
+            });
     },
 
     /**
@@ -403,13 +392,12 @@ let DataTypeService = {
      * @param{function} next - callback function
      * @description service function to retrieve the dataType privilege
      */
-    getDataTypePrivilegeLevel: function(groupsId, dataTypesId) {
-
+    getDataTypePrivilegeLevel: function (groupsId, dataTypesId) {
         return coroutines.getDataTypePrivilegeLevel(groupsId, dataTypesId)
-        .catch(/* istanbul ignore next */ function(err) {
-            sails.log(err);
-            return err;
-        });
+            .catch(/* istanbul ignore next */ function (err) {
+                sails.log(err);
+                return err;
+            });
     },
 
     /**
@@ -419,13 +407,12 @@ let DataTypeService = {
      * @param{array} dataTypes
      * @description service function to filter dataTypes compared to operator Privileges
      */
-    filterDataTypes: function(groupsId, dataTypes) {
-
+    filterDataTypes: function (groupsId, dataTypes) {
         return coroutines.filterDataTypes(groupsId, dataTypes)
-        .catch(/* istanbul ignore next */ function(err) {
-            sails.log(err);
-            return err;
-        });
+            .catch(/* istanbul ignore next */ function (err) {
+                sails.log(err);
+                return err;
+            });
     },
 
     /**
@@ -435,23 +422,21 @@ let DataTypeService = {
      * @description return the higher privileges in array
      * @return {array} - privileges
      */
-    getHigherPrivileges: function(privileges) {
+    getHigherPrivileges: function (privileges) {
         let levels = {};
-        if (!privileges || _.isEmpty(privileges)) {return [];}
-        if ( privileges.length === 1 ) { return privileges;}
+        if (!privileges || _.isEmpty(privileges)) { return []; }
+        if (privileges.length === 1) { return privileges; }
 
         var groupedPriv = _.mapValues(_.groupBy(privileges, 'dataType'));
-        _.forEach(groupedPriv, function (list,key) {
+        _.forEach(groupedPriv, function (list, key) {
             levels[key] = {};
             _.forEach(list, function (el) {
-                if(!levels[key].privilegeLevel || el.privilegeLevel === EDIT){
+                if (!levels[key].privilegeLevel || el.privilegeLevel === EDIT) {
                     levels[key] = el;
-                    if( levels[key].privilegeLevel === EDIT){ return false; }
-                }
-                else if (levels[key].privilegeLevel === VIEW_OVERVIEW && (el.privilegeLevel === VIEW_DETAILS || el.privilegeLevel === DOWNLOAD)) {
+                    if (levels[key].privilegeLevel === EDIT) { return false; }
+                } else if (levels[key].privilegeLevel === VIEW_OVERVIEW && (el.privilegeLevel === VIEW_DETAILS || el.privilegeLevel === DOWNLOAD)) {
                     levels[key] = el;
-                }
-                else if (levels[key].privilegeLevel === VIEW_DETAILS && el.privilegeLevel === DOWNLOAD) { levels[key] = el; }
+                } else if (levels[key].privilegeLevel === VIEW_DETAILS && el.privilegeLevel === DOWNLOAD) { levels[key] = el; }
             });
         });
         let results = _.values(levels);
@@ -464,21 +449,19 @@ let DataTypeService = {
      * @description return the query object with the project array parsed if exists
      * @return {object} - query
      */
-    parseProject: function(query) {
-        if (query._criteria.where && query._criteria.where.project ) {
-            if (query._criteria.where.project[0] =="[") {
+    parseProject: function (query) {
+        if (query._criteria.where && query._criteria.where.project) {
+            if (query._criteria.where.project[0] == "[") {
                 try {
                     query._criteria.where.project = JSON.parse(query._criteria.where.project);
-                }
-              catch (e) {
+                } catch (e) {
                 /* istanbul ignore next */
-                  throw new Error("Error parsing project clause");
-              }
+                    throw new Error("Error parsing project clause");
+                }
             }
         }
         return query;
     }
-
 
 };
 module.exports = DataTypeService;

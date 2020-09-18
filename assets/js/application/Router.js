@@ -38,7 +38,7 @@
                     var aux = el.split('='); var o = {};
                     if (aux.length >= 1) {
                         var val = null;
-                        if (aux.length == 2) { val = aux[1]; }
+                        if (aux.length === 2) { val = aux[1]; }
                         o[aux[0]] = val;
                     }
                     return o;
@@ -186,8 +186,8 @@
         dataTypePrivilegesList: function (queryString) {
             var queryParams = parseQueryString(queryString);
             var privilegesParams = { sort: 'id ASC', populate: ['dataType', 'group'], limit: xtens.module("xtensconstants").DefaultLimitPrivileges };
-            queryParams.groupId ? privilegesParams.group = queryParams.groupId : null;
-            queryParams.dataTypeId ? privilegesParams.dataType = queryParams.dataTypeId : null;
+            if (queryParams.groupId) { privilegesParams.group = queryParams.groupId; }
+            if (queryParams.dataTypeId) { privilegesParams.dataType = queryParams.dataTypeId; }
             var that = this;
             var group = new Group.Model(queryParams.groupId ? { id: queryParams.groupId } : {});
             var privileges = new DataTypePrivileges.List();
@@ -323,7 +323,10 @@
                 data: { id: params.duplicate ? params.duplicate : id },
                 contentType: 'application/json',
                 success: function (results) {
-                    params.duplicate ? results.params = params : null;
+                    if (params.duplicate) {
+                        results.params = params;
+                    }
+
                     that.loadView(new DataType.Views.Edit(results));
                 },
                 error: function (err) {
@@ -606,7 +609,7 @@
             var that = this;
             var operator = new Operator.Model();
             if (id) {
-                if (xtens.session.get('userId') == id || xtens.session.get('isWheel')) {
+                if (xtens.session.get('userId') === id || xtens.session.get('isWheel')) {
                     operator.fetch({
                         data: $.param({ id: id, populate: ['addressInformation'] }),
                         success: function (operator) {
@@ -670,7 +673,8 @@
             this.loadView(new Operator.Views.updatePassword());
         },
 
-        subjectList: function () {
+        subjectList: function (queryString) {
+            var queryParams = parseQueryString(queryString);
             var privileges = new DataTypePrivileges.List();
             var operator = new Operator.List();
             var dataTypes = new DataType.List();
@@ -698,6 +702,9 @@
                             'Authorization': 'Bearer ' + xtens.session.get("accessToken")
                         },
                         data: {
+                            parentSubject: queryParams.parentSubject,
+                            parentSubjectCode: queryParams.parentSubjectCode,
+                            parentDataType: queryParams.parentDataType,
                             project: activeProject ? activeProject.id : undefined,
                             populate: ['type'],
                             limit: xtens.module("xtensconstants").DefaultLimit,
@@ -722,7 +729,8 @@
                                 dataTypePrivileges: new DataTypePrivileges.List(privilegesRes && privilegesRes[0]),
                                 subjects: new Subject.List(results),
                                 dataTypes: new DataType.List(dataTypesRes && dataTypesRes[0]),
-                                paginationHeaders: headers
+                                paginationHeaders: headers,
+                                params: queryParams
                             }));
                         },
                         error: function (err) {
@@ -737,8 +745,9 @@
             });
         },
 
-        subjectEdit: function (id) {
-            var params = {};
+        subjectEdit: function (id, queryString) {
+            // var dataTypes = new DataType.List();
+            var params = parseQueryString(queryString);
             if (id && _.parseInt(id) > 0) {
                 params.id = id;
             }
@@ -1023,7 +1032,10 @@
                 populate: ['children', 'superType'],
                 sort: 'id ASC'
             };
-            idProject ? criteria.project = idProject : null;
+            if (idProject) {
+                criteria.project = idProject;
+            }
+
             var $operatorDeferred = operator.fetch({
                 data: $.param({ login: xtens.session.get("login"), populate: ['groups'] })
             });
@@ -1067,7 +1079,10 @@
                 superType: idSuperTypeProcedures,
                 sort: 'id ASC'
             };
-            idProject ? criteria.project = idProject : null;
+            if (idProject) {
+                criteria.project = idProject;
+            }
+
             var $operatorDeferred = operator.fetch({
                 data: $.param({ login: xtens.session.get("login"), populate: ['groups'] })
             });
