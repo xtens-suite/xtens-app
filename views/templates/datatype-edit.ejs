@@ -7,16 +7,10 @@
     <div id="schemaHeader">
       <div class="form-group row">
         <label for="name" class="col-md-2 control-label"><%= __("name") %></label>
-        <div class="col-md-4">
+        <div class="col-md-7">
           <input text class="form-control" id="name" name="name" value="<%= dataType.id ? dataType.get('name') : '' %>" placeholder="<%= __('data-type-name')%>" required>
         </div>
-    <div class="col-md-3">
-      <div class="form-check">
-        <label for="skipPaging" class="form-check-label"><%= __("skip-paging") %></label>
-        <input class="form-check-input" type="checkbox" id="skipPaging" name="skipPaging" value="skipPaging" <% if(dataType.id && dataType.get( 'superType').schema.header.skipPaging) { %> checked="checked" <% } %> >
-      </div>
-    </div>
-    <div class="col-md-3">
+    <div class="col-md-2">
       <div class="form-check">
         <label for="fileUpload" class="form-check-label"><%= __("file-upload") %></label>
         <input class="form-check-input" type="checkbox" id="fileUpload" name="fileUpload" value="fileUpload" <% if(dataType.id && dataType.get( 'superType').schema.header.fileUpload) { %> checked="checked" <% } %> >
