@@ -41,7 +41,7 @@
     /**
      *  @description general purpose function to retrieve the value from a field
      */
-    function getFieldValue($el, ev, options) {
+    function getFieldValue ($el, ev, options) {
         switch (options.view.component.fieldType) {
             case FieldTypes.INTEGER:
                 return parseInt($el.val());
@@ -62,7 +62,7 @@
     /**
      * @description render a Date from the model to a view
      */
-    function renderDateValue(value) {
+    function renderDateValue (value) {
         if (value) {
             var dateArray = value instanceof Date ? value.toISOString().split('-') : value.split('-');
             return dateArray[2] + '/' + dateArray[1] + '/' + dateArray[0];
@@ -963,7 +963,7 @@
                 modal.hide();
                 $('.waiting-modal').modal('show');
                 that.$modal.one('hidden.bs.modal', function (e) {
-                    var targetRoute = $(ev.currentTarget).data('targetRoute') || 'data';
+                    // var targetRoute = $(ev.currentTarget).data('targetRoute') || 'data';
 
                     that.model.destroy({
                         success: function (model, res) {
@@ -972,6 +972,7 @@
                             modal.title = i18n('ok');
                             modal.body = i18n('data-deleted');
                             that.$modal.append(modal.render().el);
+                            $('.modal-header').removeClass('alert-danger');
                             $('.modal-header').addClass('alert-success');
                             modal.show();
                             setTimeout(function () { modal.hide(); }, 1200);

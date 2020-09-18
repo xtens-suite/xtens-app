@@ -39,8 +39,6 @@
 
     Subject.Views.Edit = Data.Views.Edit.fullExtend({
 
-
-
         bindings: {
 
             '#owner': {
@@ -290,7 +288,7 @@
                 modal.hide();
                 that.$modal.one('hidden.bs.modal', function (e) {
                     $('.waiting-modal').modal('show');
-                    var targetRoute = $(ev.currentTarget).data('targetRoute') || 'subjects';
+                    // var targetRoute = $(ev.currentTarget).data('targetRoute') || 'subjects';
 
                     that.model.destroy({
                         success: function (model, res) {
@@ -299,6 +297,7 @@
                             modal.title = i18n('ok');
                             modal.body = i18n('subject-deleted');
                             that.$modal.append(modal.render().el);
+                            $('.modal-header').removeClass('alert-danger');
                             $('.modal-header').addClass('alert-success');
                             modal.show();
                             setTimeout(function () { modal.hide(); }, 1200);

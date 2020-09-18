@@ -3,15 +3,15 @@
  * @author Massimiliano Izzo
  *
  */
-function renderDatatablesBoolean(data) {
+function renderDatatablesBoolean (data) {
     if (data) {
         return 'true';
     }
     return 'false';
 }
 
-function renderDatatablesDate(data, type) {
-    function pad(s) { return (s < 10) ? '0' + s : s; }
+function renderDatatablesDate (data, type) {
+    function pad (s) { return (s < 10) ? '0' + s : s; }
 
     if (!_.isEmpty(data)) {
         var d = new Date(data);
@@ -27,7 +27,7 @@ function renderDatatablesDate(data, type) {
     var useFormattedNames = xtens.module("xtensconstants").useFormattedMetadataFieldNames;
     var Classes = xtens.module("xtensconstants").DataTypeClasses;
     var Privileges = xtens.module("xtensconstants").DataTypePrivilegeLevels;
-    var replaceUnderscoreAndCapitalize = xtens.module("utils").replaceUnderscoreAndCapitalize;
+    // var replaceUnderscoreAndCapitalize = xtens.module("utils").replaceUnderscoreAndCapitalize;
     var DataType = xtens.module("datatype");
     var Data = xtens.module("data");
     var SuperType = xtens.module("supertype");
@@ -35,9 +35,9 @@ function renderDatatablesDate(data, type) {
     var DataFile = xtens.module("datafile");
     var Operator = xtens.module("operator");
     var VIEW_OVERVIEW = Privileges.VIEW_OVERVIEW;
-    var VIEW_DETAILS = Privileges.VIEW_DETAILS;
-    var EDIT = Privileges.EDIT;
-    var DOWNLOAD = Privileges.DOWNLOAD;
+    // var VIEW_DETAILS = Privileges.VIEW_DETAILS;
+    // var EDIT = Privileges.EDIT;
+    // var DOWNLOAD = Privileges.DOWNLOAD;
     var ModalDialog = xtens.module("xtensbootstrap").Views.ModalDialog;
 
     /**
@@ -114,7 +114,7 @@ function renderDatatablesDate(data, type) {
             var idDts = _.map(currentMDT, 'id');
             // var currentMDTP = [];
             var currentMDTP = this.isLeafSearch || this.multiProject ? this.dataTypePrivileges.filter(function (dtp) {
-                return idDts.indexOf(dtp.dataType) != -1;
+                return idDts.indexOf(dtp.dataType) !== -1;
             }) : this.dataTypePrivileges;
             return { dt: currentDT, dts: currentMDT, dtps: currentMDTP };
         },
@@ -314,10 +314,8 @@ function renderDatatablesDate(data, type) {
                     buttons: this.colvisButtons
                 });
                 this.table.buttons().container().appendTo($('.col-sm-6:eq(0)', this.table.table().container()));
-            }
-
-            // the returned dataset is empty
-            else {
+            } else {
+                // the returned dataset is empty
                 this.remove();
             }
         },
@@ -336,7 +334,7 @@ function renderDatatablesDate(data, type) {
                     var cl = 'child-table-' + row.index();
                     var leafKey = _.find(_.keys(that.data[0]), function (k) { return k.indexOf("_id") > 0; });
                     var data = _.find(that.data, function (d) {
-                        return d[leafKey] == row.data()[leafKey];
+                        return d[leafKey] === row.data()[leafKey];
                     });
                     var maxWidth = $('.query').width() + 'px';
                     var html = '<div class="row" style="max-width:' + maxWidth + ';"><div class="col-sm-12"><table class="' + cl + ' query-table"></table></div></div>';
@@ -421,13 +419,12 @@ function renderDatatablesDate(data, type) {
                         "defaultContent": '<i style="cursor:pointer; color:#337ab7;" class="fa fa-plus-circle"></i>'
                     }
                 ];
-                this.childColumns.push(this.insertModelSpecificColumns(model, xtens.session.get('canAccessPersonalData'), this.isLeafSearch));
+                this.childColumns.push(this.insertModelSpecificColumnsNoLeaf(model, xtens.session.get('canAccessPersonalData')));
                 this.childColumns = _.flatten(this.childColumns);
+            } else {
+                this.columns.push(this.insertModelSpecificColumnsNoLeaf(model, xtens.session.get('canAccessPersonalData')));
+                this.columns = _.flatten(this.columns);
             }
-            // else {
-            this.columns.push(this.insertModelSpecificColumns(model, xtens.session.get('canAccessPersonalData'), this.isLeafSearch));
-            this.columns = _.flatten(this.columns);
-            // }
             if (this.multiProject) {
                 this.columns.push({
                     "title": i18n("project-owner"),
@@ -458,7 +455,7 @@ function renderDatatablesDate(data, type) {
             }
             this.optLinks = { dataTypes: dataTypes, dataTypePrivileges: dataTypePrivileges, hasDataSensitive: false, fileUpload: fileUpload, hasDataChildren: hasDataChildren, hasSampleChildren: hasSampleChildren };
 
-            this.prepareDataForRenderingJSONLeaf(dataTypePrivileges, dataTypes, queryArgs, queryArgs.dataType, this.isLeafSearch);
+            this.prepareDataForRenderingJSONLeaf(dataTypePrivileges, dataTypes, queryArgs, queryArgs.dataType, this.isLeafSearch, true);
 
             if (!this.multiProject) {
                 this.addLinks(this.optLinks);
@@ -471,16 +468,27 @@ function renderDatatablesDate(data, type) {
          * @name prepareDataForRenderingJSONLeaf
          * @description Format the data according to the dataType schema and prepare data for visualization through DataTables
          */
-        prepareDataForRenderingJSONLeaf: function (dataTypePrivileges, dataTypes, queryArgs, idDataType, nested) {
+        prepareDataForRenderingJSONLeaf: function (dataTypePrivileges, dataTypes, queryArgs, idDataType, nested, isRoot) {
             var that = this;
             if (queryArgs.getMetadata || idDataType) {
                 var fieldsToShow = [];
 
-                var selectedSuperType = new SuperType.Model(this.multiProject || this.isLeafSearch ? dataTypes[0].get("superType") : dataTypes.get("superType"));
+                var selectedDataType = this.multiProject || this.isLeafSearch ? dataTypes[0] : dataTypes;
+
+                var selectedSuperType = new SuperType.Model(selectedDataType.get("superType"));
                 var flattenedFields = selectedSuperType.getFlattenedFields(); // get the names of all the madatafields but those within loops;
 
                 var dtpOverview = this.multiProject || this.isLeafSearch ? _.filter(dataTypePrivileges, function (dtp) { return dtp.privilegeLevel === VIEW_OVERVIEW; }) : !!(dataTypePrivileges && dataTypePrivileges.privilegeLevel === VIEW_OVERVIEW);
                 if (!dtpOverview || !dtpOverview.length || (this.multiProject && dtpOverview.length !== dataTypePrivileges.length)) {
+                    if (!isRoot) {
+                        _.forEach(this.insertModelSpecificColumnsLeaf(selectedDataType.get('model'), xtens.session.get('canAccessPersonalData'), selectedDataType.get('name')), function (col) {
+                            if (_.findIndex(that.columns, function (c) { return c.title === col.title; }) < 0) {
+                                that.columns.push(col);
+                            }
+                        });
+                        this.columns = _.flatten(this.columns);
+                    }
+
                     flattenedFields.forEach(function (field) {
                         if (field.sensitive && idDataType) { that.optLinks.hasDataSensitive = true; }
                         if (!field.sensitive || xtens.session.get('canAccessSensitiveData')) {
@@ -561,7 +569,8 @@ function renderDatatablesDate(data, type) {
                                 columnOpts.render = function (data, type, row) {
                                     var priv = this.multiProject || this.isLeafSearch ? _.findWhere(dataTypePrivileges, { 'dataType': row.type }) : dataTypePrivileges;
                                     if (priv && priv.privilegeLevel !== VIEW_OVERVIEW) {
-                                        return data = '<a href="' + data + '" target="_blank">' + data + '</a>';
+                                        data = '<a href="' + data + '" target="_blank">' + data + '</a>';
+                                        return data;
                                     } else {
                                         return null;
                                     }
@@ -620,7 +629,7 @@ function renderDatatablesDate(data, type) {
                         // get right dataTypes and privileges of nested content
                         var results = that.getCurrentTypeAndPrivileges(content.dataType);
                         var isLast = !_.find(content.content, function (c) { return c.dataType; });
-                        that.prepareDataForRenderingJSONLeaf(results.dtps, results.dts, content, undefined, !_.has(that.data[0], content.label) && !isLast);
+                        that.prepareDataForRenderingJSONLeaf(results.dtps, results.dts, content, undefined, !_.has(that.data[0], content.label) && !isLast, false);
                     }
                 });
             }
@@ -692,26 +701,26 @@ function renderDatatablesDate(data, type) {
         //
         // },
 
-        insertModelSpecificColumns: function (model, canViewPersonalInfo, nested) {
+        insertModelSpecificColumnsNoLeaf: function (model, canViewPersonalInfo) {
             var cols = [];
             if (canViewPersonalInfo) { // if you are allowed to see the Personal Details
-                cols = cols.concat(this.insertPersonalDetailsColumns(nested));
+                cols = cols.concat(this.insertPersonalDetailsColumnsNoLeaf());
             }
             switch (model) {
                 case Classes.SUBJECT || Classes.DATA:
-                    cols = cols.concat(this.insertSubjectColumns(nested));
+                    cols = cols.concat(this.insertSubjectColumnsNoLeaf());
                     break;
                 case Classes.DATA:
-                    cols = cols.concat(this.insertSubjectColumns(nested));
+                    cols = cols.concat(this.insertSubjectColumnsNoLeaf());
                     break;
                 case Classes.SAMPLE:
-                    cols = cols.concat(this.insertSampleColumns(nested));
+                    cols = cols.concat(this.insertSampleColumnsNoLeaf());
                     break;
             }
             return cols;
         },
 
-        insertPersonalDetailsColumns: function (nested) {
+        insertPersonalDetailsColumnsNoLeaf: function () {
             return [
                 {
                     "title": i18n("surname"),
@@ -738,7 +747,7 @@ function renderDatatablesDate(data, type) {
             ];
         },
 
-        insertSubjectColumns: function (nested) {
+        insertSubjectColumnsNoLeaf: function () {
             return [
                 {
                     "title": i18n("code"),
@@ -757,22 +766,99 @@ function renderDatatablesDate(data, type) {
             ];
         },
 
-        insertSampleColumns: function (nested) {
+        insertSampleColumnsNoLeaf: function () {
             return [
-                {
-                    "title": i18n("biobank"),
-                    "data": function (data) {
-                        return data.biobank_acronym ? data.biobank_acronym : "";
-                    },
-                    "className": "header"
-                },
                 {
                     "title": i18n("biobank-code"),
                     "data": function (data) {
                         return data.biobank_code ? data.biobank_code : "";
                     },
                     "className": "header"
+                }, {
+                    "title": i18n("biobank"),
+                    "data": function (data) {
+                        return data.biobank_acronym ? data.biobank_acronym : "";
+                    },
+                    "className": "header"
                 }
+            ];
+        },
+
+        insertModelSpecificColumnsLeaf: function (model, canViewPersonalInfo, nameLeaf) {
+            var cols = [];
+            if (canViewPersonalInfo) { // if you are allowed to see the Personal Details
+                cols = cols.concat(this.insertPersonalDetailsColumnsLeaf(nameLeaf));
+            }
+            switch (model) {
+                case Classes.SUBJECT || Classes.DATA:
+                    cols = cols.concat(this.insertSubjectColumnsLeaf(nameLeaf));
+                    break;
+                case Classes.DATA:
+                    cols = cols.concat(this.insertSubjectColumnsLeaf(nameLeaf));
+                    break;
+                case Classes.SAMPLE:
+                    cols = cols.concat(this.insertSampleColumnsLeaf(nameLeaf));
+                    break;
+            }
+            return cols;
+        },
+
+        insertPersonalDetailsColumnsLeaf: function (nameLeaf) {
+            return [
+                {
+                    "title": i18n("surname"),
+                    "data": function (data) {
+                        return data[this.fieldName] ? data[this.fieldName] : "";
+                    }.bind({ fieldName: nameLeaf.toLowerCase() + "_surname" }),
+                    "className": "header"
+                },
+                {
+                    "title": i18n("given-name"),
+                    "data": function (data) {
+                        return data[this.fieldName] ? data[this.fieldName] : "";
+                    }.bind({ fieldName: nameLeaf.toLowerCase() + "_given-name" }),
+                    "className": "header"
+                },
+                {
+                    "title": i18n("birth-date"),
+                    "data": function (data) {
+                        return data[this.fieldName] ? data[this.fieldName] : "";
+                    }.bind({ fieldName: nameLeaf.toLowerCase() + "_birth-date" }),
+                    "render": renderDatatablesDate,
+                    "className": "header"
+                }
+            ];
+        },
+
+        insertSubjectColumnsLeaf: function (nameLeaf) {
+            return [
+                {
+                    "title": i18n("code"),
+                    "data": function (data) {
+                        return data[this.fieldName] ? data[this.fieldName] : "";
+                    }.bind({ fieldName: nameLeaf.toLowerCase() + "_code" }),
+                    "className": "header"
+                },
+                {
+                    "title": i18n("sex"),
+                    "data": function (data) {
+                        return data[this.fieldName] ? data[this.fieldName] : "";
+                    }.bind({ fieldName: nameLeaf.toLowerCase() + "_sex" }),
+                    "className": "header"
+                }
+            ];
+        },
+
+        insertSampleColumnsLeaf: function (nameLeaf) {
+            return [
+                {
+                    "title": nameLeaf + " " + i18n("biobank-code"),
+                    "data": function (data) {
+                        return data[this.fieldName] ? data[this.fieldName] : "";
+                    }.bind({ fieldName: nameLeaf.toLowerCase() + "_biobank_code" }),
+                    "className": "header"
+                }
+
             ];
         },
 
@@ -944,8 +1030,9 @@ function renderDatatablesDate(data, type) {
             // if there is any open popover destroy it
             var that = this;
             var currRow = this.table.row($(ev.currentTarget).parents('tr'));
+            var d = currRow.data();
             var id = currRow.data().id;
-            var dataType = this.multiProject || this.isLeafSearch ? _.find(this.dataTypes.models, { 'id': data.type }) : this.dataTypes;
+            var dataType = this.multiProject || this.isLeafSearch ? _.find(this.dataTypes.models, { 'id': d.type }) : this.dataTypes;
             var model = dataType.get("model");
             if (!this[id]) {
                 if (model === Classes.SUBJECT) { return false; }

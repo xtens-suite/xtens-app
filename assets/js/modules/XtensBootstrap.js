@@ -2,8 +2,7 @@
  * @author Massimiliano Izzo
  *
  */
-(function(xtens, XtensBootstrap) {
-
+(function (xtens, XtensBootstrap) {
     var i18n = xtens.module("i18n").en;
 
     /**
@@ -19,8 +18,8 @@
             'hidden.bs.modal div.modal': 'removeMe'
         },
 
-        initialize: function(options) {
-            options.template ? this.template = options.template: this.template = JST['views/templates/dialog-bootstrap.ejs'];
+        initialize: function (options) {
+            options.template ? this.template = options.template : this.template = JST['views/templates/dialog-bootstrap.ejs'];
             this.title = options.title;
             this.body = options.body;
             this.type = options.type && options.type;
@@ -28,7 +27,7 @@
             this.type ? this.data.type = this.type : this.data.type = null;
         },
 
-        render: function() {
+        render: function () {
             this.$el.html(this.template(this.data));
             this.$modal = this.$("div.modal");
             if (this.title) {
@@ -38,20 +37,20 @@
                 this.$(".modal-body").html(this.body);
             }
             this.$('.modal-header').addClass(this.type === "Edit" ? "alert-warning" : this.type === "Delete" ? "alert-danger" : "");
-            $('#confirm').addClass(this.type === "Edit" ? "btn-warning" : this.type === "Delete" ? "btn-danger" : "");
+            this.$('#confirm').addClass(this.type === "Edit" ? "btn-warning" : this.type === "Delete" ? "btn-danger" : "");
             // $('#confirm').addClass("btn-warning");
             return this;
         },
 
-        show: function() {
+        show: function () {
             this.$modal.modal();
         },
 
-        hide: function() {
+        hide: function () {
             this.$modal.modal('hide');
         },
 
-        removeMe: function() {
+        removeMe: function () {
             console.log("removing XtensDialog");
             this.remove();
         }
@@ -66,14 +65,13 @@
 
         className: 'xtens-popover',
 
-        initialize: function(options) {
+        initialize: function (options) {
             this.template = JST["views/templates/popover-bootstrap.ejs"];
         },
 
-        render: function() {
+        render: function () {
             return this;
         }
 
     });
-
-} (xtens, xtens.module("xtensbootstrap")));
+}(xtens, xtens.module("xtensbootstrap")));

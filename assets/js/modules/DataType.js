@@ -447,6 +447,7 @@
                             modal.title = i18n('ok');
                             modal.body = i18n('datatype-deleted');
                             that.$modal.append(modal.render().el);
+                            $('.modal-header').removeClass('alert-danger');
                             $('.modal-header').addClass('alert-success');
                             modal.show();
                             setTimeout(function () { modal.hide(); }, 1200);

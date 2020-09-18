@@ -324,7 +324,7 @@
                 that.$modal.one('hidden.bs.modal', function (e) {
                     e.preventDefault();
                     $('.waiting-modal').modal('show');
-                    var targetRoute = $(ev.currentTarget).data('targetRoute') || 'samples';
+                    // var targetRoute = $(ev.currentTarget).data('targetRoute') || 'samples';
 
                     that.model.destroy({
                         success: function (model, res) {
@@ -334,6 +334,7 @@
                             modal.title = i18n('ok');
                             modal.body = i18n('sample-deleted');
                             that.$modal.append(modal.render().el);
+                            $('.modal-header').removeClass('alert-danger');
                             $('.modal-header').addClass('alert-success');
                             modal.show();
                             setTimeout(function () {
