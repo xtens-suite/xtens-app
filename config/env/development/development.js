@@ -18,6 +18,8 @@ customisedDataMap.set('CBINFO', '../migrate-utils/updateCBInfo.js');
 customisedDataMap.set('VCF', '../migrate-utils/createVCF.js');
 customisedDataMap.set('BIOAN', '../migrate-utils/createBIOAN.js');
 customisedDataMap.set('NKCELL', '../migrate-utils/createNKCELL.js');
+customisedDataMap.set('NGSPAT', '../migrate-utils/createNGSPATIENTS.js');
+customisedDataMap.set('NGSAN', '../migrate-utils/createNGSANALYSIS.js');
 
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
 module.exports = {
