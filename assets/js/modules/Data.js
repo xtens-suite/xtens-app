@@ -534,6 +534,13 @@
                     } else {
                         return value;
                     }
+                },
+                onSet: function (value, options) {
+                    if (options.view.component && options.view.component.fieldType === FieldTypes.DATE && _.isNaN(Date.parse(value))) {
+                        return null;
+                    } else {
+                        return value;
+                    }
                 }
             }
         },
@@ -1649,7 +1656,7 @@
             this.tableView.displayDaemonsTable();
             this.interval = setInterval((function (self) { // Self-executing func which takes 'this' as self
                 return function () { // Return a function in the context of 'self'
-                    self.tableView.refreshDaemonsTable();
+                    // self.tableView.refreshDaemonsTable();
                 };
             })(this), 2000);
         },
