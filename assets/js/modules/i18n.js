@@ -413,7 +413,7 @@
         "total-rows": "Total Rows",
         "imported-rows": "Imported Rows",
         "discarded-rows": "Discarded Rows",
-        "process-id": "Process ID",
+        "download-template": "Download Template File",
         /* views/templates/dedicated-notprocessedrows-dialog-bootstrap */
         "file": "File",
         "index": "Index",

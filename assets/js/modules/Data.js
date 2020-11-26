@@ -1499,13 +1499,20 @@
         showSelector: function () {
             if ($('#data-type').val() === 'VCF') {
                 $('#buttonseldiv').removeClass('hidden');
-                $('#checkFileMovediv').addClass('hidden');
+                $('#ngsAnalysisdiv').addClass('hidden');
+                $('#ngsPatientdiv').addClass('hidden');
             } else if ($('#data-type').val() === 'NGSAN') {
-                $('#checkFileMovediv').removeClass('hidden');
+                $('#ngsAnalysisdiv').removeClass('hidden');
+                $('#buttonseldiv').addClass('hidden');
+                $('#ngsPatientdiv').addClass('hidden');
+            } else if ($('#data-type').val() === 'NGSPAT') {
+                $('#ngsPatientdiv').removeClass('hidden');
+                $('#ngsAnalysisdiv').addClass('hidden');
                 $('#buttonseldiv').addClass('hidden');
             } else {
                 $('#buttonseldiv').addClass('hidden');
-                $('#checkFileMovediv').addClass('hidden');
+                $('#ngsAnalysisdiv').addClass('hidden');
+                $('#ngsPatientdiv').addClass('hidden');
             }
         },
 
