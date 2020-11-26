@@ -1387,7 +1387,7 @@
             'submit .edit-data-form': 'saveCustomisedData',
             'click #by-patient': 'showByPatient',
             'click #bulk': 'hideByPatient',
-            'change #data-type': 'showSelectorIfVcf',
+            'change #data-type': 'showSelector',
             'change #subject-selector': 'getSubjectSamples',
             'click #new-subject': 'goToNewSubject',
             'click #new-sample': 'goToNewSample',
@@ -1496,11 +1496,16 @@
             this.sendVcfByPatient = false;
         },
 
-        showSelectorIfVcf: function () {
-            if ($('#data-type').val() !== 'VCF') {
+        showSelector: function () {
+            if ($('#data-type').val() === 'VCF') {
+                $('#buttonseldiv').removeClass('hidden');
+                $('#checkFileMovediv').addClass('hidden');
+            } else if ($('#data-type').val() === 'NGSAN') {
+                $('#checkFileMovediv').removeClass('hidden');
                 $('#buttonseldiv').addClass('hidden');
             } else {
-                $('#buttonseldiv').removeClass('hidden');
+                $('#buttonseldiv').addClass('hidden');
+                $('#checkFileMovediv').addClass('hidden');
             }
         },
 
@@ -1613,6 +1618,11 @@
                 vcfData.machine = $('#machine-selector').val();
                 vcfData.capture = $('#capture-input').val();
             }
+
+            if ($('#data-type').val() === 'NGSAN') {
+                vcfData.reWritePath = $('#reWritePath').val() == 'on';
+            }
+
             var that = this; var dataType = this.$("select option:selected").val(); var superType = _.find(procedures, { 'value': dataType }).superType; var owner = _.find(procedures, { 'value': dataType }).owner;
             var activeProject = xtens.session.get('activeProject') !== 'all' ? _.find(xtens.session.get('projects'), { 'name': xtens.session.get('activeProject') }) : undefined;
             $.ajax({

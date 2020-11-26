@@ -31,6 +31,8 @@
         "please-select-source-project": "Please select Source project",
         "please-select-a-data-type": "Please select a Data Type",
         "choose-import": "Choose a type of import",
+        "rewrite-path": "Move fastq file",
+        "info-check-move-file": "Enable file moving from source path to xtens path destination. Otherwise disable to skip moving.",
         "bulk": "Bulk",
         "bulk-message": "Please rename files to upload following this istructions: </br>" +
             "<ul><li><b>Patient ID</b> : Prefix - number (es. AA-12345) </li>" +

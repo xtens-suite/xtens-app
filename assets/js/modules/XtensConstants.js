@@ -31,7 +31,7 @@
         { label: 'Biochemistry Analysis', value: 'BIOAN', superType: 132, owner: 40 },
         { label: 'NK Cells Phenotype and Function Analysis', value: 'NKCELL', superType: 144, owner: 42 },
         { label: 'NGS Patient', value: 'NGSPAT', superType: 113 },
-        { label: 'NGS Analysis', value: 'NGSAN', superType: 114, rewritePath: true }
+        { label: 'NGS Analysis', value: 'NGSAN', superType: 114, rewritePath: undefined }
 
     ];
 

@@ -50,6 +50,9 @@ const MainController = {
         const operator = TokenService.getToken(req);
         let obj = { bearerToken: req.headers.authorization.split(' ')[1], idProject: idProject };
         // let summary = {};
+        if (key === 'NGSAN') {
+            obj.reWritePath = vcfData.reWritePath;
+        }
 
         return DataType.findOne({ superType: superType, project: idProject }).populate('parents').then((dataType) => {
             if (dataType) {
