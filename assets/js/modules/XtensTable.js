@@ -444,16 +444,20 @@ function renderDatatablesDate (data, type) {
             this.numLeft = this.columns.length;
 
             var fileUpload = !this.multiProject ? this.isLeafSearch ? dataTypes[0].get("superType").schema.header.fileUpload : dataTypes.get("superType").schema.header.fileUpload : false;
-            var hasDataChildren = false; var hasSampleChildren = false;
+            var hasDataChildren = false; var hasSampleChildren = false; var showSubjectDashButton = false;
             var dataTypeChildren = !this.multiProject ? _.where(this.isLeafSearch ? dataTypes[0].get("children") : dataTypes.get("children"), { "model": Classes.DATA }) : [];
             var sampleTypeChildren = !this.multiProject ? _.where(this.isLeafSearch ? dataTypes[0].get("children") : dataTypes.get("children"), { "model": Classes.SAMPLE }) : [];
+            var dataTypeModel = this.multiProject || this.isLeafSearch ? dataTypes[0].get("model") : dataTypes.get("model");
+            if (dataTypeModel === "Subject" || this.data[0].code) {
+                showSubjectDashButton = true;
+            }
             if (dataTypeChildren.length > 0) {
                 hasDataChildren = true;
             }
             if (sampleTypeChildren.length > 0) {
                 hasSampleChildren = true;
             }
-            this.optLinks = { dataTypes: dataTypes, dataTypePrivileges: dataTypePrivileges, hasDataSensitive: false, fileUpload: fileUpload, hasDataChildren: hasDataChildren, hasSampleChildren: hasSampleChildren };
+            this.optLinks = { dataTypes, dataTypePrivileges, hasDataSensitive: false, fileUpload, hasDataChildren, hasSampleChildren, showSubjectDashButton, dataTypeModel };
 
             this.prepareDataForRenderingJSONLeaf(dataTypePrivileges, dataTypes, queryArgs, queryArgs.dataType, this.isLeafSearch, true);
 
@@ -869,17 +873,18 @@ function renderDatatablesDate (data, type) {
          */
         addLinks: function (options) {
             var btnGroupTemplate = JST["views/templates/xtenstable-buttongroup.ejs"];
-            var that = this;
+            // var that = this;
             var privilege = this.multiProject || this.isLeafSearch ? _.find(options.dataTypePrivileges, { 'dataType': this.data[0].type }) : options.dataTypePrivileges;
             _.each(!this.isLeafSearch ? this.data : this.plainData, function (datum) {
                 datum._links = btnGroupTemplate({
                     __: i18n,
-                    dataTypeModel: that.multiProject || that.isLeafSearch ? options.dataTypes[0].get("model") : options.dataTypes.get("model"),
+                    dataTypeModel: options.dataTypeModel,
                     privilegeLevel: privilege ? privilege.privilegeLevel : undefined,
                     hasDataSensitive: options.hasDataSensitive,
                     fileUpload: options.fileUpload,
                     hasDataChildren: options.hasDataChildren,
-                    hasSampleChildren: options.hasSampleChildren
+                    hasSampleChildren: options.hasSampleChildren,
+                    showSubjectDashButton: options.showSubjectDashButton
                 });
             });
 
@@ -959,8 +964,8 @@ function renderDatatablesDate (data, type) {
         showSubjectGraph: function (ev) {
             var currRow = this.table.row($(ev.currentTarget).parents('tr'));
             var data = currRow.data();
-            var dataId = data.id;
-            var path = "subjects/dashboard?idPatient=" + dataId;
+            var codePatient = data.code;
+            var path = "subjects/dashboard?codePatient=" + codePatient;
 
             xtens.router.navigate(path, { trigger: true });
             return false;

@@ -241,6 +241,87 @@ const coroutines = {
         const results = yield crudManager.getInfoForBarChart(dataTypeId, fieldName, model, period);
 
         return res.json(results);
+    }),
+
+    createGraph: BluebirdPromise.coroutine(function * (req, res, co) {
+        let idSubject = req.param("idPatient");
+        const subjectCode = req.param("codePatient");
+
+        if ((!idSubject || isNaN(idSubject)) && subjectCode) {
+            let subj = yield SubjectService.getOneAsync(null, subjectCode);
+            if (!subj) {
+                throw new NonexistentResourceError(`No subject found with code: ${subjectCode}`);
+            }
+            idSubject = subj.id;
+        } else if ((!idSubject || isNaN(idSubject)) && !subjectCode) {
+            throw new NonexistentResourceError("No valid idSubject or CodeSubject provided");
+        }
+        const fetchSubjectDataTree = sails.hooks['persistence'].getDatabaseManager().recursiveQueries.fetchSubjectDataTree;
+        const operator = TokenService.getToken(req);
+        let dataTypePrivileges;
+
+        return DataTypePrivileges.find({ group: operator.groups }).populate('dataType')
+            .then(results => {
+                dataTypePrivileges = results;
+                // operator has not privileges on datatype, then throw Privileges Error
+                if (_.isEmpty(dataTypePrivileges)) {
+                    throw new PrivilegesError(`Authenticated user has not privileges`);
+                }
+                return fetchSubjectDataTree(idSubject, subjectTreeCb.bind({ idSubject, co }));
+            })
+            .catch(err => {
+                sails.log.error(err);
+                return co.error(err);
+            });
+
+        function subjectTreeCb (err, resp) {
+            /* istanbul ignore if */
+            if (err) {
+                sails.log.error(err);
+                return co.error(err);
+            } else {
+                let links = []; let idRows = [];
+                _.forEach(resp.rows, function (row) {
+                    _.find(dataTypePrivileges, function (d) {
+                        if (d.dataType.name === row.type) {
+                            idRows.push(row.id);
+                        }
+                    });
+                });
+                BluebirdPromise.map(resp.rows, function (row) {
+                    let privilege;
+                    if (_.find(dataTypePrivileges, function (d) {
+                        privilege = d;
+                        return privilege.dataType.name === row.type;
+                    })) {
+                        if (privilege.privilegeLevel === VIEW_OVERVIEW) { row.metadata = {}; }
+                        if (row.parent_data !== null && _.find(idRows, function (i) { return i === row.parent_data; })) {
+                            return { 'source': row.parent_data, 'target': row.id, 'name': row.id, 'type': row.type, 'typeId': row.typeId, 'biobankCode': row.biobankcode, 'metadata': row.metadata, privilege: privilege.privilegeLevel };
+                        } else if (row.parent_sample !== null && _.find(idRows, function (i) { return i === row.parent_sample; })) {
+                            return { 'source': row.parent_sample, 'target': row.id, 'name': row.id, 'type': row.type, 'typeId': row.typeId, 'biobankCode': row.biobankcode, 'metadata': row.metadata, privilege: privilege.privilegeLevel };
+                        } else if (row.parent_subject !== null && _.find(idRows, function (i) { return i === row.parent_subject; })) {
+                            return { 'source': row.parent_subject, 'target': row.id, 'name': row.id, 'type': row.type, 'typeId': row.typeId, 'biobankCode': row.biobankcode, 'metadata': row.metadata, privilege: privilege.privilegeLevel };
+                        } else {
+                            return { 'source': 'Patient', 'target': row.id, 'name': row.id, 'type': row.type, 'typeId': row.typeId, 'biobankCode': row.biobankcode, 'metadata': row.metadata, privilege: privilege.privilegeLevel };
+                            // console.log(privilege);
+                        }
+                    }
+                })
+                    .then(function (link) {
+                        links = _.compact(link);
+                        links = links && links.length > 0 ? links : [{ 'source': 'Patient', 'target': null, 'name': idSubject, 'type': 'Patient', 'metadata': {} }];
+                        let json = {
+                            'links': links,
+                            'idPatient': idSubject
+                        };
+                        return res.json(json);
+                    })
+                    .catch(/* istanbul ignore next */ function (err) {
+                        sails.log(err);
+                        return co.error(err);
+                    });
+            }
+        }
     })
 
 };
@@ -365,70 +446,11 @@ module.exports = {
      */
     createGraph: function (req, res) {
         const co = new ControllerOut(res);
-        const idSubject = req.param("idPatient");
-        const fetchSubjectDataTree = sails.hooks['persistence'].getDatabaseManager().recursiveQueries.fetchSubjectDataTree;
-        const operator = TokenService.getToken(req);
-        let dataTypePrivileges;
-
-        return DataTypePrivileges.find({ group: operator.groups }).populate('dataType')
-            .then(results => {
-                dataTypePrivileges = results;
-                // operator has not privileges on datatype, then throw Privileges Error
-                if (_.isEmpty(dataTypePrivileges)) {
-                    throw new PrivilegesError(`Authenticated user has not privileges`);
-                }
-                return fetchSubjectDataTree(idSubject, subjectTreeCb);
-            })
+        coroutines.createGraph(req, res)
             .catch(err => {
                 sails.log.error(err);
                 return co.error(err);
             });
-
-        function subjectTreeCb (err, resp) {
-            /* istanbul ignore if */
-            if (err) {
-                sails.log.error(err);
-                return co.error(err);
-            } else {
-                let links = []; let idRows = [];
-                _.forEach(resp.rows, function (row) {
-                    _.find(dataTypePrivileges, function (d) {
-                        if (d.dataType.name === row.type) {
-                            idRows.push(row.id);
-                        }
-                    });
-                });
-                BluebirdPromise.map(resp.rows, function (row) {
-                    let privilege;
-                    if (_.find(dataTypePrivileges, function (d) {
-                        privilege = d;
-                        return privilege.dataType.name === row.type;
-                    })) {
-                        if (privilege.privilegeLevel === VIEW_OVERVIEW) { row.metadata = {}; }
-                        if (row.parent_data !== null && _.find(idRows, function (i) { return i === row.parent_data; })) {
-                            return { 'source': row.parent_data, 'target': row.id, 'name': row.id, 'type': row.type, 'typeId': row.typeId, 'biobankCode': row.biobankcode, 'metadata': row.metadata, privilege: privilege.privilegeLevel };
-                        } else if (row.parent_sample !== null && _.find(idRows, function (i) { return i === row.parent_sample; })) {
-                            return { 'source': row.parent_sample, 'target': row.id, 'name': row.id, 'type': row.type, 'typeId': row.typeId, 'biobankCode': row.biobankcode, 'metadata': row.metadata, privilege: privilege.privilegeLevel };
-                        } else if (row.parent_subject !== null && _.find(idRows, function (i) { return i === row.parent_subject; })) {
-                            return { 'source': row.parent_subject, 'target': row.id, 'name': row.id, 'type': row.type, 'typeId': row.typeId, 'biobankCode': row.biobankcode, 'metadata': row.metadata, privilege: privilege.privilegeLevel };
-                        } else {
-                            return { 'source': 'Patient', 'target': row.id, 'name': row.id, 'type': row.type, 'typeId': row.typeId, 'biobankCode': row.biobankcode, 'metadata': row.metadata, privilege: privilege.privilegeLevel };
-                            // console.log(privilege);
-                        }
-                    }
-                })
-                    .then(function (link) {
-                        links = _.compact(link);
-                        links = links && links.length > 0 ? links : [{ 'source': 'Patient', 'target': null, 'name': idSubject, 'type': 'Patient', 'metadata': {} }];
-                        let json = { 'links': links };
-                        return res.json(json);
-                    })
-                    .catch(/* istanbul ignore next */ function (err) {
-                        sails.log(err);
-                        return co.error(err);
-                    });
-            }
-        }
     },
 
     /**

@@ -575,6 +575,7 @@
             $("#main").html(this.el);
             this.template = JST["views/templates/subject-dashboard.ejs"];
             this.idPatient = options.idPatient || undefined;
+            this.codePatient = options.codePatient || undefined;
             // this.dataTypes = options.dataTypes.models || undefined;
             this.subjects = options.subjects && options.subjects.toJSON();
             this.dataTypes = options.dataTypes;
@@ -591,7 +592,6 @@
             this.GraphView = new Subject.Views.Graph(this.optionsGraph);
             this.$graphCnt.append(this.GraphView.render().el);
             this.GraphView.renderSelectPatient();
-
             return this;
         }
 
@@ -611,6 +611,7 @@
             // $("#main").html(this.el);
             this.template = JST["views/templates/subject-graph.ejs"];
             this.idPatient = options.idPatient || undefined;
+            this.codePatient = options.codePatient || undefined;
             // this.dataTypes = options.dataTypes.models || undefined;
             this.subjects = options.subjects && options.subjects.toJSON();
             this.dataTypes = options.dataTypes;
@@ -620,9 +621,9 @@
         },
 
         render: function () {
-            this.$el.html(this.template({ __: i18n, idPatient: this.idPatient, subjects: this.subjects }));
+            this.$el.html(this.template({ __: i18n, idPatient: this.idPatient, codePatient: this.codePatient, subjects: this.subjects }));
 
-            if (this.idPatient) {
+            if (this.idPatient || this.codePatient) {
                 this.createGraph();
                 this.initRightClick();
             }
@@ -635,6 +636,9 @@
 
             if (this.idPatient) {
                 $('#subject-selector').val(this.idPatient);
+                $('#subject-selector').selectpicker('refresh');
+            } else {
+                $('#subject-selector').val("");
                 $('#subject-selector').selectpicker('refresh');
             }
         },
@@ -654,15 +658,27 @@
                 headers: {
                     'Authorization': 'Bearer ' + xtens.session.get("accessToken")
                 },
-                data: { idPatient: this.idPatient },
+                data: {
+                    idPatient: this.idPatient,
+                    codePatient: this.codePatient
+                },
                 // beforeSend: function () {
                 //     $('.loader-gif').css("display", "block");
                 // },
                 success: function (res) {
                     var that = _this;
-                    $('.d3-tip').remove();
+                    if (!that.idPatient) {
+                        that.idPatient = res.idPatient;
+                        that.renderSelectPatient();
+                    }
 
-                    var path = "subjects/dashboard?idPatient=" + that.idPatient;
+                    $('.d3-tip').remove();
+                    var path = "subjects/dashboard?";
+                    if (that.codePatient) {
+                        path += "codePatient=" + that.codePatient;
+                    } else {
+                        path += "idPatient=" + that.idPatient;
+                    }
                     xtens.router.navigate(path, { trigger: false });
                     // clean the previous graph if present
                     d3.select("#subject-svg-graph").remove();
@@ -751,7 +767,7 @@
                                     }
                                 }
                                 content = content + "<br /> <br />" + dato;
-                            } else { content = '<b>Patient</b><br />' + "ID: " + that.idPatient; }
+                            } else { content = '<b>Patient</b><br />' + "ID: " + that.idPatient; if (that.codePatient) content += '<br />' + "CODE: " + that.codePatient; }
                             var rightClicktext = "<br /> <br /> Right Click to Show Option";
                             return content + rightClicktext;
                         });
@@ -931,6 +947,7 @@
                     $('.loader-gif').css("display", "none");
                 },
                 error: function (res) {
+                    $('.loader-gif').css("display", "none");
                     xtens.error(res);
                 }
             });

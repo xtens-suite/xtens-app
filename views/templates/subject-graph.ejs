@@ -48,7 +48,8 @@
   <label for="subject-selector" class="text-uppercase"><%= __("select-a-patient") %>:</label>
   <div class="row">
     <div class="col-md-5">
-      <select id='subject-selector' class="form-group selectpicker" data-live-search="true" data-width="100%">
+      <select id='subject-selector' class="form-group selectpicker" data-live-search="true" data-width="100%" placeholder="TEST">
+        <option value="" selected disabled>Please select</option>
         <% _.each(subjects, function(subject) {
               var label = subject.givenName && subject.surname ? subject.surname + " " + subject.givenName + " - " + subject.code : subject.code; %>
         <option value='<%= subject.id %>'><%= label %></option>

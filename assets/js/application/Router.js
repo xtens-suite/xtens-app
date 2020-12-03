@@ -829,6 +829,7 @@
                         that.loadView(new Subject.Views.DashBoard({
                             dataTypes: dataTypesRes,
                             idPatient: queryParams.idPatient ? queryParams.idPatient : undefined,
+                            codePatient: queryParams.codePatient ? queryParams.codePatient : undefined,
                             subjects: new Subject.List(results)
                         }));
                     },
