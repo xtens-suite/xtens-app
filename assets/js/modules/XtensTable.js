@@ -457,7 +457,7 @@ function renderDatatablesDate (data, type) {
             if (sampleTypeChildren.length > 0) {
                 hasSampleChildren = true;
             }
-            this.optLinks = { dataTypes, dataTypePrivileges, hasDataSensitive: false, fileUpload, hasDataChildren, hasSampleChildren, showSubjectDashButton, dataTypeModel };
+            this.optLinks = { dataTypes: dataTypes, dataTypePrivileges: dataTypePrivileges, hasDataSensitive: false, fileUpload: fileUpload, hasDataChildren: hasDataChildren, hasSampleChildren: hasSampleChildren, showSubjectDashButton: showSubjectDashButton, dataTypeModel: dataTypeModel };
 
             this.prepareDataForRenderingJSONLeaf(dataTypePrivileges, dataTypes, queryArgs, queryArgs.dataType, this.isLeafSearch, true);
 
