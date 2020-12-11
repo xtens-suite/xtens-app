@@ -366,12 +366,12 @@
                         // if the loop value/unit arrays already exists push them in the arrays
                         else {
                             if (serialized[i].loopIndex > (metadata[fieldName].values.length - 1)) {
-                                let values = new Array(serialized[i].loopIndex + 1);
-                                _.forEach(values, function (v, i) {
-                                    values[i] = metadata[fieldName].values[i];
+                                var vals = new Array(serialized[i].loopIndex + 1);
+                                _.forEach(vals, function (v, i) {
+                                    vals[i] = metadata[fieldName].values[i];
                                 });
-                                values[serialized[i].loopIndex] = serialized[i].value;
-                                metadata[fieldName].values = values;
+                                vals[serialized[i].loopIndex] = serialized[i].value;
+                                metadata[fieldName].values = vals;
                             } else {
                                 metadata[fieldName].values[serialized[i].loopIndex] = serialized[i].value;
                             }
