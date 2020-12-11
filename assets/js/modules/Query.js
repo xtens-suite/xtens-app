@@ -545,12 +545,12 @@
                     $el.selectpicker('show');
                     if (this.model.get('fieldUnit') && this.model.get('fieldUnit').length > 0) {
                         $el.selectpicker('val', this.model.get('fieldUnit'));
-                        $el.selectpicker('refresh');
                     }
                     $el.removeClass('hidden');
                     $el.change(function () {
                         $el.trigger('input');
                     });
+                    $el.selectpicker('refresh');
                 },
                 getVal: function ($el) {
                     return $el.val();
