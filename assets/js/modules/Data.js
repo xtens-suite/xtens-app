@@ -131,6 +131,7 @@
             this.set("groupName", options.groupName);
             if (options.loopParams) {
                 this.set("loop", options.loopParams.name);
+                this.set("loopIndex", options.loopParams.index);
             }
 
             var fieldName = useFormattedNames ? field.formattedName : field.name;
@@ -348,20 +349,32 @@
                 var fieldName = useFormattedNames ? serialized[i].formattedName : serialized[i].name;
 
                 // if it's not a field of a loop just store the value/unit pair as an object
-                if ((serialized[i].value || !isNaN(serialized[i].value)) && serialized[i].value != null && serialized[i].value !== "") {
-                    if (!serialized[i].loop) {
+                if ((serialized[i].value || !isNaN(serialized[i].value))) {
+                    if (!serialized[i].loop && serialized[i].value != null && serialized[i].value !== "") {
                         metadata[fieldName] = { value: serialized[i].value, unit: unit, group: serialized[i].groupName };
                     }
 
                     // if it's a field within a loop store the value unit pair within two arrays
                     else {
                         if (!metadata[fieldName]) {
+                            var size = serialized[i].loopIndex + 1;
+                            var values = []; while (size--) values[size] = null;
+                            values[serialized[i].loopIndex] = serialized[i].value;
                             metadata[fieldName] = { values: [serialized[i].value], group: serialized[i].groupName, loop: serialized[i].loop };
                             metadata[fieldName].units = unit ? [unit] : undefined;
                         }
                         // if the loop value/unit arrays already exists push them in the arrays
                         else {
-                            metadata[fieldName].values.push(serialized[i].value);
+                            if (serialized[i].loopIndex > (metadata[fieldName].values.length - 1)) {
+                                let values = new Array(serialized[i].loopIndex + 1);
+                                _.forEach(values, function (v, i) {
+                                    values[i] = metadata[fieldName].values[i];
+                                });
+                                values[serialized[i].loopIndex] = serialized[i].value;
+                                metadata[fieldName].values = values;
+                            } else {
+                                metadata[fieldName].values[serialized[i].loopIndex] = serialized[i].value;
+                            }
                             if (unit && _.isArray(metadata[fieldName].units)) {
                                 metadata[fieldName].units.push(serialized[i].unit);
                             }
@@ -447,6 +460,10 @@
                var $last = this.$el.children('.metadatacomponent-body').last();
                $last.after(newLoopbody); */
             var len = this.component && this.component.content && this.component.content.length;
+            if (isNaN(index)) {
+                index = this.loopRecords;
+                this.loopRecords = this.loopRecords + 1;
+            }
             var loopParams = { name: this.component.name, index: index };
             for (var i = 0; i < len; i++) {
                 this.add(this.component.content[i], this.model.metadata, this.model.get("groupName"), loopParams);
