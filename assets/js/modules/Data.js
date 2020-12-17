@@ -350,10 +350,11 @@
 
                 // if it's not a field of a loop just store the value/unit pair as an object
                 if ((serialized[i].value || !isNaN(serialized[i].value))) {
-                    if (!serialized[i].loop && serialized[i].value != null && serialized[i].value !== "") {
-                        metadata[fieldName] = { value: serialized[i].value, unit: unit, group: serialized[i].groupName };
+                    if (!serialized[i].loop) {
+                        if (serialized[i].value != null && serialized[i].value !== "") {
+                            metadata[fieldName] = { value: serialized[i].value, unit: unit, group: serialized[i].groupName };
+                        }
                     }
-
                     // if it's a field within a loop store the value unit pair within two arrays
                     else {
                         if (!metadata[fieldName]) {
