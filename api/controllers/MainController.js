@@ -65,7 +65,7 @@ const MainController = {
             obj.executor = operator.id;
             obj.vcfData = vcfData;
             sails.log("MainController.executeCustomDataManagement - executing customised function");
-            const ps = require("child_process").spawn(sails.config.xtens.customisedDataMap.get(key), [JSON.stringify(obj)], { stdio: ['ipc'] });
+            const ps = require("child_process").spawn(sails.config.xtens.customisedDataMap.get(key), ['--inspect-brk=9229', JSON.stringify(obj)], { stdio: ['ipc'] });
 
             // ps.stdout.on('data', (data) => {
             //     console.log(data.toString());
