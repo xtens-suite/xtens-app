@@ -964,7 +964,7 @@
                     var id = options.$trigger.attr('id').split('_')[0];
                     // var type = options.$trigger.attr('id').split('_')[1];
                     var route = _.find(that.data, function (d) {
-                        return d.id === id;
+                        return parseInt(id) === d.id;
                     });
                     var url = route[key];
                     xtens.router.navigate(url, { trigger: true });
