@@ -1645,7 +1645,7 @@
             }
 
             if ($('#data-type').val() === 'NGSAN') {
-                vcfData.reWritePath = $('#reWritePath').val() == 'on';
+                vcfData.reWritePath = $('#reWritePath').is(":checked");
             }
 
             var that = this; var dataType = this.$("select option:selected").val(); var superType = _.find(procedures, { 'value': dataType }).superType; var owner = _.find(procedures, { 'value': dataType }).owner;
