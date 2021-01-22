@@ -778,18 +778,17 @@
                         value: null
                     }
                 },
-                getVal: function ($el, ev, options) {
+                getVal: function ($el) {
                     var value = parseInt($el.val());
                     return _.isNaN(value) ? null : value;
                     // return _.findWhere(options.view.dataTypes, {id: value });
                 },
-                onGet: function (val, options) {
+                onGet: function (val) {
                     // if you get the whole DataType object you must retrieve the ID
                     if (_.isObject(val)) {
                         return (val && val.id);
-                    }
-                    // otherwise you've already the ID
-                    else {
+                    } else {
+                        // otherwise you've already the ID
                         return val;
                     }
                 }
@@ -1409,7 +1408,8 @@
             'change #subject-selector': 'getSubjectSamples',
             'click #new-subject': 'goToNewSubject',
             'click #new-sample': 'goToNewSample',
-            'change #sample-selector': 'setSampleTypeSelector'
+            'change #sample-selector': 'setSampleTypeSelector',
+            'click #reloadDaemonsTableButton': 'startReloadingDaemons'
         },
 
         tagName: 'div',
@@ -1438,6 +1438,7 @@
             this.$modal = $(".modal-cnt");
             this.$daemonNoResultCnt = this.$("#daemonNoResultCnt");
             // this.$aDeamonTableTag = $("#collapse-daemons");
+            this.keepCalling = false;
             this.daemons = options.daemons;
             this.initializeDaemonsTable(this.daemons, options.operator);
         },
@@ -1449,7 +1450,7 @@
             _.forEach(procedures, function (procedure) {
                 var dt = _.find(that.dataTypes, function (dt) { return dt.superType.id === procedure.superType; });
                 if (dt && _.find(that.privileges, { 'dataType': dt.id })) {
-                    textHtml = textHtml + '<option value=\"' + procedure.value + '\">' + procedure.label + '</option>';
+                    textHtml = textHtml + '<option value="' + procedure.value + '">' + procedure.label + '</option>';
                 }
             });
             $("#data-type").html(textHtml).selectpicker();
@@ -1566,7 +1567,7 @@
                     sort: 'created_at ASC'
                 },
                 contentType: 'application/json',
-                success: function (subjects, options, res) {
+                success: function (subjects) {
                     _.forEach(subjects, function (subject) {
                         textHtml = textHtml + '<option value=\"' + subject.id + '#' + subject.code + '\">' + subject.code + '</option>';
                     });
@@ -1682,6 +1683,49 @@
             return false;
         },
 
+        startReloadingDaemons: function () {
+            var that = this;
+            this.keepCalling = true;
+            var timeleft = 10;
+
+            var refreshTimer = setInterval(function () {
+                if (timeleft <= 0) {
+                    clearInterval(refreshTimer);
+                    $('#refresh-dmn').removeClass('icn-spinner');
+                    $('#reloadDaemonsTableButton').prop('disabled', false);
+                    $('#reloadDaemonsTableButton').html('<i id="refresh-dmn" class="fa fa-refresh"></i> Check Processes');
+                    $("#countdown").text("");
+                    that.keepCalling = false;
+
+                    console.log("Kill setInterval ReloadDaemonstable");
+                } else {
+                    $("#countdown").text(timeleft + "s remaining");
+                }
+                timeleft -= 1;
+            }, 1000);
+
+            $('#reloadDaemonsTableButton').html('<i id="refresh-dmn" class="fa fa-refresh"></i> Checking');
+            $('#reloadDaemonsTableButton').prop('disabled', true);
+            $('#refresh-dmn').addClass('icn-spinner');
+
+            that.reloadDaemonsTable();
+        },
+
+        reloadDaemonsTable: function () {
+            var that = this;
+            console.log("Calling ReloadDaemonstable");
+            this.tableView.refreshDaemonsTable();
+            this.interval = setInterval(function () {
+                if (!that.keepCalling) {
+                    clearTimeout(that.interval);
+                    // console.log("stop setInterval ReloadDaemonstable");
+                } else {
+                    that.tableView.refreshDaemonsTable();
+                    // console.log("Calling ReloadDaemonstable");
+                }
+            }, 2000);
+        },
+
         initializeDaemonsTable: function (results, operator) {
             if (this.tableView) {
                 this.tableView.destroy();
@@ -1689,11 +1733,7 @@
             this.tableView = new Daemon.Views.DaemonsTable({ daemons: results, operator: operator });
             this.$tableCnt.append(this.tableView.render().el);
             this.tableView.displayDaemonsTable();
-            this.interval = setInterval((function (self) { // Self-executing func which takes 'this' as self
-                return function () { // Return a function in the context of 'self'
-                    self.tableView.refreshDaemonsTable();
-                };
-            })(this), 2000);
+            // this.startReloadingDaemons();
         },
 
         saveOnSuccess: function (infoObj) {
@@ -1719,7 +1759,7 @@
                 that.dropzone.removeAllFiles(true);
                 that.modal.remove();
                 $(".new-import-btn-cnt").css('display', 'block');
-                that.tableView.refreshDaemonsTable();
+                that.startReloadingDaemons();
                 $("#collapse-import").collapse('hide');
             });
         }

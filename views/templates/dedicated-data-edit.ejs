@@ -124,12 +124,20 @@
 </div>
 
 <div class="row" style="margin-top: 2em;">
-  <h2><%= __("customised-data-daemon") %></h2>
+  <div class="col-xs-8">
+    <h2><%= __("customised-data-daemon") %></h2>
+  </div>
+  <div class="col-xs-2" style="margin-top: 2.5em;">
+    <div id="countdown" style="float: right;"></div>
+  </div>
+  <div class="col-xs-2" style="margin-top: 2em; padding-right: 0px;">
+    <button id="reloadDaemonsTableButton" class="btn btn-default" style="float: right;"><i id="refresh-dmn" class="fa fa-refresh"></i> Check Processes</button>
+  </div>
+</div>
   <div class="row text-center">
     <div class="col-xs-12">
       <div id="daemon-table-cnt" class="row" style="margin-top:2em;"></div>
     </div>
   </div>
-</div>
 </div>
 <div class="customised-data-modal"></div>
