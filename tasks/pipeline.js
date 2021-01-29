@@ -52,6 +52,7 @@ var jsFilesToInject = [
     'dependencies/**/dataTables.bootstrap.js',
     'dependencies/**/dataTables.buttons.js',
     'dependencies/**/dataTables.fixedColumns.js',
+    'dependencies/**/dataTables.select.js',
     'dependencies/**/buttons.bootstrap.js',
     'dependencies/**/buttons.html5.js',
     'dependencies/**/jszip.js',

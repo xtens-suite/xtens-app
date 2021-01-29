@@ -231,6 +231,21 @@ function renderDatatablesDate (data, type) {
                 pagingType: "full_numbers" // DOES NOT WORK!!
             };
 
+            if (this.checkNGSProject()) {
+                this.tableOpts.columnDefs.push({
+                    orderable: false,
+                    className: 'select-checkbox',
+                    targets: 0
+                });
+                this.tableOpts.select = {
+                    style: 'os',
+                    selector: 'td:not(:last-child)'
+                };
+                this.tableOpts.order = [
+                    [1, 'asc']
+                ];
+            }
+
             if (this.tableOpts && !_.isEmpty(this.tableOpts.data)) {
                 $.fn.dataTable.ext.search.pop();
 
@@ -305,8 +320,122 @@ function renderDatatablesDate (data, type) {
                         extension: ".vcf"
                         // title:'##fileformat=VCFv4.1'
                     });
-                }
+                } else if (this.checkNGSProject()) {
+                    // this.table.on("click", "th.select-checkbox", function () {
+                    //     if ($("th.select-checkbox").hasClass("selected")) {
+                    //         that.table.rows().deselect();
+                    //         $("th.select-checkbox").removeClass("selected");
+                    //     } else {
+                    //         that.table.rows().select();
+                    //         $("th.select-checkbox").addClass("selected");
+                    //     }
+                    // }).on("select deselect", function () {
+                    //     // ("Some selection or deselection going on");
+                    //     if (that.table.rows({
+                    //         selected: true
+                    //     }).count() !== that.table.rows().count()) {
+                    //         $("th.select-checkbox").removeClass("selected");
+                    //     } else {
+                    //         $("th.select-checkbox").addClass("selected");
+                    //     }
+                    // });
+                    // $('th.select-checkbox').append('<input type="checkbox" class="selectAll" name="selectAll" value="all">');
+                    buttons.push({
+                        text: "Select/Deselect all",
+                        className: "selectAllButton",
+                        action: function (e, dt, button, config) {
+                            if ($("td.select-checkbox").hasClass("selected")) {
+                                that.table.rows().deselect();
+                                $("td.select-checkbox").removeClass("selected");
+                            } else {
+                                that.table.rows().select();
+                                $("td.select-checkbox").addClass("selected");
+                            }
+                        }
+                    },
+                    {
+                        extend: 'selected',
+                        text: 'SnakeMake',
+                        action: function (e, dt, node, config) {
+                            var rows = dt.rows({ selected: true });
 
+                            // alert('There are ' + rows.count() + '(s) selected in the table');
+                            that.table.buttons('.ngsSnakeMake').trigger();
+                            // that.table.button('8').trigger();
+                            // that.table.button('9').trigger();
+                            // that.table.button('10').trigger();
+                        }
+                    },
+                    {
+                        extend: 'csvHtml5',
+                        className: "ngsSnakeMake",
+                        text: 'NGS Units',
+                        exportOptions: {
+                            orthogonal: 'export', // to export source data and not rendered data
+                            columns: [] // export only vcf columns
+
+                        },
+                        customize: function (csv) {
+                            return that.buildCsvInfoNGSUnits();
+                        },
+                        fieldSeparator: '\t',
+                        filename: 'units',
+                        extension: ".tsv"
+                        // title:'##fileformat=VCFv4.1'
+                    },
+                    {
+                        extend: 'csvHtml5',
+                        className: "ngsSnakeMake",
+                        text: 'NGS Samples',
+                        exportOptions: {
+                            orthogonal: 'export', // to export source data and not rendered data
+                            columns: [] // export only vcf columns
+
+                        },
+                        customize: function (csv) {
+                            return that.buildCsvInfoNGSSamples();
+                        },
+                        fieldSeparator: '\t',
+                        filename: 'samples',
+                        extension: ".tsv"
+                        // title:'##fileformat=VCFv4.1'
+                    },
+                    {
+                        extend: 'csvHtml5',
+                        className: "ngsSnakeMake",
+                        text: 'NGS sets',
+                        exportOptions: {
+                            orthogonal: 'export', // to export source data and not rendered data
+                            columns: [] // export only vcf columns
+
+                        },
+                        customize: function (csv) {
+                            return that.buildCsvInfoNGSSets();
+                        },
+                        fieldSeparator: '\t',
+                        filename: 'sets',
+                        extension: ".tsv"
+                        // title:'##fileformat=VCFv4.1'
+                    },
+                    {
+                        extend: 'csvHtml5',
+                        className: "ngsSnakeMake",
+                        text: 'NGS samples ped',
+                        exportOptions: {
+                            orthogonal: 'export', // to export source data and not rendered data
+                            columns: [] // export only vcf columns
+
+                        },
+                        customize: function (csv) {
+                            return that.buildCsvInfoNGSSamplesPed();
+                        },
+                        fieldSeparator: '\t',
+                        filename: 'samples',
+                        extension: ".ped"
+                        // title:'##fileformat=VCFv4.1'
+                    });
+                    this.getCsvInfoNGSCore();
+                }
                 // buttons = buttons.concat(excelPlainData);
                 this.colvisButtons.push(buttons);
                 this.colvisButtons = _.flatten(this.colvisButtons);
@@ -314,6 +443,8 @@ function renderDatatablesDate (data, type) {
                     buttons: this.colvisButtons
                 });
                 this.table.buttons().container().appendTo($('.col-sm-6:eq(0)', this.table.table().container()));
+
+                $('.ngsSnakeMake').addClass('hidden');
             } else {
                 // the returned dataset is empty
                 this.remove();
@@ -397,6 +528,142 @@ function renderDatatablesDate (data, type) {
             }
         },
 
+        checkNGSProject: function () {
+            // abilita selezione
+            this.rowSelection = true;
+            return xtens.session.get('activeProject') === 'NGSCore';
+        },
+
+        getCsvInfoNGSCore: function () {
+            var that = this;
+            return $.ajax({
+                method: 'POST',
+                headers: {
+                    'Authorization': 'Bearer ' + xtens.session.get("accessToken")
+                },
+                contentType: 'application/x-www-form-urlencoded; charset=UTF-8',
+                url: '/query/dataSearch',
+                data: 'queryArgs={"dataType":210,"model":"Subject","content":[{"personalDetails":true,"surnameComparator":"=","givenNameComparator":"=","birthDateComparator":"="},{"codeComparator":"LIKE","specializedQuery":"Subject"},{"sexComparator":"IN","specializedQuery":"Subject"},{"getMetadata":true,"label":"tissue","dataType":211,"content":[{"biobankComparator":"=","specializedQuery":"Sample"},{"biobankCodeComparator":"LIKE","specializedQuery":"Sample"},{"getMetadata":true,"label":"ngs_analysis","dataType":212,"model":"Data","title":"NGS Analysis","superType":114}],"model":"Sample","title":"Tissue","superType":113}],"wantsSubject":true,"leafSearch":true,"wantsPersonalInfo":true}&isStream=false',
+                success: function (results) {
+                    that.sourceNGS = that.buildPlainData(results.data);
+                    // that.sourceNGS = _.filter(that.buildPlainData(results.data), function (sourcerow) {
+                    //     return sourcerow && sourcerow.tissue_biobank_code && sourcerow.ngs_analysis && sourcerow.ngs_analysis.flow_cell && sourcerow.ngs_analysis.flow_cell.values && sourcerow.ngs_analysis.flow_cell.values[0] &&
+                    //     sourcerow.ngs_analysis.flow_cell && sourcerow.ngs_analysis.flow_cell.values && sourcerow.ngs_analysis.flow_cell.values[0] &&
+                    //     sourcerow.ngs_analysis.lane && sourcerow.ngs_analysis.lane.values && sourcerow.ngs_analysis.lane.values[0] &&
+                    //     sourcerow.ngs_analysis.fastq_file_path_r1 && sourcerow.ngs_analysis.fastq_file_path_r1.values && sourcerow.ngs_analysis.fastq_file_path_r1.values[0] &&
+                    //     sourcerow.ngs_analysis.fastq_file_path_r2 && sourcerow.ngs_analysis.fastq_file_path_r2.values && sourcerow.ngs_analysis.fastq_file_path_r2.values[0];
+                    // });
+                }
+            });
+        },
+
+        buildCsvInfoNGSUnits: function () {
+            var that = this;
+            var csvContent = "sample\tunit\tfq1\tfq2\r\n";
+            _.forEach(this.table.rows({ selected: true }).data(), function (d) {
+                var sourcerow = _.find(that.sourceNGS, function (s) {
+                    return s.code === d.code;
+                });
+                if (sourcerow && sourcerow.tissue_biobank_code && sourcerow.ngs_analysis && sourcerow.ngs_analysis.flow_cell && sourcerow.ngs_analysis.flow_cell.values && sourcerow.ngs_analysis.flow_cell.values[0] &&
+                            sourcerow.ngs_analysis.flow_cell && sourcerow.ngs_analysis.flow_cell.values && sourcerow.ngs_analysis.flow_cell.values[0] &&
+                            sourcerow.ngs_analysis.lane && sourcerow.ngs_analysis.lane.values && sourcerow.ngs_analysis.lane.values[0] &&
+                            sourcerow.ngs_analysis.fastq_file_path_r1 && sourcerow.ngs_analysis.fastq_file_path_r1.values && sourcerow.ngs_analysis.fastq_file_path_r1.values[0] &&
+                            sourcerow.ngs_analysis.fastq_file_path_r2 && sourcerow.ngs_analysis.fastq_file_path_r2.values && sourcerow.ngs_analysis.fastq_file_path_r2.values[0]) {
+                    for (let index = 0; index < sourcerow.ngs_analysis.flow_cell.values.length; index++) {
+                        csvContent = csvContent + sourcerow.tissue_biobank_code + '\t' +
+                            sourcerow.ngs_analysis.flow_cell.values[index] + '.' + sourcerow.ngs_analysis.lane.values[index] + '.' + sourcerow.tissue_biobank_code + '\t' +
+                             sourcerow.ngs_analysis.fastq_file_path_r1.values[index] + '\t' +
+                             sourcerow.ngs_analysis.fastq_file_path_r2.values[index] + '\r\n';
+                    }
+                    // csvContent = csvContent + sourcerow.tissue_biobank_code + '\t' +
+                    //         sourcerow.ngs_analysis.flow_cell.values[0] + '.' + sourcerow.ngs_analysis.lane.values[0] + '.' + sourcerow.tissue_biobank_code + '\t' +
+                    //          sourcerow.ngs_analysis.fastq_file_path_r1.values[0] + '\t' +
+                    //          sourcerow.ngs_analysis.fastq_file_path_r2.values[0] + '\r\n';
+                }
+            });
+            return csvContent;
+        },
+
+        buildCsvInfoNGSSamples: function () {
+            var that = this;
+            var csvContent = "sample\tunits\tkit\r\n";
+            _.forEach(this.table.rows({ selected: true }).data(), function (d) {
+                var sourcerow = _.find(that.sourceNGS, function (s) {
+                    return s.code === d.code;
+                });
+                if (sourcerow && sourcerow.tissue_biobank_code && sourcerow.ngs_analysis && sourcerow.ngs_analysis.flow_cell && sourcerow.ngs_analysis.flow_cell.values && sourcerow.ngs_analysis.flow_cell.values[0] &&
+                            sourcerow.ngs_analysis.flow_cell && sourcerow.ngs_analysis.flow_cell.values && sourcerow.ngs_analysis.flow_cell.values[0] &&
+                            sourcerow.ngs_analysis.lane && sourcerow.ngs_analysis.lane.values && sourcerow.ngs_analysis.lane.values[0] &&
+                            sourcerow.ngs_analysis.target_details && sourcerow.ngs_analysis.target_details.value) {
+                    var units = '';
+                    for (let index = 0; index < sourcerow.ngs_analysis.flow_cell.values.length; index++) {
+                        units = units + sourcerow.ngs_analysis.flow_cell.values[index] + '.' + sourcerow.ngs_analysis.lane.values[index] + '.' + sourcerow.tissue_biobank_code + ',';
+                    }
+                    csvContent = csvContent +
+                            sourcerow.tissue_biobank_code + '\t' +
+                            units + '\t' +
+                            sourcerow.ngs_analysis.target_details.value + '\r\n';
+                }
+            });
+            return csvContent;
+        },
+
+        buildCsvInfoNGSSets: function () {
+            var that = this;
+            var csvContent = " \t \r\n";
+            _.forEach(this.table.rows({ selected: true }).data(), function (d) {
+                var sourcerow = _.find(that.sourceNGS, function (s) {
+                    return s.code === d.code;
+                });
+                if (sourcerow) {
+                    var sourcefamily = _.filter(that.sourceNGS, function (s) {
+                        return s.metadata.family_id.value === sourcerow.metadata.family_id.value;
+                    });
+                    if (csvContent.indexOf(sourcerow.metadata.family_id.value) < 0) {
+                        csvContent = csvContent + sourcerow.metadata.family_id.value + '\t' +
+                        sourcefamily.map(function (s) { return s.tissue_biobank_code; }).join(',') + '\r\n';
+                    }
+                }
+            });
+            return csvContent;
+        },
+
+        buildCsvInfoNGSSamplesPed: function () {
+            var that = this;
+            var csvContent = '';
+            _.forEach(this.table.rows({ selected: true }).data(), function (d) {
+                var sourcerow = _.find(that.sourceNGS, function (s) {
+                    return s.code === d.code;
+                });
+                if (sourcerow) {
+                    var sourcefamily = _.filter(that.sourceNGS, function (s) {
+                        return s.metadata.family_id.value === sourcerow.metadata.family_id.value;
+                    });
+
+                    if (csvContent.indexOf(sourcerow.metadata.family_id.value) < 0) {
+                        // csvContent = csvContent + sourcerow.metadata.family_id.value + '\t' +
+                        // sourcefamily.map(function (s) { return s.tissue_biobank_code; }).join(',') + '\r\n';
+                        var mother = _.find(sourcefamily, function (s) { return s.metadata.status.value == 'MOTHER'; });
+                        var father = _.find(sourcefamily, function (s) { return s.metadata.status.value == 'FATHER'; });
+                        let familytxt = '';
+                        _.forEach(sourcefamily, function (subj) {
+                            var sex = subj.sex == 'M' ? '1' : subj.sex == 'F' ? '2' : '0';
+                            var affected = subj.metadata.affected.value ? '2' : '1';
+                            var motherTissueCode = subj.metadata.status.value == 'PROBAND' && mother && mother.tissue_biobank_code ? mother.tissue_biobank_code : '0';
+                            var fatherTissueCode = subj.metadata.status.value == 'PROBAND' && father && father.tissue_biobank_code ? father.tissue_biobank_code : '0';
+                            familytxt = familytxt + subj.metadata.family_id.value + '\t' +
+                        subj.tissue_biobank_code + '\t' +
+                        motherTissueCode + '\t' +
+                        fatherTissueCode + '\t' +
+                        sex + '\t' +
+                        affected + '\r\n';
+                        });
+                        csvContent = csvContent + familytxt;
+                    }
+                }
+            });
+            return csvContent;
+        },
         /**
          * @method
          * @name prepareDataForRenderingJSON
@@ -410,15 +677,26 @@ function renderDatatablesDate (data, type) {
 
             var model = this.multiProject || this.isLeafSearch ? dataTypes[0].get("model") : dataTypes.get("model");
 
+            if (this.checkNGSProject) {
+                this.columns.push(
+                    {
+                        "className": 'select-checkbox',
+                        "orderable": false,
+                        "data": null,
+                        "defaultContent": ''
+                    }
+                );
+            }
+
             if (this.isLeafSearch) {
-                this.columns = [
+                this.columns.push(
                     {
                         "className": 'details-control',
                         "orderable": false,
                         "data": null,
                         "defaultContent": '<i style="cursor:pointer; color:#337ab7;" class="fa fa-plus-circle"></i>'
                     }
-                ];
+                );
                 this.childColumns.push(this.insertModelSpecificColumnsNoLeaf(model, xtens.session.get('canAccessPersonalData')));
                 this.childColumns = _.flatten(this.childColumns);
             } else {
