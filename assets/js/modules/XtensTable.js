@@ -601,7 +601,7 @@ function renderDatatablesDate (data, type) {
                     }
                     csvContent = csvContent +
                             sourcerow.tissue_biobank_code + '\t' +
-                            units + '\t' +
+                            units.slice(0, -1) + '\t' +
                             sourcerow.ngs_analysis.target_details.value + '\r\n';
                 }
             });
@@ -610,7 +610,7 @@ function renderDatatablesDate (data, type) {
 
         buildCsvInfoNGSSets: function () {
             var that = this;
-            var csvContent = " \t \r\n";
+            var csvContent = "";
             _.forEach(this.table.rows({ selected: true }).data(), function (d) {
                 var sourcerow = _.find(that.sourceNGS, function (s) {
                     return s.code === d.code;
