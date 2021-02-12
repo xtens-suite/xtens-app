@@ -179,7 +179,7 @@
                 serialized.hasOwnProperty("comparator") &&
                 serialized.hasOwnProperty("fieldName") &&
                 serialized.hasOwnProperty("fieldType") &&
-                serialized.hasOwnProperty("fieldValue") &&
+                ((['IS NULL', 'IS NOT NULL'].indexOf(serialized.comparator) > -1) || serialized.hasOwnProperty("fieldValue")) &&
                 serialized.hasOwnProperty("isInLoop") &&
                 serialized.hasOwnProperty("isList");
         },
@@ -255,7 +255,7 @@
         events: {
             'change [name="field-value"]': 'onFieldValueChange',
             'click [name="field-value"]': 'onFieldValueClick',
-            'change [name=comparator]': 'onFieldValueChange'
+            'change [name=comparator]': 'onComparisonValueChange'
         },
 
         className: 'form-group',
@@ -330,6 +330,11 @@
             if (this.selectedField.hasUnit && this.selectedField.possibleUnits) {
                 this.$unit.prop('required', true);
             }
+            if (['IS NULL', 'IS NOT NULL'].indexOf(this.model.get('comparator')) > -1) {
+                this.$fieldValue.prop('required', false);
+                this.$fieldValue.addClass('hidden');
+                this.$('[name=field-value]').val("");
+            }
         },
 
         initDatepicker: function () {
@@ -352,6 +357,27 @@
             this.$fieldValue = this.$("input[name='" + FIELD_VALUE + "']");
             this.setValidationOptions(this.selectedField);
             $("#query-form").parsley(parsleyOpts);
+        },
+
+        onComparisonValueChange: function (ev) {
+            ev.preventDefault();
+            if (this.$fieldValue) {
+                var currentComparison = this.$('[name=comparator]').select2('data');
+                switch (currentComparison.text) {
+                    case 'IS NULL':
+                    case 'IS NOT NULL':
+                        this.$fieldValue.prop('required', false);
+                        this.$fieldValue.addClass('hidden');
+                        this.$('[name=field-value]').val("");
+                        break;
+
+                    default:
+                        this.$fieldValue.prop('required', true);
+                        this.$fieldValue.removeClass('hidden');
+                        break;
+                }
+                this.onFieldValueChange(ev);
+            }
         },
 
         onFieldValueChange: function (ev) {
