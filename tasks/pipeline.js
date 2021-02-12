@@ -50,6 +50,7 @@ var jsFilesToInject = [
     'dependencies/**/dropzone.js',
     'dependencies/**/jquery.dataTables.js',
     'dependencies/**/dataTables.bootstrap.js',
+    'dependencies/**/natural.js',
     'dependencies/**/dataTables.buttons.js',
     'dependencies/**/dataTables.fixedColumns.js',
     'dependencies/**/dataTables.select.js',

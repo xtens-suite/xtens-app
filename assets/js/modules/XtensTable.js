@@ -226,7 +226,9 @@ function renderDatatablesDate (data, type) {
                 autoWidth: false,
                 deferRender: true,
                 columnDefs: [
-                    { "className": "dt-center", "targets": "_all" }
+                    { "className": "dt-center", "targets": "_all" },
+                    { "type": "natural", "targets": "_all" }
+
                 ],
                 pagingType: "full_numbers" // DOES NOT WORK!!
             };
@@ -241,9 +243,9 @@ function renderDatatablesDate (data, type) {
                     style: 'os',
                     selector: 'td:not(:last-child)'
                 };
-                this.tableOpts.order = [
-                    [1, 'asc']
-                ];
+                // this.tableOpts.order = [
+                //     [1, 'asc']
+                // ];
             }
 
             if (this.tableOpts && !_.isEmpty(this.tableOpts.data)) {

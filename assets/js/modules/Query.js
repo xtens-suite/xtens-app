@@ -105,7 +105,8 @@
                     var leaf = {
                         label: res.label.replace(/[_]/g, " ").replace(/(^|\s)\S/g, function (l) { return l.toUpperCase(); }),
                         getMetadata: res.getMetadata,
-                        superType: res.superType
+                        superType: res.superType,
+                        junction: res.junction
                     };
                     leafSearch.push(leaf);
                 }
@@ -297,19 +298,19 @@
             this.$unitCnt = this.$(".query-unit-div");
             this.$junction = this.$("input[name=junction]");
             if (this.model.get("fieldName")) {
-                var selectedField = this.generateStatementOptions(this.model, this.model.get("fieldName"));
+                this.selectedField = this.generateStatementOptions(this.model, this.model.get("fieldName"));
                 this.$fieldValue = this.$("input[name='" + FIELD_VALUE + "']");
-                this.setValidationOptions(selectedField);
+                this.setValidationOptions();
                 $("#query-form").parsley(parsleyOpts);
             }
             return this;
         },
 
-        setValidationOptions: function (selectedField) {
+        setValidationOptions: function () {
             this.$fieldValue.prop('required', true);
             this.$comparator.prop('required', true);
 
-            switch (selectedField.fieldType) {
+            switch (this.selectedField.fieldType) {
                 case FieldTypes.INTEGER:
                     this.$fieldValue.attr("data-parsley-type", "integer");
                     break;
@@ -322,11 +323,11 @@
 
                     break;
             }
-            if (selectedField.hasRange) {
-                this.$fieldValue.attr("min", selectedField.min);
-                this.$fieldValue.attr("max", selectedField.max);
+            if (this.selectedField.hasRange) {
+                this.$fieldValue.attr("min", this.selectedField.min);
+                this.$fieldValue.attr("max", this.selectedField.max);
             }
-            if (selectedField.hasUnit && selectedField.possibleUnits) {
+            if (this.selectedField.hasUnit && this.selectedField.possibleUnits) {
                 this.$unit.prop('required', true);
             }
         },
@@ -347,9 +348,9 @@
                     model.unset(key);
                 }
             });
-            var selectedField = this.generateStatementOptions(model, fieldName);
+            this.selectedField = this.generateStatementOptions(model, fieldName);
             this.$fieldValue = this.$("input[name='" + FIELD_VALUE + "']");
-            this.setValidationOptions(selectedField);
+            this.setValidationOptions(this.selectedField);
             $("#query-form").parsley(parsleyOpts);
         },
 
@@ -378,6 +379,7 @@
                     case 'IENDS WITH':
                         currentFieldValue = '%' + currentFieldValue;
                         break;
+
                     default:
                         break;
                 }
@@ -423,25 +425,31 @@
         generateComparisonItem: function (metadataField) {
             var data = []; var fieldType = metadataField.fieldType;
             if (fieldType === FieldTypes.BOOLEAN) {
-                data = [{ id: '=', text: '=' }];
+                data = [{ id: '=', text: '=' },
+                    { id: 'IS NULL', text: 'IS NULL' }, { id: 'IS NOT NULL', text: 'IS NOT NULL' }];
             } else if (metadataField.isList) {
                 if (metadataField._loop) {
-                    data = [{ id: '?&', text: 'MATCH ALL' }, { id: '?|', text: 'MATCH ANY' }];
+                    data = [{ id: '?&', text: 'MATCH ALL' }, { id: '?|', text: 'MATCH ANY' },
+                        { id: 'IS NULL', text: 'IS NULL' }, { id: 'IS NOT NULL', text: 'IS NOT NULL' }];
                 } else {
-                    data = [{ id: 'IN', text: '=' }, { id: 'NOT IN', text: '≠' }];
+                    data = [{ id: 'IN', text: '=' }, { id: 'NOT IN', text: '≠' },
+                        { id: 'IS NULL', text: 'IS NULL' }, { id: 'IS NOT NULL', text: 'IS NOT NULL' }];
                 }
             } else if (fieldType === FieldTypes.INTEGER || fieldType === FieldTypes.FLOAT || fieldType === FieldTypes.DATE) {
                 data = [{ id: '=', text: '=' }, { id: '<=', text: '≤' },
                     { id: '>=', text: '≥' }, { id: '<', text: '<' },
-                    { id: '>', text: '>' }, { id: '<>', text: '≠' }];
+                    { id: '>', text: '>' }, { id: '<>', text: '≠' },
+                    { id: 'IS NULL', text: 'IS NULL' }, { id: 'IS NOT NULL', text: 'IS NOT NULL' }];
             } else if (fieldType === FieldTypes.TEXT) {
                 data = [{ id: '=', text: '=' }, { id: '<>', text: '≠' },
                     { id: 'LIKE', text: 'CONTAINS' }, { id: 'NOT LIKE', text: 'NOT CONTAINS' },
                     { id: 'LIKES', text: 'STARTS WITH' }, { id: 'LIKEE', text: 'ENDS WITH' },
                     { id: 'ILIKE', text: 'ICONTAINS' }, { id: 'NOT ILIKE', text: 'INOT CONTAINS' }, { id: 'ILIKES', text: 'ISTARTS WITH' },
-                    { id: 'ILIKEE', text: 'IENDS WITH' }];
+                    { id: 'ILIKEE', text: 'IENDS WITH' },
+                    { id: 'IS NULL', text: 'IS NULL' }, { id: 'IS NOT NULL', text: 'IS NOT NULL' }];
             } else {
-                data = [{ id: '=', text: '=' }, { id: '<>', text: '≠' }];
+                data = [{ id: '=', text: '=' }, { id: '<>', text: '≠' }],
+                { id: 'IS NULL', text: 'IS NULL' }, { id: 'IS NOT NULL', text: 'IS NOT NULL' };
             }
             this.addBinding(null, 'input[name=comparator]', {
                 observe: 'comparator',
@@ -585,7 +593,8 @@
                 observe: 'surnameComparator',
                 initialize: function ($el) {
                     var data = [{ id: '=', text: '=' }, { id: '<>', text: '≠' },
-                        { id: 'LIKE', text: 'LIKE' }, { id: 'NOT LIKE', text: 'NOT LIKE' }];
+                        { id: 'LIKE', text: 'LIKE' }, { id: 'NOT LIKE', text: 'NOT LIKE' },
+                        { id: 'IS NULL', text: 'IS NULL' }, { id: 'IS NOT NULL', text: 'IS NOT NULL' }];
                     $el.select2({
                         data: data
                     });
@@ -601,7 +610,8 @@
                 observe: 'givenNameComparator',
                 initialize: function ($el) {
                     var data = [{ id: '=', text: '=' }, { id: '<>', text: '≠' },
-                        { id: 'LIKE', text: 'LIKE' }, { id: 'NOT LIKE', text: 'NOT LIKE' }];
+                        { id: 'LIKE', text: 'LIKE' }, { id: 'NOT LIKE', text: 'NOT LIKE' },
+                        { id: 'IS NULL', text: 'IS NULL' }, { id: 'IS NOT NULL', text: 'IS NOT NULL' }];
                     $el.select2({
                         data: data
                     });
@@ -618,7 +628,8 @@
                 initialize: function ($el) {
                     var data = [{ id: '=', text: '=' }, { id: '<>', text: '≠' },
                         { id: '<=', text: '≤' }, { id: '>=', text: '≥' },
-                        { id: '<', text: '<' }, { id: '>', text: '>' }];
+                        { id: '<', text: '<' }, { id: '>', text: '>' },
+                        { id: 'IS NULL', text: 'IS NULL' }, { id: 'IS NOT NULL', text: 'IS NOT NULL' }];
                     $el.select2({
                         data: data
                     });
@@ -768,7 +779,8 @@
             '[name="biobank-comparator"]': {
                 observe: 'biobankComparator',
                 initialize: function ($el) {
-                    var data = [{ id: '=', text: '=' }, { id: '<>', text: '≠' }];
+                    var data = [{ id: '=', text: '=' }, { id: '<>', text: '≠' },
+                        { id: 'IS NULL', text: 'IS NULL' }, { id: 'IS NOT NULL', text: 'IS NOT NULL' }];
                     $el.select2({
                         data: data
                     });
@@ -808,7 +820,8 @@
             '[name="biobank-code-comparator"]': {
                 observe: 'biobankCodeComparator',
                 initialize: function ($el) {
-                    var data = [{ id: 'LIKE', text: '=' }, { id: 'NOT LIKE', text: '≠' }];
+                    var data = [{ id: 'LIKE', text: '=' }, { id: 'NOT LIKE', text: '≠' },
+                        { id: 'IS NULL', text: 'IS NULL' }, { id: 'IS NOT NULL', text: 'IS NOT NULL' }];
                     $el.select2({
                         data: data
                     });
@@ -948,6 +961,12 @@
                 selectOptions: {
                     collection: function () {
                         return [{ value: 'AND', label: i18n("all-conditions") }, { value: 'OR', label: i18n("any-of-the-conditions") }];
+                    },
+                    getVal: function ($el, ev, options) {
+                        return $el.val();
+                    },
+                    onGet: function (val) {
+                        return val;
                     }
                 }
             }
@@ -977,6 +996,8 @@
                     this.model = options.model;
                 }
             }
+            this.model.set('junction', 'AND');
+
             this.dataTypesComplete = options.dataTypesComplete || [];
             this.dataTypePrivileges = options.dataTypePrivileges || [];
             this.bind("reset", this.destroyView);
@@ -1183,6 +1204,7 @@
                 this.$addLoopButton.addClass('hidden');
                 this.selectedDataType = null;
                 this.model.set("model", null);
+                this.model.set("junction", 'AND');
             } else {
                 if (this.isFirst) {
                     $("select.query-selector").val('default');
@@ -1190,7 +1212,8 @@
                     $('.delete-query').prop('disabled', true);
                     this.model = new Query.Model({
                         dataType: idDataType,
-                        multiProject: false
+                        multiProject: false,
+                        junction: 'AND'
                     });
                     this.createDataTypeRow(idDataType, function () {
                         that.setMultiProjectButton(false, false, function () {

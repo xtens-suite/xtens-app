@@ -108,6 +108,7 @@
     },
     "datatables-plugins": {
       "integration-bootstrap/js": "integration/bootstrap/3/dataTables.bootstrap.js",
+      "sorting/js": "sorting/natural.js",
       "integration-bootstrap/styles": "integration/bootstrap/3/dataTables.bootstrap.css",
       "integration-fontAwesome/styles": "integration/font-awesome/dataTables.fontAwesome.css"
     },
