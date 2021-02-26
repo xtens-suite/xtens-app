@@ -51,6 +51,7 @@
             var that = this;
             this.tableOpts = {
                 data: this.daemons,
+                pagingType: "full", // DOES NOT WORK!!
                 columns: [{
                     title: i18n("status"),
                     data: "status"
@@ -88,6 +89,7 @@
                 {
                     title: i18n("date"),
                     data: "createdAt",
+                    width: "30%",
                     render: function (data, type, row) {
                         return moment(data).format("YYYY-MM-DD HH:mm:ss");
                     }
@@ -123,8 +125,8 @@
                 info: true,
                 scrollCollapse: true,
                 autoWidth: true,
-                paging: false,
-                scrollY: '40em',
+                paging: true,
+                scrollY: '25em',
                 order: [
                     [7, "desc"]
                 ]
@@ -140,6 +142,16 @@
                     $(e.currentTarget).addClass('btn-primary');
                     that.table.column(0).search("").draw();
                     that.table.column(6).visible(true);
+                }
+            },
+            {
+                text: 'Initializing',
+                className: 'filter-button',
+                action: function (e, dt, node, config) {
+                    $('.filter-button').removeClass('btn-primary');
+                    $(e.currentTarget).addClass('btn-primary');
+                    that.table.column(0).search($(e.target).text().toLowerCase()).draw();
+                    that.table.column(6).visible(false);
                 }
             },
             {

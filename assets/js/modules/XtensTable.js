@@ -538,6 +538,74 @@ function renderDatatablesDate (data, type) {
 
         getCsvInfoNGSCore: function () {
             var that = this;
+            var targetValues = this.getFieldValueQuery('target', this.queryArgs);
+            var formattedTargetValues = [ targetValues.join('","') ];
+            var queryObj = {
+                "dataType": 210,
+                "multiProject": false,
+                "junction": "AND",
+                "model": "Subject",
+                "content": [
+                    {
+                        "personalDetails": true,
+                        "surnameComparator": "=",
+                        "givenNameComparator": "=",
+                        "birthDateComparator": "="
+                    },
+                    {
+                        "codeComparator": "LIKE",
+                        "specializedQuery": "Subject"
+                    },
+                    {
+                        "sexComparator": "IN",
+                        "specializedQuery": "Subject"
+                    },
+                    {
+                        "getMetadata": true,
+                        "label": "tissue",
+                        "junction": "AND",
+                        "dataType": 211,
+                        "content": [
+                            {
+                                "biobankComparator": "=",
+                                "specializedQuery": "Sample"
+                            },
+                            {
+                                "biobankCodeComparator": "LIKE",
+                                "specializedQuery": "Sample"
+                            },
+                            {
+                                "getMetadata": true,
+                                "label": "ngs_analysis",
+                                "junction": "AND",
+                                "dataType": 212,
+                                "content": [
+                                    {
+                                        "fieldName": "target",
+                                        "fieldType": "text",
+                                        "isList": true,
+                                        "caseInsensitive": false,
+                                        "comparator": "IN",
+                                        "fieldValue": targetValues
+                                    }
+                                ],
+                                "model": "Data",
+                                "title": "NGS Analysis",
+                                "superType": 114
+                            }
+                        ],
+                        "model": "Sample",
+                        "title": "Tissue",
+                        "superType": 113
+                    }
+                ],
+                "wantsSubject": true,
+                "leafSearch": true,
+                "wantsPersonalInfo": true
+            };
+
+            // var queryParameters = JSON.stringify({ queryArgs: queryObj });
+
             return $.ajax({
                 method: 'POST',
                 headers: {
@@ -545,7 +613,7 @@ function renderDatatablesDate (data, type) {
                 },
                 contentType: 'application/x-www-form-urlencoded; charset=UTF-8',
                 url: '/query/dataSearch',
-                data: 'queryArgs={"dataType":210,"model":"Subject","content":[{"personalDetails":true,"surnameComparator":"=","givenNameComparator":"=","birthDateComparator":"="},{"codeComparator":"LIKE","specializedQuery":"Subject"},{"sexComparator":"IN","specializedQuery":"Subject"},{"getMetadata":true,"label":"tissue","dataType":211,"content":[{"biobankComparator":"=","specializedQuery":"Sample"},{"biobankCodeComparator":"LIKE","specializedQuery":"Sample"},{"getMetadata":true,"label":"ngs_analysis","dataType":212,"model":"Data","title":"NGS Analysis","superType":114}],"model":"Sample","title":"Tissue","superType":113}],"wantsSubject":true,"leafSearch":true,"wantsPersonalInfo":true}&isStream=false',
+                data: 'queryArgs=' + JSON.stringify(queryObj) + '&isStream=false',
                 success: function (results) {
                     that.sourceNGS = that.buildPlainData(results.data);
                     // that.sourceNGS = _.filter(that.buildPlainData(results.data), function (sourcerow) {
@@ -563,25 +631,29 @@ function renderDatatablesDate (data, type) {
             var that = this;
             var csvContent = "sample\tunit\tfq1\tfq2\r\n";
             _.forEach(this.table.rows({ selected: true }).data(), function (d) {
-                var sourcerow = _.find(that.sourceNGS, function (s) {
+                var source = _.filter(that.sourceNGS, function (s) {
                     return s.code === d.code;
                 });
-                if (sourcerow && sourcerow.tissue_biobank_code && sourcerow.ngs_analysis && sourcerow.ngs_analysis.flow_cell && sourcerow.ngs_analysis.flow_cell.values && sourcerow.ngs_analysis.flow_cell.values[0] &&
-                            sourcerow.ngs_analysis.flow_cell && sourcerow.ngs_analysis.flow_cell.values && sourcerow.ngs_analysis.flow_cell.values[0] &&
-                            sourcerow.ngs_analysis.lane && sourcerow.ngs_analysis.lane.values && sourcerow.ngs_analysis.lane.values[0] &&
-                            sourcerow.ngs_analysis.fastq_file_path_r1 && sourcerow.ngs_analysis.fastq_file_path_r1.values && sourcerow.ngs_analysis.fastq_file_path_r1.values[0] &&
-                            sourcerow.ngs_analysis.fastq_file_path_r2 && sourcerow.ngs_analysis.fastq_file_path_r2.values && sourcerow.ngs_analysis.fastq_file_path_r2.values[0]) {
-                    for (var index = 0; index < sourcerow.ngs_analysis.flow_cell.values.length; index++) {
-                        csvContent = csvContent + sourcerow.tissue_biobank_code + '\t' +
+                _.forEach(source, function (sourcerow) {
+                    if (sourcerow && sourcerow.tissue_biobank_code && sourcerow.ngs_analysis && sourcerow.ngs_analysis.flow_cell && sourcerow.ngs_analysis.flow_cell.values && sourcerow.ngs_analysis.flow_cell.values[0] &&
+                        sourcerow.ngs_analysis.flow_cell && sourcerow.ngs_analysis.flow_cell.values && sourcerow.ngs_analysis.flow_cell.values[0] &&
+                        sourcerow.ngs_analysis.lane && sourcerow.ngs_analysis.lane.values && sourcerow.ngs_analysis.lane.values[0] &&
+                        sourcerow.ngs_analysis.fastq_file_path_r1 && sourcerow.ngs_analysis.fastq_file_path_r1.values && sourcerow.ngs_analysis.fastq_file_path_r1.values[0] &&
+                        sourcerow.ngs_analysis.fastq_file_path_r2 && sourcerow.ngs_analysis.fastq_file_path_r2.values && sourcerow.ngs_analysis.fastq_file_path_r2.values[0]) {
+                        for (var index = 0; index < sourcerow.ngs_analysis.flow_cell.values.length; index++) {
+                            var row = sourcerow.tissue_biobank_code + '\t' +
                             sourcerow.ngs_analysis.flow_cell.values[index] + '.' + sourcerow.ngs_analysis.lane.values[index] + '.' + sourcerow.tissue_biobank_code + '\t' +
-                             sourcerow.ngs_analysis.fastq_file_path_r1.values[index] + '\t' +
-                             sourcerow.ngs_analysis.fastq_file_path_r2.values[index] + '\r\n';
+                            sourcerow.ngs_analysis.fastq_file_path_r1.values[index] + '\t' +
+                            sourcerow.ngs_analysis.fastq_file_path_r2.values[index] + '\r\n';
+                            if (csvContent.indexOf() === -1) {}
+                            csvContent = csvContent + row;
+                        }
+                        // csvContent = csvContent + sourcerow.tissue_biobank_code + '\t' +
+                        //         sourcerow.ngs_analysis.flow_cell.values[0] + '.' + sourcerow.ngs_analysis.lane.values[0] + '.' + sourcerow.tissue_biobank_code + '\t' +
+                        //          sourcerow.ngs_analysis.fastq_file_path_r1.values[0] + '\t' +
+                        //          sourcerow.ngs_analysis.fastq_file_path_r2.values[0] + '\r\n';
                     }
-                    // csvContent = csvContent + sourcerow.tissue_biobank_code + '\t' +
-                    //         sourcerow.ngs_analysis.flow_cell.values[0] + '.' + sourcerow.ngs_analysis.lane.values[0] + '.' + sourcerow.tissue_biobank_code + '\t' +
-                    //          sourcerow.ngs_analysis.fastq_file_path_r1.values[0] + '\t' +
-                    //          sourcerow.ngs_analysis.fastq_file_path_r2.values[0] + '\r\n';
-                }
+                });
             });
             return csvContent;
         },
@@ -590,22 +662,29 @@ function renderDatatablesDate (data, type) {
             var that = this;
             var csvContent = "sample\tunits\tkit\r\n";
             _.forEach(this.table.rows({ selected: true }).data(), function (d) {
-                var sourcerow = _.find(that.sourceNGS, function (s) {
+                var source = _.filter(that.sourceNGS, function (s) {
                     return s.code === d.code;
                 });
-                if (sourcerow && sourcerow.tissue_biobank_code && sourcerow.ngs_analysis && sourcerow.ngs_analysis.flow_cell && sourcerow.ngs_analysis.flow_cell.values && sourcerow.ngs_analysis.flow_cell.values[0] &&
-                            sourcerow.ngs_analysis.flow_cell && sourcerow.ngs_analysis.flow_cell.values && sourcerow.ngs_analysis.flow_cell.values[0] &&
-                            sourcerow.ngs_analysis.lane && sourcerow.ngs_analysis.lane.values && sourcerow.ngs_analysis.lane.values[0] &&
-                            sourcerow.ngs_analysis.target_details && sourcerow.ngs_analysis.target_details.value) {
+                var sourceGroupByTargetDetails = _.groupBy(source, function (s) { return s.ngs_analysis.target_details && s.ngs_analysis.target_details.value; });
+                _.forEach(sourceGroupByTargetDetails, function (srcgroup, currentTagertDetails) {
+                    var biobankCode = srcgroup[0].tissue_biobank_code;
                     var units = '';
-                    for (var index = 0; index < sourcerow.ngs_analysis.flow_cell.values.length; index++) {
-                        units = units + sourcerow.ngs_analysis.flow_cell.values[index] + '.' + sourcerow.ngs_analysis.lane.values[index] + '.' + sourcerow.tissue_biobank_code + ',';
-                    }
+                    _.forEach(srcgroup, function (sourcerow) {
+                        if (sourcerow && sourcerow.tissue_biobank_code && sourcerow.ngs_analysis && sourcerow.ngs_analysis.flow_cell && sourcerow.ngs_analysis.flow_cell.values && sourcerow.ngs_analysis.flow_cell.values[0] &&
+                                sourcerow.ngs_analysis.flow_cell && sourcerow.ngs_analysis.flow_cell.values && sourcerow.ngs_analysis.flow_cell.values[0] &&
+                                sourcerow.ngs_analysis.lane && sourcerow.ngs_analysis.lane.values && sourcerow.ngs_analysis.lane.values[0]) {
+                            // && ((sourcerow.ngs_analysis.target_details && sourcerow.ngs_analysis.target_details.value) ||
+                            // (!sourcerow.ngs_analysis.target_details && !sourcerow.ngs_analysis.target_details.value && !sourcerow.ngs_analysis.target.value === 'WHOLE GENOME'))) {
+                            for (var index = 0; index < sourcerow.ngs_analysis.flow_cell.values.length; index++) {
+                                units = units + sourcerow.ngs_analysis.flow_cell.values[index] + '.' + sourcerow.ngs_analysis.lane.values[index] + '.' + sourcerow.tissue_biobank_code + ',';
+                            }
+                        }
+                    });
                     csvContent = csvContent +
-                            sourcerow.tissue_biobank_code + '\t' +
+                            biobankCode + '\t' +
                             units.slice(0, -1) + '\t' +
-                            sourcerow.ngs_analysis.target_details.value + '\r\n';
-                }
+                            currentTagertDetails + '\r\n';
+                });
             });
             return csvContent;
         },
@@ -614,18 +693,19 @@ function renderDatatablesDate (data, type) {
             var that = this;
             var csvContent = "";
             _.forEach(this.table.rows({ selected: true }).data(), function (d) {
-                var sourcerow = _.find(that.sourceNGS, function (s) {
+                var source = _.filter(that.sourceNGS, function (s) {
                     return s.code === d.code;
                 });
-                if (sourcerow) {
-                    var sourcefamily = _.filter(that.sourceNGS, function (s) {
-                        return s.metadata.family_id.value === sourcerow.metadata.family_id.value;
-                    });
-                    if (csvContent.indexOf(sourcerow.metadata.family_id.value) < 0) {
-                        csvContent = csvContent + sourcerow.metadata.family_id.value + '\t' +
-                        sourcefamily.map(function (s) { return s.tissue_biobank_code; }).join(',') + '\r\n';
+                _.forEach(source, function (sourcerow) {
+                    if (sourcerow) {
+                        var sourcefamily = _.filter(that.sourceNGS, function (s) {
+                            return s.metadata.family_id.value === sourcerow.metadata.family_id.value;
+                        });
+                        if (csvContent.indexOf(sourcerow.metadata.family_id.value) < 0) {
+                            csvContent = csvContent + sourcerow.metadata.family_id.value + '\t' + _.uniq(sourcefamily.map(function (s) { return s.tissue_biobank_code; })).join(',') + '\r\n';
+                        }
                     }
-                }
+                });
             });
             return csvContent;
         },
@@ -634,37 +714,51 @@ function renderDatatablesDate (data, type) {
             var that = this;
             var csvContent = '';
             _.forEach(this.table.rows({ selected: true }).data(), function (d) {
-                var sourcerow = _.find(that.sourceNGS, function (s) {
+                var source = _.filter(that.sourceNGS, function (s) {
                     return s.code === d.code;
                 });
-                if (sourcerow) {
-                    var sourcefamily = _.filter(that.sourceNGS, function (s) {
-                        return s.metadata.family_id.value === sourcerow.metadata.family_id.value;
-                    });
+                _.forEach(source, function (sourcerow) {
+                    if (sourcerow) {
+                        var sourcefamily = _.filter(that.sourceNGS, function (s) {
+                            return s.metadata.family_id.value === sourcerow.metadata.family_id.value;
+                        });
 
-                    if (csvContent.indexOf(sourcerow.metadata.family_id.value) < 0) {
+                        if (csvContent.indexOf(sourcerow.metadata.family_id.value) < 0) {
                         // csvContent = csvContent + sourcerow.metadata.family_id.value + '\t' +
                         // sourcefamily.map(function (s) { return s.tissue_biobank_code; }).join(',') + '\r\n';
-                        var mother = _.find(sourcefamily, function (s) { return s.metadata.status.value == 'MOTHER'; });
-                        var father = _.find(sourcefamily, function (s) { return s.metadata.status.value == 'FATHER'; });
-                        var familytxt = '';
-                        _.forEach(sourcefamily, function (subj) {
-                            var sex = subj.sex == 'M' ? '1' : subj.sex == 'F' ? '2' : '0';
-                            var affected = subj.metadata.affected.value ? '2' : '1';
-                            var motherTissueCode = subj.metadata.status.value == 'PROBAND' && mother && mother.tissue_biobank_code ? mother.tissue_biobank_code : '0';
-                            var fatherTissueCode = subj.metadata.status.value == 'PROBAND' && father && father.tissue_biobank_code ? father.tissue_biobank_code : '0';
-                            familytxt = familytxt + subj.metadata.family_id.value + '\t' +
-                        subj.tissue_biobank_code + '\t' +
-                        motherTissueCode + '\t' +
-                        fatherTissueCode + '\t' +
-                        sex + '\t' +
-                        affected + '\r\n';
-                        });
-                        csvContent = csvContent + familytxt;
+                            var mother = _.find(sourcefamily, function (s) { return s.metadata.status.value == 'MOTHER'; });
+                            var father = _.find(sourcefamily, function (s) { return s.metadata.status.value == 'FATHER'; });
+                            var familytxt = '';
+                            _.forEach(sourcefamily, function (subj) {
+                                var sex = subj.sex == 'M' ? '1' : subj.sex == 'F' ? '2' : '0';
+                                var affected = subj.metadata.affected.value ? '2' : '1';
+                                var motherTissueCode = subj.metadata.status.value == 'PROBAND' && mother && mother.tissue_biobank_code ? mother.tissue_biobank_code : '0';
+                                var fatherTissueCode = subj.metadata.status.value == 'PROBAND' && father && father.tissue_biobank_code ? father.tissue_biobank_code : '0';
+                                var row = subj.metadata.family_id.value + '\t' + subj.tissue_biobank_code + '\t' + motherTissueCode + '\t' + fatherTissueCode + '\t' + sex + '\t' + affected + '\r\n';
+                                if (familytxt.indexOf(row) === -1) {
+                                    familytxt = familytxt + row;
+                                }
+                            });
+                            csvContent = csvContent + familytxt;
+                        }
                     }
-                }
+                });
             });
             return csvContent;
+        },
+
+        getFieldValueQuery: function (formattedField, queryObj) {
+            var res = ['PANEL', 'EXOME', 'WHOLE GENOME'];
+            if (queryObj.fieldName && queryObj.fieldName === formattedField) {
+                res = queryObj.fieldValue;
+                return res;
+            }
+            if (queryObj.content && queryObj.content.length > 0) {
+                for (var index = 0; index < queryObj.content.length; index++) {
+                    res = this.getFieldValueQuery(formattedField, queryObj.content[index]);
+                }
+            }
+            return res;
         },
         /**
          * @method
