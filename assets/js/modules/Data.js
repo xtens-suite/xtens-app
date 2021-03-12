@@ -2348,18 +2348,21 @@
                         $('#samplelabid-input', that.$el).val(phenotipsObj.external_id);
                         that.checkSampleID({ currentTarget: { value: phenotipsObj.external_id } });
                         if (phenotipsObj.sex) {
-                            $("#sex-type-selector").val(phenotipsObj.sex);
+                            $("#sex-type-selector", that.$el).val(phenotipsObj.sex);
                         } else {
-                            $("#sex-type-selector").val(null);
+                            $("#sex-type-selector", that.$el).val(null);
                         }
+                        $("#sex-type-selector", that.$el).select2({ placeholder: 'Select Sex' });
                         // $("#sex-type-selector").selectpicker("refresh");
 
                         if (phenotipsObj.clinicalStatus) {
                             var value = phenotipsObj.clinicalStatus == 'affected' ? 'AFFECTED' : 'NOT AFFECTED';
-                            $("#affected-type-selector").val(value);
+                            $("#affected-type-selector", that.$el).val(value);
                         } else {
-                            $("#affected-type-selector").val(null);
+                            $("#affected-type-selector", that.$el).val(null);
                         }
+                        $("#affected-type-selector", that.$el).select2({ placeholder: 'Select Status' });
+
                         // $("#affected-type-selector").selectpicker("refresh");
                     },
                     error: function (err) {
