@@ -126,7 +126,7 @@ module.exports = function filecontent (sails) {
 
             this.upload = function uploadFileContent (req, res) {
                 let dirName; let fsPath = sails.hooks['persistence'].getFileSystem().defaultConnection.path;
-                    let landingDir = sails.hooks['persistence'].getFileSystem().defaultConnection.landingDirectory;
+                let landingDir = sails.hooks['persistence'].getFileSystem().defaultConnection.landingDirectory;
                 // if the local-fs strategy is not in use, don't allow local file upload
                 // if (this.fileSystemManager.type && this.fileSystemManager.type !== 'local-fs') {
                 //     return res.badRequest('Files cannot be uploaded on server local file system.');
@@ -198,9 +198,9 @@ module.exports = function filecontent (sails) {
                 // sails.log.info(fileSystem.defaultConnection.type);
 
                 // if (fileSystem.manager.type && this.fileSystem.manager.type !== 'local-fs') {
-                if (fileSystem.defaultConnection.type && fileSystem.defaultConnection.type === 'local-fs') {
-                    return cb();
-                }
+                // if (fileSystem.defaultConnection.type && fileSystem.defaultConnection.type === 'local-fs') {
+                //     return cb();
+                // }
                 sails.on('router:before', function () {
                     sails.router.bind(routePath, upload, 'POST', {});
                     sails.router.bind(routePath, download, 'GET', {});
