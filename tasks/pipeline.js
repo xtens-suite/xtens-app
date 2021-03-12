@@ -18,6 +18,7 @@ var cssFilesToInject = [
     'dependencies/bootstrap-select/css/bootstrap-select.css',
     'dependencies/font-awesome/styles/font-awesome.css',
     'dependencies/select2/select2.css',
+    'dependencies/**/toastr.css',
     // 'dependencies/datatables/styles/jquery.dataTables.css',
     'dependencies/datatables-plugins/integration-bootstrap/styles/dataTables.bootstrap.css',
     'dependencies/datatables-plugins/integration-fontAwesome/styles/dataTables.fontAwesome.css',
@@ -63,9 +64,10 @@ var jsFilesToInject = [
     'dependencies/**/d3-tip.js',
     'dependencies/**/Sortable.js',
     'dependencies/**/JsBarcode.all.js',
-    '/dependencies/**/bootstrap-select.js',
-    '/dependencies/**/bootstrap-notify.js',
-    '/dependencies/**/jquery.contextMenu.js',
+    'dependencies/**/bootstrap-select.js',
+    'dependencies/**/bootstrap-notify.js',
+    'dependencies/**/jquery.contextMenu.js',
+    'dependencies/**/toastr.js',
     // Customised client-side js files
 
     'js/application/xtens.js',

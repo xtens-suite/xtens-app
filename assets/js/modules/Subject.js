@@ -1058,7 +1058,7 @@
                 // rightClick Links
                 var dataType;
                 var id;
-                if ((datum.type && datum.type !== 'Patient') || (datum.name && datum.name.indexOf("sb_") > -1)) {
+                if ((datum.type && datum.type !== 'Patient') || (datum.name && datum.name.toString().indexOf("sb_") > -1)) {
                     dataType = _.find(that.dataTypes, function (dt) {
                         return datum.type.toLowerCase() === dt.name.toLowerCase();
                     });

@@ -41,6 +41,13 @@
             "<li><b>Capture</b>:  Free Text (es. Exome, Panel1, Panel2, Genome, etc.) </li></ul>" +
             "An Example: <b>AA-12345_BL-5543_ILL_Panel2.vcf</b>",
         "by-patient": "By Patient",
+        "by-family": "By Family",
+        "please-insert-a-familyid": "Please insert a Family ID",
+        "add-row": "Add Row",
+        "remove-row": "Remove Row",
+        "family-not-entered": "Family ID is not yet entered. Please add at least a row",
+        "family-entered": "Family ID is already present in the db, with the following individuals: ",
+        // "family-entered-2": " will not be uploaded.",
         "please-select-a-subject": "Please select a Subject or create",
         "please-select-a-sample": "Select an existing Sample Code or get",
         "new-sample-code": "New Sample Code",

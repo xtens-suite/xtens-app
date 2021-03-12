@@ -7,30 +7,31 @@
   <div id="collapse-import" class="collapse">
     <div class="row">
       <h2></h2>
-      <div id="customised-form" class="col-xs-offset-2 col-xs-8">
+      <div id="customised-form" class="col-xs-12">
         <form class="form-horizontal edit-data-form" role="form" data-parsley-focus="first" data-parsley-validate>
           <div class="row text-center">
             <div class="row text-center">
-              <div class="col-xs-offset-3 col-xs-6" style="padding:1em;">
+              <div class="col-xs-offset-4 col-xs-4" style="padding:1em;">
                 <div class="form-group">
                   <select required id="data-type" name="data-type" title="<%= __('please-select-a-data-type') %>"
-                    class="selectpicker form-control"></select>
+                    class="selectpicker form-control" style="text-align: center;"></select>
                 </div>
               </div>
             </div>
-            <div id="ngsPatientdiv" class="row text-center hidden">
-              <div class="row">
-                <a class="btn btn-primary" role="button" href="https://sharedoc.gaslini.org/index.php/s/tpuYb6UB59NkXcA/download" target="_blank"><%= __('download-template')%></a>
-              </div>
-            </div>
+
+            <div id="ngsPatientdiv" class="row text-center hidden"></div>
+
             <div id="ngsAnalysisdiv" class="row text-center hidden">
               <div class="row">
                 <a class="btn btn-primary" role="button" href="https://sharedoc.gaslini.org/index.php/s/gxY7UoPMxbPkbTH/download" target="_blank"><%= __('download-template')%></a>
               </div>
-              <input type="checkbox" id="reWritePath" data-toggle="tooltip" title="<%= __('info-check-move-file')%>">
-              <label class="form-check-label" for="reWritePath"><%= __('rewrite-path') %></label>
+              <div class="row">                  
+                <input type="checkbox" id="reWritePath" data-toggle="tooltip" title="<%= __('info-check-move-file')%>">
+                <label class="form-check-label" for="reWritePath"><%= __('rewrite-path') %></label>
+              </div>
             </div>
-            <div id="buttonseldiv" class="row text-center hidden">
+
+            <div id="vcfDiv" class="row text-center hidden">
               <h4><%= __('choose-import') %></h4>
               <div class="btn-group btn-group-margin">
                 <input type="button" id="bulk" class="btn btn-default" value="<%=__('bulk') %>">
@@ -39,7 +40,6 @@
             </div>
             <div id="bulk-message" class="row text-left hidden" style="font-size:12px">
               <div><%=__('bulk-message') %></div>
-
             </div>
 
             <div class="row text-center selector-cnt hidden">
@@ -100,7 +100,7 @@
             </div>
           </div>
           <div class="row text-center">
-            <div class="col-xs-12">
+            <div class="col-xs-offset-2 col-xs-10">
               <div class="dropzone" style="width: 18%;">
                 <div class="dz-default dz-message text-center">
                   <span><%= __('drop-files-here') %></span>

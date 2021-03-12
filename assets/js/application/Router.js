@@ -1077,7 +1077,7 @@
             var idSuperTypeProcedures = _.map(procedures, 'superType');
 
             var criteria = {
-                superType: idSuperTypeProcedures,
+                superType: _.flatten(idSuperTypeProcedures),
                 sort: 'id ASC'
             };
             if (idProject) {

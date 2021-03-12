@@ -29,6 +29,12 @@ module.exports.policies = {
         '*': true
     },
 
+    MainController: {
+        '*': true,
+        'getPhenotipsPatientsList': ['bearerAuth', 'expiredPassword'],
+        'getPhenotipsPatient': ['bearerAuth', 'expiredPassword']
+    },
+
     DataController: {
         '*': ['bearerAuth', 'expiredPassword'],
         'getInfoForBarChart': ['bearerAuth', 'expiredPassword', 'isAdmin']

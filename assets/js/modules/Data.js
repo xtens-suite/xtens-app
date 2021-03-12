@@ -14,7 +14,7 @@
     var Classes = xtens.module("xtensconstants").DataTypeClasses;
     // var MetadataComponent = xtens.module("metadatacomponent");
     // var DataTypeModel = xtens.module("datatype").Model;
-    // var SuperTypeModel = xtens.module("supertype").Model;
+    var SuperType = xtens.module("supertype");
     // var DataTypeCollection = xtens.module("datatype").List;
     var FileManager = xtens.module("filemanager");
     var Daemon = xtens.module("daemon");
@@ -36,6 +36,24 @@
         },
         errorsWrapper: "<span class='help-block'></span>",
         errorTemplate: "<span></span>"
+    };
+
+    toastr.options = {
+        "closeButton": false,
+        "debug": false,
+        "newestOnTop": false,
+        "progressBar": false,
+        "positionClass": "toast-bottom-right",
+        "preventDuplicates": true,
+        "onclick": null,
+        "showDuration": "300",
+        "hideDuration": "1000",
+        "timeOut": "3000",
+        "extendedTimeOut": "1000",
+        "showEasing": "swing",
+        "hideEasing": "linear",
+        "showMethod": "fadeIn",
+        "hideMethod": "fadeOut"
     };
 
     /**
@@ -1448,7 +1466,13 @@
             var textHtml = "";
             this.$el.html(this.template({ __: i18n }));
             _.forEach(procedures, function (procedure) {
-                var dt = _.find(that.dataTypes, function (dt) { return dt.superType.id === procedure.superType; });
+                var dt = _.find(that.dataTypes, function (dt) {
+                    if (_.isArray(procedure.superType)) {
+                        return procedure.superType.indexOf(dt.superType.id) > -1;
+                    } else {
+                        return dt.superType.id === procedure.superType;
+                    }
+                });
                 if (dt && _.find(that.privileges, { 'dataType': dt.id })) {
                     textHtml = textHtml + '<option value="' + procedure.value + '">' + procedure.label + '</option>';
                 }
@@ -1482,6 +1506,40 @@
 
             return this;
         },
+
+        showSelector: function () {
+            $('.dropzone').removeClass('hidden');
+            $('#save').removeClass('hidden');
+
+            if ($('#data-type').val() === 'VCF') {
+                $('#vcfDiv').removeClass('hidden');
+                $('#ngsAnalysisdiv').addClass('hidden');
+                $('#ngsPatientdiv').addClass('hidden');
+            } else if ($('#data-type').val() === 'NGSPAT') {
+                if (!this.NGSPatientsImportView) {
+                    this.NGSPatientsImportView = new Data.Views.NGSPatientsImport({
+                        dataTypes: this.dataTypes,
+                        privileges: this.privileges
+                        // model: model,
+                        // colors: colors
+                    });
+                    $('#ngsPatientdiv').append(this.NGSPatientsImportView.render().el);
+                    $('#ngsPatientdiv').removeClass('hidden');
+                    $('#ngsAnalysisdiv').addClass('hidden');
+                    $('#vcfDiv').addClass('hidden');
+                    $('#addRowIcon').tooltip();
+                }
+            } else if ($('#data-type').val() === 'NGSAN') {
+                $('#ngsAnalysisdiv').removeClass('hidden');
+                $('#vcfDiv').addClass('hidden');
+                $('#ngsPatientdiv').addClass('hidden');
+            } else {
+                $('#vcfDiv').addClass('hidden');
+                $('#ngsAnalysisdiv').addClass('hidden');
+                $('#ngsPatientdiv').addClass('hidden');
+            }
+        },
+
         showByPatient: function (params) {
             $('#subject-selector').prop('required', true);
             $('#sample-selector').prop('required', true);
@@ -1512,27 +1570,8 @@
             $('#bulk-message').removeClass('hidden');
             $('#by-patient').addClass('btn-default');
             $('#by-patient').removeClass('btn-success');
+            $('#by-patient-ngs').removeClass('btn-success');
             this.sendVcfByPatient = false;
-        },
-
-        showSelector: function () {
-            if ($('#data-type').val() === 'VCF') {
-                $('#buttonseldiv').removeClass('hidden');
-                $('#ngsAnalysisdiv').addClass('hidden');
-                $('#ngsPatientdiv').addClass('hidden');
-            } else if ($('#data-type').val() === 'NGSAN') {
-                $('#ngsAnalysisdiv').removeClass('hidden');
-                $('#buttonseldiv').addClass('hidden');
-                $('#ngsPatientdiv').addClass('hidden');
-            } else if ($('#data-type').val() === 'NGSPAT') {
-                $('#ngsPatientdiv').removeClass('hidden');
-                $('#ngsAnalysisdiv').addClass('hidden');
-                $('#buttonseldiv').addClass('hidden');
-            } else {
-                $('#buttonseldiv').addClass('hidden');
-                $('#ngsAnalysisdiv').addClass('hidden');
-                $('#ngsPatientdiv').addClass('hidden');
-            }
         },
 
         goToNewSubject: function () {
@@ -1764,5 +1803,618 @@
             });
         }
 
+    });
+
+    /**
+     * @class
+     * @name Data.Views.NGSPatientsImport
+     * @extends Backbone.View
+     * @description view to automatically upload bulk data (i.e. files) with metadata on the server
+     */
+    Data.Views.NGSPatientsImport = Backbone.View.extend({
+
+        serialize: function () {
+            var arr = [];
+            if (this.nestedViews && this.nestedViews.length) {
+                for (var i = 0, len = this.nestedViews.length; i < len; i++) {
+                    this.nestedViews[i].model.set('Family ID', this.model.get('Family ID'));
+                    arr.push(this.nestedViews[i].model.attributes);
+                }
+            }
+            return arr;
+        },
+
+        events: {
+            'click #by-patient-ngs': 'showByPatient',
+            'click #bulk-ngs': 'showBulk',
+            'click #addRowIcon': 'addRow',
+            'keyup #familyid-input': 'onChangeFamilyID',
+            'submit .ngs-data-form': 'saveNGSFamily'
+        },
+
+        tagName: 'div',
+        className: 'ngs-analysis-import',
+
+        initialize: function (options) {
+            this.template = JST["views/templates/dedicated-data-edit-ngs-patients.ejs"];
+            this.dataTypes = options.dataTypes && options.dataTypes;
+            this.privileges = options.dataTypePrivileges && options.dataTypePrivileges;
+            this.patientFields = new SuperType.Model(_.find(this.dataTypes, { id: 210 }).superType).getFlattenedFields();
+            this.sampleFields = new SuperType.Model(_.find(this.dataTypes, { id: 211 }).superType).getFlattenedFields();
+            this.analysisFields = new SuperType.Model(_.find(this.dataTypes, { id: 212 }).superType).getFlattenedFields();
+            this.model = new Data.NGSPatientModel();
+            this.nestedViews = [];
+            this.patientStatusAlreadyEntered = [];
+        },
+
+        bindings: {
+            '#familyid-input': 'Family ID'
+        },
+
+        render: function () {
+            this.$el.html(this.template({ __: i18n, patientFields: this.patientFields, sampleFields: this.sampleFields, analysisFields: this.analysisFields }));
+            this.$form = this.$('form .ngs-data-form');
+
+            this.stickit();
+            // $('#addRowIcon').prop('disabled', false);
+            // this.addRow();
+
+            return this;
+        },
+
+        saveNGSFamily: function (ev) {
+            ev.preventDefault();
+            var that = this;
+
+            this.$modal = $(".modal-cnt");
+            var arrayPatients = this.serialize();
+            var dataType = $("select#data-type option:selected").val();
+            var superType = _.find(procedures, { 'value': dataType }).superType;
+            var owner = _.find(procedures, { 'value': dataType }).owner;
+            var activeProject = xtens.session.get('activeProject') !== 'all' ? _.find(xtens.session.get('projects'), { 'name': xtens.session.get('activeProject') }) : undefined;
+            $.ajax({
+                url: '/customisedData',
+                type: 'POST',
+                headers: {
+                    'Authorization': 'Bearer ' + xtens.session.get("accessToken")
+                },
+                data: JSON.stringify({
+                    dataType: dataType,
+                    superType: superType,
+                    owner: owner,
+                    idProject: activeProject && activeProject.id,
+                    folder: this.randomFolder,
+                    vcfData: {},
+                    ngsPatData: arrayPatients
+                }),
+                contentType: 'application/json',
+
+                success: function (infoObj) {
+                    if (that.modal) {
+                        that.modal.hide();
+                    }
+
+                    that.modal = new ModalDialog({
+                        title: i18n('data-correctly-loaded-on-server'),
+                        body: JST["views/templates/dedicated-data-dialog-bootstrap.ejs"]({ __: i18n })
+                    });
+
+                    that.$modal.append(that.modal.render().el);
+                    $('.modal-header').addClass('alert-info');
+                    that.modal.show();
+
+                    setTimeout(function () { that.modal.hide(); }, 1500);
+                    that.$modal.one('hidden.bs.modal', function (e) {
+                        // that.dropzone.removeAllFiles(true);
+                        that.modal.remove();
+                        $(".new-import-btn-cnt").css('display', 'block');
+                        // that.startReloadingDaemons();
+                        $("#collapse-import").collapse('hide');
+                    });
+                },
+
+                error: function (err) {
+                    if (that.modal) {
+                        that.modal.hide();
+                    }
+                    that.$modal.one('hidden.bs.modal', function (e) {
+                        e.preventDefault();
+                        xtens.error(err);
+                        that.dropzone.removeAllFiles(true);
+                    });
+                }
+            });
+            return false;
+        },
+
+        addRow: function (ev) {
+            ev.preventDefault();
+            var view = new Data.Views.NGSPatientsFamilyRow({
+                patientFields: this.patientFields,
+                sampleFields: this.sampleFields,
+                analysisFields: this.analysisFields
+            });
+
+            $('.patrow-container', this.$el).last().append(view.render().el);
+
+            this.listenTo(view, 'closeMe', this.removeChild);
+            this.handleRelationshipsOptions();
+
+            this.$form.parsley(parsleyOpts);
+
+            this.nestedViews.push(view);
+
+            this.handleSaveButton();
+        },
+
+        showByPatient: function (params) {
+            // $('#subject-selector').prop('required', true);
+            // $('#sample-selector').prop('required', true);
+            // $('#sample-type-selector').prop('required', true);
+            // $('#machine-selector').prop('required', true);
+            // $('#capture-input').prop('required', true);
+            $('.selector-cnt-ngs').removeClass('hidden');
+            $('#bulk-ngs').removeClass('btn-success');
+            $('#bulk-ngs').addClass('btn-default');
+            // $('#bulk-message').addClass('hidden');
+            $('#by-patient-ngs').removeClass('btn-default');
+            $('#by-patient-ngs').addClass('btn-success');
+            $('.dropzone').addClass('hidden');
+            $('#save').addClass('hidden');
+
+            // this.getSampleTypes();
+            // this.getMachineTypes();
+            // this.sendVcfByPatient = true;
+        },
+
+        showBulk: function (params) {
+            // $('#subject-selector').prop('required', false);
+            // $('#sample-selector').prop('required', false);
+            // $('#sample-type-selector').prop('required', false);
+            // $('#machine-selector').prop('required', false);
+            // $('#capture-input').prop('required', false);
+            $('.selector-cnt-ngs').addClass('hidden');
+
+            $('#bulk-ngs').addClass('btn-success');
+            $('#bulk-ngs').removeClass('btn-default');
+            // $('#bulk-message').removeClass('hidden');
+            $('#by-patient-ngs').addClass('btn-default');
+            $('#by-patient-ngs').removeClass('btn-success');
+            $('.dropzone').removeClass('hidden');
+            $('#save').removeClass('hidden');
+            // this.sendVcfByPatient = false;
+        },
+
+        removeChild: function (child) {
+            for (var i = 0, len = this.nestedViews.length; i < len; i++) {
+                if (_.isEqual(this.nestedViews[i], child)) {
+                    child.remove();
+                    if (child.nestedViews) {
+                        for (var j = 0, clen = child.nestedViews.length; j < clen; j++) {
+                            if (child.nestedViews[j].remove) {
+                                child.nestedViews[j].remove();
+                            }
+                        }
+                    }
+                    this.nestedViews.splice(i, 1);
+                }
+            }
+            this.handleSaveButton();
+        },
+
+        handleSaveButton: function () {
+            if (this.nestedViews.length === 0) {
+                $('#save-ngs-pat', this.$el).prop('disabled', true);
+            } else {
+                $('#save-ngs-pat', this.$el).prop('disabled', false);
+            }
+        },
+
+        onChangeFamilyID: _.debounce(function (ev) {
+            ev.preventDefault();
+            $('#family-not-entered').addClass('hidden');
+            $('#family-entered').addClass('hidden');
+            // $('#addRowIcon').prop('disabled', true);
+
+            if (ev.currentTarget.value != "") {
+                $('#familyid-input').addClass('hidden');
+                $('.checking-familyid').removeClass('hidden');
+                var that = this;
+                var queryObj = {
+                    "dataType": 210,
+                    "multiProject": false,
+                    "junction": "AND",
+                    "model": "Subject",
+                    "content": [
+                        {
+                            "fieldName": "family_id",
+                            "fieldType": "text",
+                            "isList": false,
+                            "caseInsensitive": false,
+                            "comparator": "ILIKE",
+                            "fieldValue": ev.currentTarget.value
+                        }
+                    ],
+                    "wantsSubject": true,
+                    "leafSearch": false,
+                    "wantsPersonalInfo": false
+                };
+
+                return $.ajax({
+                    method: 'POST',
+                    headers: {
+                        'Authorization': 'Bearer ' + xtens.session.get("accessToken")
+                    },
+                    contentType: 'application/x-www-form-urlencoded; charset=UTF-8',
+                    url: '/query/dataSearch',
+                    data: 'queryArgs=' + JSON.stringify(queryObj) + '&isStream=false',
+                    success: function (results) {
+                        $('#familyid-input').removeClass('hidden');
+                        $('.checking-familyid').addClass('hidden');
+                        // $('#addRowIcon').prop('disabled', false);
+                        that.patientStatusAlreadyEntered = [];
+                        if (results.data && results.data.length > 0) {
+                            $('#familyid-input').val(results.data[0].metadata.family_id.value);
+                            that.patientStatusAlreadyEntered = _.map(results.data, function (d) {
+                                if (['PROBAND', 'MOTHER', 'FATHER'].indexOf(d.metadata.status.value) > -1) {
+                                    return d.metadata.status.value;
+                                }
+                            });
+                            var textValueEntered = [i18n("family-entered"), that.patientStatusAlreadyEntered.join(", "), "."].join("");
+                            $('#family-entered').text(textValueEntered);
+                            $('#family-entered').removeClass('hidden');
+                            $('#family-not-entered').addClass('hidden');
+                        } else if (results.data && results.data.length === 0) {
+                            $('#family-not-entered').text(i18n("family-not-entered"));
+                            $('#family-not-entered').removeClass('hidden');
+                            $('#family-entered').addClass('hidden');
+                        }
+                        that.handleRelationshipsOptions();
+                    }
+                });
+            }
+        }, 700),
+
+        handleRelationshipsOptions: function () {
+            $('.relationship-type-selector option').attr('disabled', false);
+            _.forEach(this.patientStatusAlreadyEntered, function (rel) {
+                $('.relationship-type-selector option[value=' + rel + ']').attr('disabled', true);
+            });
+            $('select.relationship-type-selector').select2({ placeholder: 'Select Relation' });
+        }
+    });
+
+    Data.NGSPatientModel = Backbone.Model.extend({});
+
+    Data.Views.NGSPatientsFamilyRow = Backbone.View.extend({
+
+        events: {
+            'click .remove-me': 'closeMe',
+            'keyup #phenotipsid-input': 'getPhenotipsByID',
+            'keyup #samplelabid-input': 'checkSampleID'
+        },
+
+        tagName: 'li',
+        className: 'list-group-item',
+
+        bindings: {
+            '#phenotipsid-input': 'PHENOTIPS ID',
+            '.relationship-type-selector': {
+                observe: 'Relationship',
+                initialize: function ($el) {
+                    $el.select2({ placeholder: 'Select Relation' });// i18n("please-select") });
+                },
+                selectOptions: {
+                    collection: 'this.relatioshipsArraySource',
+                    defaultOption: {
+                        label: '',
+                        value: null
+                    }
+                },
+                onGet: function (val) {
+                    return val;
+                }
+            },
+            // '#unit-type-selector': 'Unit',
+            '#unit-type-selector': {
+                observe: 'Unit',
+                initialize: function ($el) {
+                    $el.select2({ placeholder: 'Select Unit' });// i18n("please-select") });
+                },
+                selectOptions: {
+                    collection: 'this.unitArraySource',
+                    defaultOption: {
+                        label: '',
+                        value: null
+                    }
+                },
+                onGet: function (val) {
+                    return val;
+                }
+            },
+            '#affected-type-selector': {
+                observe: 'Status',
+                initialize: function ($el) {
+                    $el.select2({ placeholder: 'Select Status' });// i18n("please-select") });
+                },
+                selectOptions: {
+                    collection: 'this.affectedArraySource',
+                    labelPath: 'text',
+                    valuePath: 'value',
+                    defaultOption: {
+                        label: '',
+                        value: null
+                    }
+                },
+                onGet: function (val) {
+                    return val;
+                }
+            },
+            '#sex-type-selector': {
+                observe: 'Sex',
+                initialize: function ($el) {
+                    $el.select2({ placeholder: 'Select Sex' });// i18n("please-select") });
+                },
+                selectOptions: {
+                    collection: 'this.sexArraySource',
+                    labelPath: 'text',
+                    valuePath: 'value',
+                    defaultOption: {
+                        label: '',
+                        value: null
+                    }
+                },
+                onGet: function (val) {
+                    return val;
+                }
+            },
+            '#samplelabid-input': 'SAMPLE ID (LAB)',
+            '#sampleiitid-input': 'Sample ID (IIT)',
+            // '#shipmentdateiit-input': 'IIT Shipment Date',
+            '#shipmentdateiit-input': {
+                observe: 'IIT Shipment Date',
+
+                // format date on model as ISO (YYYY-MM-DD)
+                onSet: function (val, options) {
+                    // var dateArray = val.split("/");
+                    if (!val || val == "") {
+                        return null;
+                    }
+                    var momentDate = moment(val, 'L', 'it');
+                    // return new Date(dateArray[2] + '-'+ dateArray[1] + '-' + dateArray[0]);
+                    return momentDate.format('YYYY-MM-DD');
+                },
+
+                // store data in view (from model) as DD/MM/YYYY (European format)
+                onGet: function (value, options) {
+                    if (value) {
+                        /*
+                        var dateArray = value instanceof Date ? value.toISOString().split('-') : moment(value).format('L');
+                        var dateArray2 = dateArray[2].split('T');
+                        dateArray[2] = dateArray2[0];
+                        return dateArray[2] + '/' + dateArray[1] + '/' + dateArray[0]; */
+                        return moment(value).lang("it").format('L');
+                    }
+                },
+
+                // initialize Pikaday + Moment.js
+                initialize: function ($el, model, options) {
+                    var picker = new Pikaday({
+                        field: $el[0],
+                        // lang: 'it',
+                        // format: 'DD/MM/YYYY',
+                        format: moment.localeData('it')._longDateFormat.L,
+                        minDate: moment('1900-01-01').toDate(),
+                        maxDate: new Date()
+                    });
+                }
+            },
+            '#260280-input': '260/280',
+            '#totaldna-input': 'Total DNA',
+            '#dnaconcentration-input': 'DNA Concentration',
+            '#volume-input': 'Volume',
+            '#seqtype-selector': {
+                observe: 'Seq Type',
+                initialize: function ($el) {
+                    $el.select2({ placeholder: 'Select Seq Type' });// i18n("please-select") });
+                },
+                selectOptions: {
+                    collection: 'this.analysisTypesArraySource',
+                    labelPath: 'text',
+                    valuePath: 'value',
+                    defaultOption: {
+                        label: '',
+                        value: null
+                    }
+                },
+                onGet: function (val) {
+                    return val;
+                }
+            }
+        },
+
+        initialize: function (options) {
+            this.template = JST["views/templates/dedicated-data-edit-ngs-patients-row.ejs"];
+            this.dataTypes = options.dataTypes && options.dataTypes;
+            this.privileges = options.dataTypePrivileges && options.dataTypePrivileges;
+            this.patientFields = options.patientFields;
+            this.sampleFields = options.sampleFields;
+            this.analysisFields = options.analysisFields;
+            this.relatioshipsArraySource = _.find(this.patientFields, { formattedName: "status" }).possibleValues;
+            this.unitArraySource = _.find(this.patientFields, { formattedName: "unit" }).possibleValues;
+            // this.analysisTypesArraySource = _.find(this.analysisFields, { formattedName: "target" }).possibleValues;
+            this.analysisTypesArraySource = [
+                {
+                    text: 'WHOLE GENOME',
+                    value: 'WGS'
+                }, {
+                    text: 'EXOME',
+                    value: 'WES'
+                }, {
+                    text: 'PANEL',
+                    value: 'PANEL'
+                }
+            ];
+            this.affectedArraySource = [
+                {
+                    text: 'AFFECTED',
+                    value: 'AFFECTED'
+                }, {
+                    text: 'NOT AFFECTED',
+                    value: 'NOT AFFECTED'
+                }
+            ];
+            this.sexArraySource = [
+                {
+                    text: 'M',
+                    value: 'M'
+                }, {
+                    text: 'F',
+                    value: 'F'
+                }, {
+                    text: 'N.A.',
+                    value: 'N.A.'
+                }
+            ];
+            this.phenotipsObject = null;
+            this.model = new Data.NGSPatientModel();
+            this.model.set('Volume', null);
+
+            // this.listenTo(this.parentView, 'disableRelationshipsRows', this.disableRelationships);
+
+            // this.relationshipValues = _.find(this.patientFields, { formattedName: "status" }).possibleValues;
+        },
+
+        render: function () {
+            // var that = this;
+            // var textHtml = "";
+            this.$el.html(this.template({
+                __: i18n,
+                _: _,
+                patientFields: this.patientFields,
+                sampleFields: this.sampleFields,
+                analysisFields: this.analysisFields,
+                affectedArraySource: this.affectedArraySource,
+                sexArraySource: this.sexArraySource
+            }));
+
+            this.stickit();
+
+            // $('.relationship-type-selector', this.$el).selectpicker();
+            // $('#affected-type-selector', this.$el).selectpicker();
+            // $('#sex-type-selector', this.$el).selectpicker();
+            // $('#unit-type-selector', this.$el).selectpicker();
+            // $('#seqtype-selector', this.$el).selectpicker();
+
+            // this.trigger('handleRelationshipsOptions', this);
+
+            $('.remove-me', this.$el).tooltip();
+            if ($('form .ngs-data-form').length > 0) { $('form .ngs-data-form').parsley(parsleyOpts).reset(); }
+
+            return this;
+        },
+
+        closeMe: function (ev) {
+            this.trigger('closeMe', this);
+        },
+
+        getPhenotipsByID: _.debounce(function (ev) {
+            ev.preventDefault();
+            var format = new RegExp(/P[0-9]{7}/);
+            if (format.test(ev.currentTarget.value)) {
+                $('#phenotipsid-input').addClass('hidden');
+                $('.checking-phenotipsid').removeClass('hidden');
+                var that = this;
+                var textHtml = "";
+
+                $.ajax({
+                    url: '/getPhenotipsPatient?id=' + ev.currentTarget.value,
+                    type: 'GET',
+                    headers: {
+                        'Authorization': 'Bearer ' + xtens.session.get("accessToken")
+                    },
+                    contentType: 'application/json',
+                    success: function (phenotipsObj, options, res) {
+                        $('#phenotipsid-input').removeClass('hidden');
+                        $('.checking-phenotipsid').addClass('hidden');
+                        // console.log(phenotipsObj);
+                        that.phenotipsObject = phenotipsObj;
+                        if (that.phenotipsObject.id) {
+                            toastr.success('Phenotips ID: ' + that.model.get('PHENOTIPS ID') + ' FOUND');
+                        } else {
+                            toastr.warning('Phenotips ID: ' + that.model.get('PHENOTIPS ID') + ' NOT FOUND');
+                        }
+
+                        $('#samplelabid-input', that.$el).val(phenotipsObj.external_id);
+                        that.checkSampleID({ currentTarget: { value: phenotipsObj.external_id } });
+                        if (phenotipsObj.sex) {
+                            $("#sex-type-selector").val(phenotipsObj.sex);
+                        } else {
+                            $("#sex-type-selector").val(null);
+                        }
+                        // $("#sex-type-selector").selectpicker("refresh");
+
+                        if (phenotipsObj.clinicalStatus) {
+                            var value = phenotipsObj.clinicalStatus == 'affected' ? 'AFFECTED' : 'NOT AFFECTED';
+                            $("#affected-type-selector").val(value);
+                        } else {
+                            $("#affected-type-selector").val(null);
+                        }
+                        // $("#affected-type-selector").selectpicker("refresh");
+                    },
+                    error: function (err) {
+                        xtens.error(err);
+                    }
+                });
+            }
+        }, 700),
+
+        checkSampleID: _.debounce(function (ev) {
+            ev.preventDefault && ev.preventDefault();
+            if (ev.currentTarget.value && ev.currentTarget.value != "") {
+                $('#samplelabid-input').addClass('hidden');
+                $('.checking-samplelabid').removeClass('hidden');
+                var currentValue = ev.currentTarget.value;
+                var that = this;
+                var queryObj = {
+                    "dataType": 211,
+                    "multiProject": false,
+                    "junction": "AND",
+                    "model": "Sample",
+                    "content": [
+                        {
+                            "fieldName": "laboratory_id",
+                            "fieldType": "text",
+                            "isList": false,
+                            "caseInsensitive": false,
+                            "comparator": "=",
+                            "fieldValue": ev.currentTarget.value
+                        }
+                    ],
+                    "wantsSubject": true,
+                    "leafSearch": false,
+                    "wantsPersonalInfo": false
+                };
+
+                return $.ajax({
+                    method: 'POST',
+                    headers: {
+                        'Authorization': 'Bearer ' + xtens.session.get("accessToken")
+                    },
+                    contentType: 'application/x-www-form-urlencoded; charset=UTF-8',
+                    url: '/query/dataSearch',
+                    data: 'queryArgs=' + JSON.stringify(queryObj) + '&isStream=false',
+                    success: function (results) {
+                        $('#samplelabid-input').removeClass('hidden');
+                        $('.checking-samplelabid').addClass('hidden');
+                        if (results.data && results.data.length > 0) {
+                            toastr.error('Sample LAB ID: ' + currentValue + ' already entered');
+                            that.model.set('SAMPLE ID (LAB)', null);
+                            $("#samplelabid-input", that.$el).text("");
+                        }
+                    }
+                });
+            }
+        }, 700)
     });
 }(xtens, xtens.module("data")));

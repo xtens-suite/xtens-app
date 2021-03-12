@@ -1,0 +1,123 @@
+
+<ul class="list-group list-group-flush">
+    <li class="list-group-item" style="background-color: rgba(0, 153, 255, 0.15);">
+    <div class="row">
+      <div class="col-xs-offset-1 col-xs-2">
+        <div class="form-group">
+          <input type="text" id="phenotipsid-input" class="form-control" placeholder="PHENOTIPS ID" data-parsley-pattern="P[0-9]{7}">
+          <span class="checking-phenotipsid hidden"><i class="icn-spinner fa fa-spinner fa-spin" aria-hidden="true"></i></span>
+        </div>
+      </div>
+      <div class="col-xs-offset-1 col-xs-2">
+        <div class="form-group">
+          <select class="form-control relationship-type-selector" id="relationship-type-selector" name="relationship-type-selector" required></select>
+        </div>
+      </div>
+      <div class="col-xs-offset-1 col-xs-3">
+        <div class="form-group">
+          <!-- <select id="unit-type-selector" name="unit-type-selector" data-live-search="true"
+          title="Select Unit" class="selectpicker form-control" width="auto">
+          <%_.each(_.find(patientFields, { formattedName: "unit" }).possibleValues, function(value) {%>
+            <option value='<%= value %>'><%= value %></option>
+            <%}) %>
+          </select> -->
+          <select class="form-control unit-type-selector" id="unit-type-selector" name="unit-type-selector" required></select>
+
+        </div>
+      </div>
+      <div class="col-xs-offset-1 col-xs-1">
+        <a class="remove-me"><span data-toggle="tooltip" title="<%= __('remove-row')%>" class="fa fa-times-circle" style="cursor: pointer;"></span></a>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-xs-offset-3 col-xs-2">
+        <div class="form-group">
+          <!-- <select required id="affected-type-selector" name="affected-type-selector" data-live-search="true" title="Select Affected" class="selectpicker form-control">
+            <%_.each(affectedArraySource, function(obj) {%>
+            <option value='<%= obj.value %>'><%= obj.text %></option>
+            <%}) %>
+          </select> -->
+          <select class="form-control affected-type-selector" id="affected-type-selector" name="affected-type-selector" required></select>
+        </div>
+      </div>
+
+      <div class="col-xs-offset-1 col-xs-2">
+        <div class="form-group">
+          <!-- <select required id="sex-type-selector" name="sex-type-selector" title="Select Sex" class="selectpicker form-control" width="auto">
+            <%_.each(sexArraySource, function(obj) {%>
+              <option value='<%= obj.value %>'><%= obj.text %></option>
+              <%}) %>
+          </select> -->
+          <select class="form-control sex-type-selector" id="sex-type-selector" name="sex-type-selector" required></select>
+        </div>
+      </div>
+    </div>
+  </li>
+    <li class="list-group-item" style="background-color: rgba(0, 255, 166, 0.10);">
+    <div class="row">   
+      <div class="col-xs-offset-2 col-xs-2">
+        <div class="form-group">
+          <input required type="text" id="samplelabid-input" class="form-control"
+          placeholder="Sample LAB ID">
+          <span class="checking-samplelabid hidden"><i class="icn-spinner fa fa-spinner fa-spin" aria-hidden="true"></i></span>
+        </div>
+      </div>
+      <div class="col-xs-offset-1 col-xs-2">
+        <div class="form-group">
+          <input type="text" id="sampleiitid-input" class="form-control"
+          placeholder="Sample IIT ID">
+        </div>
+      </div>
+      <div class="col-xs-offset-1 col-xs-2">
+        <div class="form-group">
+          <!-- <label for="lastName" class="data-label">Shipment Date IIT</label> -->
+          <!-- <label></label> -->
+          <input placeholder="Shipment Date IIT" id="shipmentdateiit-input" class="form-control"
+          placeholder="Shipment Date IIT">
+        </div>
+      </div>
+    </div>
+    <div class="row">   
+      <div class="col-xs-offset-1 col-xs-1">
+        <div class="form-group">
+          <input type="number" id="260280-input" class="form-control" min="0"
+          placeholder="260/280" step="0.01" data-parsley-type='number'>
+        </div>
+      </div>
+      <div class="col-xs-offset-1 col-xs-2">
+        <div class="form-group">
+          <input type="number" id="totaldna-input" class="form-control" min="0"
+          placeholder="Total DNA - ng" step="0.01" data-parsley-type='number'>
+        </div>
+      </div>
+      <div class="col-xs-offset-1 col-xs-2">
+        <div class="form-group">
+          <input type="number" id="dnaconcentration-input" class="form-control" min="0"
+          placeholder="DNA Concentr. - ng/ul" step="0.01" data-parsley-type='number'>
+        </div>
+      </div>
+      <div class="col-xs-offset-1 col-xs-2">
+        <div class="form-group">
+          <input type="number" id="volume-input" class="form-control" min="0"
+          placeholder="Volume - ul" step="0.01" data-parsley-type='number'>
+        </div>
+        <!-- validation - binding - css parsley selectpicker - recupero dati inviati in upload - gestione save lato server - generazione report finale -->
+      </div>
+    </div>
+  </li>
+    <li class="list-group-item" style="background-color: rgba(255, 47, 0, 0.10);">
+    <div class="row">
+      <div class="col-xs-offset-5 col-xs-2">
+        <div class="form-group">
+          <!-- <select required id="seqtype-selector" name="seqtype-selector" data-live-search="true"
+            title="Select Seq Type" class="selectpicker form-control" width="auto">
+            <%_.each(_.find(analysisFields, { formattedName: "target" }).possibleValues, function(value) {%>
+              <option value='<%= value %>'><%= value %></option>
+              <%}) %>
+          </select> -->
+          <select class="form-control seqtype-selector" id="seqtype-selector" name="seqtype-selector" required></select>
+        </div>
+      </div>
+    </div>
+  </li>
+</ul>

@@ -2,9 +2,7 @@
  * @author Massimiliano Izzo
  */
 
-
-(function(xtens) {
-
+(function (xtens) {
     var ModalDialog = xtens.module("xtensbootstrap").Views.ModalDialog;
 
     /**
@@ -12,35 +10,32 @@
      * @name handleError
      *
      */
-    function handleError(res, type){
+    function handleError (res, type) {
         var modal, body;
 
         var error = _.isObject(res) ? res.responseJSON.error._internal ? res.responseJSON.error._internal : res.responseJSON.error : res;
 
-        if (_.isObject(error)){
-          //error is an object
+        if (_.isObject(error)) {
+            // error is an object
             var details = res.responseJSON.error.message.details;
-            if (_.isArray(details)){
-              //error.message is object and has details
+            if (_.isArray(details)) {
+                // error.message is object and has details
                 var path = details[0].path.split(".");
-                if (path[1]){
+                if (path[1]) {
                     body = path[0] + " " + path[1].toUpperCase() + " " + details[0].message;
-                }else {
+                } else {
                     body = details[0].message;
                 }
-
-            }
-            else{
-              //error.message is a string
+            } else {
+                // error.message is a string
                 body = error.message;
             }
-        }
-        else {
-          //error is a string
+        } else {
+            // error is a string
             var spl = error && error.split(/\r?\n/);
             var splitted = spl && spl[0].split(":");
             body = splitted && _.isArray(splitted) ? splitted.length > 1 ? splitted[1] : splitted[0] : splitted;
-            if(_.isObject(res) && res.responseJSON.error.raw){
+            if (_.isObject(res) && res.responseJSON.error.raw) {
                 var err = res.responseJSON.error.raw;
                 body = "Error on column <b>" + err.column + "</b> in  <b>" + err.table + "</b>";
             }
@@ -51,7 +46,7 @@
         modal = new ModalDialog({
             title: title,
             body: body,
-            type: type ? type : "delete"
+            type: type || "delete"
         });
 
         $(".modal-cnt").append(modal.render().el);
@@ -68,19 +63,17 @@
                 window.location.replace('/#/operators/updatePassword');
             }
         });
-
     }
 
     xtens.error = handleError;
-} (xtens));
+}(xtens));
 
 /**
  * @description function to overrid the original Backbone sync method to supply authentication Token
  */
-(function(Backbone) {
-
+(function (Backbone) {
     var originalSync = Backbone.sync;
-    Backbone.sync = function(method, model, options) {
+    Backbone.sync = function (method, model, options) {
         options.headers = options.headers || {};
         var accessToken = xtens.session.get('accessToken');
         if (accessToken) {
@@ -88,16 +81,14 @@
         }
         return originalSync.call(model, method, model, options);
     };
-
 })(Backbone);
-
 
 /**
  * Provides a full extention for a Backbone Model
  * Mutuated from: https://coderwall.com/p/xj81ua
  */
 
-(function(Model){
+(function (Model) {
     'use strict';
     // Additional extension layer for Models
     //
@@ -117,7 +108,6 @@
         }
         return extended;
     };
-
 })(Backbone.Model);
 
 /**
@@ -125,7 +115,7 @@
  * mutuated from: https://coderwall.com/p/xj81ua
  */
 
-(function(View){
+(function (View) {
     'use strict';
     // Additional extension layer for Views
     View.fullExtend = function (protoProps, staticProps) {
@@ -143,12 +133,9 @@
         }
         return extended;
     };
-
 })(Backbone.View);
 
-
-(function($) {
-
+(function ($) {
     /**
      *  Ajax prefilters are useful for hooking into all AJAX request
      */
@@ -162,10 +149,10 @@
      *  @description jQuery serializeObject plugin
      */
 
-    $.fn.serializeObject = function() {
+    $.fn.serializeObject = function () {
         var o = {};
         var a = this.serializeArray();
-        $.each(a, function() {
+        $.each(a, function () {
             if (o[this.name] !== undefined) {
                 if (!o[this.name].push) {
                     o[this.name] = [o[this.name]];
@@ -181,10 +168,9 @@
     /**
      * Method to prevent undesired key-related events (ENTER, ...)
      */
-    $("html").on('keypress', function(ev) {
+    $("html").on('keypress', function (ev) {
         if (ev.keyCode === 13) { // The ENTER keycode is 13
             return false;
         }
     });
-
 })(jQuery);
