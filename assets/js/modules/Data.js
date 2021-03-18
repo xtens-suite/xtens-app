@@ -1850,6 +1850,7 @@
 
         initialize: function (options) {
             this.template = JST["views/templates/dedicated-data-edit-ngs-patients.ejs"];
+            this.templateByPatient = JST["views/templates/dedicated-data-edit-ngs-patients-bypat.ejs"];
             this.dataTypes = options.dataTypes && options.dataTypes;
             this.privileges = options.dataTypePrivileges && options.dataTypePrivileges;
             this.patientFields = new SuperType.Model(_.find(this.dataTypes, { id: 210 }).superType).getFlattenedFields();
@@ -1865,10 +1866,8 @@
         },
 
         render: function () {
-            this.$el.html(this.template({ __: i18n, patientFields: this.patientFields, sampleFields: this.sampleFields, analysisFields: this.analysisFields }));
-            this.$form = this.$('form .ngs-data-form');
+            this.$el.html(this.template({ __: i18n }));
 
-            this.stickit();
             // $('#addRowIcon').prop('disabled', false);
             // this.addRow();
 
@@ -1968,7 +1967,13 @@
             // $('#sample-type-selector').prop('required', true);
             // $('#machine-selector').prop('required', true);
             // $('#capture-input').prop('required', true);
+            $('.selector-cnt-ngs').append(this.templateByPatient({ __: i18n, patientFields: this.patientFields, sampleFields: this.sampleFields, analysisFields: this.analysisFields }));
+            this.$form = this.$('form .ngs-data-form');
+
+            this.stickit();
             $('.selector-cnt-ngs').removeClass('hidden');
+            // $('.exclude-parent-valid-input').removeAttr("data-parsley-excluded");
+            // $('form .ngs-data-form').parsley(parsleyOpts).reset();
             $('#bulk-ngs').removeClass('btn-success');
             $('#bulk-ngs').addClass('btn-default');
             // $('#bulk-message').addClass('hidden');
@@ -1988,8 +1993,10 @@
             // $('#sample-type-selector').prop('required', false);
             // $('#machine-selector').prop('required', false);
             // $('#capture-input').prop('required', false);
+            $('.selector-cnt-ngs').empty();
+            this.$form = null;
             $('.selector-cnt-ngs').addClass('hidden');
-
+            // $('.edit-data-form').parsley(parsleyOptsDataManagementParent).reset();
             $('#bulk-ngs').addClass('btn-success');
             $('#bulk-ngs').removeClass('btn-default');
             // $('#bulk-message').removeClass('hidden');
@@ -2324,7 +2331,7 @@
             // this.trigger('handleRelationshipsOptions', this);
 
             $('.remove-me', this.$el).tooltip();
-            if ($('form .ngs-data-form').length > 0) { $('form .ngs-data-form').parsley(parsleyOpts).reset(); }
+            if ($('.ngs-data-form').length > 0) { $('.ngs-data-form').parsley(parsleyOpts).reset(); }
 
             return this;
         },
