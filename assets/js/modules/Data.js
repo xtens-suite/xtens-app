@@ -2344,8 +2344,8 @@
             ev.preventDefault();
             var format = new RegExp(/P[0-9]{7}/);
             if (format.test(ev.currentTarget.value)) {
-                $('#phenotipsid-input').addClass('hidden');
-                $('.checking-phenotipsid').removeClass('hidden');
+                $('#phenotipsid-input', this.$el).addClass('hidden');
+                $('.checking-phenotipsid', this.$el).removeClass('hidden');
                 var that = this;
                 var textHtml = "";
 
@@ -2370,20 +2370,20 @@
                         $('#samplelabid-input', that.$el).val(phenotipsObj.external_id);
                         that.checkSampleID({ currentTarget: { value: phenotipsObj.external_id } });
                         if (phenotipsObj.sex) {
-                            $("#sex-type-selector", that.$el).val(phenotipsObj.sex);
+                            $("#sex-type-selector", that.$el).val(phenotipsObj.sex).trigger('change');
                         } else {
-                            $("#sex-type-selector", that.$el).val(null);
+                            $("#sex-type-selector", that.$el).val(null).trigger('change');
                         }
-                        $("#sex-type-selector", that.$el).select2({ placeholder: 'Select Sex' });
+                        // $("#sex-type-selector", that.$el).select2({ placeholder: 'Select Sex' });
                         // $("#sex-type-selector").selectpicker("refresh");
 
                         if (phenotipsObj.clinicalStatus) {
-                            var value = phenotipsObj.clinicalStatus == 'affected' ? 'AFFECTED' : 'NOT AFFECTED';
-                            $("#affected-type-selector", that.$el).val(value);
+                            var value = phenotipsObj.clinicalStatus === 'affected' ? 'AFFECTED' : 'NOT AFFECTED';
+                            $("#affected-type-selector", that.$el).val(value).trigger('change');
                         } else {
-                            $("#affected-type-selector", that.$el).val(null);
+                            $("#affected-type-selector", that.$el).val(null).trigger('change');
                         }
-                        $("#affected-type-selector", that.$el).select2({ placeholder: 'Select Status' });
+                        // $("#affected-type-selector", that.$el).select2({ placeholder: 'Select Status' });
 
                         // $("#affected-type-selector").selectpicker("refresh");
                     },
