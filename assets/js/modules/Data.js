@@ -38,6 +38,19 @@
         errorTemplate: "<span></span>"
     };
 
+    var parsleyOptsDataManagementParent = {
+        priorityEnabled: false,
+        // excluded: "select[name='fieldUnit']",
+        successClass: "has-success",
+        errorClass: "has-error",
+        classHandler: function (el) {
+            return el.$element.parent();
+        },
+        errorsWrapper: "<span class='help-block'></span>",
+        errorTemplate: "<span></span>",
+        excluded: '.exclude-parent-valid-input'
+    };
+
     toastr.options = {
         "closeButton": false,
         "debug": false,
@@ -1480,7 +1493,7 @@
             $("#data-type").html(textHtml).selectpicker();
             this.$("#save").prop("disabled", true);
             this.$("#save").prop('title', 'Select a specific project to perform a procedure and load at least a file');
-            this.$('form').parsley(parsleyOpts);
+            this.$('form').parsley(parsleyOptsDataManagementParent);
             this.dropzone = new Dropzone(this.$(".dropzone")[0], this.dropzoneOpts);
 
             this.dropzone.on("sending", function (file, xhr, formData) {
@@ -1614,7 +1627,7 @@
                     $("#sample-selector").selectpicker();
                     that.$("#save").prop("disabled", true);
                     that.$("#save").prop('title', 'Select a patient and sample to perform a procedure and load at least a file');
-                    that.$('form').parsley(parsleyOpts);
+                    that.$('form').parsley(parsleyOptsDataManagementParent);
                 },
                 error: function (err) {
                     xtens.error(err);

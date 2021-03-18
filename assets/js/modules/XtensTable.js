@@ -732,9 +732,9 @@ function renderDatatablesDate (data, type) {
                             _.forEach(sourcefamily, function (subj) {
                                 var sex = subj.sex == 'M' ? '1' : subj.sex == 'F' ? '2' : '0';
                                 var affected = subj.metadata.affected.value ? '2' : '1';
-                                var motherTissueCode = subj.metadata.status.value == 'PROBAND' && mother && mother.tissue_biobank_code ? mother.tissue_biobank_code : '0';
-                                var fatherTissueCode = subj.metadata.status.value == 'PROBAND' && father && father.tissue_biobank_code ? father.tissue_biobank_code : '0';
-                                var row = subj.metadata.family_id.value + '\t' + subj.tissue_biobank_code + '\t' + motherTissueCode + '\t' + fatherTissueCode + '\t' + sex + '\t' + affected + '\r\n';
+                                var fatherTissueCode = ['PROBAND', 'BROTHER', 'SISTER'].indexOf(subj.metadata.status.value) > -1 && father && father.tissue_biobank_code ? father.tissue_biobank_code : '0';
+                                var motherTissueCode = ['PROBAND', 'BROTHER', 'SISTER'].indexOf(subj.metadata.status.value) > -1 && mother && mother.tissue_biobank_code ? mother.tissue_biobank_code : '0';
+                                var row = subj.metadata.family_id.value + '\t' + subj.tissue_biobank_code + '\t' + fatherTissueCode + '\t' + motherTissueCode + '\t' + sex + '\t' + affected + '\r\n';
                                 if (familytxt.indexOf(row) === -1) {
                                     familytxt = familytxt + row;
                                 }

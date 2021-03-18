@@ -4,13 +4,13 @@
     <div class="row">
       <div class="col-xs-offset-1 col-xs-2">
         <div class="form-group">
-          <input type="text" id="phenotipsid-input" class="form-control" placeholder="PHENOTIPS ID" data-parsley-pattern="P[0-9]{7}">
+          <input type="text" id="phenotipsid-input" class="form-control exclude-parent-valid-input" placeholder="PHENOTIPS ID" data-parsley-pattern="P[0-9]{7}">
           <span class="checking-phenotipsid hidden"><i class="icn-spinner fa fa-spinner fa-spin" aria-hidden="true"></i></span>
         </div>
       </div>
       <div class="col-xs-offset-1 col-xs-2">
         <div class="form-group">
-          <select class="form-control relationship-type-selector" id="relationship-type-selector" name="relationship-type-selector" required></select>
+          <select class="form-control relationship-type-selector exclude-parent-valid-input" id="relationship-type-selector" name="relationship-type-selector" required></select>
         </div>
       </div>
       <div class="col-xs-offset-1 col-xs-3">
@@ -21,7 +21,7 @@
             <option value='<%= value %>'><%= value %></option>
             <%}) %>
           </select> -->
-          <select class="form-control unit-type-selector" id="unit-type-selector" name="unit-type-selector" required></select>
+          <select class="form-control unit-type-selector exclude-parent-valid-input" id="unit-type-selector" name="unit-type-selector" required></select>
 
         </div>
       </div>
@@ -37,7 +37,7 @@
             <option value='<%= obj.value %>'><%= obj.text %></option>
             <%}) %>
           </select> -->
-          <select class="form-control affected-type-selector" id="affected-type-selector" name="affected-type-selector" required></select>
+          <select class="form-control affected-type-selector exclude-parent-valid-input" id="affected-type-selector" name="affected-type-selector" required></select>
         </div>
       </div>
 
@@ -48,7 +48,7 @@
               <option value='<%= obj.value %>'><%= obj.text %></option>
               <%}) %>
           </select> -->
-          <select class="form-control sex-type-selector" id="sex-type-selector" name="sex-type-selector" required></select>
+          <select class="form-control sex-type-selector exclude-parent-valid-input" id="sex-type-selector" name="sex-type-selector" required></select>
         </div>
       </div>
     </div>
@@ -115,7 +115,7 @@
               <option value='<%= value %>'><%= value %></option>
               <%}) %>
           </select> -->
-          <select class="form-control seqtype-selector" id="seqtype-selector" name="seqtype-selector" required></select>
+          <select class="form-control seqtype-selector exclude-parent-valid-input" id="seqtype-selector" name="seqtype-selector" required></select>
         </div>
       </div>
     </div>
