@@ -1894,6 +1894,8 @@
                         that.modal.hide();
                     }
 
+                    $("#reloadDaemonsTableButton").trigger("click");
+
                     that.modal = new ModalDialog({
                         title: i18n('data-correctly-loaded-on-server'),
                         body: JST["views/templates/dedicated-data-dialog-bootstrap.ejs"]({ __: i18n })
