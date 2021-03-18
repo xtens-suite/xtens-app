@@ -1,0 +1,34 @@
+<form class="ngs-data-form" role="form" data-parsley-focus="first" data-parsley-trigger="focusout" data-parsley-validate>
+  <div class="card text-center">
+    <div class="card-header" style="background-color: rgb(0,0,0,0.1);">
+      <div class="row" style="padding-top: 2vh;">
+        <div class="col-xs-offset-1 col-xs-3">
+          <div class="form-group">
+            <input type="text" id="familyid-input" class="form-control exclude-parent-valid-input" placeholder="<%=__('please-insert-a-familyid') %>" required>
+            <span class="checking-familyid hidden"><i class="icn-spinner fa fa-spinner fa-spin" aria-hidden="true"></i></span>
+          </div>
+        </div>
+        <div class="col-xs-1">
+          <div class="form-group">
+            <button class='btn' id="addRowIcon">
+              <i class="fa fa-plus-square-o fa-3x" data-toggle="tooltip" title="<%= __('add-row')%>"></i>
+            </button>
+          </div>
+        </div>
+        <div class="col-xs-6">
+          <div class="form-group" style="font-size: smaller;padding-top: 1vh;">
+            <span id="family-entered" class="hidden"></span>
+            <span id="family-not-entered" class="hidden"></span>
+            <!-- <span id="family-entered" class="hidden"></span> -->
+          </div>
+        </div>
+        <!-- controllo family id - controllo sample id - costruzione oggetto da salvare (insert family id) - gestione lato server - eventuale report -->
+        <div class="col-xs-1">
+            <input disabled type="submit" id="save-ngs-pat" class="btn btn-primary"  value="<%=__('save') %>">
+        </div>
+      </div>
+    </div>
+    <ul class="patrow-container list-group list-group-flush">
+    </ul>
+  </div>
+</form>
