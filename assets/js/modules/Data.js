@@ -1523,7 +1523,7 @@
         showSelector: function () {
             $('.dropzone').removeClass('hidden');
             $('#save').removeClass('hidden');
-
+            if (this.NGSPatientsImportView) { this.NGSPatientsImportView.remove(); this.NGSPatientsImportView = null; }
             if ($('#data-type').val() === 'VCF') {
                 $('#vcfDiv').removeClass('hidden');
                 $('#ngsAnalysisdiv').addClass('hidden');
@@ -1554,7 +1554,7 @@
                 $('#ngsAnalysisdiv').addClass('hidden');
                 $('#ngsPatientdiv').addClass('hidden');
                 if (this.NGSPatientsImportView) {
-                    $('#ngsPatientdiv').empty();                                                                                                                        []
+                    $('#ngsPatientdiv').empty(); [];
                 }
             }
         },
