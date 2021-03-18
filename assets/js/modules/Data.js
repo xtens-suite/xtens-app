@@ -1536,20 +1536,26 @@
                         // model: model,
                         // colors: colors
                     });
-                    $('#ngsPatientdiv').append(this.NGSPatientsImportView.render().el);
-                    $('#ngsPatientdiv').removeClass('hidden');
-                    $('#ngsAnalysisdiv').addClass('hidden');
-                    $('#vcfDiv').addClass('hidden');
-                    $('#addRowIcon').tooltip();
                 }
+                $('#ngsPatientdiv').append(this.NGSPatientsImportView.render().el);
+                $('#ngsPatientdiv').removeClass('hidden');
+                $('#ngsAnalysisdiv').addClass('hidden');
+                $('#vcfDiv').addClass('hidden');
+                $('#addRowIcon').tooltip();
             } else if ($('#data-type').val() === 'NGSAN') {
                 $('#ngsAnalysisdiv').removeClass('hidden');
                 $('#vcfDiv').addClass('hidden');
                 $('#ngsPatientdiv').addClass('hidden');
+                if (this.NGSPatientsImportView) {
+                    $('#ngsPatientdiv').empty();
+                }
             } else {
                 $('#vcfDiv').addClass('hidden');
                 $('#ngsAnalysisdiv').addClass('hidden');
                 $('#ngsPatientdiv').addClass('hidden');
+                if (this.NGSPatientsImportView) {
+                    $('#ngsPatientdiv').empty();                                                                                                                        []
+                }
             }
         },
 
