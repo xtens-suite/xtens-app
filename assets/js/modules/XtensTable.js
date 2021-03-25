@@ -793,10 +793,10 @@ function renderDatatablesDate (data, type) {
                         "defaultContent": '<i style="cursor:pointer; color:#337ab7;" class="fa fa-plus-circle"></i>'
                     }
                 );
-                this.childColumns.push(this.insertModelSpecificColumnsNoLeaf(model, xtens.session.get('canAccessPersonalData')));
+                this.childColumns.push(this.insertModelSpecificColumnsNoLeaf(model, xtens.session.get('canAccessPersonalData'), true));
                 this.childColumns = _.flatten(this.childColumns);
             } else {
-                this.columns.push(this.insertModelSpecificColumnsNoLeaf(model, xtens.session.get('canAccessPersonalData')));
+                this.columns.push(this.insertModelSpecificColumnsNoLeaf(model, xtens.session.get('canAccessPersonalData'), true));
                 this.columns = _.flatten(this.columns);
             }
             if (this.multiProject) {
@@ -865,7 +865,23 @@ function renderDatatablesDate (data, type) {
                             }
                         });
                         this.columns = _.flatten(this.columns);
+                    } 
+                    
+                    //MODIFICHE - INSERISCO LE COLONNE INVISIBILI IN this.columns
+                    //----------- SULLA BASE DEL MODELLO 
+                    //----------- SOLO SE NON CI SONO GIA' 
+                    //----------- E NON SONO PERSONAL DATA 
+                    //----------- COSI' CHE COMPAIANNO AUTOMATICAMENTE IN OGNI EXCEL
+                    else {
+                        _.forEach(this.insertModelSpecificColumnsNoLeaf(selectedDataType.get('model'), xtens.session.get('canAccessPersonalData'), false), function (col) {
+                            if (_.findIndex(that.columns, function (c) { return c.title === col.title; }) < 0) {
+                                col.visible = false;
+                                that.columns.push(col);
+                            }
+                        });
+                        this.columns = _.flatten(this.columns);
                     }
+                    //MODIFICHE - FINE
 
                     flattenedFields.forEach(function (field) {
                         if (field.sensitive && idDataType) { that.optLinks.hasDataSensitive = true; }
@@ -1079,15 +1095,13 @@ function renderDatatablesDate (data, type) {
         //
         // },
 
-        insertModelSpecificColumnsNoLeaf: function (model, canViewPersonalInfo) {
+        insertModelSpecificColumnsNoLeaf: function (model, canViewPersonalInfo, addViewPersonalInfo) {
             var cols = [];
-            if (canViewPersonalInfo) { // if you are allowed to see the Personal Details
+            if (canViewPersonalInfo && addViewPersonalInfo) { // if you are allowed to see the Personal Details
                 cols = cols.concat(this.insertPersonalDetailsColumnsNoLeaf());
             }
             switch (model) {
-                case Classes.SUBJECT || Classes.DATA:
-                    cols = cols.concat(this.insertSubjectColumnsNoLeaf());
-                    break;
+                case Classes.SUBJECT:
                 case Classes.DATA:
                     cols = cols.concat(this.insertSubjectColumnsNoLeaf());
                     break;
@@ -1168,9 +1182,7 @@ function renderDatatablesDate (data, type) {
                 cols = cols.concat(this.insertPersonalDetailsColumnsLeaf(nameLeaf));
             }
             switch (model) {
-                case Classes.SUBJECT || Classes.DATA:
-                    cols = cols.concat(this.insertSubjectColumnsLeaf(nameLeaf));
-                    break;
+                case Classes.SUBJECT:
                 case Classes.DATA:
                     cols = cols.concat(this.insertSubjectColumnsLeaf(nameLeaf));
                     break;
