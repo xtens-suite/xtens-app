@@ -31,12 +31,8 @@
         }
     };
 
-    // utils.escapeRegExpMatch = function (s) {
-    //     return ;
-    // };
-
     utils.isExactMatch = function (str, match) {
-        return new RegExp(`\\b${match.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')}\\b`).test(str);
+        return new RegExp('\\b' + match.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&') + '\\b').test(str);
     };
 
     /**

@@ -702,7 +702,6 @@ function renderDatatablesDate (data, type) {
                             return s.metadata.family_id.value === sourcerow.metadata.family_id.value;
                         });
                         if (!utils.isExactMatch(csvContent, sourcerow.metadata.family_id.value)) {
-                        if (!utils.isExactMatch(csvContent, sourcerow.metadata.family_id.value)) {
                             csvContent = csvContent + sourcerow.metadata.family_id.value + '\t' + _.uniq(sourcefamily.map(function (s) { return s.tissue_biobank_code; })).join(',') + '\r\n';
                         }
                     }
