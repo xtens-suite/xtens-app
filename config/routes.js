@@ -56,6 +56,7 @@ module.exports.routes = {
     'GET /dataType/edit': { controller: 'dataType', action: 'edit' },
     'POST /graph': { controller: 'dataType', action: 'buildGraph' },
     'GET /dataType/getDataForDashboard': { controller: 'dataType', action: 'getDataForDashboard' },
+    'GET /dataType/getInfoForBarChartDatediff': { controller: 'dataType', action: 'getInfoForBarChartDatediff' },
     // 'GET /graph/buildHierarchy':{controller:'dataType',action:'buildHierarchy'},
 
     // DataTypePrivileges Controller

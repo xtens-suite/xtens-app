@@ -227,6 +227,23 @@ const coroutines = {
         const dataTypeSource = yield DataType.find(params).populate('superType');
         results.DataTypeSource = dataTypeSource;
         return res.json(results);
+    }),
+
+    getInfoForBarChartDatediff: BluebirdPromise.coroutine(function * (req, res) {
+        const fromModel = req.param('fromModel');
+        const fromDataTypeId = req.param('fromDataType');
+        const fromFieldName = req.param('fromFieldName');
+        const toModel = req.param('toModel');
+        const toDataTypeId = req.param('toDataType');
+        const toFieldName = req.param('toFieldName');
+        const period = req.param('period');
+        // const operator = TokenService.getToken(req);       
+
+        const results = yield crudManager.getInfoForBarChartDatediff(
+            fromModel, fromDataTypeId, fromFieldName, 
+            toModel, toDataTypeId, toFieldName, period);
+
+        return res.json(results);
     })
 };
 
@@ -315,6 +332,22 @@ const DataTypeController = {
     getDataForDashboard: function (req, res) {
         const co = new ControllerOut(res);
         coroutines.getDataForDashboard(req, res, co)
+            .catch(/* istanbul ignore next */ function (err) {
+                sails.log.error(err);
+                return co.error(err);
+            });
+    },
+
+    /**
+    * GET /dataType/getInfoForBarChartDatediff
+    *
+    * @method
+    * @name getInfoForBarChartDatediff
+    * @description Find dats interval based on dataTypes
+    */
+     getInfoForBarChartDatediff: function (req, res) {
+        const co = new ControllerOut(res);
+        coroutines.getInfoForBarChartDatediff(req, res, co)
             .catch(/* istanbul ignore next */ function (err) {
                 sails.log.error(err);
                 return co.error(err);

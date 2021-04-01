@@ -8,6 +8,32 @@
 (function (xtens, DashBoard) {
     // dependencies
     var i18n = xtens.module("i18n").en;
+    const optionPeriods = [{
+        name: "Last Year",
+        value: "year",
+        graphFormat: "%Y-%m"
+    },
+    {
+        name: "All time",
+        value: "allyear",
+        graphFormat: "%Y"
+    },
+    {
+        name: "Current Year - " + new Date().getFullYear(),
+        value: "year-" + new Date().getFullYear(),
+        graphFormat: "%Y-%m"
+    },
+    {
+        name: "Last Month",
+        value: "month",
+        graphFormat: "%m-%d"
+    },
+    {
+        name: "Last Week",
+        value: "week",
+        graphFormat: "%m-%d"
+    }
+    ];
     // var Constants = xtens.module("xtensconstants").Constants;
     // var DataTypeClasses = xtens.module("xtensconstants").DataTypeClasses;
     // var MetadataComponent = xtens.module("metadatacomponent");
@@ -48,11 +74,14 @@
 
         initialize: function (options) {
             $('#main').html(this.el);
+            this.models = ["Subject", "Sample", "Data"];
             this.SubjectCount = options.DataTypes;
             this.DataTypes = options.DataTypeSource;
             this.SampleCount = options.Samples;
             this.DataCount = options.Data;
             this.subjects = options.subjects && options.subjects.toJSON();
+            this.BarGraphParent1 = null;
+            this.BarGraphParent2 = null;
 
             this.dataTypesModelsColors = {
                 "Data": "#DB222A", // "#FB3640",//#FF4B3E",
@@ -73,13 +102,12 @@
             }));
             $('#subject-selector').selectpicker();
 
-            _.forEach(["Subject", "Sample", "Data"], function (model) {
+            _.forEach(this.models, function (model) {
                 if (that[model + 'Count'] && that[model + 'Count'].length > 0) {
-                    that.$el.append('<div class="row ' + model + '" >');
-                    that.renderChartsByModel(model);
+                    that.renderPieByModel(model);
                 }
             });
-
+            this.renderChartsByModel();
             return this;
         },
 
@@ -88,22 +116,22 @@
             xtens.router.navigate('#/subjects/dashboard?idPatient=' + idPatient, { trigger: true });
         },
 
-        renderChartsByModel: function (model) {
+        renderPieByModel: function (model) {
             var pieData; var title; var colors; var writeTag = false;
             switch (model) {
                 case "Subject":
                     pieData = this.SubjectCount;
-                    title = "DataTypes_Pie";
+                    title = "DataTypes";
                     colors = this.dataTypesModelsColors;
                     writeTag = true;
                     break;
                 case "Sample":
                     pieData = this.SampleCount;
-                    title = "Samples_Pie";
+                    title = "Samples";
                     break;
                 case "Data":
                     pieData = this.DataCount;
-                    title = "Data_Pie";
+                    title = "Data";
                     break;
                 default:
                     break;
@@ -111,38 +139,42 @@
             var viewName = "PieChart" + model;
             this[viewName] = new DashBoard.Views.PieChart({
                 data: pieData,
+                name: title + "_Pie",
                 title: title,
                 model: model,
                 colors: colors
             });
 
-            $("." + model, this.$el).append(this[viewName].render().el);
+            $("#pies").append(this[viewName].render().el);
             this[viewName].createGraph(writeTag);
+        },
 
-            viewName = "BarGraph" + model;
-            var filteredDts = this.DataTypes.filter(function (d) {
-                return d.model === model;
+        renderChartsByModel: function () {
+            this.BarGraphParent1 = new DashBoard.Views.BarChartParent({
+                models: this.models,
+                dataTypes: this.DataTypes,
+                name: 'Time'
             });
-            this[viewName] = new DashBoard.Views.BarChart({
-                DataTypes: filteredDts,
-                model: model,
-                title: "Time_" + model
+            $("#bars").append(this.BarGraphParent1.render().el);
+            this.BarGraphParent1.renderBarChartByModel();
+
+            /** */
+            this.BarGraphParent2 = new DashBoard.Views.DateDiffBarChart({
+                dataTypes: this.DataTypes
             });
-            $("." + model, this.$el).append(this[viewName].render().el);
+            $("#bars").append(this.BarGraphParent2.render().el);
+            /**/
         }
     });
 
     DashBoard.Views.PieChart = Backbone.View.extend({
 
         tagName: 'div',
-        className: 'dashboard-pie-chart col-md-6 col-sm-12',
+        className: 'dashboard-pie-chart col-sm-4',
         attributes: function () {
             var style = 'border: 3px solid #29406d; ' +
                 'text-align: center; ' +
-                // 'margin: 1vh; ' +
-                'border-radius: 2vh; ' +
-                'min-height: 437px; ' +
-                'padding: 0px;';
+                'border-radius: 2vh; ';
             return {
                 'style': style
             };
@@ -153,20 +185,19 @@
 
         initialize: function (options) {
             this.data = options.data;
+            this.name = options.name;
             this.title = options.title;
             this.model = options.model;
             this.colors = options.colors;
-            // $('.dashboard-cnt').append(this.el);
             this.template = JST["views/templates/dashboard-graph.ejs"];
-            // this.render();
         },
 
         render: function () {
             this.$el.html(this.template({
                 __: i18n,
                 title: this.title
-            })); //, dataTypes : dataTypes.models}));
-            this.$el.addClass(this.title);
+            })); 
+            this.$el.addClass(this.name);
             return this;
         },
 
@@ -184,7 +215,7 @@
 
             var width = 500;
             var height = 280;
-            var radius = Math.min(width, height) / 2;
+            var radius = (Math.min(width, height) / 2) +10;
             var colorLength = data.length < 3 ? 3 : data.length < 9 ? data.length : 9;
             var color = this.colors ? d3.scaleOrdinal().range(_.values(this.colors))
                 : this.model === "Sample" ? d3.scaleOrdinal(d3.schemeGreens[colorLength])
@@ -203,10 +234,8 @@
             var svgTraslationX = 150;
             var svgTraslationY = (height / 2 + 10);
 
-            var svg = d3.select("." + this.title).append("svg")
-                .attr("width", width)
-                .attr("height", height + 50)
-                .style("margin-top", '5vh')
+            var svg = d3.select("." + this.name + " > #content > .row > .graph-cnt").append("svg")
+                .attr("viewBox", "-10 -15 " + width + " " + (height + 50))
                 .append("g")
                 .attr("transform", "translate(" + svgTraslationX + "," + svgTraslationY + ")");
 
@@ -268,23 +297,25 @@
                     handlemousemove(this, d);
                 });
 
+        
+
             // LEGEND initialization
             var legend = svg.selectAll(".legend")
                 .data(color.domain())
                 .enter().append("g")
                 .attr("class", "legend")
                 .attr("transform", function (d, i) {
-                    return "translate(-" + 230 + "," + ((i * 20) - 120) + ")";
+                    return "translate(300," + ((i * 20) - 135) + ")";
                 });
 
             legend.append("rect")
-                .attr("x", $('.' + that.title).width() - 18)
+                .attr("x", $('.' + that.name).width() - 18)
                 .attr("width", 18)
                 .attr("height", 18)
                 .style("fill", color);
 
             legend.append("text")
-                .attr("x", $('.' + that.title).width() - 24)
+                .attr("x", $('.' + that.name).width() - 24)
                 .attr("y", 9)
                 .attr("dy", ".35em")
                 .style("text-anchor", "end")
@@ -294,21 +325,77 @@
         }
     });
 
-    DashBoard.Views.BarChart = Backbone.View.extend({
-
+    DashBoard.Views.BarChartParent = Backbone.View.extend({
         tagName: 'div',
-        className: 'dashboard-pie-chart col-md-6 col-sm-12',
+        className: 'dashboard-bar-chart-parent col-sm-6',
+        events: {
+            'change #md-sel': 'onChangeModel'
+        },
         attributes: function () {
             var style = 'border: 3px solid #29406d; ' +
                 'text-align: center; ' +
-                // 'margin: 1vh; ' +
-                'border-radius: 2vh; ' +
-                'min-height: 437px; ' +
-                'padding: 0px;';
+                'border-radius: 2vh; ';
             return {
                 'style': style
             };
         },
+
+        initialize: function (options) {
+            var that = this;
+            this.BarChart = null;
+            this.models = options.models;
+            this.DataTypes = options.dataTypes;
+            this.name = options.name;
+            this.selectedModel = options.models[0];
+            this.DataTypesFiltered = this.DataTypes.filter(function (dt) {
+                return dt.model === that.selectedModel;
+            });
+            this.template = JST["views/templates/dashboard-bargraph-parent.ejs"];
+
+        },   
+
+        onChangeModel: function (ev) {
+            ev.preventDefault();
+            var that = this;
+            this.selectedModel = this.models.find(function (md) {
+                return md === that.$('#md-sel').val();
+            });
+            this.DataTypesFiltered = this.DataTypes.filter(function (dt) {
+                return dt.model === that.selectedModel;
+            });
+            this.renderBarChartByModel();
+        },
+
+        render: function () {
+            this.$el.html(this.template({
+                __: i18n,
+                models: this.models,
+                name: this.name
+            }));
+            this.$el.addClass(this.name);
+            this.$('#md-sel').selectpicker();
+            return this;
+        },
+
+        renderBarChartByModel: function () {
+            if (this.BarChart) { 
+                this.BarChart = null; 
+                $("#bargraph-parent-content-" + this.name).empty(); 
+            }
+            
+            this.BarChart = new DashBoard.Views.BarChart({
+                DataTypes: this.DataTypesFiltered,            
+                model: this.selectedModel,
+                name: this.name + '-' + this.selectedModel
+            });
+            $("#bargraph-parent-content-" + this.name).append(this.BarChart.render().el);
+        }
+    });
+        
+    DashBoard.Views.BarChart = Backbone.View.extend({
+
+        tagName: 'div',
+        className: 'dashboard-bar-chart',
         events: {
             'change #dt-sel': 'onChangeDataType',
             'change #field-sel': 'onChangeField',
@@ -316,35 +403,10 @@
         },
 
         initialize: function (options) {
-            this.periods = [{
-                name: "Last Year",
-                value: "year",
-                graphFormat: "%Y-%m"
-            },
-            {
-                name: "All time",
-                value: "allyear",
-                graphFormat: "%Y"
-            },
-            {
-                name: "Current Year - " + new Date().getFullYear(),
-                value: "year-" + new Date().getFullYear(),
-                graphFormat: "%Y-%m"
-            },
-            {
-                name: "Last Month",
-                value: "month",
-                graphFormat: "%m-%d"
-            },
-            {
-                name: "Last Week",
-                value: "week",
-                graphFormat: "%m-%d"
-            }
-            ];
+            this.periods = optionPeriods;
 
             this.model = options.model;
-            this.title = options.title;
+            this.name = 'bar-chart-' + options.name;
             this.DataTypes = options.DataTypes;
             this.selectedDataType = this.DataTypes[0];
             this.selectedPeriod = this.periods[0].value;
@@ -424,7 +486,6 @@
         render: function () {
             this.$el.html(this.template({
                 __: i18n,
-                title: this.title,
                 dataTypes: this.DataTypes,
                 fields: this.dateFields,
                 periods: this.periods
@@ -433,7 +494,7 @@
             this.$('#field-sel').selectpicker();
             this.$('#period-sel').selectpicker();
             this.fetchData();
-            this.$el.addClass(this.title);
+            this.$el.addClass(this.name);
             return this;
         },
 
@@ -503,10 +564,9 @@
                     return "<strong>" + d.date + " total:</strong> <span style='color:steelblue'>" + partialTotal + "</span>";
                 });
 
-            var svg = d3.select("." + this.title).append("svg")
+            var svg = d3.select("." + this.name + " > .row > .graph-cnt").append("svg")
                 .data(this.data)
-                .attr("width", width + margin.left + margin.right)
-                .attr("height", height + margin.top + margin.bottom)
+                .attr("viewBox", "-10 -15 " + (width + margin.left + margin.right) + " " + (height + margin.top + margin.bottom))
                 .append("g")
                 .attr("transform",
                     "translate(" + margin.left + "," + margin.top + ")");
@@ -619,5 +679,149 @@
                     tipPoint.hide(d, i);
                 });
         }
+    });
+
+    DashBoard.Views.DateDiffBarChart = Backbone.View.extend({
+
+        tagName: 'div',
+        className: 'dashboard-datediff-bar-chart col-sm-6',
+        events: {
+            'change #fd-from-sel': 'onChangeFieldFrom',
+            'change #fd-to-sel': 'onChangeFieldTo',
+            'change #period-sel': 'onChangePeriod'
+        },
+        attributes: function () {
+            var style = 'border: 3px solid #29406d; ' +
+                'text-align: center; ' +
+                'border-radius: 2vh; ';
+            return {
+                'style': style
+            };
+        },
+
+        initialize: function (options) {
+            var that = this;
+            this.periods = optionPeriods;
+            this.name = 'datediff-bar-chart';
+            this.selectedFieldFrom = null;
+            this.selectedFieldTo = null;
+            this.fieldsDate = [];
+            _.forEach(options.dataTypes, function (dt) {
+                dataType = {id: dt.id, name: dt.name, model: dt.model};
+                _.forEach(dt.superType.schema.body, function (bd) {
+                    _.forEach(bd.content, function (ct) {
+                        if (ct.fieldType == "Date"){
+                            field = {
+                                id: dataType.model + '-' + dataType.id + '-' + ct.formattedName, 
+                                name: dataType.name + ' - ' + ct.description
+                            }
+                            that.fieldsDate.push(field);
+                        }
+                    });
+                });
+            });
+            
+            this.selectedPeriod = this.periods[0].value;
+            this.selectedFormat = this.periods[0].graphFormat;
+            this.template = JST["views/templates/dashboard-bargraph-datediff.ejs"];
+
+        },
+
+        onChangeFieldFrom: function (ev) {
+            ev.preventDefault();
+            this.manageDateFields(true);
+            this.fetchData();
+        },
+
+        onChangeFieldTo: function (ev) {
+            ev.preventDefault();
+            this.manageDateFields(false);
+            this.fetchData();
+        },
+
+        manageDateFields: function(isFrom) {
+            select1 = isFrom ? '#fd-from-sel' : '#fd-to-sel'; 
+            select2 = isFrom ? '#fd-to-sel' : '#fd-from-sel'; 
+            varName = isFrom ? 'selectedFieldFrom' : 'selectedFieldTo'; 
+            this[varName] = this.$(select1).val();
+            this.$(select2).children('option[value=' + this[varName] + ']')
+                .attr('disabled', true)
+                .siblings().removeAttr('disabled');
+            this.$(select2).selectpicker('refresh');
+        },
+
+        onChangePeriod: function (ev) {
+            ev.preventDefault();
+            this.selectedPeriod = this.$('#period-sel').val();
+            this.selectedFormat = _.findWhere(this.periods, { value: this.selectedPeriod });
+            this.fetchData();
+        },
+
+        fetchData: function () {
+            var that = this;
+            this.fromArray = this.selectedFieldFrom.split("-");
+            this.toArray = this.selectedFieldTo.split("-");
+            $.ajax({
+                url: '/dataType/getInfoForBarChartDatediff?',
+                type: 'GET',
+                headers: {
+                    'Authorization': 'Bearer ' + xtens.session.get("accessToken")
+                },
+                data: {
+                    fromModel: this.fromArray[0],
+                    fromDataType: this.fromArray[1],
+                    fromFieldName: this.fromArray[2],
+                    toModel: this.toArray[0],
+                    toDataType: this.toArray[1],
+                    toFieldName: this.toArray[2],
+                    period: this.selectedPeriod
+                },
+                contentType: 'application/json',
+                success: function (results) {
+                    that.data = results;
+                    that.createGraph();
+                },
+                error: function (err) {
+                    xtens.error(err);
+                }
+            });
+        },
+
+        render: function () {
+            this.$el.html(this.template({
+                __: i18n,
+                fieldsDate: this.fieldsDate,
+                periods: this.periods
+            }));
+            this.$('#fd-from-sel').selectpicker('val', this.fieldsDate[0].id);
+            this.$('#fd-to-sel').selectpicker('val', this.fieldsDate[1].id);
+            this.manageDateFields(true);
+            this.manageDateFields(false);
+            this.$('#period-sel').selectpicker();
+            this.fetchData();
+            this.$el.addClass(this.name);
+            return this;
+        },
+
+        resetTips: function () {
+            $('.d3-tip').css('opacity', 0).css('pointer-events', 'none');
+        },
+
+        createGraph: function (){
+            this.resetTips();
+            $("svg", this.$el).remove();
+            var that = this;
+            var margin = {
+                top: 20,
+                right: 35,
+                bottom: 70,
+                left: 40
+            };
+            var width = 600 - margin.left - margin.right;
+            var height = 300 - margin.top - margin.bottom;
+            var xAxisTraslation = 35;
+
+        }
+    
     });
 }(xtens, xtens.module("dashboard")));

@@ -1,0 +1,52 @@
+<style>
+    div.tooltip {	
+        position: absolute;			
+        text-align: center;			
+        width: 60px;					
+        height: 28px;					
+        padding: 2px;				
+        font: 12px sans-serif;		
+        background: lightsteelblue;	
+        border: 0px;		
+        border-radius: 8px;			
+        pointer-events: none;			
+    }
+</style>
+    <p style="margin: 17px 0px; font-size:16px;">Dates Interval</p>
+      <div class="row">
+        <div class="col-md-4">
+          <div class="form-group">
+            <label for="fd-from-sel"><%=__('from') %></label><br>
+            <select required id='fd-from-sel' class="form-control selectpicker dateFields" >
+                <% _.each(fieldsDate, function(field) {%>
+                  <option value='<%= field.id %>' data-width="auto"><%= field.name %></option>
+                <% }) %>
+            </select>
+          </div>
+        </div>
+        <div class="col-md-4">
+            <div class="form-group">
+              <label for="fd-to-sel"><%=__('to') %></label><br>
+              <select required id='fd-to-sel' class="form-control selectpicker dateFields">
+                  <% _.each(fieldsDate, function(field) {%>
+                    <option value='<%= field.id %>' data-width="auto"><%= field.name %></option>
+                  <% }) %>
+              </select>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="form-group">
+              <label for="period-sel"><%=__('period') %></label><br>
+              <select required id='period-sel' class="form-control selectpicker">
+                  <% _.each(periods, function(period) {%>
+                    <option value='<%= period.value %>'><%= period.name %></option>
+                  <% }) %>
+              </select>
+            </div>
+          </div>
+        </div>
+      <div class="row">
+        <div class="col-md-12 graph-cnt" style="text-align:center;">
+        </div>
+      </div>
+    
