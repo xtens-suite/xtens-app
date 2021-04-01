@@ -27,7 +27,7 @@ function renderDatatablesDate (data, type) {
     var useFormattedNames = xtens.module("xtensconstants").useFormattedMetadataFieldNames;
     var Classes = xtens.module("xtensconstants").DataTypeClasses;
     var Privileges = xtens.module("xtensconstants").DataTypePrivilegeLevels;
-    // var replaceUnderscoreAndCapitalize = xtens.module("utils").replaceUnderscoreAndCapitalize;
+    var utils = xtens.module("utils");
     var DataType = xtens.module("datatype");
     var Data = xtens.module("data");
     var SuperType = xtens.module("supertype");
@@ -701,7 +701,8 @@ function renderDatatablesDate (data, type) {
                         var sourcefamily = _.filter(that.sourceNGS, function (s) {
                             return s.metadata.family_id.value === sourcerow.metadata.family_id.value;
                         });
-                        if (csvContent.indexOf(sourcerow.metadata.family_id.value) < 0) {
+                        if (!utils.isExactMatch(csvContent, sourcerow.metadata.family_id.value)) {
+                        if (!utils.isExactMatch(csvContent, sourcerow.metadata.family_id.value)) {
                             csvContent = csvContent + sourcerow.metadata.family_id.value + '\t' + _.uniq(sourcefamily.map(function (s) { return s.tissue_biobank_code; })).join(',') + '\r\n';
                         }
                     }
@@ -723,8 +724,8 @@ function renderDatatablesDate (data, type) {
                             return s.metadata.family_id.value === sourcerow.metadata.family_id.value;
                         });
 
-                        if (csvContent.indexOf(sourcerow.metadata.family_id.value) < 0) {
-                        // csvContent = csvContent + sourcerow.metadata.family_id.value + '\t' +
+                        if (!utils.isExactMatch(csvContent, sourcerow.metadata.family_id.value)) {
+                            // csvContent = csvContent + sourcerow.metadata.family_id.value + '\t' +
                         // sourcefamily.map(function (s) { return s.tissue_biobank_code; }).join(',') + '\r\n';
                             var mother = _.find(sourcefamily, function (s) { return s.metadata.status.value == 'MOTHER'; });
                             var father = _.find(sourcefamily, function (s) { return s.metadata.status.value == 'FATHER'; });
@@ -865,13 +866,13 @@ function renderDatatablesDate (data, type) {
                             }
                         });
                         this.columns = _.flatten(this.columns);
-                    } 
-                    
-                    //MODIFICHE - INSERISCO LE COLONNE INVISIBILI IN this.columns
-                    //----------- SULLA BASE DEL MODELLO 
-                    //----------- SOLO SE NON CI SONO GIA' 
-                    //----------- E NON SONO PERSONAL DATA 
-                    //----------- COSI' CHE COMPAIANNO AUTOMATICAMENTE IN OGNI EXCEL
+                    }
+
+                    // MODIFICHE - INSERISCO LE COLONNE INVISIBILI IN this.columns
+                    // ----------- SULLA BASE DEL MODELLO
+                    // ----------- SOLO SE NON CI SONO GIA'
+                    // ----------- E NON SONO PERSONAL DATA
+                    // ----------- COSI' CHE COMPAIANNO AUTOMATICAMENTE IN OGNI EXCEL
                     else {
                         _.forEach(this.insertModelSpecificColumnsNoLeaf(selectedDataType.get('model'), xtens.session.get('canAccessPersonalData'), false), function (col) {
                             if (_.findIndex(that.columns, function (c) { return c.title === col.title; }) < 0) {
@@ -881,7 +882,7 @@ function renderDatatablesDate (data, type) {
                         });
                         this.columns = _.flatten(this.columns);
                     }
-                    //MODIFICHE - FINE
+                    // MODIFICHE - FINE
 
                     flattenedFields.forEach(function (field) {
                         if (field.sensitive && idDataType) { that.optLinks.hasDataSensitive = true; }

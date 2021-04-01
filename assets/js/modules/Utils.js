@@ -31,6 +31,14 @@
         }
     };
 
+    // utils.escapeRegExpMatch = function (s) {
+    //     return ;
+    // };
+
+    utils.isExactMatch = (str, match) => {
+        return new RegExp(`\\b${match.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')}\\b`).test(str);
+    };
+
     /**
      * @description a set of utility functions for Date management
      */
