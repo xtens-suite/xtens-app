@@ -35,7 +35,7 @@
     //     return ;
     // };
 
-    utils.isExactMatch = (str, match) => {
+    utils.isExactMatch = function (str, match) {
         return new RegExp(`\\b${match.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')}\\b`).test(str);
     };
 
