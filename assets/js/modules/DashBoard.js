@@ -706,13 +706,22 @@
             this.selectedFieldFrom = null;
             this.selectedFieldTo = null;
             this.fieldsDate = [];
-            _.forEach(options.dataTypes, function (dt) {
-                dataType = {id: dt.id, name: dt.name, model: dt.model};
+            this.filteredDatatypes = options.dataTypes.filter (function (dt) {
+                return _.find(dt.parents, function (pt) {
+                    return pt.model == 'Subject';
+                } );
+            })
+            _.forEach(this.filteredDatatypes, function (dt) {
+                dataType = {id: dt.id, name: dt.name, model: dt.model, 
+                    hasSample: _.find(dt.parents, function (pt) {
+                        return pt.model == 'Sample';
+                    })
+                };
                 _.forEach(dt.superType.schema.body, function (bd) {
                     _.forEach(bd.content, function (ct) {
                         if (ct.fieldType == "Date"){
                             field = {
-                                id: dataType.model + '-' + dataType.id + '-' + ct.formattedName, 
+                                id: dataType.model + '-' + dataType.id + '-' + ct.formattedName + '-' + dataType.hasSample ? 1 : 0, 
                                 name: dataType.name + ' - ' + ct.description
                             }
                             that.fieldsDate.push(field);
@@ -771,9 +780,11 @@
                     fromModel: this.fromArray[0],
                     fromDataType: this.fromArray[1],
                     fromFieldName: this.fromArray[2],
+                    fromHasSample: this.fromArray[3],
                     toModel: this.toArray[0],
                     toDataType: this.toArray[1],
                     toFieldName: this.toArray[2],
+                    toHasSample: this.toArray[3],
                     period: this.selectedPeriod
                 },
                 contentType: 'application/json',

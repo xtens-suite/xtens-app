@@ -224,7 +224,7 @@ const coroutines = {
         if (projectId) {
             params = { project: projectId };
         }
-        const dataTypeSource = yield DataType.find(params).populate('superType');
+        const dataTypeSource = yield DataType.find(params).populate(['superType', 'parents']);
         results.DataTypeSource = dataTypeSource;
         return res.json(results);
     }),
@@ -233,15 +233,17 @@ const coroutines = {
         const fromModel = req.param('fromModel');
         const fromDataTypeId = req.param('fromDataType');
         const fromFieldName = req.param('fromFieldName');
+        const fromHasSample = req.param('fromHasSample');
         const toModel = req.param('toModel');
         const toDataTypeId = req.param('toDataType');
         const toFieldName = req.param('toFieldName');
+        const toHasSample = req.param('toHasSample');
         const period = req.param('period');
-        // const operator = TokenService.getToken(req);       
-
+        // const operator = TokenService.getToken(req);      
         const results = yield crudManager.getInfoForBarChartDatediff(
-            fromModel, fromDataTypeId, fromFieldName, 
-            toModel, toDataTypeId, toFieldName, period);
+            fromModel, fromDataTypeId, fromFieldName, fromHasSample,
+            toModel, toDataTypeId, toFieldName, toHasSample,
+            period);
 
         return res.json(results);
     })
