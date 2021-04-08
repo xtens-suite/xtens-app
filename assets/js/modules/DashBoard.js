@@ -721,7 +721,7 @@
                     _.forEach(bd.content, function (ct) {
                         if (ct.fieldType == "Date"){
                             field = {
-                                id: dataType.model + '-' + dataType.id + '-' + ct.formattedName + '-' + dataType.hasSample ? 1 : 0, 
+                                id: dataType.model + '-' + dataType.id + '-' + ct.formattedName + '-' + (dataType.hasSample ? 1 : 0), 
                                 name: dataType.name + ' - ' + ct.description
                             }
                             that.fieldsDate.push(field);
@@ -830,8 +830,290 @@
             };
             var width = 600 - margin.left - margin.right;
             var height = 300 - margin.top - margin.bottom;
-            var xAxisTraslation = 35;
+            //var xAxisTraslation = 35;
 
+            //MANAGE DATA FOR DAYS BOX PLOTS
+            var dataOutliers = [];
+            var dataDays = [];
+            var min_days = 0;
+            var max_days = 0;
+            const quartile = (arr, q) => {
+                const sorted = _.sortBy(arr, 'days');
+                const pos = (sorted.length - 1) * q;
+                const base = Math.floor(pos);
+                const rest = pos - base;
+                if (sorted[base + 1] !== undefined) {
+                    a = sorted[base];
+                    b = sorted[base + 1];
+                    return sorted[base].days + rest * (sorted[base + 1].days - sorted[base].days);
+                } else {
+                    return sorted[base].days;
+                }
+            };
+            _.forEach(_.groupBy(this.data.filter(function (o) { return o.todate; }), 'date'), function (group) {
+                var field = {};
+                field.date = group[0].date;
+                _.forEach(group, function (obj) {
+                    var to_date = new Date(obj.todate);
+                    var from_date = new Date(obj.fromdate);
+                    obj.days = Math.round((to_date.getTime() - from_date.getTime())/(1000*60*60*24)); 
+                    max_days = obj.days > max_days ? obj.days : max_days; 
+                    min_days = obj.days < min_days ? obj.days : min_days; 
+                });
+                field.qrt1 = quartile(group, .25);
+                field.median = quartile(group, .50);
+                field.qrt3 = quartile(group, .75);
+                var IQR = field.qrt3 - field.qrt1;
+                field.uav = field.qrt3;
+                field.lav = field.qrt1;
+                field.outliers = [];
+                if (IQR > 0) {
+                    var uif = field.qrt3 + (IQR * 1.5);
+                    uav_array = group.filter(function (obj) {
+                        return  obj.days >= field.qrt3 && obj.days <= uif;
+                    });
+                    if (uav_array.length > 0) {
+                        field.uav = Math.max.apply(Math, uav_array.map(function(o) { return o.days; }));
+                    }
+
+                    var lif = field.qrt1 - (IQR * 1.5);
+                    lav_array = group.filter(function (obj) {
+                        return obj.days >= lif && obj.days <= field.qrt1;
+                    });
+                    if (lav_array.length > 0) {
+                        field.lav = Math.min.apply(Math, lav_array.map(function(o) { return o.days; }));
+                    }
+
+                    group.map(function (obj) {
+                        if (obj.days <= lif || obj.days >= uif) {
+                            dataOutliers.push(obj);
+                        }
+                    });
+                }
+                dataDays.push(field);
+            });
+            _.forEach(dataOutliers, function (obj) {
+                dataOutliersGroup = dataOutliers.filter(function (grp) {
+                    return grp.date == obj.date;
+                });
+                obj.perc = dataOutliersGroup.length > 0 ? Math.round(dataOutliers.length / dataOutliersGroup.length)* 100 : 0;
+            });
+
+            //MANAGE DATA FOR COUNTER WHEN "TO_DATE" IS NULL
+            var dataCount = [];
+            var max_count = 0;
+            _.forEach(_.groupBy(this.data.filter(function (o) { return !o.todate; }), 'date'), function (group) {
+                var field = {};
+                field.date = group[0].date;
+                field.count = group.length;
+                max_count += field.count;
+                dataCount.push(field);
+            });
+
+            //TIPS DAYS AND COUNT
+            var tipDays = d3.tip()
+                .attr('class', 'd3-tip')
+                .offset([-10, 0])
+                .html(function (d) {
+                    return "<b>" + d.date + "</b>"
+                    + "<br><b>Quartile 1:</b> <span style='color:steelblue'>" + d.qrt1
+                    + "</span><br> <b>Median:</b> <span style='color:orange'>" + d.median
+                    + "</span><br> <b>Quartile 3:</b> <span style='color:steelblue'>" + d.qrt3 
+                    + "</span><br> <b>LAV:</b> <span style='color:steelblue'>" + d.lav 
+                    + "</span> <b>UAV:</b> <span style='color:steelblue'>" + d.uav + "</span>";
+                });
+            var tipCount = d3.tip()
+                .attr('class', 'd3-tip')
+                .offset([-10, 0])
+                .html(function (d, currentIndex) {
+                    var partialTotal = 0;
+                    for (var index = 0; index <= currentIndex; index++) {
+                        partialTotal = partialTotal + dataCount[index].count;
+                    }
+                    return "<b>" + d.date + " - No destination date</b>"
+                        + "<br><b>current:</b> <span style='color:steelblue'>" + dataCount[currentIndex].count 
+                        + "</span> <b>total:</b> <span style='color:steelblue'>" + partialTotal + "</span>";
+                });
+            var tipOutlier = d3.tip()
+                .attr('class', 'd3-tip')
+                .offset([-10, 0])
+                .html(function (d) {
+                    return "<b>" + d.date + " - Outlier:</b> <span style='color:steelblue'>" + d.days 
+                        + "</span> <b>percentage:</b> <span style='color:steelblue'>" + d.perc + "</span>";
+                });
+
+            //CREATE GRAPH
+            var svg = d3.select("." + this.name + " > .row > .graph-cnt").append("svg")
+                .data(this.data)
+                .attr("viewBox", "-10 -15 " + (width + margin.left + margin.right) + " " + (height + margin.top + margin.bottom))
+                .append("g")
+                .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+            if (svg._groups[0].length > 0) {
+                svg.call(tipDays);
+                svg.call(tipCount);
+                svg.call(tipOutlier);
+            }
+                
+            //X AXIS FOR BOTH DAYS AND COUNT
+            var xDays = d3.scaleBand()
+                .domain(_.map(_.groupBy(this.data, 'date'), function (d) {
+                    return d[0].date;
+                }))
+                .range([ 0, width ])
+                .paddingInner(1)
+                .paddingOuter(.5);
+            svg.append("g")
+                .attr("transform", "translate(0," + height + ")")
+                .call(d3.axisBottom(xDays));
+                
+            //DAYS Y AXIS
+            var yDays = d3.scaleLinear()
+                .domain([min_days < 0 || (min_days - 30 >= 0) ? min_days - 30 : 0, max_days + 30])
+                .range([height, 0]);
+            svg.append("g").call(d3.axisLeft(yDays));
+                
+            //COUNT Y AXIS
+            var yCount = d3.scaleLinear()
+                .domain([0, max_count + 30])
+                .range([height, 0]);
+            svg.append("g")
+                .attr("class", "axisRed")
+                .attr("transform", "translate( " + width + ", 0 )")
+                .call(d3.axisRight(yCount));
+                
+            //DAYS VERTICAL LINE
+            svg.selectAll("vertLines").data(dataDays).enter().append("line")
+                .attr("x1", function(d){
+                    return(xDays(d.date));
+                })
+                .attr("x2", function(d){
+                    return(xDays(d.date));
+                })
+                .attr("y1", function(d){
+                    return(yDays(d.lav));
+                })
+                .attr("y2", function(d){
+                    return(yDays(d.uav));
+                })
+                .attr("stroke", "#29406d")
+                .style("width", 40);
+                
+            //DAYS RECTANGLE QUARTILE RANGE
+            var boxWidth = 100;
+            svg.selectAll("boxes").data(dataDays).enter().append("rect")
+                .attr("x", function(d){
+                    return(xDays(d.date)-boxWidth/2);
+                })
+                .attr("y", function(d){
+                    return(yDays(d.qrt3));
+                })
+                .attr("height", function(d){
+                    var height = yDays(d.qrt1) - yDays(d.qrt3);
+                    return(height < 3 ? 3 : height);
+                })
+                .attr("width", boxWidth )
+                .attr("class", "bar")
+                .on('mouseover', function (d) {
+                    that.resetTips();
+                    tipDays.show(d);
+                })
+                .on('mouseout', function (d) {
+                    that.resetTips();
+                    tipDays.hide(d);
+                });
+                
+            //DAYS MEDIAN
+            svg.selectAll("medianLines").data(dataDays).enter().append("line")
+                .attr("x1", function(d){
+                    return(xDays(d.date)-boxWidth/2); 
+                })
+                .attr("x2", function(d){
+                    return(xDays(d.date)+boxWidth/2); 
+                })
+                .attr("y1", function(d){
+                    return(yDays(d.median));
+                })
+                .attr("y2", function(d){
+                    return(yDays(d.median));
+                })
+                .attr("stroke", function (d) {
+                    return(d.qrt3 - d.qrt1 > 3 ? "#29406d" : "none");
+                })
+                .style("width", 80)
+                .on('mouseover', function (d) {
+                    that.resetTips();
+                    tipDays.show(d);
+                })
+                .on('mouseout', function (d) {
+                    that.resetTips();
+                    tipDays.hide(d);
+                });
+                
+            //DAYS OUTLIERS
+            var jitterWidth = 50
+            svg.selectAll("indPoints").data(dataOutliers).enter().append("circle")
+                .attr("cx", function(d){return(xDays(d.date) - jitterWidth/2 + Math.random()*jitterWidth )})
+                .attr("cy", function(d){return(yDays(d.days))})
+                .attr("r", 4)
+                .attr("class", "point1")
+                .style("stroke", "red")
+                .style("fill", "red")
+                .on('mouseover', function (d) {
+                    that.resetTips();
+                    tipOutlier.show(d);
+                })
+                .on('mouseout', function (d) {
+                    that.resetTips();
+                    tipOutlier.hide(d);
+                });
+            
+            //COUNT VALUE
+            var valueline = d3.line()
+                .x(function (d) {
+                    return xDays(d.date);
+                })
+                .y(function (d, currentIndex) {
+                    var partialTotal = 0;
+                    for (var index = 0; index <= currentIndex; index++) {
+                        partialTotal = partialTotal + dataCount[index].count;
+                    }
+                    return yCount(partialTotal);
+                });
+            
+            //COUNT LINE
+            svg.append("path").data([dataCount])
+                .attr("class", "line")
+                .style("stroke", "steelblue")
+                .attr("d", valueline);
+            
+            //COUNT POINT
+            var points2 = svg.selectAll("circle.point2").data(dataCount);
+            points2.enter().append("circle").merge(points2)
+                .attr("class", "point1")
+                .style("stroke", "steelblue")
+                .style("fill", "steelblue")
+                .attr("cx", function (d) {
+                    return xDays(d.date);
+                })
+                .attr("cy", function (d, currentIndex) {
+                    var partialTotal = 0;
+                    for (var index = 0; index <= currentIndex; index++) {
+                        partialTotal = partialTotal + dataCount[index].count;
+                    }
+                    var part
+                    return yCount(partialTotal);
+                })
+                .attr("r", function () {
+                    return 5;
+                })
+                .on('mouseover', function (d, i) {
+                    that.resetTips();
+                    tipCount.show(d, i);
+                })
+                .on('mouseout', function (d, i) {
+                    that.resetTips();
+                    tipCount.hide(d, i);
+                });
         }
     
     });
