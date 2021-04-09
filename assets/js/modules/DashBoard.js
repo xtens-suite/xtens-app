@@ -461,7 +461,7 @@
             var that = this;
 
             $.ajax({
-                url: '/' + this.model + '/getInfoForBarChart?',
+                url: '/dashboard/getInfoForBarChart?',
                 type: 'GET',
                 headers: {
                     'Authorization': 'Bearer ' + xtens.session.get("accessToken")
@@ -771,7 +771,7 @@
             this.fromArray = this.selectedFieldFrom.split("-");
             this.toArray = this.selectedFieldTo.split("-");
             $.ajax({
-                url: '/dataType/getInfoForBarChartDatediff?',
+                url: '/dashboard/getInfoForBarChartDatediff?',
                 type: 'GET',
                 headers: {
                     'Authorization': 'Bearer ' + xtens.session.get("accessToken")
@@ -892,11 +892,13 @@
                 }
                 dataDays.push(field);
             });
+
+            //MANAGE DATA FOR OUTLIERS
             _.forEach(dataOutliers, function (obj) {
-                dataOutliersGroup = dataOutliers.filter(function (grp) {
+                dataGrouped = that.data.filter(function (grp) {
                     return grp.date == obj.date;
                 });
-                obj.perc = dataOutliersGroup.length > 0 ? Math.round(dataOutliers.length / dataOutliersGroup.length)* 100 : 0;
+                obj.perc = dataGrouped.length > 0 ? Math.round((dataOutliers.length / dataGrouped.length) * 100) : 0;
             });
 
             //MANAGE DATA FOR COUNTER WHEN "TO_DATE" IS NULL
@@ -910,7 +912,7 @@
                 dataCount.push(field);
             });
 
-            //TIPS DAYS AND COUNT
+            //TIPS DAYS, COUNT, OUTLIERS
             var tipDays = d3.tip()
                 .attr('class', 'd3-tip')
                 .offset([-10, 0])
@@ -939,7 +941,7 @@
                 .offset([-10, 0])
                 .html(function (d) {
                     return "<b>" + d.date + " - Outlier:</b> <span style='color:steelblue'>" + d.days 
-                        + "</span> <b>percentage:</b> <span style='color:steelblue'>" + d.perc + "</span>";
+                        + "</span> <b>percentage:</b> <span style='color:steelblue'>" + d.perc + "%</span>";
                 });
 
             //CREATE GRAPH
@@ -1054,10 +1056,10 @@
             svg.selectAll("indPoints").data(dataOutliers).enter().append("circle")
                 .attr("cx", function(d){return(xDays(d.date) - jitterWidth/2 + Math.random()*jitterWidth )})
                 .attr("cy", function(d){return(yDays(d.days))})
-                .attr("r", 4)
+                .attr("r", 3)
                 .attr("class", "point1")
-                .style("stroke", "red")
-                .style("fill", "red")
+                .attr("stroke", "#29406d")
+                .style("fill", "white")
                 .on('mouseover', function (d) {
                     that.resetTips();
                     tipOutlier.show(d);
@@ -1103,9 +1105,7 @@
                     var part
                     return yCount(partialTotal);
                 })
-                .attr("r", function () {
-                    return 5;
-                })
+                .attr("r", 5)
                 .on('mouseover', function (d, i) {
                     that.resetTips();
                     tipCount.show(d, i);

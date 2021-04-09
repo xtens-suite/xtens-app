@@ -35,19 +35,20 @@ module.exports.policies = {
         'getPhenotipsPatient': ['bearerAuth', 'expiredPassword']
     },
 
+    DashboardController: {
+        '*': ['bearerAuth', 'expiredPassword', 'isAdmin']
+    },
+
     DataController: {
-        '*': ['bearerAuth', 'expiredPassword'],
-        'getInfoForBarChart': ['bearerAuth', 'expiredPassword', 'isAdmin']
+        '*': ['bearerAuth', 'expiredPassword']
     },
 
     SampleController: {
-        '*': ['bearerAuth', 'expiredPassword'],
-        'getInfoForBarChart': ['bearerAuth', 'expiredPassword', 'isAdmin']
+        '*': ['bearerAuth', 'expiredPassword']
     },
 
     SubjectController: {
-        '*': ['bearerAuth', 'expiredPassword'],
-        'getInfoForBarChart': ['bearerAuth', 'expiredPassword', 'isAdmin']
+        '*': ['bearerAuth', 'expiredPassword']
     },
 
     GroupController: {
@@ -82,8 +83,7 @@ module.exports.policies = {
     DataTypeController: {
         '*': ['bearerAuth', 'expiredPassword', 'isAdmin'],
         find: ['bearerAuth', 'expiredPassword'],
-        'edit': ['bearerAuth', 'expiredPassword', 'isAdmin'],
-        'getDataForDashboard': ['bearerAuth', 'expiredPassword', 'isAdmin']
+        'edit': ['bearerAuth', 'expiredPassword', 'isAdmin']
     },
 
     SuperTypeController: {

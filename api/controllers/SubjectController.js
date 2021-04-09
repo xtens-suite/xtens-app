@@ -227,22 +227,6 @@ const coroutines = {
         return res.json(nextCode);
     }),
 
-    getInfoForBarChart: BluebirdPromise.coroutine(function * (req, res, co) {
-        const dataTypeId = req.param('dataType');
-        let fieldName = req.param('fieldName');
-        const model = req.param('model');
-        const period = req.param('period');
-
-        if (!fieldName) {
-            fieldName = "created_at";
-        }
-        // const operator = TokenService.getToken(req);
-
-        const results = yield crudManager.getInfoForBarChart(dataTypeId, fieldName, model, period);
-
-        return res.json(results);
-    }),
-
     createGraph: BluebirdPromise.coroutine(function * (req, res, co) {
         let idSubject = req.param("idPatient");
         const subjectCode = req.param("codePatient");
@@ -453,21 +437,6 @@ module.exports = {
             });
     },
 
-    /**
-    * GET /dataType/getInfoForBarChart
-    *
-    * @method
-    * @name getInfoForBarChart
-    * @description Find dataTypes based on criteria
-    */
-    getInfoForBarChart: function (req, res) {
-        const co = new ControllerOut(res);
-        coroutines.getInfoForBarChart(req, res, co)
-            .catch(/* istanbul ignore next */ function (err) {
-                sails.log.error(err);
-                return co.error(err);
-            });
-    },
     /**
      * @method
      * @name createGraphSimple
