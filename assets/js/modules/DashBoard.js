@@ -722,7 +722,7 @@
                         if (ct.fieldType == "Date"){
                             field = {
                                 id: dataType.model + '-' + dataType.id + '-' + ct.formattedName + '-' + (dataType.hasSample ? 1 : 0), 
-                                name: dataType.name + ' - ' + ct.description
+                                name: dataType.name + ' - ' + ct.name
                             }
                             that.fieldsDate.push(field);
                         }
@@ -753,10 +753,13 @@
             select2 = isFrom ? '#fd-to-sel' : '#fd-from-sel'; 
             varName = isFrom ? 'selectedFieldFrom' : 'selectedFieldTo'; 
             this[varName] = this.$(select1).val();
-            this.$(select2).children('option[value=' + this[varName] + ']')
-                .attr('disabled', true)
-                .siblings().removeAttr('disabled');
-            this.$(select2).selectpicker('refresh');
+            //ok = this.$(select1).find(':selected');
+            //this[varName] = this.$(select1).find(':selected').val();
+
+            //this.$(select2).children('option[value=' + this[varName] + ']')
+            //    .attr('disabled', true)
+            //    .siblings().removeAttr('disabled');  
+            //this.$(select2).selectpicker('refresh');
         },
 
         onChangePeriod: function (ev) {
@@ -804,8 +807,11 @@
                 fieldsDate: this.fieldsDate,
                 periods: this.periods
             }));
-            this.$('#fd-from-sel').selectpicker('val', this.fieldsDate[0].id);
-            this.$('#fd-to-sel').selectpicker('val', this.fieldsDate[1].id);
+            if (this.fieldsDate.length == 0) {return this; }
+            this.selectedFieldFrom = this.fieldsDate[0].id;
+            this.selectedFieldTo = this.fieldsDate[0].id;
+            this.$('#fd-from-sel').select2('val', this.fieldsDate[0].id).trigger('change');
+            this.$('#fd-to-sel').select2('val', this.fieldsDate[1].id).trigger('change');
             this.manageDateFields(true);
             this.manageDateFields(false);
             this.$('#period-sel').selectpicker();
@@ -824,7 +830,7 @@
             var that = this;
             var margin = {
                 top: 20,
-                right: 35,
+                right: 50,
                 bottom: 70,
                 left: 40
             };
@@ -867,6 +873,7 @@
                 field.uav = field.qrt3;
                 field.lav = field.qrt1;
                 field.outliers = [];
+                field.counter = group.length;
                 if (IQR > 0) {
                     var uif = field.qrt3 + (IQR * 1.5);
                     uav_array = group.filter(function (obj) {
@@ -886,6 +893,7 @@
 
                     group.map(function (obj) {
                         if (obj.days <= lif || obj.days >= uif) {
+                            obj.counter = group.length;
                             dataOutliers.push(obj);
                         }
                     });
@@ -895,10 +903,7 @@
 
             //MANAGE DATA FOR OUTLIERS
             _.forEach(dataOutliers, function (obj) {
-                dataGrouped = that.data.filter(function (grp) {
-                    return grp.date == obj.date;
-                });
-                obj.perc = dataGrouped.length > 0 ? Math.round((dataOutliers.length / dataGrouped.length) * 100) : 0;
+                obj.perc = obj.counter > 0 ? Math.round((dataOutliers.length / obj.counter) * 100) : 0;
             });
 
             //MANAGE DATA FOR COUNTER WHEN "TO_DATE" IS NULL
@@ -918,7 +923,8 @@
                 .offset([-10, 0])
                 .html(function (d) {
                     return "<b>" + d.date + "</b>"
-                    + "<br><b>Quartile 1:</b> <span style='color:steelblue'>" + d.qrt1
+                    + "<br><b>Count:</b> <span style='color:steelblue'>" + d.counter
+                    + "</span><br> <b>Quartile 1:</b> <span style='color:steelblue'>" + d.qrt1
                     + "</span><br> <b>Median:</b> <span style='color:orange'>" + d.median
                     + "</span><br> <b>Quartile 3:</b> <span style='color:steelblue'>" + d.qrt3 
                     + "</span><br> <b>LAV:</b> <span style='color:steelblue'>" + d.lav 
@@ -957,10 +963,11 @@
             }
                 
             //X AXIS FOR BOTH DAYS AND COUNT
+            var data_grouped = _.map(_.groupBy(this.data, 'date'), function (d) {
+                return d[0].date;
+            });
             var xDays = d3.scaleBand()
-                .domain(_.map(_.groupBy(this.data, 'date'), function (d) {
-                    return d[0].date;
-                }))
+                .domain(data_grouped)
                 .range([ 0, width ])
                 .paddingInner(1)
                 .paddingOuter(.5);
@@ -969,14 +976,15 @@
                 .call(d3.axisBottom(xDays));
                 
             //DAYS Y AXIS
+            var yMargin = 0;
             var yDays = d3.scaleLinear()
-                .domain([min_days < 0 || (min_days - 30 >= 0) ? min_days - 30 : 0, max_days + 30])
+                .domain([min_days < 0 || (min_days - yMargin >= 0) ? min_days - yMargin : 0, max_days + yMargin])
                 .range([height, 0]);
             svg.append("g").call(d3.axisLeft(yDays));
                 
             //COUNT Y AXIS
             var yCount = d3.scaleLinear()
-                .domain([0, max_count + 30])
+                .domain([0, max_count + yMargin])
                 .range([height, 0]);
             svg.append("g")
                 .attr("class", "axisRed")
@@ -997,11 +1005,12 @@
                 .attr("y2", function(d){
                     return(yDays(d.uav));
                 })
-                .attr("stroke", "#29406d")
-                .style("width", 40);
+                .attr("stroke", "#29406d");
                 
             //DAYS RECTANGLE QUARTILE RANGE
-            var boxWidth = 100;
+            var boxWidth = Math.round(width / data_grouped.length);
+            var xMargin = Math.round(boxWidth * 20 / 100);
+            boxWidth = boxWidth - xMargin;
             svg.selectAll("boxes").data(dataDays).enter().append("rect")
                 .attr("x", function(d){
                     return(xDays(d.date)-boxWidth/2);
@@ -1011,7 +1020,7 @@
                 })
                 .attr("height", function(d){
                     var height = yDays(d.qrt1) - yDays(d.qrt3);
-                    return(height < 3 ? 3 : height);
+                    return(height < 1 ? 3 : height);
                 })
                 .attr("width", boxWidth )
                 .attr("class", "bar")
@@ -1039,9 +1048,9 @@
                     return(yDays(d.median));
                 })
                 .attr("stroke", function (d) {
-                    return(d.qrt3 - d.qrt1 > 3 ? "#29406d" : "none");
+                    return(d.qrt3 - d.qrt1 > 0 ? "#29406d" : "none");
                 })
-                .style("width", 80)
+                .style("width", boxWidth)
                 .on('mouseover', function (d) {
                     that.resetTips();
                     tipDays.show(d);
@@ -1052,7 +1061,7 @@
                 });
                 
             //DAYS OUTLIERS
-            var jitterWidth = 50
+            var jitterWidth = Math.round(boxWidth / 2);
             svg.selectAll("indPoints").data(dataOutliers).enter().append("circle")
                 .attr("cx", function(d){return(xDays(d.date) - jitterWidth/2 + Math.random()*jitterWidth )})
                 .attr("cy", function(d){return(yDays(d.days))})

@@ -17,9 +17,9 @@
         <div class="col-md-4">
           <div class="form-group">
             <label for="fd-from-sel"><%=__('from') %></label><br>
-            <select required id='fd-from-sel' class="form-control selectpicker dateFields" >
+            <select required id='fd-from-sel' class="form-control dateFields">
                 <% _.each(fieldsDate, function(field) {%>
-                  <option value='<%= field.id %>' data-width="auto"><%= field.name %></option>
+                  <option value='<%= field.id %>'><%= field.name %></option>
                 <% }) %>
             </select>
           </div>
@@ -27,9 +27,9 @@
         <div class="col-md-4">
             <div class="form-group">
               <label for="fd-to-sel"><%=__('to') %></label><br>
-              <select required id='fd-to-sel' class="form-control selectpicker dateFields">
+              <select required id='fd-to-sel' class="form-control dateFields">
                   <% _.each(fieldsDate, function(field) {%>
-                    <option value='<%= field.id %>' data-width="auto"><%= field.name %></option>
+                    <option value='<%= field.id %>'><%= field.name %></option>
                   <% }) %>
               </select>
             </div>
