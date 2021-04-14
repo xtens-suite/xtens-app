@@ -773,6 +773,32 @@
             var that = this;
             this.fromArray = this.selectedFieldFrom.split("-");
             this.toArray = this.selectedFieldTo.split("-");
+
+            var fromChild = 0;
+            _.forEach(this.filteredDatatypes, function (dt) {
+                if (dt.id == that.fromArray[1]) {
+                    _.forEach(dt.parents, function (pt) {
+                        if (pt.model == that.toArray[0] && pt.model != 'Subject') {
+                            fromChild = 1;
+                            return false;
+                        }
+                    })
+                    return false;
+                }
+            });
+            var toChild = 0;
+            _.forEach(this.filteredDatatypes, function (dt) {
+                if (dt.id == that.toArray[1]) {
+                    _.forEach(dt.parents, function (pt) {
+                        if (pt.model == that.fromArray[0] && pt.model != 'Subject') {
+                            toChild = 1;
+                            return false;
+                        }
+                    })
+                    return false;
+                }
+            });
+
             $.ajax({
                 url: '/dashboard/getInfoForBarChartDatediff?',
                 type: 'GET',
@@ -784,10 +810,12 @@
                     fromDataType: this.fromArray[1],
                     fromFieldName: this.fromArray[2],
                     fromHasSample: this.fromArray[3],
+                    fromIsChild: fromChild,
                     toModel: this.toArray[0],
                     toDataType: this.toArray[1],
                     toFieldName: this.toArray[2],
                     toHasSample: this.toArray[3],
+                    toIsChild: toChild,
                     period: this.selectedPeriod
                 },
                 contentType: 'application/json',

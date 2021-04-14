@@ -43,15 +43,17 @@ const coroutines = {
         const fromDataTypeId = req.param('fromDataType');
         const fromFieldName = req.param('fromFieldName');
         const fromHasSample = req.param('fromHasSample');
+        const fromIsChild = req.param('fromIsChild');
         const toModel = req.param('toModel');
         const toDataTypeId = req.param('toDataType');
         const toFieldName = req.param('toFieldName');
         const toHasSample = req.param('toHasSample');
+        const toIsChild = req.param('toIsChild');
         const period = req.param('period');
         // const operator = TokenService.getToken(req);      
         const results = yield crudManager.getInfoForBarChartDatediff(
-            fromModel, fromDataTypeId, fromFieldName, fromHasSample, 
-            toModel, toDataTypeId, toFieldName, toHasSample,
+            fromModel, fromDataTypeId, fromFieldName, fromHasSample, fromIsChild,
+            toModel, toDataTypeId, toFieldName, toHasSample, toIsChild,
             period);
 
         return res.json(results);
