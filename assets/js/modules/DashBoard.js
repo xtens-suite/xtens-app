@@ -8,7 +8,7 @@
 (function (xtens, DashBoard) {
     // dependencies
     var i18n = xtens.module("i18n").en;
-    const optionPeriods = [{
+    var optionPeriods = [{
         name: "Last Year",
         value: "year",
         graphFormat: "%Y-%m"
@@ -196,7 +196,7 @@
             this.$el.html(this.template({
                 __: i18n,
                 title: this.title
-            })); 
+            }));
             this.$el.addClass(this.name);
             return this;
         },
@@ -215,7 +215,7 @@
 
             var width = 500;
             var height = 280;
-            var radius = (Math.min(width, height) / 2) +10;
+            var radius = (Math.min(width, height) / 2) + 10;
             var colorLength = data.length < 3 ? 3 : data.length < 9 ? data.length : 9;
             var color = this.colors ? d3.scaleOrdinal().range(_.values(this.colors))
                 : this.model === "Sample" ? d3.scaleOrdinal(d3.schemeGreens[colorLength])
@@ -297,8 +297,6 @@
                     handlemousemove(this, d);
                 });
 
-        
-
             // LEGEND initialization
             var legend = svg.selectAll(".legend")
                 .data(color.domain())
@@ -351,8 +349,7 @@
                 return dt.model === that.selectedModel;
             });
             this.template = JST["views/templates/dashboard-bargraph-parent.ejs"];
-
-        },   
+        },
 
         onChangeModel: function (ev) {
             ev.preventDefault();
@@ -378,20 +375,20 @@
         },
 
         renderBarChartByModel: function () {
-            if (this.BarChart) { 
-                this.BarChart = null; 
-                $("#bargraph-parent-content-" + this.name).empty(); 
+            if (this.BarChart) {
+                this.BarChart = null;
+                $("#bargraph-parent-content-" + this.name).empty();
             }
-            
+
             this.BarChart = new DashBoard.Views.BarChart({
-                DataTypes: this.DataTypesFiltered,            
+                DataTypes: this.DataTypesFiltered,
                 model: this.selectedModel,
                 name: this.name + '-' + this.selectedModel
             });
             $("#bargraph-parent-content-" + this.name).append(this.BarChart.render().el);
         }
     });
-        
+
     DashBoard.Views.BarChart = Backbone.View.extend({
 
         tagName: 'div',
@@ -706,34 +703,35 @@
             this.selectedFieldFrom = null;
             this.selectedFieldTo = null;
             this.fieldsDate = [];
-            this.filteredDatatypes = options.dataTypes.filter (function (dt) {
+            this.filteredDatatypes = options.dataTypes.filter(function (dt) {
                 return _.find(dt.parents, function (pt) {
                     return pt.model == 'Subject';
-                } );
-            })
+                });
+            });
             _.forEach(this.filteredDatatypes, function (dt) {
-                dataType = {id: dt.id, name: dt.name, model: dt.model, 
+                dataType = { id: dt.id,
+                    name: dt.name,
+                    model: dt.model,
                     hasSample: _.find(dt.parents, function (pt) {
                         return pt.model == 'Sample';
                     })
                 };
                 _.forEach(dt.superType.schema.body, function (bd) {
                     _.forEach(bd.content, function (ct) {
-                        if (ct.fieldType == "Date"){
+                        if (ct.fieldType == "Date") {
                             field = {
-                                id: dataType.model + '-' + dataType.id + '-' + ct.formattedName + '-' + (dataType.hasSample ? 1 : 0), 
+                                id: dataType.model + '-' + dataType.id + '-' + ct.formattedName + '-' + (dataType.hasSample ? 1 : 0),
                                 name: dataType.name + ' - ' + ct.name
-                            }
+                            };
                             that.fieldsDate.push(field);
                         }
                     });
                 });
             });
-            
+
             this.selectedPeriod = this.periods[0].value;
             this.selectedFormat = this.periods[0].graphFormat;
             this.template = JST["views/templates/dashboard-bargraph-datediff.ejs"];
-
         },
 
         onChangeFieldFrom: function (ev) {
@@ -748,18 +746,18 @@
             this.fetchData();
         },
 
-        manageDateFields: function(isFrom) {
-            select1 = isFrom ? '#fd-from-sel' : '#fd-to-sel'; 
-            select2 = isFrom ? '#fd-to-sel' : '#fd-from-sel'; 
-            varName = isFrom ? 'selectedFieldFrom' : 'selectedFieldTo'; 
+        manageDateFields: function (isFrom) {
+            select1 = isFrom ? '#fd-from-sel' : '#fd-to-sel';
+            select2 = isFrom ? '#fd-to-sel' : '#fd-from-sel';
+            varName = isFrom ? 'selectedFieldFrom' : 'selectedFieldTo';
             this[varName] = this.$(select1).val();
-            //ok = this.$(select1).find(':selected');
-            //this[varName] = this.$(select1).find(':selected').val();
+            // ok = this.$(select1).find(':selected');
+            // this[varName] = this.$(select1).find(':selected').val();
 
-            //this.$(select2).children('option[value=' + this[varName] + ']')
+            // this.$(select2).children('option[value=' + this[varName] + ']')
             //    .attr('disabled', true)
-            //    .siblings().removeAttr('disabled');  
-            //this.$(select2).selectpicker('refresh');
+            //    .siblings().removeAttr('disabled');
+            // this.$(select2).selectpicker('refresh');
         },
 
         onChangePeriod: function (ev) {
@@ -782,7 +780,7 @@
                             fromChild = 1;
                             return false;
                         }
-                    })
+                    });
                     return false;
                 }
             });
@@ -794,7 +792,7 @@
                             toChild = 1;
                             return false;
                         }
-                    })
+                    });
                     return false;
                 }
             });
@@ -835,7 +833,7 @@
                 fieldsDate: this.fieldsDate,
                 periods: this.periods
             }));
-            if (this.fieldsDate.length == 0) {return this; }
+            if (this.fieldsDate.length == 0) { return this; }
             this.selectedFieldFrom = this.fieldsDate[0].id;
             this.selectedFieldTo = this.fieldsDate[0].id;
             this.$('#fd-from-sel').select2('val', this.fieldsDate[0].id).trigger('change');
@@ -852,7 +850,7 @@
             $('.d3-tip').css('opacity', 0).css('pointer-events', 'none');
         },
 
-        createGraph: function (){
+        createGraph: function () {
             this.resetTips();
             $("svg", this.$el).remove();
             var that = this;
@@ -864,18 +862,18 @@
             };
             var width = 600 - margin.left - margin.right;
             var height = 300 - margin.top - margin.bottom;
-            //var xAxisTraslation = 35;
+            // var xAxisTraslation = 35;
 
-            //MANAGE DATA FOR DAYS BOX PLOTS
+            // MANAGE DATA FOR DAYS BOX PLOTS
             var dataOutliers = [];
             var dataDays = [];
             var min_days = 0;
             var max_days = 0;
-            const quartile = (arr, q) => {
-                const sorted = _.sortBy(arr, 'days');
-                const pos = (sorted.length - 1) * q;
-                const base = Math.floor(pos);
-                const rest = pos - base;
+            var quartile = function (arr, q) {
+                var sorted = _.sortBy(arr, 'days');
+                var pos = (sorted.length - 1) * q;
+                var base = Math.floor(pos);
+                var rest = pos - base;
                 if (sorted[base + 1] !== undefined) {
                     a = sorted[base];
                     b = sorted[base + 1];
@@ -890,13 +888,13 @@
                 _.forEach(group, function (obj) {
                     var to_date = new Date(obj.todate);
                     var from_date = new Date(obj.fromdate);
-                    obj.days = Math.round((to_date.getTime() - from_date.getTime())/(1000*60*60*24)); 
-                    max_days = obj.days > max_days ? obj.days : max_days; 
-                    min_days = obj.days < min_days ? obj.days : min_days; 
+                    obj.days = Math.round((to_date.getTime() - from_date.getTime()) / (1000 * 60 * 60 * 24));
+                    max_days = obj.days > max_days ? obj.days : max_days;
+                    min_days = obj.days < min_days ? obj.days : min_days;
                 });
-                field.qrt1 = quartile(group, .25);
-                field.median = quartile(group, .50);
-                field.qrt3 = quartile(group, .75);
+                field.qrt1 = quartile(group, 0.25);
+                field.median = quartile(group, 0.50);
+                field.qrt3 = quartile(group, 0.75);
                 var IQR = field.qrt3 - field.qrt1;
                 field.uav = field.qrt3;
                 field.lav = field.qrt1;
@@ -905,10 +903,10 @@
                 if (IQR > 0) {
                     var uif = field.qrt3 + (IQR * 1.5);
                     uav_array = group.filter(function (obj) {
-                        return  obj.days >= field.qrt3 && obj.days <= uif;
+                        return obj.days >= field.qrt3 && obj.days <= uif;
                     });
                     if (uav_array.length > 0) {
-                        field.uav = Math.max.apply(Math, uav_array.map(function(o) { return o.days; }));
+                        field.uav = Math.max.apply(Math, uav_array.map(function (o) { return o.days; }));
                     }
 
                     var lif = field.qrt1 - (IQR * 1.5);
@@ -916,7 +914,7 @@
                         return obj.days >= lif && obj.days <= field.qrt1;
                     });
                     if (lav_array.length > 0) {
-                        field.lav = Math.min.apply(Math, lav_array.map(function(o) { return o.days; }));
+                        field.lav = Math.min.apply(Math, lav_array.map(function (o) { return o.days; }));
                     }
 
                     group.map(function (obj) {
@@ -929,12 +927,12 @@
                 dataDays.push(field);
             });
 
-            //MANAGE DATA FOR OUTLIERS
+            // MANAGE DATA FOR OUTLIERS
             _.forEach(dataOutliers, function (obj) {
                 obj.perc = obj.counter > 0 ? Math.round((dataOutliers.length / obj.counter) * 100) : 0;
             });
 
-            //MANAGE DATA FOR COUNTER WHEN "TO_DATE" IS NULL
+            // MANAGE DATA FOR COUNTER WHEN "TO_DATE" IS NULL
             var dataCount = [];
             var max_count = 0;
             _.forEach(_.groupBy(this.data.filter(function (o) { return !o.todate; }), 'date'), function (group) {
@@ -945,18 +943,18 @@
                 dataCount.push(field);
             });
 
-            //TIPS DAYS, COUNT, OUTLIERS
+            // TIPS DAYS, COUNT, OUTLIERS
             var tipDays = d3.tip()
                 .attr('class', 'd3-tip')
                 .offset([-10, 0])
                 .html(function (d) {
-                    return "<b>" + d.date + "</b>"
-                    + "<br><b>Count:</b> <span style='color:steelblue'>" + d.counter
-                    + "</span><br> <b>Quartile 1:</b> <span style='color:steelblue'>" + d.qrt1
-                    + "</span><br> <b>Median:</b> <span style='color:orange'>" + d.median
-                    + "</span><br> <b>Quartile 3:</b> <span style='color:steelblue'>" + d.qrt3 
-                    + "</span><br> <b>LAV:</b> <span style='color:steelblue'>" + d.lav 
-                    + "</span> <b>UAV:</b> <span style='color:steelblue'>" + d.uav + "</span>";
+                    return "<b>" + d.date + "</b>" +
+                    "<br><b>Count:</b> <span style='color:steelblue'>" + d.counter +
+                    "</span><br> <b>Quartile 1:</b> <span style='color:steelblue'>" + d.qrt1 +
+                    "</span><br> <b>Median:</b> <span style='color:orange'>" + d.median +
+                    "</span><br> <b>Quartile 3:</b> <span style='color:steelblue'>" + d.qrt3 +
+                    "</span><br> <b>LAV:</b> <span style='color:steelblue'>" + d.lav +
+                    "</span> <b>UAV:</b> <span style='color:steelblue'>" + d.uav + "</span>";
                 });
             var tipCount = d3.tip()
                 .attr('class', 'd3-tip')
@@ -966,19 +964,19 @@
                     for (var index = 0; index <= currentIndex; index++) {
                         partialTotal = partialTotal + dataCount[index].count;
                     }
-                    return "<b>" + d.date + " - No destination date</b>"
-                        + "<br><b>current:</b> <span style='color:steelblue'>" + dataCount[currentIndex].count 
-                        + "</span> <b>total:</b> <span style='color:steelblue'>" + partialTotal + "</span>";
+                    return "<b>" + d.date + " - No destination date</b>" +
+                        "<br><b>current:</b> <span style='color:steelblue'>" + dataCount[currentIndex].count +
+                        "</span> <b>total:</b> <span style='color:steelblue'>" + partialTotal + "</span>";
                 });
             var tipOutlier = d3.tip()
                 .attr('class', 'd3-tip')
                 .offset([-10, 0])
                 .html(function (d) {
-                    return "<b>" + d.date + " - Outlier:</b> <span style='color:steelblue'>" + d.days 
-                        + "</span> <b>percentage:</b> <span style='color:steelblue'>" + d.perc + "%</span>";
+                    return "<b>" + d.date + " - Outlier:</b> <span style='color:steelblue'>" + d.days +
+                        "</span> <b>percentage:</b> <span style='color:steelblue'>" + d.perc + "%</span>";
                 });
 
-            //CREATE GRAPH
+            // CREATE GRAPH
             var svg = d3.select("." + this.name + " > .row > .graph-cnt").append("svg")
                 .data(this.data)
                 .attr("viewBox", "-10 -15 " + (width + margin.left + margin.right) + " " + (height + margin.top + margin.bottom))
@@ -989,8 +987,8 @@
                 svg.call(tipCount);
                 svg.call(tipOutlier);
             }
-                
-            //X AXIS FOR BOTH DAYS AND COUNT
+
+            // X AXIS FOR BOTH DAYS AND COUNT
             var data_grouped = _.map(_.groupBy(this.data, 'date'), function (d) {
                 return d[0].date;
             });
@@ -998,19 +996,19 @@
                 .domain(data_grouped)
                 .range([ 0, width ])
                 .paddingInner(1)
-                .paddingOuter(.5);
+                .paddingOuter(0.5);
             svg.append("g")
                 .attr("transform", "translate(0," + height + ")")
                 .call(d3.axisBottom(xDays));
-                
-            //DAYS Y AXIS
+
+            // DAYS Y AXIS
             var yMargin = 0;
             var yDays = d3.scaleLinear()
                 .domain([min_days < 0 || (min_days - yMargin >= 0) ? min_days - yMargin : 0, max_days + yMargin])
                 .range([height, 0]);
             svg.append("g").call(d3.axisLeft(yDays));
-                
-            //COUNT Y AXIS
+
+            // COUNT Y AXIS
             var yCount = d3.scaleLinear()
                 .domain([0, max_count + yMargin])
                 .range([height, 0]);
@@ -1018,39 +1016,39 @@
                 .attr("class", "axisRed")
                 .attr("transform", "translate( " + width + ", 0 )")
                 .call(d3.axisRight(yCount));
-                
-            //DAYS VERTICAL LINE
+
+            // DAYS VERTICAL LINE
             svg.selectAll("vertLines").data(dataDays).enter().append("line")
-                .attr("x1", function(d){
-                    return(xDays(d.date));
+                .attr("x1", function (d) {
+                    return (xDays(d.date));
                 })
-                .attr("x2", function(d){
-                    return(xDays(d.date));
+                .attr("x2", function (d) {
+                    return (xDays(d.date));
                 })
-                .attr("y1", function(d){
-                    return(yDays(d.lav));
+                .attr("y1", function (d) {
+                    return (yDays(d.lav));
                 })
-                .attr("y2", function(d){
-                    return(yDays(d.uav));
+                .attr("y2", function (d) {
+                    return (yDays(d.uav));
                 })
                 .attr("stroke", "#29406d");
-                
-            //DAYS RECTANGLE QUARTILE RANGE
+
+            // DAYS RECTANGLE QUARTILE RANGE
             var boxWidth = Math.round(width / data_grouped.length);
             var xMargin = Math.round(boxWidth * 20 / 100);
             boxWidth = boxWidth - xMargin;
             svg.selectAll("boxes").data(dataDays).enter().append("rect")
-                .attr("x", function(d){
-                    return(xDays(d.date)-boxWidth/2);
+                .attr("x", function (d) {
+                    return (xDays(d.date) - boxWidth / 2);
                 })
-                .attr("y", function(d){
-                    return(yDays(d.qrt3));
+                .attr("y", function (d) {
+                    return (yDays(d.qrt3));
                 })
-                .attr("height", function(d){
+                .attr("height", function (d) {
                     var height = yDays(d.qrt1) - yDays(d.qrt3);
-                    return(height < 1 ? 3 : height);
+                    return (height < 1 ? 3 : height);
                 })
-                .attr("width", boxWidth )
+                .attr("width", boxWidth)
                 .attr("class", "bar")
                 .on('mouseover', function (d) {
                     that.resetTips();
@@ -1060,23 +1058,23 @@
                     that.resetTips();
                     tipDays.hide(d);
                 });
-                
-            //DAYS MEDIAN
+
+            // DAYS MEDIAN
             svg.selectAll("medianLines").data(dataDays).enter().append("line")
-                .attr("x1", function(d){
-                    return(xDays(d.date)-boxWidth/2); 
+                .attr("x1", function (d) {
+                    return (xDays(d.date) - boxWidth / 2);
                 })
-                .attr("x2", function(d){
-                    return(xDays(d.date)+boxWidth/2); 
+                .attr("x2", function (d) {
+                    return (xDays(d.date) + boxWidth / 2);
                 })
-                .attr("y1", function(d){
-                    return(yDays(d.median));
+                .attr("y1", function (d) {
+                    return (yDays(d.median));
                 })
-                .attr("y2", function(d){
-                    return(yDays(d.median));
+                .attr("y2", function (d) {
+                    return (yDays(d.median));
                 })
                 .attr("stroke", function (d) {
-                    return(d.qrt3 - d.qrt1 > 0 ? "#29406d" : "none");
+                    return (d.qrt3 - d.qrt1 > 0 ? "#29406d" : "none");
                 })
                 .style("width", boxWidth)
                 .on('mouseover', function (d) {
@@ -1087,12 +1085,12 @@
                     that.resetTips();
                     tipDays.hide(d);
                 });
-                
-            //DAYS OUTLIERS
+
+            // DAYS OUTLIERS
             var jitterWidth = Math.round(boxWidth / 2);
             svg.selectAll("indPoints").data(dataOutliers).enter().append("circle")
-                .attr("cx", function(d){return(xDays(d.date) - jitterWidth/2 + Math.random()*jitterWidth )})
-                .attr("cy", function(d){return(yDays(d.days))})
+                .attr("cx", function (d) { return (xDays(d.date) - jitterWidth / 2 + Math.random() * jitterWidth); })
+                .attr("cy", function (d) { return (yDays(d.days)); })
                 .attr("r", 3)
                 .attr("class", "point1")
                 .attr("stroke", "#29406d")
@@ -1105,8 +1103,8 @@
                     that.resetTips();
                     tipOutlier.hide(d);
                 });
-            
-            //COUNT VALUE
+
+            // COUNT VALUE
             var valueline = d3.line()
                 .x(function (d) {
                     return xDays(d.date);
@@ -1118,14 +1116,14 @@
                     }
                     return yCount(partialTotal);
                 });
-            
-            //COUNT LINE
+
+            // COUNT LINE
             svg.append("path").data([dataCount])
                 .attr("class", "line")
                 .style("stroke", "steelblue")
                 .attr("d", valueline);
-            
-            //COUNT POINT
+
+            // COUNT POINT
             var points2 = svg.selectAll("circle.point2").data(dataCount);
             points2.enter().append("circle").merge(points2)
                 .attr("class", "point1")
@@ -1139,7 +1137,7 @@
                     for (var index = 0; index <= currentIndex; index++) {
                         partialTotal = partialTotal + dataCount[index].count;
                     }
-                    var part
+                    var part;
                     return yCount(partialTotal);
                 })
                 .attr("r", 5)
@@ -1152,6 +1150,6 @@
                     tipCount.hide(d, i);
                 });
         }
-    
+
     });
 }(xtens, xtens.module("dashboard")));
