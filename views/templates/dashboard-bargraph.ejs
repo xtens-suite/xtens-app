@@ -12,22 +12,23 @@ div.tooltip {
     pointer-events: none;			
 }
 </style>
-<div id="content" style="padding:1vh">
-  <p><%=title%></p>
-  <div class="row">
-    <div class="col-md-4">
-      <label for="project-source"><%=__('data-type') %></label>
-    </div>
-    <div class="col-md-4">
-      <label for="project-source"><%=__('field') %></label>
-    </div>
-    <div class="col-md-4">
-        <label for="project-source"><%=__('period') %></label>
-    </div>
+<!--
+<div class="row">
+  <div class="col-md-4">
+    <label for="project-source"><%=__('data-type') %></label>
   </div>
+  <div class="col-md-4">
+    <label for="project-source"><%=__('field') %></label>
+  </div>
+  <div class="col-md-4">
+      <label for="project-source"><%=__('period') %></label>
+  </div>
+</div>
+-->
   <div class="row">
     <div class="col-md-4">
       <div class="form-group">
+        <label for="project-source"><%=__('data-type') %></label><br>
         <select required id='dt-sel' class="form-control selectpicker">
             <% _.each(dataTypes, function(dt) {%>
               <option value='<%= dt.id %>'><%= dt.name %></option>
@@ -37,6 +38,7 @@ div.tooltip {
     </div>
     <div class="col-md-4">
         <div class="form-group">
+          <label for="project-source"><%=__('field') %></label><br>
           <select required id='field-sel' class="form-control selectpicker">
               <option value='created_at'>Creation Date</option>
               <% _.each(fields, function(field) {%>
@@ -47,6 +49,7 @@ div.tooltip {
       </div>
       <div class="col-md-4">
         <div class="form-group">
+          <label for="project-source"><%=__('period') %></label><br>
           <select required id='period-sel' class="form-control selectpicker">
               <% _.each(periods, function(period) {%>
                 <option value='<%= period.value %>'><%= period.name %></option>

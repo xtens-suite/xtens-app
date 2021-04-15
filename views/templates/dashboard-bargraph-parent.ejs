@@ -1,0 +1,16 @@
+
+<div class="row" style="padding:1vh">
+  <div class="col-sm-offset-4 col-sm-4">
+    <% if (models.length === 1) {%>
+      <p><%=models[0] %> <%=name %></p>
+    <% } else { %>
+      <select required id='md-sel' class="form-control selectpicker">
+        <% _.each(models, function(md) {%>
+          <option value='<%= md %>'><%= md %></option>
+        <% }) %>
+      </select>
+    <% } %>
+  </div>
+</div>
+<div id="bargraph-parent-content-<%=name %>"  style="padding:1vh">
+</div>

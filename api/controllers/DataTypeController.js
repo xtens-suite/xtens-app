@@ -205,28 +205,6 @@ const coroutines = {
             DbLog(logMessages.DELETE, "DataType", deletedDataType.id, deletedDataType.project, deletedDataType.superType.id, operator.id, { deletedData: JSON.stringify(deletedDataType) });
         }
         return res.json({ deleted: deleted });
-    }),
-
-    getDataForDashboard: BluebirdPromise.coroutine(function * (req, res, co) {
-        const projectId = req.param('projectId');
-        // if (!projectId) {
-        //     return co.badRequest({message: 'Missing dataType ID on getDataForDashboard request'});
-        // }
-        const operator = TokenService.getToken(req);
-        let adminGroups = yield Group.find(operator.adminGroups).populate('projects');
-        const adminProjects = _.uniq(_.flatten(_.map(_.flatten(_.map(adminGroups, 'projects')), 'id')));
-
-        if (!operator.isWheel && !_.find(adminProjects, function (p) { return p === _.parseInt(projectId); })) {
-            throw new PrivilegesError('User has not privilege as Admin on this project');
-        }
-        const results = yield crudManager.getCountsForDashboard(projectId);
-        var params = {};
-        if (projectId) {
-            params = { project: projectId };
-        }
-        const dataTypeSource = yield DataType.find(params).populate('superType');
-        results.DataTypeSource = dataTypeSource;
-        return res.json(results);
     })
 };
 
@@ -301,22 +279,6 @@ const DataTypeController = {
         coroutines.edit(req, res)
             .catch(/* istanbul ignore next */ function (err) {
                 sails.log(err);
-                return co.error(err);
-            });
-    },
-
-    /**
-    * GET /dataType/getDataForDashboard
-    *
-    * @method
-    * @name getDataForDashboard
-    * @description Find dataTypes based on criteria
-    */
-    getDataForDashboard: function (req, res) {
-        const co = new ControllerOut(res);
-        coroutines.getDataForDashboard(req, res, co)
-            .catch(/* istanbul ignore next */ function (err) {
-                sails.log.error(err);
                 return co.error(err);
             });
     },

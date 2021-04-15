@@ -538,7 +538,7 @@
             var activeProject = xtens.session.get('activeProject') !== 'all' ? _.find(xtens.session.get('projects'), { 'name': xtens.session.get('activeProject') }).id : "";
             // get all info for dashboard
             $.ajax({
-                url: '/dataType/getDataForDashboard?',
+                url: '/dashboard/getDataForDashboard?',
                 type: 'GET',
                 headers: {
                     'Authorization': 'Bearer ' + xtens.session.get("accessToken")
