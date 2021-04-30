@@ -87,8 +87,31 @@ function renderDatatablesDate (data, type) {
             this.prepareDataForRenderingJSON(results.dtps, results.dts, this.queryArgs);
             // this.render();
         },
+        
+        manageParents: function (row, obj) {
+            if (!row.parents) {
+                return obj;
+            }
+            for (var j = 0; j < row.parents.length; j++) {
+                var noprt = _.omit(row, 'parents');
+                noprt.showRow = j === 0;
+                obj = _.merge(row.parents[j], noprt);
+                return this.manageParents(row.parents[j], obj);
+            }
+        },
 
         buildPlainData: function (data) {
+            var plainData = [];
+            for (var i = 0; i < data.length; i++) {
+                var obj = null;
+                obj = this.manageParents(data[i], obj);
+                if (obj) {
+                    plainData.push(obj);
+                }
+            }
+            return plainData;
+
+            /*
             var plainData = [];
             for (var i = 0; i < data.length; i++) {
                 for (var j = 0; j < data[i].parents.length; j++) {
@@ -102,6 +125,7 @@ function renderDatatablesDate (data, type) {
                 }
             }
             return plainData;
+            */
         },
 
         getCurrentTypeAndPrivileges: function (dataType) {
@@ -474,7 +498,7 @@ function renderDatatablesDate (data, type) {
                     var tableOptsChild = {
                         data: data.parents,
                         columns: that.childColumns,
-                        info: false,
+                        info: true,
                         searching: false,
                         scrollX: true,
                         scrollY: "500px",
