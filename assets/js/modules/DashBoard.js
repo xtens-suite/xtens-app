@@ -836,8 +836,8 @@
             if (this.fieldsDate.length == 0) { return this; }
             this.selectedFieldFrom = this.fieldsDate[0].id;
             this.selectedFieldTo = this.fieldsDate[0].id;
-            this.$('#fd-from-sel').select2('val', this.fieldsDate[0].id).trigger('change');
-            this.$('#fd-to-sel').select2('val', this.fieldsDate[1].id).trigger('change');
+            this.$('#fd-from-sel').select2('val', this.fieldsDate[0].id);
+            this.$('#fd-to-sel').select2('val', this.fieldsDate[1].id);
             this.manageDateFields(true);
             this.manageDateFields(false);
             this.$('#period-sel').selectpicker();

@@ -1619,6 +1619,7 @@
          */
         pumpStream: function (reader, queryArgs) {
             var that = this;
+            this.bufferInitMinLenght = 1000;
             return reader.read().then(function (result) {
                 // if stream end and table is initialized
                 if (result.done && that.tableInitialized) {
@@ -1666,7 +1667,7 @@
                     return reader.cancel();
                 }
 
-                if (!that.tableInitialized && ((that.optStream.dataTypes && that.optStream.dataTypePrivileges && that.buffer.length >= 8000) || (result.done && that.buffer.length >= 0))) {
+                if (!that.tableInitialized && ((that.optStream.dataTypes && that.optStream.dataTypePrivileges && that.buffer.length >= that.bufferInitMinLenght) || (result.done && that.buffer.length >= 0))) {
                     var jsonParsed = { data: [] };
                     jsonParsed.dataTypes = that.optStream.dataTypes;
                     jsonParsed.dataTypePrivileges = that.optStream.dataTypePrivileges;
@@ -1674,6 +1675,10 @@
                     that.tableInitialized = true;
                     that.buffer = [];
                     that.initializeDataTable(jsonParsed, queryArgs, true);
+                    that.modal.hide();
+                } else if (that.tableInitialized && that.buffer.length >= that.bufferInitMinLenght) {
+                    that.tableView.addRowsDataTable(that.buffer);
+                    that.buffer = [];
                 }
 
                 return that.pumpStream(reader, queryArgs);

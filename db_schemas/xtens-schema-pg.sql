@@ -3171,46 +3171,85 @@ CREATE INDEX gin_index_subject ON subject USING gin (metadata);
 
 CREATE INDEX privileges_index ON datatype_privileges (data_type, xtens_group);
 
---
--- Name: join_data_data_index; Type: INDEX; Schema: public; Owner: xtenspg; Tablespace:
---
+-- --
+-- -- Name: join_data_data_index; Type: INDEX; Schema: public; Owner: xtenspg; Tablespace:
+-- --
 
-CREATE INDEX join_data_data_index ON data_childrendata__data_parentdata ("data_parentData", "data_childrenData");
+-- CREATE INDEX join_data_data_index ON data_childrendata__data_parentdata ("data_parentData", "data_childrenData");
 
---
--- Name: join_data_sample_index; Type: INDEX; Schema: public; Owner: xtenspg; Tablespace:
---
+-- --
+-- -- Name: join_data_sample_index; Type: INDEX; Schema: public; Owner: xtenspg; Tablespace:
+-- --
 
-CREATE INDEX join_data_sample_index ON data_parentsample__sample_childrendata ("data_parentSample", "sample_childrenData");
+-- CREATE INDEX join_data_sample_index ON data_parentsample__sample_childrendata ("data_parentSample", "sample_childrenData");
 
---
--- Name: join_data_subject_index; Type: INDEX; Schema: public; Owner: xtenspg; Tablespace:
---
+-- --
+-- -- Name: join_data_subject_index; Type: INDEX; Schema: public; Owner: xtenspg; Tablespace:
+-- --
 
-CREATE INDEX join_data_subject_index ON data_parentsubject__subject_childrendata ("data_parentSubject", "subject_childrenData");
+-- CREATE INDEX join_data_subject_index ON data_parentsubject__subject_childrendata ("data_parentSubject", "subject_childrenData");
 
---
--- Name: join_data_subject_index; Type: INDEX; Schema: public; Owner: xtenspg; Tablespace:
---
+-- --
+-- -- Name: join_data_subject_index; Type: INDEX; Schema: public; Owner: xtenspg; Tablespace:
+-- --
 
-CREATE INDEX join_subject_subject_index ON subject_parentsubject__subject_childrensubject ("subject_parentSubject", "subject_childrenSubject");
+-- CREATE INDEX join_subject_subject_index ON subject_parentsubject__subject_childrensubject ("subject_parentSubject", "subject_childrenSubject");
 
---
--- Name: join_sample_sample_index; Type: INDEX; Schema: public; Owner: xtenspg; Tablespace:
---
+-- --
+-- -- Name: join_sample_sample_index; Type: INDEX; Schema: public; Owner: xtenspg; Tablespace:
+-- --
 
-CREATE INDEX join_sample_sample_index ON sample_parentsample__sample_childrensample ("sample_parentSample", "sample_childrenSample");
+-- CREATE INDEX join_sample_sample_index ON sample_parentsample__sample_childrensample ("sample_parentSample", "sample_childrenSample");
 
---
--- Name: join_sample_donor_index; Type: INDEX; Schema: public; Owner: xtenspg; Tablespace:
---
+-- --
+-- -- Name: join_sample_donor_index; Type: INDEX; Schema: public; Owner: xtenspg; Tablespace:
+-- --
 
-CREATE INDEX join_sample_donor_index ON sample_donor__subject_childrensample ("sample_donor", "subject_childrenSample");
+-- CREATE INDEX join_sample_donor_index ON sample_donor__subject_childrensample ("sample_donor", "subject_childrenSample");
 
 
 --
 -- Name: biobank_fkey; Type: FK CONSTRAINT; Schema: public; Owner: xtenspg
 --
+
+CREATE INDEX datatype_privileges_data_type_idx ON public.datatype_privileges (data_type);
+CREATE INDEX datatype_privileges_xtens_group_idx ON public.datatype_privileges (xtens_group);
+CREATE INDEX datatype_groups__group_datatypes_datatype_groups_idx ON public.datatype_groups__group_datatypes (datatype_groups);
+CREATE INDEX datatype_groups__group_datatypes_group_datatypes_idx ON public.datatype_groups__group_datatypes ("group_dataTypes");
+CREATE INDEX datatype_children__datatype_parents_datatype_parents_idx ON public.datatype_children__datatype_parents (datatype_parents);
+CREATE INDEX datatype_children__datatype_parents_datatype_children_idx ON public.datatype_children__datatype_parents (datatype_children);
+CREATE INDEX datafile_samples__sample_files_datafile_samples_idx ON public.datafile_samples__sample_files (datafile_samples);
+CREATE INDEX datafile_samples__sample_files_sample_files_idx ON public.datafile_samples__sample_files (sample_files);
+CREATE INDEX data_files__datafile_data_data_files_idx ON public.data_files__datafile_data (data_files);
+CREATE INDEX data_files__datafile_data_datafile_data_idx ON public.data_files__datafile_data (datafile_data);
+CREATE INDEX biobank_projects__project_biobanks_project_biobanks_idx ON public.biobank_projects__project_biobanks (project_biobanks);
+CREATE INDEX biobank_projects__project_biobanks_biobank_projects_idx ON public.biobank_projects__project_biobanks (biobank_projects);
+
+
+CREATE INDEX data_childrendata__data_parentdata_data_parentdata_idx ON public.data_childrendata__data_parentdata ("data_parentData");
+
+CREATE INDEX data_childrendata__data_parentdata_data_childrendata_idx ON public.data_childrendata__data_parentdata ("data_childrenData");
+
+CREATE INDEX data_parentsample__sample_childrendata_data_parentsample_idx ON public.data_parentsample__sample_childrendata ("data_parentSample");
+
+CREATE INDEX data_parentsample__sample_childrendata_sample_childrendata_idx ON public.data_parentsample__sample_childrendata ("sample_childrenData");
+
+CREATE INDEX data_parentsubject__subject_childrendata_data_parentsubject_idx ON public.data_parentsubject__subject_childrendata ("data_parentSubject");
+
+CREATE INDEX data_parentsubject__subject_childrendata_subject_childrendata_idx ON public.data_parentsubject__subject_childrendata ("subject_childrenData");
+
+CREATE INDEX sample_donor__subject_childrensample_sample_donor_idx ON public.sample_donor__subject_childrensample (sample_donor);
+
+CREATE INDEX sample_donor__subject_childrensample_subject_childrensample_idx ON public.sample_donor__subject_childrensample ("subject_childrenSample");
+
+CREATE INDEX sample_parentsample__sample_childrensample_sample_parentsample_idx ON public.sample_parentsample__sample_childrensample ("sample_parentSample");
+
+CREATE INDEX sample_parentsample__sample_childrensample_sample_childrensample_idx ON public.sample_parentsample__sample_childrensample ("sample_childrenSample");
+
+CREATE INDEX subject_parentsubject__subject_childrensubject_subject_parentsubject_idx ON public.subject_parentsubject__subject_childrensubject ("subject_parentSubject");
+
+CREATE INDEX subject_parentsubject__subject_childrensubject_subject_childrensubject_idx ON public.subject_parentsubject__subject_childrensubject ("subject_childrenSubject");
+
 
 ALTER TABLE ONLY sample
     ADD CONSTRAINT biobank_fkey FOREIGN KEY (biobank) REFERENCES biobank(id) MATCH FULL ON DELETE CASCADE;
