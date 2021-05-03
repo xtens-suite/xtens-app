@@ -172,9 +172,12 @@ function renderDatatablesDate (data, type) {
         addRowsDataTable: function (data) {
             if (data) {
                 this.data = this.data.concat(data);
+                var plainData;
                 if (this.isLeafSearch) {
-                    var plainData = this.buildPlainData(data);
+                    plainData = this.buildPlainData(data);
                     this.plainData = this.plainData.concat(plainData);
+                } else {
+                    plainData = data;
                 }
                 this.addLinks(this.optLinks);
                 // TODO: disabilitare le actions per i multi projects
