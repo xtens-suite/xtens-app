@@ -483,6 +483,73 @@ function renderDatatablesDate (data, type) {
         childrenRowsHandler: function (row) {
             var that = this;
             $(this.$el).on('click', 'td.details-control', function () {
+
+                if (that.modal) {
+                    that.modal.hide();
+                }
+
+                var tr = $(this).closest('tr');
+                var row = that.table.row(tr);
+                var tableName = 'child-table-' + row.index();
+                var leafKey = _.find(_.keys(that.data[0]), function (k) { return k.indexOf("_id") > 0; });
+                var data = _.find(that.data, function (d) {
+                    return d[leafKey] === row.data()[leafKey];
+                });
+                var maxHeight = ($(window).height() - 200) + 'px';
+                var modal = new ModalDialog({
+                    template: JST["views/templates/table-modal.ejs"],
+                    data: { __: i18n, table: tableName, height: maxHeight }
+                });
+
+                that.$modal.append(modal.render().el);
+                modal.show();
+                $('.modal-cnt').one('hidden.bs.modal', function (e) {
+                    e.preventDefault();
+                    modal.remove();
+                    $('.modal-backdrop').remove();
+                });
+
+
+                var tableOptsChild = {
+                    data: data.parents,
+                    columns: that.childColumns,
+                    info: true,
+                    searching: false,
+                    paging: false,
+                    deferRender: true,
+                    autoWidth: true,
+                    columnDefs: [
+                        { "className": "dt-center", "targets": "_all" }
+                    ]
+                    /*
+                    scrollX: true,
+                    scrollY: true,
+                    scrollCollapse: true,
+                    destroy: true,
+                    fixedColumns: {
+                        leftColumns: that.childColumns.length > 9 ? that.childNumLeft : 0,
+                        rightColumns: 0
+                    }
+                    */
+                };
+                var tableSelector = '.' + tableName;
+                $(tableSelector).DataTable(tableOptsChild);
+                /*
+                if (tableOptsChild.columns.length > 9) {
+                    new $.fn.dataTable.FixedColumns($(tableSelector), {
+                        leftColumns: that.childNumLeft,
+                        rightColumns: 0
+                    });
+                } else {
+                    tableOptsChild.fixedColumns = false;
+                }
+                */
+            });
+
+
+
+            /*
+            $(this.$el).on('click', 'td.details-control', function () {
                 var tr = $(this).closest('tr');
                 var row = that.table.row(tr);
 
@@ -527,6 +594,7 @@ function renderDatatablesDate (data, type) {
                     }
                 }
             });
+            */
         },
 
         checkVCF: function () {

@@ -136,6 +136,23 @@
                 default:
                     break;
             }
+            var realTotVals = 0;
+            var fakeData = _.filter(pieData, function (data) {
+                var valInt = parseInt(data.value);
+                if (valInt !== -1) {
+                    realTotVals += valInt;
+                }
+                return valInt === -1;
+            });
+            var realLength = fakeData ? pieData.length - fakeData.length : 0;
+            var fakeVal = realTotVals !== 0 && realLength !== 0 && realTotVals > realLength ? Math.round(realTotVals / realLength) : 1;
+            
+            pieData = _.map(pieData, function (data) {
+                if (parseInt(data.value) === -1) {
+                    data.value = fakeVal;
+                }
+                return data;
+            });
             var viewName = "PieChart" + model;
             this[viewName] = new DashBoard.Views.PieChart({
                 data: pieData,

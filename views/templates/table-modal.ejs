@@ -1,0 +1,31 @@
+<div class="modal fade">
+    <div class="modal-dialog" style="width:100%; height:auto; margin-left: 10px;">
+        <div class="modal-content">
+
+            <div class="modal-header">
+              <h4 class="modal-title">Parent Details</h4>
+            </div>
+            <div class="modal-body table-responsive" style="width:100%; overflow-x: auto; max-height:<%= height %>; overflow-y: auto;">
+                <table class="<%= table %> table-bordered table-striped table-hover query-table"></table>
+            </div> 
+
+            <!--
+            <table class="modal-body <%= table %> query-table" style="max-height: 500px"></table>
+
+            <div class="modal-body">
+                <div style="height: 500px;">
+                    <table class="<%= table %> query-table table-bordered table-striped table-hover"></table>
+                </div>
+            </div>
+
+            <div class="modal-body table-responsive" style="width:100%; overflow-x: auto;">
+                <table class="<%= table %> table-bordered table-striped table-hover query-table"></table>
+            </div> 
+            -->
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal"><%= __('close') %></button>
+            </div>
+        </div>
+    </div>
+</div>
