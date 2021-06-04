@@ -116,6 +116,28 @@
             xtens.router.navigate('#/subjects/dashboard?idPatient=' + idPatient, { trigger: true });
         },
 
+        fakeTotPie: function(pieData) {
+            var realTotVals = 0;
+            var fakeData = _.filter(pieData, function (data) {
+                var valInt = parseInt(data.value);
+                if (valInt !== -1) {
+                    realTotVals += valInt;
+                }
+                return valInt === -1;
+            });
+            var realLength = fakeData ? pieData.length - fakeData.length : 0;
+            var fakeVal = realTotVals !== 0 && realLength !== 0 && realTotVals > realLength ? Math.round(realTotVals / realLength) * 1.5 : 1;
+            
+            return _.map(pieData, function (data) {
+                if (parseInt(data.value) === -1) {
+                    data.value = fakeVal;
+                    data.isFake = true;
+                }
+                return data;
+            });
+
+        },
+
         renderPieByModel: function (model) {
             var pieData; var title; var colors; var writeTag = false;
             switch (model) {
@@ -126,33 +148,16 @@
                     writeTag = true;
                     break;
                 case "Sample":
-                    pieData = this.SampleCount;
                     title = "Samples";
+                    pieData = this.fakeTotPie(this.SampleCount);
                     break;
                 case "Data":
-                    pieData = this.DataCount;
                     title = "Data";
+                    pieData = this.fakeTotPie(this.DataCount);
                     break;
                 default:
                     break;
             }
-            var realTotVals = 0;
-            var fakeData = _.filter(pieData, function (data) {
-                var valInt = parseInt(data.value);
-                if (valInt !== -1) {
-                    realTotVals += valInt;
-                }
-                return valInt === -1;
-            });
-            var realLength = fakeData ? pieData.length - fakeData.length : 0;
-            var fakeVal = realTotVals !== 0 && realLength !== 0 && realTotVals > realLength ? Math.round(realTotVals / realLength) : 1;
-            
-            pieData = _.map(pieData, function (data) {
-                if (parseInt(data.value) === -1) {
-                    data.value = fakeVal;
-                }
-                return data;
-            });
             var viewName = "PieChart" + model;
             this[viewName] = new DashBoard.Views.PieChart({
                 data: pieData,
@@ -226,7 +231,11 @@
             this.resetTips();
             var that = this;
             var data = this.data;
+            var hasFake = false;
             var totalData = this.data.reduce(function (s, f) {
+                if (f.isFake) {
+                    hasFake = true;
+                }
                 return s + parseInt(f.value); // return the sum of the accumulator and the current time, as the the new accumulator
             }, 0);
 
@@ -236,7 +245,7 @@
             var colorLength = data.length < 3 ? 3 : data.length < 9 ? data.length : 9;
             var color = this.colors ? d3.scaleOrdinal().range(_.values(this.colors))
                 : this.model === "Sample" ? d3.scaleOrdinal(d3.schemeGreens[colorLength])
-                    : d3.scaleOrdinal().range(data.length < 9 ? d3.schemeReds[3] : d3.schemeCategory10);
+                    : d3.scaleOrdinal().range(data.length < 9 ? d3.schemeReds[data.length] : d3.schemeCategory10);
 
             var arc = d3.arc()
                 .innerRadius(0)
@@ -261,7 +270,10 @@
                 .attr('class', 'd3-tip')
                 .offset([-10, 0])
                 .html(function (d) {
-                    return "<strong>Value:</strong> <span style='color:#4476b5'>" + d.data.value + "</span> - " + Math.floor(d.data.value / totalData * 100) + "%";
+                    if (d.data.isFake) {
+                        return "<strong>Value:</strong> <span style='color:#4476b5'>Huge number</span>";
+                    }
+                    return "<strong>Value:</strong> <span style='color:#4476b5'>" + d.data.value + "</span>" + (hasFake ? '' : ' - ' + Math.floor(d.data.value / totalData * 100) + "%");
                 });
 
             var followselector = 'ipfollowscursor' + this.model;
