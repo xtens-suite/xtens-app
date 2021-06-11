@@ -812,7 +812,7 @@
                 getVal: function ($el) {
                     var value = parseInt($el.val());
                     return _.isNaN(value) ? null : value;
-                    // return _.findWhere(options.view.dataTypes, {id: value });
+                    // return _.find(options.view.dataTypes, {id: value });
                 },
                 onGet: function (val) {
                     // if you get the whole DataType object you must retrieve the ID
@@ -1055,7 +1055,7 @@
             } else {
                 idDataType = dataType;
             }
-            return _.findWhere(this.dataTypes, { id: idDataType }).schema;
+            return _.find(this.dataTypes, { id: idDataType }).schema;
         },
 
         dataTypeOnChange: function () {
@@ -1122,7 +1122,7 @@
                         fileSystem: fileSystem,
                         datum: _this.model,
                         // added the second condition for the scenarios where the dataType is not populated
-                        dataTypeName: _this.model.get("type").name || _.findWhere(_this.dataTypes, { id: _.parseInt(_this.model.get("type")) }).name
+                        dataTypeName: _this.model.get("type").name || _.find(_this.dataTypes, { id: _.parseInt(_this.model.get("type")) }).name
                     });
                     _this.$fileCnt.append(_this.fileUploadView.render().el);
                     _this.fileUploadView.initializeDropzone();
@@ -1140,7 +1140,7 @@
                 fileSystem: this.fileSystem,
                 datum: this.model,
                 // added the second condition for the scenarios where the dataType is not populated
-                dataTypeName: this.model.get("type").name || _.findWhere(this.dataTypes, { id: _.parseInt(this.model.get("type")) }).name
+                dataTypeName: this.model.get("type").name || _.find(this.dataTypes, { id: _.parseInt(this.model.get("type")) }).name
             });
             $('.filemanager').remove();
             this.$fileCnt.append(this.fileUploadView.render().el);

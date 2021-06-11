@@ -193,7 +193,7 @@
                 },
                 getVal: function ($el, ev, options) {
                     return $el.val() && $el.val().map(function (value) {
-                        return _.findWhere(options.view.existingDataTypes, { id: parseInt(value) });
+                        return _.find(options.view.existingDataTypes, { id: parseInt(value) });
                     });
                 },
                 onGet: function (vals) {

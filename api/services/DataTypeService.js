@@ -41,7 +41,7 @@ const coroutines = {
 
         const dataTypePrivileges = yield DataTypePrivileges.find({ where: { group: groupsId, dataType: dataTypesId } });
         let results = _.map(dataTypePrivileges, function (dtp) {
-            if (_.findWhere(dataTypesProjects, dtp.dataType)) {
+            if (_.find(dataTypesProjects, (d) => d === dtp.dataType)) {
                 return dtp;
             }
         });
@@ -62,7 +62,7 @@ const coroutines = {
         dataTypesProjects = _.uniq(_.flatten(dataTypesProjects));
 
         let dataTypesFilteredByProjects = _.map(dataTypes, function (d) {
-            if (_.findWhere(dataTypesProjects, d.id)) {
+            if (_.find(dataTypesProjects, d.id)) {
                 return d;
             }
         });
@@ -70,7 +70,7 @@ const coroutines = {
         id = _.uniq(_.flatten(id));
         const dataTypePrivileges = yield DataTypePrivileges.find({ where: { group: groupsId, dataType: id } });
         let results = _.compact(_.uniq(_.map(dataTypePrivileges, function (dtp) {
-            return _.findWhere(dataTypesFilteredByProjects, { id: dtp.dataType });
+            return _.find(dataTypesFilteredByProjects, { id: dtp.dataType });
         })));
         return results;
     }),

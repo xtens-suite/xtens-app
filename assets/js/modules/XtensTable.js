@@ -1025,7 +1025,7 @@ function renderDatatablesDate (data, type) {
                     if (field._loop) {
                         columnOpts.data = idDataType ? "metadata." + fieldName + ".values" : queryArgs.label + "." + fieldName + ".values";
                         columnOpts.render = function (data, type, row) {
-                            var priv = this.multiProject || this.isLeafSearch ? _.findWhere(dataTypePrivileges, { 'dataType': row.type }) : dataTypePrivileges;
+                            var priv = this.multiProject || this.isLeafSearch ? _.find(dataTypePrivileges, { 'dataType': row.type }) : dataTypePrivileges;
                             if (priv && priv.privilegeLevel !== VIEW_OVERVIEW) {
                                 return data && type === 'export' ? data.join() : data ? data.length > 2 ? '<span>List on Details button</span>' : data.join() : null;
                             } else {
@@ -1036,7 +1036,7 @@ function renderDatatablesDate (data, type) {
                         switch (field.fieldType) {
                             case "Date": // if the column has dates render them in the desired format
                                 columnOpts.render = function (data, type, row) {
-                                    var priv = this.multiProject || this.isLeafSearch ? _.findWhere(dataTypePrivileges, { 'dataType': row.type }) : dataTypePrivileges;
+                                    var priv = this.multiProject || this.isLeafSearch ? _.find(dataTypePrivileges, { 'dataType': row.type }) : dataTypePrivileges;
                                     if (priv && priv.privilegeLevel !== VIEW_OVERVIEW) {
                                         return renderDatatablesDate(data, type);
                                     } else {
@@ -1046,7 +1046,7 @@ function renderDatatablesDate (data, type) {
                                 break;
                             case "Boolean": // if the column has booleans render them in the desired format
                                 columnOpts.render = function (data, type, row) {
-                                    var priv = this.multiProject || this.isLeafSearch ? _.findWhere(dataTypePrivileges, { 'dataType': row.type }) : dataTypePrivileges;
+                                    var priv = this.multiProject || this.isLeafSearch ? _.find(dataTypePrivileges, { 'dataType': row.type }) : dataTypePrivileges;
                                     if (priv && priv.privilegeLevel !== VIEW_OVERVIEW) {
                                         return renderDatatablesBoolean(data);
                                     } else {
@@ -1056,7 +1056,7 @@ function renderDatatablesDate (data, type) {
                                 break;
                             case "Link": // if the column has links render them in the desired format
                                 columnOpts.render = function (data, type, row) {
-                                    var priv = this.multiProject || this.isLeafSearch ? _.findWhere(dataTypePrivileges, { 'dataType': row.type }) : dataTypePrivileges;
+                                    var priv = this.multiProject || this.isLeafSearch ? _.find(dataTypePrivileges, { 'dataType': row.type }) : dataTypePrivileges;
                                     if (priv && priv.privilegeLevel !== VIEW_OVERVIEW) {
                                         data = '<a href="' + data + '" target="_blank">' + data + '</a>';
                                         return data;
@@ -1067,7 +1067,7 @@ function renderDatatablesDate (data, type) {
                                 break;
                             default: // if the column has numbers, texts, floats render them in the default format
                                 columnOpts.render = function (data, type, row) {
-                                    var priv = this.multiProject || this.isLeafSearch ? _.findWhere(dataTypePrivileges, { 'dataType': row.type }) : dataTypePrivileges;
+                                    var priv = this.multiProject || this.isLeafSearch ? _.find(dataTypePrivileges, { 'dataType': row.type }) : dataTypePrivileges;
                                     if (priv && priv.privilegeLevel !== VIEW_OVERVIEW) {
                                         return data;
                                     } else {

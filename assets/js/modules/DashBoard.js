@@ -116,7 +116,7 @@
             xtens.router.navigate('#/subjects/dashboard?idPatient=' + idPatient, { trigger: true });
         },
 
-        fakeTotPie: function(pieData) {
+        fakeTotPie: function (pieData) {
             var realTotVals = 0;
             var fakeData = _.filter(pieData, function (data) {
                 var valInt = parseInt(data.value);
@@ -127,7 +127,7 @@
             });
             var realLength = fakeData ? pieData.length - fakeData.length : 0;
             var fakeVal = realTotVals !== 0 && realLength !== 0 && realTotVals > realLength ? Math.round(realTotVals / realLength) * 1.5 : 1;
-            
+
             return _.map(pieData, function (data) {
                 if (parseInt(data.value) === -1) {
                     data.value = fakeVal;
@@ -135,7 +135,6 @@
                 }
                 return data;
             });
-
         },
 
         renderPieByModel: function (model) {
@@ -479,7 +478,7 @@
         onChangePeriod: function (ev) {
             ev.preventDefault();
             this.selectedPeriod = this.$('#period-sel').val();
-            this.selectedFormat = _.findWhere(this.periods, { value: this.selectedPeriod });
+            this.selectedFormat = _.find(this.periods, { value: this.selectedPeriod });
             this.fetchData();
         },
 
@@ -792,7 +791,7 @@
         onChangePeriod: function (ev) {
             ev.preventDefault();
             this.selectedPeriod = this.$('#period-sel').val();
-            this.selectedFormat = _.findWhere(this.periods, { value: this.selectedPeriod });
+            this.selectedFormat = _.find(this.periods, { value: this.selectedPeriod });
             this.fetchData();
         },
 

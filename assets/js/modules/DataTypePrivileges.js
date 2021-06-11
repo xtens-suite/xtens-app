@@ -182,11 +182,11 @@
 
         setGroupByDataTypeProject: function (ev) {
             var selDatatype = ev ? _.parseInt(ev.target.value) : _.parseInt($('#data-type').val());
-            var dt = _.findWhere(this.dataTypes, { id: selDatatype });
+            var dt = _.find(this.dataTypes, { id: selDatatype });
             var filteredValues = []; var newColl = [];
 
             this.groups.forEach(function (gr) {
-                if (_.findWhere(gr.projects, { id: dt.project })) {
+                if (_.find(gr.projects, { id: dt.project })) {
                     return newColl.push({ label: gr.name, value: gr.id });
                 }
             });

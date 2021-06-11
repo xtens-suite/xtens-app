@@ -429,7 +429,7 @@
             // set match criteria on formatted or unformatted names depending of the application usage
             var matchCriteria = useFormattedNames ? { "formattedName": fieldName } : { "name": fieldName };
 
-            var selectedField = _.findWhere(this.fieldList, matchCriteria);
+            var selectedField = _.find(this.fieldList, matchCriteria);
             this.model.set("fieldType", selectedField.fieldType.toLowerCase());
             this.model.set("isList", selectedField.isList);
             this.model.set("caseInsensitive", selectedField.caseInsensitive);
@@ -929,7 +929,7 @@
         },
 
         loopNameOnChange: function() {
-            var selectedLoop = _.findWhere(this.loopList, {name: this.model.get('loopName')});
+            var selectedLoop = _.find(this.loopList, {name: this.model.get('loopName')});
             var childView;
             for (var i=0, len=selectedLoop.content.length; i<len; i++) {
                 childView = new Query.Views.Row({fieldList: [selectedLoop.content[i]],
@@ -1309,7 +1309,7 @@
             }
             if (this.model.get("model") === DataTypeClasses.SUBJECT && xtens.session.get('canAccessPersonalData')) {
                 personalInfoQueryView = new Query.Views.PersonalInfo({
-                    model: new Query.PersonalInfoModel(_.findWhere(queryContent, { personalDetails: true }))
+                    model: new Query.PersonalInfoModel(_.find(queryContent, { personalDetails: true }))
                 });
                 this.addSubqueryView(personalInfoQueryView);
             }

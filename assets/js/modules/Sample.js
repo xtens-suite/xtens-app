@@ -59,7 +59,7 @@
                     var value = parseInt($el.val());
                     value ? $('#editDonor').prop('disabled', false) : null;
                     return _.isNaN(value) ? null : value;
-                    // return _.findWhere(options.view.dataTypes, {id: value });
+                    // return _.find(options.view.dataTypes, {id: value });
                 },
                 onGet: function (val, options) {
                     // if you get the whole DataType object you must retrieve the ID
@@ -114,7 +114,7 @@
                 },
                 getVal: function ($el, ev, options) {
                     var value = parseInt($el.val());
-                    return _.findWhere(options.view.biobanks, {
+                    return _.find(options.view.biobanks, {
                         id: value
                     });
                 },
@@ -145,7 +145,7 @@
                 },
                 getVal: function($el, ev, options) {
                     var value = parseInt($el.val());
-                    return _.findWhere(options.view.subjects, {id: value });
+                    return _.find(options.view.subjects, {id: value });
                 },
                 onGet: function(val, options) {
                     return (val && val.id);
@@ -175,7 +175,7 @@
             //     },
             //     getVal: function($el, ev, options) {
             //         var value = parseInt($el.val());
-            //         return _.findWhere(options.view.parentSamples, {
+            //         return _.find(options.view.parentSamples, {
             //             id: value
             //         });
             //     },
