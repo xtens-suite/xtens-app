@@ -9,8 +9,7 @@ let BluebirdPromise = require('bluebird');
 let Joi = require("joi");
 let SAMPLE = sails.config.xtens.constants.DataTypeClasses.SAMPLE;
 const coroutines = {
-    validate: BluebirdPromise.coroutine(function *(sample, performMetadataValidation, dataType) {
-
+    validate: BluebirdPromise.coroutine(function * (sample, performMetadataValidation, dataType) {
         if (dataType.model !== SAMPLE) {
             return {
                 error: "This data type is for another model: " + dataType.model
@@ -55,8 +54,8 @@ const coroutines = {
         return Joi.validate(sample, validationSchema);
     }),
 
-    validateBiobank: BluebirdPromise.coroutine(function* (sample, dataType) {
-        if (!sample || ! dataType) {
+    validateBiobank: BluebirdPromise.coroutine(function * (sample, dataType) {
+        if (!sample || !dataType) {
             throw new Error('SampleService: validateBiobank - Missing function arguments');
         }
 
@@ -69,7 +68,6 @@ const coroutines = {
     })
 };
 
-
 let SampleService = BluebirdPromise.promisifyAll({
 
     /**
@@ -77,7 +75,7 @@ let SampleService = BluebirdPromise.promisifyAll({
      * @name simplify
      * @description removes all associated Objects if present keeping only their primary keys (i.e. IDs)
      */
-    simplify: function(sample) {
+    simplify: function (sample) {
         ["type", "donor", "parentSample", "biobank"].forEach(elem => {
             if (sample[elem]) {
                 sample[elem] = sample[elem].id || sample[elem];
@@ -96,12 +94,12 @@ let SampleService = BluebirdPromise.promisifyAll({
      *                      - error: null if the Data is validated, an Error object otherwise
      *                      - value: the validated data object if no error is returned
      */
-    validate: function(sample, performMetadataValidation, dataType) {
+    validate: function (sample, performMetadataValidation, dataType) {
         return coroutines.validate(sample, performMetadataValidation, dataType)
-        .catch(/* istanbul ignore next */ function(err) {
-            sails.log(err);
-            return err;
-        });
+            .catch(/* istanbul ignore next */ function (err) {
+                sails.log(err);
+                return err;
+            });
     },
 
     /**
@@ -114,12 +112,12 @@ let SampleService = BluebirdPromise.promisifyAll({
      *                      - error: null if the Data is validated, an Error object otherwise
      *                      - value: the validated data object if no error is returned
      */
-    validateBiobank: function(sample, performMetadataValidation, dataType) {
+    validateBiobank: function (sample, performMetadataValidation, dataType) {
         return coroutines.validateBiobank(sample, performMetadataValidation, dataType)
-        .catch(/* istanbul ignore next */ function(err) {
-            sails.log(err);
-            return err;
-        });
+            .catch(/* istanbul ignore next */ function (err) {
+                sails.log(err);
+                return err;
+            });
     },
 
     /**
@@ -127,11 +125,10 @@ let SampleService = BluebirdPromise.promisifyAll({
      * @name getOne
      * @description get a Sample model from the ID if an ID is provided
      */
-    getOne: function(id, next) {
+    getOne: function (id, next) {
         if (!id) {
             next(null, null);
-        }
-        else {
+        } else {
             Sample.findOne(_.parseInt(id)).populateAll().exec(next);
         }
     }

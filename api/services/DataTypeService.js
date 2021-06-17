@@ -61,11 +61,11 @@ const coroutines = {
         let dataTypesProjects = _.map(projects, function (p) { return _.map(p.dataTypes, 'id'); });
         dataTypesProjects = _.uniq(_.flatten(dataTypesProjects));
 
-        let dataTypesFilteredByProjects = _.map(dataTypes, function (d) {
+        let dataTypesFilteredByProjects = _.compact(_.map(dataTypes, function (d) {
             if (_.find(dataTypesProjects, (p) => p === d.id)) {
                 return d;
             }
-        });
+        }));
         let id = _.map(projects, function (p) { return _.map(p.dataTypes, 'id'); });
         id = _.uniq(_.flatten(id));
         const dataTypePrivileges = yield DataTypePrivileges.find({ where: { group: groupsId, dataType: id } });
