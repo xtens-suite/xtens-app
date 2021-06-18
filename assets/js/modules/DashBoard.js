@@ -244,7 +244,7 @@
             var colorLength = data.length < 3 ? 3 : data.length < 9 ? data.length : 9;
             var color = this.colors ? d3.scaleOrdinal().range(_.values(this.colors))
                 : this.model === "Sample" ? d3.scaleOrdinal(d3.schemeGreens[colorLength])
-                    : d3.scaleOrdinal().range(data.length < 9 ? d3.schemeReds[data.length] : d3.schemeCategory10);
+                    : d3.scaleOrdinal().range(data.length < 9 && data.length > 2 ? d3.schemeReds[data.length] : d3.schemeCategory10);
 
             var arc = d3.arc()
                 .innerRadius(0)
