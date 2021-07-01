@@ -56,7 +56,7 @@
                         <%= __('date') %>
                     </label>
                     <div class="data-input-div">
-                        <div text class="" id="date" name="date"></div>
+                        <div text class="" id="date" name="date"><%=data.get('date')%></div>
                     </div>
                 </div>
                 <div class="row margin-row">
@@ -64,7 +64,7 @@
                         <%= __('tags') %>
                     </label>
                     <div class="data-input-div">
-                        <div type="hidden" class="" id="tags" name="tags"></div>
+                        <div  class="" id="tags" name="tags"><%=data.get('tags') && data.get('tags').join(' - ')%></div>
                     </div>
                 </div>
                 <div class="row margin-row">
@@ -72,7 +72,7 @@
                         <%= __('notes') %>
                     </label>
                     <div class="data-input-div">
-                        <div class="" id="notes" name="notes" rows="4"></div>
+                        <div class="" id="notes" name="notes" rows="4"><%=data.get('notes')%></div>
                     </div>
                 </div>
             </div>

@@ -40,6 +40,9 @@
                            if(privilege && privilege.get("privilegeLevel") === "edit" ){ %>
                             <a type="button" class="btn btn-primary" href="<%= sample.get("editLink") %>"><%=__("edit") %></a>
                             <%} %>
+                            <% if(privilege && privilege.get("privilegeLevel") != "view_overview" ){ %>
+                              <a type="button" class="btn btn-info" href="<%= sample.get("detailsLink") %>"><%=__("data-details") %>
+                                <%} %>
                             <% if (sample.get("newDerivativeLink") && sample.get("newDerivativeLink").length > 0) {%>
                             <a type="button" class="btn btn-default" href="<%= sample.get("newDerivativeLink") %>"><%=__("new-derivative-sample") %></a>
                             <%} %>

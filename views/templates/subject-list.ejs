@@ -43,6 +43,9 @@
                                     <a type="button" class="btn btn-primary"
                                         href="<%= subject.get("editLink") %>"><%=__("edit") %></a>
                                     <%} %>
+                                    <% if(privilege && privilege.get("privilegeLevel") != "view_overview" ){ %>
+                                        <a type="button" class="btn btn-info" href="<%= subject.get("detailsLink") %>"><%=__("data-details") %>
+                                            <%} %>
                                     <% if (subject.get("newSubjectLink") && subject.get("newSubjectLink").length) {%>
                                         <a type="button" class="btn btn-default"
                                             href="<%= subject.get("newSubjectLink") %>"><%=__("new-derivative-subject") %></a>

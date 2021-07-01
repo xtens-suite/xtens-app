@@ -32,14 +32,14 @@
                     <label for="tags" class="data-label"><%= __('tags') %></label>
                     <div class="data-input-div">
                         <div type="hidden" class="data-span" id="tags" name="tags">
-                            <%= _.isEmpty(data.get('tags')) ? '' : data.get('tags').join(', ') %>
+                            <%= data.get('tags') && data.get('tags').join(' - ') %>
                         </div>
                     </div>
                 </div>
                 <div class="row margin-row">
                     <label for="notes" class="data-label"><%= __('notes') %></label>
                     <div class="data-input-div">
-                        <div class="data-span" id="notes" name="notes" rows="4"><%= data.get('notes') || "" %></div>
+                        <div class="data-span" id="notes" name="notes" rows="4"><%= data.get('notes')%></div>
                     </div>
                 </div>
             </div>

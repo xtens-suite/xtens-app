@@ -86,7 +86,8 @@ let DataTypePrivilegesController = {
         query = actionUtil.populateRequest(query, req);
 
         query.then(function (data) {
-            res.json(data);
+            let re2 = DataTypeService.getHigherPrivileges(data);
+            res.json(re2);
         })
             .catch(function (err) {
                 return co.error(err);
