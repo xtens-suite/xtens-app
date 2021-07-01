@@ -981,7 +981,7 @@
                 data: $.param({ where: { id: groupIds }, sort: 'id ASC', limit: 100, populate: ['members'] })
             });
             $.when(groupsDeferred).then(function (groupRes) {
-                that.operators = _.isArray(groupRes) ? _.flatten(_.map(groupRes, 'members')) : groupRes.members;
+                that.operators = _.isArray(groupRes) ? _.uniq(_.flatten(_.map(groupRes, 'members')), 'id') : groupRes.members;
                 var newColl = [];
                 that.operators.forEach(function (op) {
                     newColl.push({ label: op.lastName + ' ' + op.firstName, value: op.id });

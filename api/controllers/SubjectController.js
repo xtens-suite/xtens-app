@@ -273,11 +273,26 @@ const coroutines = {
                     });
                 });
                 BluebirdPromise.map(resp.rows, function (row) {
-                    let privilege;
-                    if (_.find(dataTypePrivileges, function (d) {
-                        privilege = d;
-                        return privilege.dataType.name === row.type;
-                    })) {
+                    let privilege, pedit, pdown, pdet, pover;
+                    var privileges = _.filter(dataTypePrivileges, function (d) {
+                        return d.dataType.name === row.type;
+                    });
+
+                    pedit = _.find(privileges, function (d) {
+                        return d.privilegeLevel === 'edit';
+                    });
+                    pdown = _.find(privileges, function (d) {
+                        return d.privilegeLevel === 'download';
+                    });
+                    pdet = _.find(privileges, function (d) {
+                        return d.privilegeLevel === 'view_details';
+                    });
+                    pover = _.find(privileges, function (d) {
+                        return d.privilegeLevel === 'view_overview';
+                    });
+                    privilege = pedit || pdown || pdet || pover || undefined;
+
+                    if (privilege) {
                         if (privilege.privilegeLevel === VIEW_OVERVIEW) { row.metadata = {}; }
                         if (row.parent_data !== null && _.find(idRows, function (i) { return i === row.parent_data; })) {
                             return { 'source': row.parent_data, 'target': row.id, 'name': row.id, 'type': row.type, 'typeId': row.typeId, 'biobankCode': row.biobankcode, 'metadata': row.metadata, privilege: privilege.privilegeLevel };
@@ -287,7 +302,6 @@ const coroutines = {
                             return { 'source': row.parent_subject, 'target': row.id, 'name': row.id, 'type': row.type, 'typeId': row.typeId, 'biobankCode': row.biobankcode, 'metadata': row.metadata, privilege: privilege.privilegeLevel };
                         } else {
                             return { 'source': 'Patient', 'target': row.id, 'name': row.id, 'type': row.type, 'typeId': row.typeId, 'biobankCode': row.biobankcode, 'metadata': row.metadata, privilege: privilege.privilegeLevel };
-                            // console.log(privilege);
                         }
                     }
                 })
