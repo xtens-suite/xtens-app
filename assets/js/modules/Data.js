@@ -2160,6 +2160,22 @@
                     return val;
                 }
             },
+            '#project-type-selector': {
+                observe: 'Project',
+                initialize: function ($el) {
+                    $el.select2({ placeholder: 'Select Project' });// i18n("please-select") });
+                },
+                selectOptions: {
+                    collection: 'this.projectArraySource',
+                    defaultOption: {
+                        label: '',
+                        value: null
+                    }
+                },
+                onGet: function (val) {
+                    return val;
+                }
+            },
             '#affected-type-selector': {
                 observe: 'Status',
                 initialize: function ($el) {
@@ -2270,6 +2286,7 @@
             this.analysisFields = options.analysisFields;
             this.relatioshipsArraySource = _.find(this.patientFields, { formattedName: "status" }).possibleValues;
             this.unitArraySource = _.find(this.patientFields, { formattedName: "unit" }).possibleValues;
+            this.projectArraySource = _.find(this.patientFields, { formattedName: "project" }).possibleValues;
             // this.analysisTypesArraySource = _.find(this.analysisFields, { formattedName: "target" }).possibleValues;
             this.analysisTypesArraySource = [
                 {
