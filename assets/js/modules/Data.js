@@ -2176,6 +2176,12 @@
                     return val;
                 }
             },
+            '#unit-contact-input': {
+                observe: 'Contact',
+                onGet: function (val) {
+                    return val;
+                }
+            },
             '#affected-type-selector': {
                 observe: 'Status',
                 initialize: function ($el) {
