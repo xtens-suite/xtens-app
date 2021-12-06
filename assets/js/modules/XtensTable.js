@@ -727,7 +727,7 @@ function renderDatatablesDate (data, type) {
             var csvContent = "sample\tunit\tfq1\tfq2\r\n";
             _.forEach(this.table.rows({ selected: true }).data(), function (d) {
                 var source = _.filter(that.sourceNGS, function (s) {
-                    return s.code === d.code;
+                    return s.tissue_biobank_code === d.biobank_code;
                 });
                 _.forEach(source, function (sourcerow) {
                     if (sourcerow && sourcerow.tissue_biobank_code && sourcerow.ngs_analysis && sourcerow.ngs_analysis.flow_cell && sourcerow.ngs_analysis.flow_cell.values && sourcerow.ngs_analysis.flow_cell.values[0] &&
@@ -735,12 +735,12 @@ function renderDatatablesDate (data, type) {
                         sourcerow.ngs_analysis.lane && sourcerow.ngs_analysis.lane.values && sourcerow.ngs_analysis.lane.values[0] &&
                         sourcerow.ngs_analysis.fastq_file_path_r1 && sourcerow.ngs_analysis.fastq_file_path_r1.values && sourcerow.ngs_analysis.fastq_file_path_r1.values[0] &&
                         sourcerow.ngs_analysis.fastq_file_path_r2 && sourcerow.ngs_analysis.fastq_file_path_r2.values && sourcerow.ngs_analysis.fastq_file_path_r2.values[0]) {
+                        
                         for (var index = 0; index < sourcerow.ngs_analysis.flow_cell.values.length; index++) {
                             var row = sourcerow.tissue_biobank_code + '\t' +
                             sourcerow.ngs_analysis.flow_cell.values[index] + '.' + sourcerow.ngs_analysis.lane.values[index] + '.' + sourcerow.tissue_biobank_code + '\t' +
                             sourcerow.ngs_analysis.fastq_file_path_r1.values[index] + '\t' +
                             sourcerow.ngs_analysis.fastq_file_path_r2.values[index] + '\r\n';
-                            if (csvContent.indexOf() === -1) {}
                             csvContent = csvContent + row;
                         }
                         // csvContent = csvContent + sourcerow.tissue_biobank_code + '\t' +
@@ -758,13 +758,13 @@ function renderDatatablesDate (data, type) {
             var csvContent = "sample\tunits\tkit\r\n";
             _.forEach(this.table.rows({ selected: true }).data(), function (d) {
                 var source = _.filter(that.sourceNGS, function (s) {
-                    return s.code === d.code;
+                    return s.tissue_biobank_code === d.biobank_code;
                 });
                 var sourceGroupByTargetDetails = _.groupBy(source, function (s) { return s.ngs_analysis.target_details && s.ngs_analysis.target_details.value; });
                 _.forEach(sourceGroupByTargetDetails, function (srcgroup, currentTagertDetails) {
-                    var biobankCode = srcgroup[0].tissue_biobank_code;
                     var units = '';
                     _.forEach(srcgroup, function (sourcerow) {
+                        var biobankCode = sourcerow.tissue_biobank_code;
                         if (sourcerow && sourcerow.tissue_biobank_code && sourcerow.ngs_analysis && sourcerow.ngs_analysis.flow_cell && sourcerow.ngs_analysis.flow_cell.values && sourcerow.ngs_analysis.flow_cell.values[0] &&
                                 sourcerow.ngs_analysis.flow_cell && sourcerow.ngs_analysis.flow_cell.values && sourcerow.ngs_analysis.flow_cell.values[0] &&
                                 sourcerow.ngs_analysis.lane && sourcerow.ngs_analysis.lane.values && sourcerow.ngs_analysis.lane.values[0]) {
@@ -774,11 +774,11 @@ function renderDatatablesDate (data, type) {
                                 units = units + sourcerow.ngs_analysis.flow_cell.values[index] + '.' + sourcerow.ngs_analysis.lane.values[index] + '.' + sourcerow.tissue_biobank_code + ',';
                             }
                         }
+                        csvContent = csvContent +
+                                biobankCode + '\t' +
+                                units.slice(0, -1) + '\t' +
+                                currentTagertDetails + '\r\n';
                     });
-                    csvContent = csvContent +
-                            biobankCode + '\t' +
-                            units.slice(0, -1) + '\t' +
-                            currentTagertDetails + '\r\n';
                 });
             });
             return csvContent;
