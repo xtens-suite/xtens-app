@@ -861,7 +861,7 @@
                 fieldsDate: this.fieldsDate,
                 periods: this.periods
             }));
-            if (this.fieldsDate.length == 0) { return this; }
+            if (this.fieldsDate.length < 2) { return this; }
             this.selectedFieldFrom = this.fieldsDate[0].id;
             this.selectedFieldTo = this.fieldsDate[0].id;
             this.$('#fd-from-sel').select2('val', this.fieldsDate[0].id);
