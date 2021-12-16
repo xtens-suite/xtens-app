@@ -956,7 +956,9 @@ function renderDatatablesDate (data, type) {
                     if (!isRoot) {
                         _.forEach(this.insertModelSpecificColumnsLeaf(selectedDataType.get('model'), xtens.session.get('canAccessPersonalData'), selectedDataType.get('name')), function (col) {
                             if (_.findIndex(that.columns, function (c) { return c.title === col.title; }) < 0) {
-                                that.columns.push(col);
+                                if (col.title !== 'Surname' && col.title !== 'Name' && col.title !== 'Birth Date') {
+                                    that.columns.push(col);
+                                }
                             }
                         });
                         this.columns = _.flatten(this.columns);

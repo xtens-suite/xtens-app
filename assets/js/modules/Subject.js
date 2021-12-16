@@ -674,11 +674,18 @@
 
                     $('.d3-tip').remove();
                     var path = "subjects/dashboard?";
+                    if (that.idPatient) {
+                        path += "idPatient=" + that.idPatient;
+                    } else {
+                        path += "codePatient=" + that.codePatient;
+                    }
+                    /*
                     if (that.codePatient) {
                         path += "codePatient=" + that.codePatient;
                     } else {
                         path += "idPatient=" + that.idPatient;
                     }
+                    */
                     xtens.router.navigate(path, { trigger: false });
                     // clean the previous graph if present
                     d3.select("#subject-svg-graph").remove();
