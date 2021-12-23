@@ -31,6 +31,7 @@ module.exports.routes = {
     // Auth Controller
     'POST /login': { controller: 'auth', action: 'login' },
     'POST /logout': { controller: 'auth', action: 'logout' },
+    'POST /subjectLogin': { controller: 'auth', action: 'loginSubject' },
 
     // Biobank Controller
 
