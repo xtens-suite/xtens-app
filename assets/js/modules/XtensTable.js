@@ -723,11 +723,12 @@ function renderDatatablesDate (data, type) {
         },
 
         buildCsvInfoNGSUnits: function () {
+            //FUNGE SOLO SE RICERCA INIZIA DA TISSUE
             var that = this;
             var csvContent = "sample\tunit\tfq1\tfq2\r\n";
             _.forEach(this.table.rows({ selected: true }).data(), function (d) {
                 var source = _.filter(that.sourceNGS, function (s) {
-                    return s.tissue_biobank_code === d.biobank_code;
+                    return s.tissue_biobank_code === d.biobank_code && s.tissue && !s.tissue.qc_failed;
                 });
                 _.forEach(source, function (sourcerow) {
                     if (sourcerow && sourcerow.tissue_biobank_code && sourcerow.ngs_analysis && sourcerow.ngs_analysis.flow_cell && sourcerow.ngs_analysis.flow_cell.values && sourcerow.ngs_analysis.flow_cell.values[0] &&
@@ -754,11 +755,12 @@ function renderDatatablesDate (data, type) {
         },
 
         buildCsvInfoNGSSamples: function () {
+            //FUNGE SOLO SE RICERCA INIZIA DA TISSUE
             var that = this;
             var csvContent = "sample\tunits\tkit\r\n";
             _.forEach(this.table.rows({ selected: true }).data(), function (d) {
                 var source = _.filter(that.sourceNGS, function (s) {
-                    return s.tissue_biobank_code === d.biobank_code;
+                    return s.tissue_biobank_code === d.biobank_code && s.tissue && !s.tissue.qc_failed;
                 });
                 var sourceGroupByTargetDetails = _.groupBy(source, function (s) { return s.ngs_analysis.target_details && s.ngs_analysis.target_details.value; });
                 _.forEach(sourceGroupByTargetDetails, function (srcgroup, currentTagertDetails) {
@@ -794,7 +796,7 @@ function renderDatatablesDate (data, type) {
                 _.forEach(source, function (sourcerow) {
                     if (sourcerow) {
                         var sourcefamily = _.filter(that.sourceNGS, function (s) {
-                            return s.metadata.family_id.value === sourcerow.metadata.family_id.value;
+                            return s.metadata.family_id.value === sourcerow.metadata.family_id.value && s.tissue && !s.tissue.qc_failed;
                         });
                         if (!utils.isExactMatch(csvContent, sourcerow.metadata.family_id.value)) {
                             csvContent = csvContent + sourcerow.metadata.family_id.value + '\t' + _.uniq(sourcefamily.map(function (s) { return s.tissue_biobank_code; })).join(',') + '\r\n';
@@ -815,7 +817,7 @@ function renderDatatablesDate (data, type) {
                 _.forEach(source, function (sourcerow) {
                     if (sourcerow) {
                         var sourcefamily = _.filter(that.sourceNGS, function (s) {
-                            return s.metadata.family_id.value === sourcerow.metadata.family_id.value;
+                            return s.metadata.family_id.value === sourcerow.metadata.family_id.value && s.tissue && !s.tissue.qc_failed;
                         });
 
                         if (!utils.isExactMatch(csvContent, sourcerow.metadata.family_id.value)) {
