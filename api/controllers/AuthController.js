@@ -6,7 +6,7 @@
  */
 /* jshint esnext:true */
 /* jshint node:true */
-/* globals _, sails, PassportService, TokenService, Passport */
+/* globals _, sails, PassportService, OperatorService, TokenService, Passport */
 
 "use strict";
 let AuthController = {
@@ -47,9 +47,9 @@ let AuthController = {
                 // Upon successful login, send back user data and JWT token
                 // sails.services.logger.login(user, req);
                 let operator = results.user;
-                let payload = operator.formatForTokenPayload();
+                let payload = OperatorService.formatForTokenPayload(operator);
                 sails.log.verbose(payload);
-                operator = operator.toJSON();
+                operator = OperatorService.customToJSON();
                 operator.groups = results.groups;
                 console.log("AuthController - successfully logged in");
                 

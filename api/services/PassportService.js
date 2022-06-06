@@ -204,6 +204,16 @@ PassportService.connect = function (req, query, profile, next) {
     });
 };
 
+/**
+ * Validate password used by the local strategy.
+ *
+ * @param {string}   password The password to validate
+ * @param {Function} next
+ */
+PassportService.validatePassword = function (password, currentPassword, next) {
+    bcrypt.compare(password, currentPassword, next);
+}
+
 
 PassportService.validate = (req) => {
     let params = req.allParams();

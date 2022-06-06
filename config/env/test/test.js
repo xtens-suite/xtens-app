@@ -23,11 +23,11 @@
    ***************************************************************************/
 
      models: {
-         connection: 'test',
+         datastore: 'test',
          migrate: 'drop'
      },
 
-     connections: {
+     datastores: {
          test: {
              adapter: 'sails-memory'
          }

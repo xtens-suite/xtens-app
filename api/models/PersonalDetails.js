@@ -13,7 +13,7 @@ module.exports = {
             type: 'string',
             required: true,
             max: 64,
-            alpha: true,
+            // alpha: true,
             columnName: 'given_name'
         },
 
@@ -21,7 +21,7 @@ module.exports = {
             type: 'string',
             required: true,
             max: 64,
-            alpha: true,
+            // alpha: true,
             columnName: 'surname'
         },
 

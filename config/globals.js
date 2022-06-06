@@ -1,19 +1,16 @@
 /**
- * Global Variable Configuration
- * (sails.config.globals)
- *
- * Configure which global variables which will be exposed
- * automatically by Sails.
- *
- * For more information on configuration, check out:
- * http://links.sailsjs.org/docs/config/globals
+ * THIS FILE WAS ADDED AUTOMATICALLY by the Sails 1.0 app migration tool.
+ * The original file was backed up as `config/globals-old.js.txt`
  */
 
-var _ = require('lodash');
-module.exports.globals = {
-    _: _,
-    async: true,
-    sails: true,
-    services: true,
-    models: true
-};
+ module.exports.globals = {
+
+   _: require('lodash'),
+
+   async: require('async'),
+
+   models: true,
+
+   sails: true
+
+ };

@@ -18,8 +18,8 @@ var Group = {
         privilegeLevel: {
             type: 'string',
             required: true,
-            defaultsTo: sails.config.xtens.constants.GroupPrivilegeLevels.STANDARD,
-            enum: _.values(sails.config.xtens.constants.GroupPrivilegeLevels),
+            defaultsTo: 'standard',
+            enum: ['standard', 'admin', 'wheel'],
             columnName: 'privilege_level'
         },
 

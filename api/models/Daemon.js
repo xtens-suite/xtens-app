@@ -19,8 +19,8 @@ var Daemon = {
         status: {
             type: 'string',
             required: true,
-            defaultsTo: sails.config.xtens.constants.DaemonStatus.INITIALIZING,
-            enum: _.values(sails.config.xtens.constants.DaemonStatus),
+            defaultsTo: 'initializing',
+            enum: ['initializing', 'error', 'running', 'success'],
             columnName: 'status'
         },
 

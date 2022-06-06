@@ -39,7 +39,7 @@ module.exports = {
         country: {
             columnName: 'country',
             type: 'string',
-            alpha: true,
+            // alpha: true,
             minLength: 2,
             maxLength: 2,
             required: true

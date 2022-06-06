@@ -48,13 +48,13 @@ module.exports = {
         // MIABIS-07G
         city: {
             type: 'string',
-            alpha: true,
+            // alpha: true,
             required: true
         },
         // MIABIS-07H
         country: {
             type: 'string',
-            alpha: true,
+            // alpha: true,
             required: true,
             minLength: 2,
             maxLength: 2

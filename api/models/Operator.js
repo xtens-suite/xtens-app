@@ -2,7 +2,7 @@
  * Operator.js
  */
 
-var constants = sails.config.xtens.constants;
+// var constants = sails.config.xtens.constants;
 
 var Operator = {
     tableName: 'operator',
@@ -85,47 +85,7 @@ var Operator = {
         groups: {
             collection:'group',
             via:'members'
-        },
-
-        // Override toJSON instance method
-        // to remove password value
-        toJSON: function() {
-            var obj = this.toObject();
-            delete obj.password;
-            return obj;
-        },
-
-        /**
-         * @method
-         * @name formatForTokenPayload
-         * @description remove personal details from operator entity and set privilege levels.
-         *              The result will be used as the payload for the Json Web Token
-         * @return{Object} - formatted operator with the following properties:
-         *                      1) id - primary key
-         *                      2) login[string]
-         *                      3) groups [array]
-         *                      4) isWheel [boolean]
-         *                      5) isAdmin [boolean]
-         *                      6) canAccessPersonalData [boolean]
-         *                      7) canAccessSensitiveData [boolean]
-         */
-        formatForTokenPayload: function() {
-            var operator = _.pick(this.toObject(), ['id', 'groups', 'lastPswdUpdate', 'resetPswd']);
-            var privilegesArray = _.map(operator.groups, 'privilegeLevel');
-            operator.isWheel = privilegesArray.indexOf(constants.GroupPrivilegeLevels.WHEEL) > -1;
-            operator.isAdmin = operator.isWheel || privilegesArray.indexOf(constants.GroupPrivilegeLevels.ADMIN) > -1;
-            operator.adminGroups =  [];
-            if (operator.isAdmin) {
-                var adminGroups = _.where(operator.groups, {privilegeLevel: constants.GroupPrivilegeLevels.ADMIN});
-                operator.adminGroups = !_.isEmpty(adminGroups) ? _.isArray(adminGroups) ? _.map(adminGroups,'id') : [adminGroups.id] : [];
-            }
-            operator.canAccessPersonalData = _.map(operator.groups, 'canAccessPersonalData').indexOf(true) > -1;
-            operator.canAccessSensitiveData = _.map(operator.groups, 'canAccessSensitiveData').indexOf(true) > -1;
-            operator.groups = _.map(operator.groups, 'id');
-            return operator;
         }
-
-
     }
 
     /*,

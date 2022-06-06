@@ -6,6 +6,7 @@ const DeepDiff = require('deep-diff');
 const BluebirdPromise = require('bluebird');
 const coroutines = {
     log: BluebirdPromise.coroutine(function*(message, model, data, owner, type, executor, obj) {
+        console.log(JSON.serialize(sails.hooks));
         const logger = sails.hooks.dblog.logger;
         if (!message) {
             return;

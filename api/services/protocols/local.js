@@ -1,5 +1,5 @@
 /* jshint node: true */
-/* globals _, sails, Group, Operator, Passport, PassportService, TokenService */
+/* globals _, sails, Group, Operator, Passport, PassportService, OperatorService, TokenService */
 'use strict';
 let validator = require('validator');
 let crypto = require('crypto');
@@ -72,7 +72,7 @@ exports.createUser = function(_user, next) {
 
     // Generating accessToken for API authentication
     // let token = crypto.randomBytes(48).toString('base64');
-        let payload = operator.formatForTokenPayload(operator);
+        let payload = OperatorService.formatForTokenPayload(operator);
         let token = TokenService.issue(_.isObject(payload) ? JSON.stringify(payload) : payload); // modified by Massi
 
         Passport.create({
@@ -274,24 +274,24 @@ exports.updatePassword = function(param, next) {
       //Validate the old password inserted by user
 
 
-            let passValidatePassword = BluebirdPromise.promisify(passport.validatePassword);
+        let passValidatePassword = BluebirdPromise.promisify(PassportService.validatePassword);
 
-            return passValidatePassword.call(passport, password, function(err,res){
-                if (!res) {
-                    err = new ValidationError('Old Password does not match');
-                    return next(err, false);
-                }
-          //If New Passwords match, update passport with the new password
-                passport.password = newPass;
+        return passValidatePassword.call(password, passport.password, function(err,res){
+            if (!res) {
+                err = new ValidationError('Old Password does not match');
+                return next(err, false);
+            }
+        //If New Passwords match, update passport with the new password
+            passport.password = newPass;
 
-                return Passport.update({id: passport.id}, passport)
+            return Passport.update({id: passport.id}, passport)
+            .then(function() {
+                return Operator.update({id: user.id}, {lastPswdUpdate: Date(), resetPswd: false})
                 .then(function() {
-                    return Operator.update({id: user.id}, {lastPswdUpdate: Date(), resetPswd: false})
-                    .then(function() {
-                        return next(null, true);
-                    });
+                    return next(null, true);
                 });
             });
+        });
 
         }).catch(/* istanbul ignore next */ function(err) {
             sails.log.error(err);

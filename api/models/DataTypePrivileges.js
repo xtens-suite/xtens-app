@@ -26,8 +26,8 @@ var DataTypePrivileges = {
         privilegeLevel: {
             type:'string',
             required: true,
-            defaultsTo: sails.config.xtens.constants.DataTypePrivilegeLevels.VIEW_OVERVIEW,
-            enum: _.values(sails.config.xtens.constants.DataTypePrivilegeLevels),
+            defaultsTo: 'view_overview',
+            enum: ['view_overview', 'view_details', 'download', 'edit'],
             columnName: 'privilege_level'
         },
 

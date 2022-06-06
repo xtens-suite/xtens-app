@@ -17,7 +17,7 @@
      up with this setup after reading the old Captian's Log configuration. Current problem is the doubling of verbose.
      ex: verbose: verbose: Grunt :: Running "sails-linker:devStyles" (sails-linker) task
   */
- const logger = new (winston.Logger)({
+ const logger = winston.createLogger({
      transports: [
          new (winston.transports.Console)( {
              level: 'verbose',

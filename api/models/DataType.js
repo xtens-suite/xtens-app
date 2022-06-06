@@ -36,7 +36,7 @@ var DataType = {
         model: {
             type: 'string',
             required: true,
-            enum: _.values(sails.config.xtens.constants.DataTypeClasses),
+            enum: ['Data', 'Sample', 'Subject'],
             defaultsTo: 'Data',
             columnName: 'model'
         },
