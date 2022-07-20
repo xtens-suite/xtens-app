@@ -789,6 +789,7 @@ function renderDatatablesDate (data, type) {
         buildCsvInfoNGSSets: function () {
             var that = this;
             var csvContent = "";
+            const fam_array = [];
             _.forEach(this.table.rows({ selected: true }).data(), function (d) {
                 var source = _.filter(that.sourceNGS, function (s) {
                     return s.code === d.code;
@@ -798,8 +799,10 @@ function renderDatatablesDate (data, type) {
                         var sourcefamily = _.filter(that.sourceNGS, function (s) {
                             return s.metadata.family_id.value === sourcerow.metadata.family_id.value && s.tissue && (!s.tissue.qc_failed || s.tissue.qc_failed.value === false);
                         });
-                        if (!utils.isExactMatch(csvContent, sourcerow.metadata.family_id.value)) {
+                        if (!fam_array.includes(sourcerow.metadata.family_id.value)) {
+                        //if (!utils.isExactMatch(csvContent, sourcerow.metadata.family_id.value)) {
                             csvContent = csvContent + sourcerow.metadata.family_id.value + '\t' + _.uniq(sourcefamily.map(function (s) { return s.tissue_biobank_code; })).join(',') + '\r\n';
+                            fam_array.push(sourcerow.metadata.family_id.value);
                         }
                     }
                 });
@@ -810,6 +813,7 @@ function renderDatatablesDate (data, type) {
         buildCsvInfoNGSSamplesPed: function () {
             var that = this;
             var csvContent = '';
+            const fam_array = [];
             _.forEach(this.table.rows({ selected: true }).data(), function (d) {
                 var source = _.filter(that.sourceNGS, function (s) {
                     return s.code === d.code;
@@ -819,8 +823,16 @@ function renderDatatablesDate (data, type) {
                         var sourcefamily = _.filter(that.sourceNGS, function (s) {
                             return s.metadata.family_id.value === sourcerow.metadata.family_id.value && s.tissue && (!s.tissue.qc_failed || s.tissue.qc_failed.value === false);
                         });
-
-                        if (!utils.isExactMatch(csvContent, sourcerow.metadata.family_id.value)) {
+                        //console.log(sourcerow.code)
+                        let found = false;
+                        if (sourcerow.code == 'NGS-431') {
+                            console.log(sourcerow)
+                            console.log(sourcefamily)
+                            console.log(sourcerow.metadata.family_id.value)
+                            found = true;
+                        }
+                        if (!fam_array.includes(sourcerow.metadata.family_id.value)) {
+                        //if (!utils.isExactMatch(csvContent, sourcerow.metadata.family_id.value)) {
                             // csvContent = csvContent + sourcerow.metadata.family_id.value + '\t' +
                         // sourcefamily.map(function (s) { return s.tissue_biobank_code; }).join(',') + '\r\n';
                             var mother = _.find(sourcefamily, function (s) { return s.metadata.status.value == 'MOTHER'; });
@@ -835,7 +847,11 @@ function renderDatatablesDate (data, type) {
                                 if (familytxt.indexOf(row) === -1) {
                                     familytxt = familytxt + row;
                                 }
+                                if(found) {
+                                    console.log(subj.tissue_biobank_code)
+                                }
                             });
+                            fam_array.push(sourcerow.metadata.family_id.value);
                             csvContent = csvContent + familytxt;
                         }
                     }
