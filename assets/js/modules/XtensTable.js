@@ -824,7 +824,7 @@ function renderDatatablesDate (data, type) {
                             return s.metadata.family_id.value === sourcerow.metadata.family_id.value && s.tissue && (!s.tissue.qc_failed || s.tissue.qc_failed.value === false);
                         });
                         //console.log(sourcerow.code)
-                        let found = false;
+                        var found = false;
                         if (!fam_array.includes(sourcerow.metadata.family_id.value)) {
                         //if (!utils.isExactMatch(csvContent, sourcerow.metadata.family_id.value)) {
                             // csvContent = csvContent + sourcerow.metadata.family_id.value + '\t' +
