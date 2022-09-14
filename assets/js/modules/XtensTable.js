@@ -825,12 +825,6 @@ function renderDatatablesDate (data, type) {
                         });
                         //console.log(sourcerow.code)
                         let found = false;
-                        if (sourcerow.code == 'NGS-431') {
-                            console.log(sourcerow)
-                            console.log(sourcefamily)
-                            console.log(sourcerow.metadata.family_id.value)
-                            found = true;
-                        }
                         if (!fam_array.includes(sourcerow.metadata.family_id.value)) {
                         //if (!utils.isExactMatch(csvContent, sourcerow.metadata.family_id.value)) {
                             // csvContent = csvContent + sourcerow.metadata.family_id.value + '\t' +
