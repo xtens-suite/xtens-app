@@ -45,8 +45,8 @@ describe('PopulateService', function() {
         it('should create a metadata field with a float value', function(){
             var floatField = fixtures.supertype[2].schema.body[1].content[0];
 
-            var min = floatField.min || sails.config.xtens.constants.TEST_MIN;
-            var max = floatField.max || sails.config.xtens.constants.TEST_MAX;
+            var min = (floatField && floatField.min )|| sails.config.xtens.constants.TEST_MIN;
+            var max = (floatField && floatField.max ) || sails.config.xtens.constants.TEST_MAX;
 
             var field = PopulateService.generateFloatField(floatField);
             expect(field.value).to.be.a('number');
